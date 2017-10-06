@@ -1,0 +1,19 @@
+[Unit]
+Description = Watch user homes for new public_html dirs
+After = network.target
+
+[Service]
+PIDFile = /run/umbrella-pubhtml-watch/umbrella-pubhtml-watch.pid
+User = root
+Group = root
+WorkingDirectory = /tmp
+ExecStartPre = /bin/mkdir /run/umbrella-pubhtml-watch
+ExecStartPre = /bin/chown -R root:root /run/umbrella-pubhtml-watch
+ExecStart = /bin/bash /usr/local/bin/umbrella-pubhtml-watch
+ExecReload = /bin/kill -s HUP $MAINPID
+ExecStop = /bin/kill -s TERM $MAINPID
+ExecStopPost = /bin/rm -rf /run/umbrella-pubhtml-watch
+PrivateTmp = true
+
+[Install]
+WantedBy = multi-user.target

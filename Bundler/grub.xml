@@ -1,0 +1,19 @@
+<Bundle name='grub'>
+<Group name='ubuntu'>
+    <Group name='grub-legacy'>
+        <Package name='grub'/>
+    </Group>
+    <Group name='grub-legacy' negate='true'>
+        <Group name='virt-lxc' negate='true'>
+            <Package name='grub-pc'/>
+        </Group>
+    </Group>
+    <Group name='workstation'>
+        <Group name='physical'>
+            <Package name='grub-ipxe'/>
+            <Path name='/etc/default/grub'/>
+        </Group>
+    </Group>
+    <Action name='update-grub'/>
+</Group>
+</Bundle>

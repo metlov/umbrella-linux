@@ -1,0 +1,16 @@
+<Bundle name='openvpn' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
+?>
+<Group name='ubuntu'>
+    <py:if test="'router' in metadata.groups and external_vpn is not None">
+        <Package name='openvpn'/>
+        <Path name='/etc/openvpn/client.conf'/>
+        <Path name='/etc/default/openvpn'/>
+        <Path name='/etc/network/if-up.d/000vpnchains'/>
+        <Path name='/etc/init.d/firewall_vpn'/>
+        <Service name='openvpn'/>
+    </py:if>
+</Group>
+</Bundle>

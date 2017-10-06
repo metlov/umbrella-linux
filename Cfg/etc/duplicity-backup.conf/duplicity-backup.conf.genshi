@@ -1,0 +1,70 @@
+#!/bin/bash
+{% python
+from genshi.template import TemplateError
+import socket
+execfile(repo+'/Python/00_baseparams.py')
+Dkeyid=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_keyid').text
+Dpass=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_passphrase').text
+Dopts=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_extra_options').text
+Dtarget=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_target_url').text
+%}\
+ROOT="/"
+HOSTNAME=$$(hostname -f)
+DEST=${Dtarget}
+INCLIST=( )
+EXCLIST=( "/dev" "/tmp" "/proc" "/sys" "/nfs" "/run" "/mnt" "/media" "/vm/*.raw" "/vm/tmp" "/var/backups/duplicity" )
+EXDEVICEFILES=1
+ENCRYPTION='yes'
+PASSPHRASE="${Dpass}"
+GPG_ENC_KEY="${Dkeyid}"
+GPG_SIGN_KEY="${Dkeyid}"
+#HIDE_KEY_ID='yes'
+STATIC_OPTIONS="--full-if-older-than 14D --s3-use-new-style ${Dopts}"
+
+CLEAN_UP_TYPE="remove-all-but-n-full"
+CLEAN_UP_VARIABLE="4"
+REMOVE_INCREMENTALS_OLDER_THAN="4"
+
+LOGDIR="/var/log/duplicity-backup/"
+LOG_FILE="duplicity-$$(date +%Y-%m-%d_%H-%M).txt"
+LOG_FILE_OWNER="root:adm"
+REMOVE_LOGS_OLDER_THAN='30' # (days) uncomment to activate
+VERBOSITY="-v3"
+
+EMAIL_TO=itadmins@${domain_name}
+EMAIL_FROM=root@vmhost
+EMAIL_SUBJECT="DUPLICITY-backup error"
+EMAIL_FAILURE_ONLY="yes" # send e-mail only if there was an error while creating backup
+
+# command to use to send mail
+MAIL="mailx"     # default command for Linux mail
+#MAIL="mail"
+#MAIL="ssmtp"
+#MAIL="sendmail"
+#MAIL="msmtp"
+
+NOTIFICATION_SERVICE=""
+NOTIFICATION_FAILURE_ONLY="yes" # send notifications only if there was an error while creating backup
+
+# Provider: Slack
+#SLACK_HOOK_URL="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"
+#SLACK_CHANNEL="#general"
+#SLACK_USERNAME="duplicity-backup"
+#SLACK_EMOJI="package"
+
+# Provider: Pushover
+#PUSHOVER_TOKEN="" # App token generated at pushover.net
+#PUSHOVER_USER="" # User key from pushover.net
+
+# ------------------------------------------------------------------------------
+# TROUBLESHOOTING
+# ------------------------------------------------------------------------------
+#
+# If you are having any problems running this script it is
+# helpful to see the command output that is being generated to determine if the
+# script is causing a problem or if it is an issue with duplicity (or your
+# setup).  Simply  uncomment the ECHO line below and the commands will be
+# printed to the logfile.  This way, you can see if the problem is with the
+# script or with duplicity.
+#
+#ECHO=$$(which echo)

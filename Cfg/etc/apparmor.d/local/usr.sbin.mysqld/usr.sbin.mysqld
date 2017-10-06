@@ -1,0 +1,4 @@
+# backport fixes from LP #1658233 and LP #1658239
+  /sys/devices/system/node/ r,
+  /sys/devices/system/node/** r,
+  owner @{PROC}/@{pid}/{auxv,status} r,

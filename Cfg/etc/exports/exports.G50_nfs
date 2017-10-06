@@ -1,0 +1,7 @@
+# /etc/exports: NFS file systems being exported.  See exports(5).
+/export gss/krb5(fsid=0,secure,no_root_squash,no_subtree_check,async,rw)
+/export gss/krb5i(fsid=0,secure,no_root_squash,no_subtree_check,async,rw)
+/export gss/krb5p(fsid=0,secure,no_root_squash,no_subtree_check,async,rw)
+/export/home gss/krb5(rw,secure,no_root_squash,nohide,no_subtree_check,async)
+/export/home gss/krb5i(rw,secure,nohide,no_root_squash,no_subtree_check,async)
+/export/home gss/krb5p(rw,secure,nohide,no_root_squash,no_subtree_check,async)

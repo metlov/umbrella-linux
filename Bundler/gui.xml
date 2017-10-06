@@ -1,0 +1,269 @@
+<Bundle name='gui' xmlns:xi="http://www.w3.org/2001/XInclude">
+    <Package name='xserver-xorg-input-all'/>
+    <Package name='xserver-xorg-video-all'/>
+    <Package name='acpi-support'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='bluez-alsa'/>
+        <Package name='bluez-cups'/>
+    </Group>
+    <Package name='colord'/>
+    <Package name='cups-bsd'/>
+    <Package name='desktop-base'/>
+    <Package name='dconf-gsettings-backend'/>
+    <Group name='sworkstation' negate='true'>
+        <Package name='gstreamer0.10-x'/>
+    </Group>
+    <Package name='gstreamer1.0-plugins-base'/>
+    <Package name='gstreamer1.0-plugins-good'/>
+    <Package name='hplip'/>
+    <Package name='ibus-gtk'/>
+    <Package name='ibus-gtk3'/>
+    <Package name='ibus-qt4'/>
+    <Package name='inkscape'/>
+    <Package name='fonts-sil-abyssinica'/>
+    <Package name='fonts-lklug-sinhala'/>
+    <Package name='fonts-lao'/>
+    <Package name='fonts-khmeros-core'/>
+    <Package name='fonts-kacst-one'/>
+    <Package name='fonts-sil-padauk'/>
+    <Package name='fonts-takao-pgothic'/>
+    <Package name='fonts-tibetan-machine'/>
+    <Package name='fonts-thai-tlwg'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='fonts-tlwg-garuda-ttf'/>
+        <Package name='fonts-tlwg-kinnari-ttf'/>
+        <Package name='fonts-tlwg-laksaman-ttf'/>
+        <Package name='fonts-tlwg-loma-ttf'/>
+        <Package name='fonts-tlwg-mono-ttf'/>
+        <Package name='fonts-tlwg-norasi-ttf'/>
+        <Package name='fonts-tlwg-purisa-ttf'/>
+        <Package name='fonts-tlwg-sawasdee-ttf'/>
+        <Package name='fonts-tlwg-typewriter-ttf'/>
+        <Package name='fonts-tlwg-typist-ttf'/>
+        <Package name='fonts-tlwg-typo-ttf'/>
+        <Package name='fonts-tlwg-umpush-ttf'/>
+        <Package name='fonts-tlwg-waree-ttf'/>
+    </Group>
+    <Package name='fonts-uralic'/>
+    <Package name='humanity-icon-theme'/>
+<!--    <Package name='language-pack-ru'/> -->
+    <Package name='libaacs0'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='libavcodec54'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Package name='libavcodec-ffmpeg56'/>
+    </Group>
+    <Package name='libdvdnav4'/>
+    <Package name='libgpod-common'/>
+    <Package name='libegl1-mesa'/>
+    <Package name='libgl1-mesa-glx'/>
+    <Package name='libjack-jackd2-0'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='libllvm3.6'/>
+    </Group>
+    <Package name='libunity-scopes-json-def-desktop'/>
+    <Package name='mplayer2'/>
+    <Package name='notification-daemon'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='oxygen-icon-theme'/>
+        <Package name='packagekit'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Package name='oxygen5-icon-theme'/>
+    </Group>
+    <Package name='policykit-1-gnome'/>
+    <Package name='poppler-data'/>
+    <Package name='printer-driver-c2esp'/>
+    <Package name='printer-driver-foo2zjs'/>
+    <Package name='printer-driver-foo2zjs-common'/>
+    <Package name='printer-driver-hpcups'/>
+    <Package name='printer-driver-min12xxw'/>
+    <Package name='printer-driver-ptouch'/>
+    <Package name='printer-driver-pxljr'/>
+    <Package name='printer-driver-sag-gdi'/>
+    <Package name='printer-driver-splix'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='python-requests'/>
+    </Group>
+    <Package name='pulseaudio'/>
+    <Package name='pulseaudio-module-x11'/>
+    <Package name='pulseaudio-utils'/>
+    <Package name='rtkit'/>
+    <Package name='system-config-printer-udev'/>
+    <Package name='smbclient'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='ttf-indic-fonts-core'/>
+        <Package name='ttf-punjabi-fonts'/>
+    </Group>
+    <Package name='ttf-dejavu-core'/>
+    <Package name='ttf-dejavu-extra'/>
+    <Package name='qpdf'/>
+    <Package name='xfonts-100dpi'/>
+    <Package name='xfonts-100dpi-transcoded'/>
+    <Package name='xfonts-75dpi'/>
+    <Package name='xfonts-75dpi-transcoded'/>
+    <Package name='xfonts-scalable'/>
+    <Package name='xvt'/>
+    <Package name='yelp'/>
+    <Package name='zenity'/>
+
+    <Package name='xscreensaver'/>
+    <Package name='xscreensaver-data'/>
+    <Package name='xscreensaver-data-extra'/>
+    <Path name='/etc/X11/app-defaults/XScreenSaver-nogl'/>
+
+    <Package name='libpaper-utils'/>
+    <Package name='language-pack-gnome-en'/>
+    <Package name='language-pack-gnome-ru'/>
+
+    <Package name='ocrfeeder'/>
+    <Package name='unpaper'/>
+    <Package name='tesseract-ocr-rus'/>
+    <Package name='tesseract-ocr-ukr'/>
+    <Package name='tesseract-ocr'/>
+
+    <Package name='tuxcmd'/>
+    <Package name='tuxcmd-modules'/>
+
+    <Package name='gimp'/>
+    <Package name='gimp-help-ru'/>
+    <Package name='gimp-data-extras'/>
+    <Package name='libblas3'/>
+    <Package name='libgfortran3'/>
+    <Package name='liblapack3'/>
+
+    <!-- Secure worstation do not have the necessary connectivity -->
+    <Group name='sworkstation' negate='true'>
+        <!-- <Package name='telegram'/> -->
+        <Group name='trusty'>
+            <Package name='libseccomp2'/>
+            <Package name='python-twisted'/>
+            <Package name='python-lzma'/>
+            <Package name='python-parsley'/>
+            <Package name='python-support'/>
+            <Package name='python-txsocksx'/>
+            <Package name='wmctrl'/>
+        </Group>
+        <Package name='thunderbird'/>
+        <Package name='thunderbird-locale-ru'/>
+        <Path name='/etc/thunderbird/syspref.js'/>
+
+        <Package name='chromium-browser'/>
+        <Path name='/etc/chromium-browser/default'/> <!-- disable disk cache -->
+        <Group name='ltsp' negate='true'>
+             <Package name='chromium-codecs-ffmpeg-extra'/>
+        </Group>
+        <Group name='ltsp'>
+             <Package name='chromium-codecs-ffmpeg'/>
+        </Group>
+        <Group name='ltsp' negate='true'>
+             <Path name='/etc/hostname'/>
+        </Group>
+        <Package name='chromium-browser-l10n'/>
+
+<!--        <Package name='google-earth-stable'/>
+        <Package name='libc-dev-bin'/>
+        <Package name='libc6-dev'/>
+        <Package name='linux-libc-dev'/> -->
+    </Group>
+
+    <Group name="i386">
+        <Package name='wine1.6'/>
+        <Package name='wine-gecko2.21'/>
+        <Package name='wine-mono0.0.8'/>
+        <Package name='winetricks'/>
+        <Package name='libosmesa6'/>
+        <Package name='ocl-icd-libopencl1'/>
+    </Group>
+
+    <Package name='fonts-horai-umefont'/>
+    <Package name='fonts-unfonts-core'/>
+    <Package name='fonts-wqy-microhei'/>
+    <Package name='gnome-exe-thumbnailer'/>
+    <Package name='libasound2-plugins'/>
+    <Package name='libp11-kit-gnome-keyring'/>
+    <Package name='ttf-mscorefonts-installer'/>
+    <Package name='ttf-wqy-microhei'/>
+    <Package name='unixodbc'/>
+
+    <Package name='stardict'/>
+    <Package name='stardict-czech'/>
+    <Package name='stardict-english-czech'/>
+    <Package name='stardict-german-czech'/>
+    <Package name='stardict-gtk'/>
+    <Package name='stardict-plugin-festival'/>
+    <Package name='stardict-plugin-spell'/>
+    <Package name='stardict-xmlittre'/>
+<!--    <Package name='yukdicts'/>
+    <Package name='ukrdict'/> -->
+
+    <Package name='festival'/>
+    <Package name='festival-czech'/>
+    <Package name='festvox-czech-dita'/>
+    <Package name='festvox-kallpc16k'/>
+    <Package name='festvox-ru'/>
+    <Package name='libpam-gnome-keyring'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='pam-kwallet'/>
+    </Group>
+
+    <Group name='admworkstation'>
+        <Package name='clusterssh'/>
+        <Package name='jxplorer'/>
+        <Package name='libsctp1'/>
+        <Package name='hedgewars'/>
+        <Package name='default-jre'/>
+        <Package name='gvncviewer'/>
+    </Group>
+
+    <Package name='eboard'/>
+    <Package name='polyglot'/>
+    <Package name='stockfish'/>
+    <Package name='blockout2'/>
+    <Package name='five-or-more'/>
+    <Package name='aisleriot'/>
+    <Package name='pinball'/>
+    <Package name='chromium-bsu'/>
+
+    <Path name='/etc/xdg/autostart/update-notifier.desktop'/>
+
+    <Group name='sworkstation' negate='true'>
+        <Package name='pidgin'/>
+        <Package name='pidgin-libnotify'/>
+        <Package name='pidgin-festival'/>
+        <Package name='gstreamer0.10-alsa'/>
+        <Path name='/etc/xdg/autostart/pidgin.desktop'/>
+    </Group>
+<!--    <Path name='/etc/default/whoopsie'/>
+    <Path name='/usr/share/applications/sylpheed.desktop'/>
+    <Path name='/etc/default/apport'/> -->
+
+    <Package name='razorqt-lightdm-greeter'/>
+    <Package name='libqt4-svg'/>
+<!--    <Path name='/usr/share/razor/graphics/rqt.svg'/>
+    <Path name='/usr/share/razor/graphics/rqt-2.svg'/> -->
+    <Package name='razorqt-power'/>
+    <Path name='/etc/xdg/razor/razor.conf'/>
+    <Group name='ubuntu-trusty'>
+        <!-- since razor-power does not support authorization we have to enable anyone to shutdown/restart -->
+        <Path name='/usr/share/polkit-1/actions/org.freedesktop.login1.policy'/>
+        <Path name='/etc/lightdm/lightdm.conf.d/50-disable-user-list.conf'/>
+        <Path name='/etc/lightdm/lightdm.conf.d/30-xreset.conf'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Path name='/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf'/>
+        <Path name='/var/lib/lightdm'/>
+    </Group>
+    <Path name='/etc/pam.d/lightdm'/>
+    <Path name='/etc/X11/Xreset.d/killall'/>
+    <Path name='/usr/share/applications/mc.desktop'/>
+    <Path name='/etc/chromium-browser/policies/managed/policy.json'/>
+    <Group name='physical'>
+        <Package name='conky-all'/>
+        <Path name='/etc/conky/conky.conf'/>
+        <Path name='/etc/xdg/autostart/conky.desktop'/>
+        <Package name='rdesktop'/>
+    </Group>
+    <xi:include href="../Local/Bundler/gui.xml"><xi:fallback/></xi:include>
+</Bundle>

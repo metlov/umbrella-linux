@@ -1,0 +1,13 @@
+#!/bin/bash -e
+###########################################################
+# Back up MySQL databases
+###########################################################
+
+. /usr/local/bin/umbrella.sh        # source Umbrella Linux variables
+
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# My config
+BACKUP_DIR="."
+
+ssh -l root config 'slapcat' | gzip -9 > $BACKUP_DIR/LDAPdump.ldif.gz

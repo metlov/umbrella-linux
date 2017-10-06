@@ -1,0 +1,15 @@
+To enable local package repositories do the following:
+
+1. create the file
+   Cfg/etc/apt/sources.list.d/localrepo.list/localrepo.list.G50_base
+   with the apt configuration directives.
+
+2. create the binary file
+   Cfg/etc/apt/trusted.gpg.d/localrepo.gpg/localrepo.gpg.G50_base
+   with GPG keyring containing the public keys to local repositories.
+
+3. create the file
+   Packages/sources-local.xml
+   with the definition of package sources in xml for Packages plugin.
+
+These three files will not be tracked by git.

@@ -1,0 +1,23 @@
+#!/bin/bash
+# Keeps Umbrella Linux logo files up to date.
+# (c) 2017 Konstantin L. Metlov <metlov@donfti.ru>
+
+# source the Umbrella Linux configuration
+. /etc/umbrella.conf
+
+# compute the URLs for logos
+base_url="http://$HOST_CONFIG/custom/logo"
+files=(${base_url}/logo-{160x120,320x240,480x360,640x480,960x720,1024x768,1920x1440,1920x1080}.png)
+files+=(${base_url}/{640x480-cc,1024x768-cc,2048x1536-cc,640x480-nw,1024x768-nw,2048x1536-nw,1440x900-cc,2560x1440-cc,1440x900-nw,2560x1440-nw}.png)
+files+=("${base_url}/logo.svg" "${base_url}/screenshot.png")
+
+# compute the destination pathname
+varpath="/var"
+dest_path=${varpath}/lib/umbrella-logo
+
+# update the images
+for file_url in "${files[@]}"; do
+    wget -N -P "${dest_path}" "${file_url}" &>/dev/null
+done
+
+exit 0

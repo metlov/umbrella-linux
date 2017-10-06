@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+if [ `whoami` != 'umbrella-skel' ]; then
+    echo "This script must be run by an umbrella-skel user."
+    exit 9
+fi
+
+skelhome=/var/lib/umbrella-skel
+skel_archive=${skelhome}/skel.tar.gz
+skeldir=${skelhome}/unpacked
+if [[ ! -d "${skeldir}" || ${skel_archive} -nt ${skeldir} ]]; then
+    mkdir -p ${skeldir}
+    if [ ! -w $skeldir ] ; then
+        echo "The directory $skeldir must be writable by the umbrella-skel user."
+        exit 9
+    fi
+    tmpskeldir=${skeldir}.tmp
+    rm -rf ${tmpskeldir}
+    mkdir -p ${tmpskeldir}
+
+    tar -xzf ${skel_archive} -C ${tmpskeldir}
+
+    # execute the initialization of the skeleton directory
+    initializer='.setup.sh'
+    if [[ -x ${tmpskeldir}/${initializer} ]]; then
+        pushd ${tmpskeldir} &>/dev/null
+        ./${initializer}
+        popd &>/dev/null
+    fi
+
+    # not atomic, but should be
+    rm -rf ${skeldir}
+    mv -f -T ${tmpskeldir} ${skeldir} && touch -r ${skel_archive} ${skeldir}
+fi

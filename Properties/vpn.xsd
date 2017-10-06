@@ -1,0 +1,29 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+    <xsd:include schemaLocation="../Python/xsd_types.xsd"/>
+
+    <xsd:complexType name="VPNConfigType"  mixed="true">
+        <xsd:choice minOccurs="0" maxOccurs="unbounded">
+            <xsd:element name="ca" type="xsd:string"/>
+            <xsd:element name="cert" type="xsd:string"/>
+            <xsd:element name="key" type="xsd:string"/>
+            <xsd:element name="tls-auth" type="xsd:string"/>
+        </xsd:choice>
+    </xsd:complexType>
+
+    <xsd:complexType name="ExternalVPNType">
+      <xsd:sequence>
+          <xsd:element name="dev" type="xsd:string"/>
+          <xsd:element name="secnetwork" type="NetworkType" minOccurs="0" maxOccurs="unbounded"/>
+          <xsd:element name="pubnetwork" type="NetworkType" minOccurs="0" maxOccurs="unbounded"/>
+          <xsd:element name="config" type="VPNConfigType" minOccurs="0"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="external_vpn" type="ExternalVPNType"  minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

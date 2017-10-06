@@ -1,0 +1,137 @@
+{% python
+import socket
+from passlib.hash import ldap_salted_sha1 as lsm
+import random
+import string
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+# generate salt
+random.seed(metadata.hostname+metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text)
+saltstr=''.join(random.choice(string.ascii_letters+string.digits) for x in range(16))
+ldap_config_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_config_pass').text, salt=saltstr)
+ldap_admin_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_pass').text, salt=saltstr)
+%}\
+dn: olcBackend={0}hdb,cn=config
+objectClass: olcBackendConfig
+olcBackend: {0}hdb
+
+dn: olcDatabase={-1}frontend,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcFrontendConfig
+olcDatabase: {-1}frontend
+{% if 'ubuntu-trusty' in metadata.groups %}\
+olcAccess: {0}to attrs=userPassword,shadowLastChange by self write by anonymous auth by dn.base="cn=syncrepl,${ldap_root}" read by * none
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+olcAccess: {0}to attrs=userPassword,shadowLastChange by self write by anonymous auth by dn.base="cn=syncrepl,ou=people,${ldap_root}" read by * none
+{% end %}\
+olcAccess: {1}to dn.base=""  by * read
+olcAccess: {2}to dn.base="cn=subschema"  by * read
+{% if 'ubuntu-trusty' in metadata.groups %}\
+olcAccess: {3}to *  by dn.base="cn=syncrepl,${ldap_root}" read by self write by anonymous read by * read
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+olcAccess: {3}to *  by dn.base="cn=syncrepl,ou=people,${ldap_root}" read by self write by anonymous read by * read
+{% end %}\
+olcAddContentAcl: FALSE
+olcLastMod: TRUE
+olcMaxDerefDepth: 0
+olcReadOnly: FALSE
+olcSchemaDN: cn=Subschema
+olcSyncUseSubentry: FALSE
+olcMonitoring: FALSE
+
+dn: olcDatabase={0}config,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: {0}config
+olcAccess: {0}to * by dn.exact=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * break
+olcAccess: {1}to * by * none
+olcAddContentAcl: TRUE
+olcLastMod: TRUE
+olcMaxDerefDepth: 15
+olcReadOnly: FALSE
+olcRootDN: cn=admin,cn=config
+olcRootPW: ${ldap_config_pwd_hash}
+olcSyncUseSubentry: FALSE
+olcMonitoring: FALSE
+
+dn: olcDatabase={1}hdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcHdbConfig
+olcDatabase: {1}hdb
+olcSuffix: ${ldap_root}
+olcAddContentAcl: FALSE
+olcLastMod: TRUE
+olcMaxDerefDepth: 15
+olcReadOnly: FALSE
+olcRootDN: cn=admin,${ldap_root}
+olcRootPW: ${ldap_admin_pwd_hash}
+olcSyncUseSubentry: FALSE
+olcMonitoring: FALSE
+olcDbDirectory: /var/lib/ldap
+olcDbCacheSize: 1000
+olcDbCheckpoint: 512 30
+olcDbConfig: {0}set_cachesize 0 2097152 0
+olcDbConfig: {1}set_lk_max_objects 1500
+olcDbConfig: {2}set_lk_max_locks 1500
+olcDbConfig: {3}set_lk_max_lockers 1500
+olcDbNoSync: FALSE
+olcDbDirtyRead: FALSE
+olcDbIDLcacheSize: 0
+olcAccess: {0}to dn.base="" by * read
+olcAccess: {1}to * by dn="cn=admin,${ldap_root}" write by * read
+olcDbIndex: default sub
+olcDbIndex: uid,mail eq
+olcDbIndex: gosaSnapshotDN eq
+olcDbIndex: gosaSnapshotTimestamp eq,sub
+olcDbIndex: gosaMailAlternateAddress,gosaMailForwardingAddress eq
+olcDbIndex: cn,sn,givenName,ou pres,eq,sub
+olcDbIndex: objectClass pres,eq
+olcDbIndex: uidNumber,gidNumber,memberuid eq
+olcDbIndex: roleOccupant eq
+{% if 'ubuntu-trusty' in metadata.groups %}\
+olcDbIndex: gosaSubtreeACL,gosaObject,gosaUser pres,eq
+olcDbIndex: zoneName eq
+olcDbIndex: sudoUser eq
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+olcDbIndex: gosaObject,gosaUser pres,eq
+olcDbIndex: zoneName eq,sub
+olcDbIndex: sudoUser eq,sub
+olcDbIndex: gosaMailDeliveryMode sub
+olcDbIndex: ipHostNumber eq
+olcDbIndex: uniqueMember eq
+{% end %}\
+olcDbIndex: entryUUID eq
+olcDbIndex: entryCSN eq
+olcDbIndex: displayName pres,eq,sub
+olcDbIndex: dhcpHWAddress eq
+olcDbIndex: dhcpClassData eq
+olcDbIndex: relativeDomainName eq
+olcDbMode: 0600
+olcDbSearchStack: 16
+olcDbShmKey: 0
+olcDbCacheFree: 1
+olcDbDNcacheSize: 0
+{% if 'proxy' in metadata.groups %}\
+olcUpdateRef: ldaps://${funchosts['config']}
+{%      if 'ubuntu-trusty' in metadata.groups %}\
+olcSyncrepl: {0}rid=100 provider=ldaps://${funchosts['config']} type=refreshOnly interval=00:00:00:60 retry="60 10 300 +" timelimit=10 searchbase="${ldap_root}" binddn="cn=syncrepl,${ldap_root}" bindmethod=simple credentials=${metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_syncrepl_pass').text}
+{%      end %}\
+{%      if 'ubuntu-xenial' in metadata.groups %}\
+olcSyncrepl: {0}rid=100 provider=ldaps://${funchosts['config']} type=refreshOnly interval=00:00:00:60 retry="60 10 300 +" timelimit=10 searchbase="${ldap_root}" binddn="cn=syncrepl,ou=people,${ldap_root}" bindmethod=simple credentials=${metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_syncrepl_pass').text}
+{%      end %}\
+{% end %}\
+
+dn: olcOverlay={0}syncprov,olcDatabase={0}config,cn=config
+objectClass: olcOverlayConfig
+objectclass: olcSyncProvConfig
+olcOverlay: {0}syncprov
+
+dn: olcOverlay={0}syncprov,olcDatabase={1}hdb,cn=config
+objectClass: olcOverlayConfig
+objectclass: olcSyncProvConfig
+objectClass: olcConfig
+objectClass: top
+olcOverlay: {0}syncprov

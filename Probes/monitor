@@ -1,0 +1,13 @@
+#!/bin/sh
+if which get-edid >/dev/null; then
+    MONITOR=`get-edid 2>/dev/null | parse-edid 2>/dev/null | grep ModelName | cut -d ' ' -f 2 | sed 's/"//g'`
+    case $MONITOR in
+    VA903-3Series|22EN33|Philips|SyncMaster|PHL)
+        echo "group:subpixel-rgb"
+        ;;
+    *)
+        echo "group:subpixel-unknown"
+    esac
+else
+    echo "group:subpixel-unknown"
+fi

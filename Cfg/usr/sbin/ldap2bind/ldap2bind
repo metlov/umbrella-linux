@@ -1,0 +1,118 @@
+#!/bin/bash
+
+[ -r /etc/default/ldap2zone ] && . /etc/default/ldap2zone
+
+. /usr/local/bin/umbrella.sh        # source Umbrella Linux variables
+
+case "$LDAP_URI" in 
+ldap://*|ldaps://*) ;; 
+ *) LDAP_URI="ldap://${LDAP_URI}" ;; 
+ esac
+
+LDAPSEARCH=`which ldapsearch`
+
+if [ -z "${LDAPSEARCH}" ]; then
+        echo "ldapsearch program not in $PATH. Exiting..."
+        exit 1
+fi
+
+if ! /usr/local/bin/ldapsanity.sh; then
+   echo "LDAP server is not sane, exiting." 1>&2
+   exit 1
+fi
+
+LDAP_URI_PARAM=${LDAP_URI:+"-H $LDAP_URI"}
+
+if [ "$ALLOW_NOTIFY" ]; then
+        ALLOW_NOTIFY="$ALLOW_NOTIFY";
+else ALLOW_NOTIFY=;
+fi
+
+if [ "$ALLOW_UPDATE" ]; then
+	ALLOW_UPDATE_PARAM="allow-update {$ALLOW_UPDATE};";
+else ALLOW_UPDATE_PARAM=;
+fi
+
+if [ "$ALLOW_TRANSFER" ]; then
+	ALLOW_TRANSFER_PARAM="allow-transfer {$ALLOW_TRANSFER};";
+else ALLOW_TRANSFER_PARAM=;
+fi
+
+ZONES=`ldapsearch -LLL $LDAP_URI_PARAM -x "(objectClass=dNSZone)" zoneName | grep zoneName: | sort | uniq | awk '{print $2}'`
+ldap2zone=`which ldap2zone`
+rndc=`which rndc`
+
+if [ -z "${ZONES}" ]; then
+	echo "No domains configured. Exiting..."
+	exit 0
+fi
+
+if [ -z "${rndc}" ]; then
+	echo "rndc program not in $PATH. Exiting..."
+	exit 1
+fi
+
+if [ -z "${ldap2zone}" ]; then
+	echo "ldap2zone program not in $PATH. Exiting..."
+	exit 1
+fi
+
+if [ ! -d $BIND_DIR ]; then
+	echo "The directory specified as $BIND_DIR does not exist. Exiting..."
+	exit 1
+fi
+
+if [ ! -d $BIND_DATA ]; then
+        echo "The directory specified as $BIND_DATA does not exist. Exiting..."
+        exit 1
+fi
+
+
+if [ -w $BIND_DIR/named.conf.ldap2zone ]; then
+	>${BIND_DIR}/named.conf.ldap2zone
+	for domain in $ZONES; do
+		cat << EOF >> ${BIND_DIR}/named.conf.ldap2zone
+zone "${domain}" {
+	type master;
+	$ALLOW_NOTIFY
+	file "${BIND_DATA}/${PREFIX}${domain}";
+	$ALLOW_UPDATE_PARAM
+	$ALLOW_TRANSFER_PARAM
+};
+EOF
+	done
+	$rndc reconfig
+fi
+
+for domain in $ZONES; do
+	if $ldap2zone $domain $LDAP_URI $TTL > /tmp/$domain; then
+		lines=$(cat /tmp/$domain | wc -l)
+		[ $lines -gt 1 ] && mv /tmp/$domain $BIND_DATA/${PREFIX}${domain}
+		[ $lines -gt 1 -a $domain = "${DOMAIN_NAME}." ] && cat  << EOF >>$BIND_DATA/${PREFIX}${domain}
+${DOMAIN_NAME}.               IN TXT "v=spf1 a mx ~all"
+mail._domainkey.${DOMAIN_NAME}. IN TXT "v=DKIM1; k=rsa; s=email; p=${DKIM_PUBKEY}"
+_kerberos._udp.${DOMAIN_NAME}.          IN      SRV     10 0 88 ${HOST_CONFIG}.
+_kerberos.${DOMAIN_NAME}.               IN      TXT     "${REALM_NAME}"
+EOF
+		[ $lines -gt 1 -a $domain = "${DOMAIN_NAME}." -a -n "${HOST_PROXY}" ] && cat  << EOF >>$BIND_DATA/${PREFIX}${domain}
+${DOMAIN_NAME}.               IN TXT "v=spf1 a mx ~all"
+; records  for jabber
+_jabber._tcp.${DOMAIN_NAME}.            IN      SRV     5 0 5269 ${HOST_PROXY}.
+_xmpp-server._tcp.${DOMAIN_NAME}.       IN      SRV     5 0 5269 ${HOST_PROXY}.
+_xmpp-client._tcp.${DOMAIN_NAME}.       IN      SRV     5 0 5222 ${HOST_PROXY}.
+_xmpp-client._tcp.${DOMAIN_NAME}.       IN      SRV     5 0 5223 ${HOST_PROXY}.
+
+; records for WPAD (proxy autoconfig)
+wpad                                            A       ${IP_CONFIG}
+_wpad._tcp.${DOMAIN_NAME}.              IN      SRV     0 0 80 wpad.${DOMAIN_NAME}.
+wpad.${DOMAIN_NAME}.                    IN      TXT     "service: wpad:http://wpad.${DOMAIN_NAME}/wpad.dat"
+EOF
+	fi
+
+	result=$($rndc reload $domain 2>&1)
+	if [ $? -ne 0 ]; then
+                logger -t ldap2bind "Reloading the zone '$domain' failed: $result\n"
+	else
+                logger -t ldap2bind "Reloading the zone '$domain' was successful\n"
+	fi
+done

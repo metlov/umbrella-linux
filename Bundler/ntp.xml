@@ -1,0 +1,35 @@
+<Bundle name='ntp'>
+<Group name='ubuntu'>
+    <Package name='ntp'/>
+    <Group name='ubuntu-trusty'>
+        <Group name='server'>
+            <Group name='archive' negate='true'>
+                <BoundPOSIXUser name="ntp" home="/home/ntp" shell="/bin/false" gecos="" uid="108" group="ntp"/>
+                <BoundPOSIXGroup name="ntp" gid="110"/>
+            </Group>
+            <Group name='archive'>
+                <BoundPOSIXUser name="ntp" home="/home/ntp" shell="/bin/false" gecos="" uid="103" group="ntp"/>
+                <BoundPOSIXGroup name="ntp" gid="111"/>
+            </Group>
+        </Group>
+        <Group name='ltsp'>
+            <BoundPOSIXUser name="ntp" home="/home/ntp" shell="/bin/false" gecos="" uid="108" group="ntp"/>
+            <BoundPOSIXGroup name="ntp" gid="110"/>
+        </Group>
+        <Group name='ltsp' negate='true'>
+            <Group name='workstation'>
+                <BoundPOSIXUser name="ntp" home="/home/ntp" shell="/bin/false" gecos="" uid="107" group="ntp"/>
+                <BoundPOSIXGroup name="ntp" gid="113"/>
+            </Group>
+        </Group>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="ntp" home="/home/ntp" shell="/bin/false" gecos="" uid="618" group="ntp"/>
+        <BoundPOSIXGroup name="ntp" gid="618"/>
+    </Group>
+    <Path name='/etc/default/ntp'/>
+    <Path name='/etc/ntp.conf'/>
+    <Path name="/var/lib/ntp"/>
+    <Service name='ntp'/>
+</Group>
+</Bundle>

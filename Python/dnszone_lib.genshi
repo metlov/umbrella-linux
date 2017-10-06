@@ -1,0 +1,99 @@
+{% python
+from genshi.template import TemplateError
+import os
+import datetime
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+
+timestamp = int(os.path.getmtime(repo+'/Properties/umbrella.xml'))+1000000000
+# addition of 1000000000 at the end is to make the transition from
+# an old timestamp format (starting with year) easy.
+
+# infrastructure for collecting the secondary nameservers from XML
+secondaryNameservers={}
+
+def collectNameservers(DNSnameElement):
+  nameservers=set()
+  for i in range(1,5):
+    attrName='NS%s' % (i)
+    if attrName in DNSnameElement.attrib:
+      nameservers.add(DNSnameElement.attrib[attrName])
+  DNSname=DNSnameElement.text.strip()
+  secondaryNameservers[DNSname]=nameservers
+
+# Here we compute the canonical hostname for this system and collect the
+# secondary nameservers.
+# The canonical hostname is the one that (hopefully) has proper reverse
+# DNS resolution.
+# By default the canonical hostname is the smtp hostname at primary domain.
+# However, using the revDNS attribute in on domain names in umbrella.xml
+# it is possible to set another hostname as canonical.
+CANONICAL_hostname=funchostsshort['DMZsmtp']
+CANONICAL_domain=domain_name
+revDNSseen=False
+
+# check the primary domain name's revDNS option
+xml_domain_name=metadata.Properties['umbrella.xml'].xdata.find('domain_name')
+collectNameservers(xml_domain_name)
+if 'revDNS' in xml_domain_name.attrib:
+  CANONICAL_hostname=xml_domain_name.attrib['revDNS']
+  revDNSseen=True
+
+for xml_domain_name in metadata.Properties['umbrella.xml'].xdata.findall('alt_domain_name'):
+  collectNameservers(xml_domain_name)
+  if 'revDNS' in xml_domain_name.attrib:
+    if revDNSseen:
+      raise TemplateError('"revDNS" is specified for multiple domain names, '
+                          'can only be specified for one.')
+    revDNSseen=True
+    CANONICAL_hostname=xml_domain_name.attrib['revDNS']
+    CANONICAL_domain=xml_domain_name.text.strip()
+
+# compute canonical fully qualified host name for this system
+if CANONICAL_hostname:
+  CANONICAL_FQHN = '%s.%s' % (CANONICAL_hostname, CANONICAL_domain)
+else:
+  CANONICAL_FQHN = CANONICAL_domain
+%}\
+{% def EXTERNAL_ZONE(ext_ip, ext_domain) %}\
+; the external (Internet or inter-corporate net) zone view for
+; ${ext_domain} ( note that mail is still handled by the primary
+; smtp server at ${CANONICAL_FQHN} )
+$$ORIGIN ${ext_domain}.
+$$TTL 86400      ; 1 day
+${ext_domain}.      IN SOA  ${CANONICAL_FQHN}. itadmins.${domain_name}. (
+                                ${timestamp} ; serial
+                                28800      ; refresh (8 hours)
+                                3600       ; retry (1 hour)
+                                1814400    ; expire (3 weeks)
+                                86400      ; minimum (1 day)
+                                )
+                        NS      ${CANONICAL_FQHN}.
+{% for secondaryDNS in secondaryNameservers[ext_domain] %}\
+                        NS      ${secondaryDNS}.
+{% end %}\
+                        A       ${ext_ip}
+                        MX      5 ${CANONICAL_FQHN}.
+                IN      TXT     "v=spfl a mx ~all"
+mail._domainkey IN      TXT     "k=rsa; t=s; p=${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}"
+{% if ext_domain==CANONICAL_domain and CANONICAL_hostname %}\
+${CANONICAL_hostname.ljust(15)} IN      A       ${ext_ip}
+{% end %}\
+{% python
+names=None
+for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
+  if server.find('function').text=='router':
+    extif=server.find('extif')
+    if extif is not None:
+      zone=extif.find('zone')
+      if zone is not None:
+        names=zone.findall('name')
+%}\
+{%   if names is not None %}\
+{%     for name in names %}\
+${name.text.ljust(15)} IN      A       ${ext_ip}
+{%     end %}\
+{%   end %}\
+{% end %}\

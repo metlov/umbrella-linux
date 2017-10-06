@@ -1,0 +1,24 @@
+Installing Plugin
+=================
+Simply untar the file in the plugins directory, and make sure it is
+in its own directory, and that the name of the directory is the name
+of the plugin:
+
+    $ cd /var/www/squirrelmail/plugins
+    $ tar -xzvf /home/archives/folder_sizes-1.5-1.4.0.tar.gz
+
+Then go to your config directory and run conf.pl.  Choose option
+8 and add the plugin (+).  Save and exit, then that should be all
+if the plugin was made correctly.  :)
+
+  $ cd ../config
+  $ ./conf.pl
+
+Plugin adds own option block to SquirrelMail Folder Options page. 
+"Folder Sizes" link is enabled by default in folder listing.
+
+Plugin translations use folder_sizes domain. folder_sizes.po and 
+folder_sizes.mo files should be  stored in same directory that 
+stores squirrelmail.po and squirrelmail.mo files. Translations 
+are maintained by SquirrelMail Internationalization Team and are 
+distributed in SquirrelMail locale packages.

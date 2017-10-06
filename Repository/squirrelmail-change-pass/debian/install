@@ -1,0 +1,3 @@
+*.php   usr/share/squirrelmail/plugins/change_pass/
+*.pot   usr/share/squirrelmail/plugins/change_pass/
+version usr/share/squirrelmail/plugins/change_pass/

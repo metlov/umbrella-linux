@@ -1,0 +1,70 @@
+<Bundle name='ldap-server'>
+<Group name='ubuntu'>
+    <!-- user and group -->
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXGroup name="openldap" gid="109"/>
+        <BoundPOSIXUser name="openldap" home="/var/lib/ldap" shell="/bin/false" gecos="OpenLDAP Server Account" uid="104" group="openldap">
+            <MemberOf>ssl-cert</MemberOf>
+        </BoundPOSIXUser>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXGroup name="openldap" gid="619"/>
+        <BoundPOSIXUser name="openldap" home="/var/lib/ldap" shell="/bin/false" gecos="OpenLDAP Server Account" uid="619" group="openldap">
+            <MemberOf>ssl-cert</MemberOf>
+            <MemberOf>sasl</MemberOf>
+        </BoundPOSIXUser>
+    </Group>
+
+    <!-- additional schema -->
+    <Group name='ubuntu-trusty'>
+        <!-- Gosa schema definitions on Trusty -->
+        <Package name='gosa-schema'/>
+        <Package name='gosa-plugin-dhcp-schema'/>
+        <Package name='gosa-plugin-dns-schema'/>
+        <Package name='gosa-plugin-sudo-schema'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <!-- Fusiondirectory schema definitions on Xenial -->
+        <Package name='fusiondirectory-schema'/>
+        <Package name='fusiondirectory-plugin-dhcp-schema'/>
+        <Package name='fusiondirectory-plugin-dns-schema'/>
+        <Package name='fusiondirectory-plugin-sudo-schema'/>
+        <Package name='fusiondirectory-plugin-systems-schema'/>
+        <Package name='fusiondirectory-plugin-mail-schema'/>
+        <Package name='fusiondirectory-plugin-alias-schema'/>
+        <Package name='fusiondirectory-plugin-argonaut-schema'/>
+        <Package name='fusiondirectory-plugin-puppet-schema'/>
+    </Group>
+
+    <!-- data and script for LDAP initialization -->
+    <Path name='/etc/ldap/umbrella/initial-config.ldif'/>
+    <Path name='/etc/ldap/umbrella/initial-databases.ldif'/>
+    <Group name='ldap-master'>
+        <Path name='/etc/ldap/umbrella/initial-data.ldif'/>
+    </Group>
+    <Path name='/usr/local/bin/ldap-umbrella-init'/>
+
+    <!-- enable ldaps and TLS -->
+    <Path name='/etc/ssl/ldap.pem'/>
+    <Path name='/etc/ssl/private'/>
+    <Path name='/etc/ssl/private/ldap.key'/>
+
+    <!-- enable Kerberos authentication for LDAP users -->
+    <Package name='libsasl2-modules'/>
+    <Package name='libsasl2-modules-gssapi-mit'/>
+    <Package name='sasl2-bin'/>
+    <Path name='/etc/ldap/sasl2/slapd.conf'/>
+    <Path name='/etc/ldap/slapd.keytab'/>
+    <Path name='/etc/default/saslauthd'/>
+    <Service name='saslauthd'/>
+
+    <!-- the server itself -->
+    <Package name='slapd'/>
+    <Package name='ldap-utils'/>
+    <Package name='libodbc1'/>
+    <Path name='/etc/apparmor.d/local/usr.sbin.slapd'/>
+    <Path name='/etc/default/slapd'/>
+    <Path name='/etc/apparmor.d/local/usr.sbin.slapd'/>
+    <Service name='slapd'/>
+</Group>
+</Bundle>

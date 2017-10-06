@@ -1,0 +1,26 @@
+<Bundle name='dkimproxy'>
+<Group name='ubuntu'>
+    <Package name='dkimproxy'/>
+    <Package name='libcgi-pm-perl'/>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="dkimproxy" home="/var/lib/dkimproxy" shell="/bin/false" gecos="" uid="103" group="dkimproxy">
+            <MemberOf group="ssl-cert"/>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="dkimproxy" gid="108"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="dkimproxy" home="/var/lib/dkimproxy" shell="/bin/false" gecos="" uid="624" group="dkimproxy">
+            <MemberOf group="ssl-cert"/>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="dkimproxy" gid="624"/>
+    </Group>
+    <Path name='/etc/dkimproxy/domain'/>
+    <Path name='/etc/dkimproxy/private.key'/>
+<!--    <Path name='/etc/dkimproxy/public.key'/>
+    <Path name='/etc/init.d/dkimproxy'/> -->
+    <Path name='/etc/dkimproxy/dnsrecordTXT.txt'/>
+    <Path name='/etc/dkimproxy/dkimproxy_out.conf'/>
+    <Path name='/etc/default/dkimproxy'/>
+    <Service name='dkimproxy'/>
+</Group>
+</Bundle>

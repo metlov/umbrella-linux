@@ -1,0 +1,11 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+%}\
+# The mail for local recipients is going to be accepted from DMZ
+{% if 'DMZsmtp' in funchosts %}\
+${str(funcifs['DMZsmtp'])} OK
+{% end %}\

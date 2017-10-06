@@ -1,0 +1,26 @@
+<Bundle name='glpi' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+?>
+<py:if test="'glpi' in funchosts">
+    <Path name='/etc/fusioninventory/agent.cfg'/>
+    <Package name='fusioninventory-agent'/>
+    <Service name='fusioninventory-agent'/>
+    <Path name='/etc/cron.hourly/fusioninventory-agent'/>
+</py:if>
+<Group name='glpi'>
+<!--    <Path name='/root/glpi-setup/user-and-db.sh'/> -->
+<!--    <Path name='/root/glpi-setup/user-and-db.sql'/> -->
+<!--    <Action name='user-and-db'/> -->
+
+<!--    <Path name='/etc/apache2/sites-available/glpi.conf'/> -->
+<!--    <Path name='/root/glpi-setup/glpi-site-enable.sh'/> -->
+<!--    <Action name='glpi-site-enable'/> -->
+
+<!--    <Path name='/etc/apache2/sites-available/zabbix'/> -->
+<!--    <Path name='/etc/apache2/sites-enabled/zabbix.conf'/> -->
+<!--    <Path name='/etc/zabbix/zabbix.conf.php'/> -->
+</Group>
+</Bundle>

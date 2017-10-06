@@ -1,0 +1,4 @@
+if [ -n "$LTSP_CLIENT" ] && [ -z "$DESKTOP_SESSION" ]; then
+    DESKTOP_SESSION=lubuntu
+    export DESKTOP_SESSION
+fi

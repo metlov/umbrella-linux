@@ -1,0 +1,9 @@
+<Rules priority="0">
+<Group name='gui'>
+   <Path type='nonexistent' name='/etc/fonts/conf.d/10-hinting-medium.conf'/>
+   <Path type='nonexistent' name='/etc/fonts/conf.d/10-hinting-slight.conf'/>
+   <!-- <Path type='nonexistent' name='/etc/fonts/conf.d/10-hinting-full.conf'/> -->
+   <!-- enable full hinting -->
+   <Path type='symlink' name='/etc/fonts/conf.d/10-hinting-full.conf' to='../conf.avail/10-hinting-full.conf'/>
+</Group>
+</Rules>

@@ -1,0 +1,14 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+# This file Is the access control list for krb5 administration.
+# When this file is edited run /etc/init.d/krb5-admin-server restart to activate
+# One common way to set up Kerberos administration is to allow any principal
+# ending in /admin  is given full administrative rights.
+# To enable this, uncomment the following line:
+*/admin@${realm_name}      *
+hostmanager/${funchosts['config']} adci *@${realm_name}
+hostmanager/${funchosts['config']} adci host/*@${realm_name}
+hostmanager/${funchosts['config']} adci nfs/*@${realm_name}

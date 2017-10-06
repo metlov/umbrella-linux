@@ -1,0 +1,36 @@
+#!/bin/sh -e
+
+chain_exists()
+{
+    [ $# -lt 1 -o $# -gt 2 ] && { 
+        echo "Usage: chain_exists <chain_name> [table]" >&2
+        return 1
+    }
+    local chain_name="$1" ; shift
+    [ $# -eq 1 ] && local table="--table $1"
+    iptables $table -n --list "$chain_name" >/dev/null 2>&1
+}
+
+# create the custon chains when local interface is going up
+logger "000vpnchains called for $IFACE... "
+if chain_exists VPNINPUT; then
+    logger "VPNINPUT chain exists... "
+else
+    logger "Creating VPNINPUT chain... "
+    iptables -t filter -N VPNINPUT
+    iptables -t filter -A VPNINPUT -j RETURN
+fi
+if chain_exists VPNOUTPUT; then
+    logger "VPNOUTPUT chain exists... "
+else
+    logger "Creating VPNOUTPUT chain... "
+    iptables -t filter -N VPNOUTPUT
+    iptables -t filter -A VPNOUTPUT -j RETURN
+fi
+if chain_exists VPNFORWARD; then
+    logger "VPNFORWARD chain exists... "
+else
+    logger "Creating VPNFORWARD chain... "
+    iptables -t filter -N VPNFORWARD
+    iptables -t filter -A VPNFORWARD -j RETURN
+fi

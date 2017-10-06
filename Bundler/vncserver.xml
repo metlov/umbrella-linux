@@ -1,0 +1,28 @@
+<Bundle name='vncserver'>
+<Group name='ubuntu'>
+    <Path name='/etc/xdg/autostart/x11vnc.desktop'/>
+    <Path name='/usr/local/bin/vnc_connect'/>
+    <Path name='/usr/local/bin/vnc_view'/>
+    <Path name='/usr/local/bin/vnc_gui_connect'/>
+    <Path name='/usr/local/bin/vnc_gui_view'/>
+    <Package name='x11vnc'/>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="stunnel4" home="/var/run/stunnel4" shell="/bin/false" gecos="" uid="219" group="stunnel4"/>
+        <BoundPOSIXGroup name="stunnel4" gid="227"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="stunnel4" home="/var/run/stunnel4" shell="/bin/false" gecos="" uid="635" group="stunnel4"/>
+        <BoundPOSIXGroup name="stunnel4" gid="635"/>
+    </Group>
+    <Service name='stunnel4'/>
+    <Package name='ssvnc'/>
+
+    <!-- cleanup of old vncserver implementation (please remove) -->
+    <Path name='/etc/ssl/x11vnc.pem'/>
+    <Path name='/etc/ssl/private/x11vnc.key'/>
+    <Path name='/etc/x11vnc.pem'/>
+    <Path name='/usr/local/bin/x11vnc_serve.sh'/>
+    <Path name='/usr/local/bin/x11vnc_unixpw.sh'/>
+
+</Group>
+</Bundle>

@@ -1,0 +1,2 @@
+# Create homes for new users every five minutes
+*/5 * * * * root   /usr/local/bin/mkhomes.sh

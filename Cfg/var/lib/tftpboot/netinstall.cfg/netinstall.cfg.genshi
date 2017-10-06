@@ -1,0 +1,63 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+LABEL -
+  MENU LABEL INSTALL:
+  MENU DISABLE
+
+LABEL netinstall-32
+        MENU LABEL Install 32-bit Linux Workstation
+        MENU INDENT 1
+        MENU PASSWD format c:
+TEXT HELP
+Installs 32-bit (for computers with <4G RAM) Linux Workstation.
+THIS WILL ERASE EVERYTHING FROM THIS COMPUTER'S HARD DRIVE !!!
+If you are sure to do it, the password is "format c:". To get
+an account (login/password) contact itadmins@${domain_name} .
+ENDTEXT
+	KERNEL ubuntu-installer/i386/linux
+	APPEND vga=788 auto=true priority=critical preseed/locale=${language}.UTF-8 debian-installer/locale=ru_RU.UTF-8 console-keymaps-at/keymap=ru preseed/url=http://autoconfig.${domain_name}/install/preseed.cfg initrd=ubuntu-installer/i386/initrd.gz --- quiet
+
+LABEL netinstall-64
+        MENU LABEL Install 64-bit Linux Workstation
+        MENU INDENT 1
+        MENU PASSWD format c:
+TEXT HELP
+Installs 64-bit (for computers with >=4G RAM) Linux Workstation.
+THIS WILL ERASE EVERYTHING FROM THIS COMPUTER'S HARD DRIVE !!!
+If you are sure to do it, the password is "format c:". To get
+an account (login/password) contact itadmins@${domain_name} .
+ENDTEXT
+	KERNEL ubuntu-installer/amd64/linux
+	APPEND vga=788 auto=true priority=critical preseed/locale=${language}.UTF-8 debian-installer/locale=ru_RU.UTF-8 console-keymaps-at/keymap=ru preseed/url=http://autoconfig.${domain_name}/install/preseed.cfg initrd=ubuntu-installer/amd64/initrd.gz --- quiet
+
+MENU SEPARATOR
+
+LABEL -
+  MENU LABEL RESCUE:
+  MENU DISABLE
+
+LABEL rescue-32
+        MENU LABEL Boot Linux Installer in rescue mode 32-bit
+        MENU INDENT 1
+        MENU PASSWD rescue me
+TEXT HELP
+This will load the 32-bit rescue mode installer to repar the broken system.
+BE CAREFUL OR YOU WILL ERASE EVERYTHING FROM THIS COMPUTER'S HARD DRIVE !!!
+If you are sure to do it, the password is "rescue me".
+ENDTEXT
+	KERNEL ubuntu-installer/i386/linux
+	APPEND vga=788 rescue/enable=true initrd=ubuntu-installer/i386/initrd.gz --- quiet
+
+LABEL rescue-64
+        MENU LABEL Boot Linux Installer in rescue mode 64-bit
+        MENU INDENT 1
+        MENU PASSWD rescue me
+TEXT HELP
+This will load the 64-bit rescue mode installer to repar the broken system.
+BE CAREFUL OR YOU WILL ERASE EVERYTHING FROM THIS COMPUTER'S HARD DRIVE !!!
+If you are sure to do it, the password is "rescue me".
+ENDTEXT
+	KERNEL ubuntu-installer/amd64/linux
+	APPEND vga=788 rescue/enable=true initrd=ubuntu-installer/amd64/initrd.gz --- quiet

@@ -1,0 +1,23 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+    <xsd:complexType name="ou">
+      <xsd:sequence>
+          <xsd:element name="name" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="postcode" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="network_match" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="network" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="gateway" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="admin_group" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="users_group" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="bcfg2_profile" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="ou" type="ou" minOccurs="0" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="ou" type="ou"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

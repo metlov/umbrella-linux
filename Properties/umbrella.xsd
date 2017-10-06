@@ -1,0 +1,143 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+    <xsd:include schemaLocation="../Python/xsd_types.xsd"/>
+
+    <xsd:simpleType name="classCNetworkType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="((1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])/16"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:attribute name="option">
+        <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+                <xsd:pattern value="burst|iburst"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:attribute>
+
+    <xsd:complexType name="NTPServerType">
+        <xsd:simpleContent>
+            <xsd:extension base="IPaddressType">
+                <xsd:attribute ref="option"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="DHCPRangeType">
+      <xsd:sequence>
+          <xsd:element name="start" type="IPaddressType"/>
+          <xsd:element name="end" type="IPaddressType"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="DNSDomainNameType">
+        <xsd:simpleContent>
+            <xsd:extension base="FQDN">
+                <xsd:attribute name="revDNS" type="HostNameEmptyType"/>
+                <xsd:attribute name="NS2" type="FQDN"/>
+                <xsd:attribute name="NS3" type="FQDN"/>
+                <xsd:attribute name="NS4" type="FQDN"/>
+                <xsd:attribute name="NS5" type="FQDN"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="ZoneType">
+      <xsd:sequence>
+          <xsd:element name="acl" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="name" type="xsd:string" maxOccurs="unbounded" minOccurs="0"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="InterfaceType">
+      <xsd:sequence>
+          <xsd:element name="vlandev" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="bridged" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+          <xsd:element name="dev" type="xsd:string"/>
+          <xsd:element name="ip" type="IPaddressTypeEmpty" minOccurs="0"/>
+          <xsd:element name="nat_ip" type="IPaddressTypeEmpty" minOccurs="0"/>
+          <xsd:element name="mac" type="MACaddressType" minOccurs="0"/>
+          <xsd:element name="gateway" type="IPaddressType" minOccurs="0"/>
+          <xsd:element name="option" type="xsd:string" maxOccurs="unbounded" minOccurs="0"/>
+          <xsd:element name="up" type="xsd:string" maxOccurs="unbounded" minOccurs="0"/>
+          <xsd:element name="zone" type="ZoneType" minOccurs="0"/>
+          <xsd:element name="bridged" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="serverType">
+      <xsd:sequence>
+          <xsd:element name="function" type="xsd:string"/>
+          <xsd:element name="name" type="xsd:string"/>
+          <xsd:element name="intif" type="InterfaceType" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="extif" type="InterfaceType" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="pubif" type="InterfaceType" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="secif" type="InterfaceType" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="DMZif" type="InterfaceType" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="vpnif" type="InterfaceType" maxOccurs="1" minOccurs="0"/>
+          <xsd:element name="winif" type="InterfaceType" maxOccurs="1" minOccurs="0"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="FlagType">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="startPageType">
+      <xsd:sequence>
+          <xsd:element name="group" type="xsd:string" maxOccurs="1" minOccurs="0" />
+          <xsd:element name="url" type="xsd:string"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="startPagesType">
+        <xsd:sequence>
+            <xsd:element name="start_page" type="startPageType" minOccurs="1"  maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="system_name" type="xsd:string"/>
+                <xsd:element name="system_name_local" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="long_name" type="xsd:string"/>
+                <xsd:element name="long_name_local" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="dept_name" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="dept_name_local" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="location" type="xsd:string"/>
+                <xsd:element name="location_local" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="state" type="xsd:string"/>
+                <xsd:element name="state_local" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="country" type="xsd:string"/>
+                <xsd:element name="country_local" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="country_code" type="xsd:string"/>
+                <xsd:element name="language" type="xsd:string"/>
+                <xsd:element name="timezone" type="xsd:string"/>
+                <xsd:element name="domain_name" type="DNSDomainNameType"/>
+                <xsd:element name="alt_domain_name" type="DNSDomainNameType" minOccurs="0" maxOccurs="5" />
+                <xsd:element name="KRB5_realm" type="xsd:string"/>
+                <xsd:element name="LDAP_root" type="xsd:string"/>
+                <xsd:element name="net" type="classCNetworkType"/>
+                <xsd:element name="extnet" type="NetworkType" minOccurs="0"/>
+                <xsd:element name="intnet" type="NetworkType" minOccurs="0"/>
+                <xsd:element name="pubnet" type="NetworkType"/>
+                <xsd:element name="secnet" type="NetworkType"/>
+                <xsd:element name="DMZnet" type="NetworkType"/>
+                <xsd:element name="vpnet" type="NetworkType" minOccurs="0"/>
+                <xsd:element name="winnet" type="NetworkType" minOccurs="0"/>
+                <xsd:element name="pub_dhcp" type="DHCPRangeType" minOccurs="0"/>
+                <xsd:element name="DNScache" type="IPaddressType" minOccurs="0"/>
+                <xsd:element name="ntpserver" type="NTPServerType" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="upstream_proxy" type="IPaddressPortType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="start_pages" type="startPagesType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="admin" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="SMTP_incoming_relay" type="xsd:string"/>
+                <xsd:element name="SMTP_outbound_relay" type="xsd:string"/>
+                <xsd:element name="install_zabbix" type="FlagType" minOccurs="0"/>
+                <xsd:element name="NTP_server_on_vmhost" type="FlagType" minOccurs="0"/>
+                <xsd:element name="server" type="serverType" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

@@ -1,0 +1,3 @@
+[submodule "Documentation/website/output"]
+	path = Documentation/website/output
+	url = git@github.com:metlov/metlov.github.io.git

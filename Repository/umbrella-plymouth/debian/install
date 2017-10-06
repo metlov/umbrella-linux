@@ -1,0 +1,3 @@
+*.png usr/share/umbrella-plymouth/
+umbrella.* usr/share/plymouth/themes/umbrella/
+umbrella-text.* usr/share/plymouth/themes/umbrella-text/

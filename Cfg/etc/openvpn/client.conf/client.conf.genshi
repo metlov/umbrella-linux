@@ -1,0 +1,24 @@
+{% python
+from genshi.template import TemplateError
+import lxml
+execfile(repo+'/Python/00_baseparams.py')
+external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
+dev=external_vpn.find('dev').text
+config=external_vpn.find('config')
+config_text=config.text
+%}\
+ script-security 2
+# run /etc/openvpn/up.sh when the connection is set up
+ up /etc/init.d/firewall_vpn
+{% for node in config.xpath("child::node()") %}\
+{%   if isinstance(node, lxml.etree._ElementStringResult) %}\
+${node}
+{%   end %}\
+{%   if isinstance(node, lxml.etree._Element) %}\
+<${node.tag}>
+{%     if node.text is not None %}\
+${node.text}
+{% end %}\
+</${node.tag}>
+{%   end %}\
+{% end %}\

@@ -1,0 +1,13 @@
+#!/bin/bash -l
+# Can be used to start an interactive session under X2GO
+# Note that sessreg stuff still does not work very well.
+# At a minimum it would require
+# chgrp utmp /usr/bin/sessreg
+# chmod g+s /usr/bin/sessreg
+# (in Umbrella Linux this is handled by umbrella-update-tftpboot script)
+if [ -n "$X2GO_SESSION" ]; then
+    REMOTE=`x2golistsessions | grep $X2GO_SESSION | cut -d "|" -f 8`
+    /usr/bin/sessreg -a -l $REMOTE $USER
+    ssh-agent lxsession -s Lubuntu -e LXDE
+    /usr/bin/sessreg -d -l $REMOTE $USER
+fi

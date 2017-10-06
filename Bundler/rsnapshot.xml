@@ -1,0 +1,12 @@
+<Bundle name='rsnapshot'>
+<Group name='ubuntu'>
+    <Package name='rsnapshot'/>
+    <Path name='/etc/cron.d/rsnapshot'/>
+    <Path name='/etc/rsnapshot.conf'/>
+    <Path name='/etc/rsnapshot_dump_mysql_config'/>
+    <Path name='/etc/rsnapshot_dump_mysql_archive'/>
+    <Path name='/etc/rsnapshot_dump_LDAP'/>
+    <Path name='/root/.my.cnf'/>           <!-- needed for mysql backups -->
+    <Package name='mysql-client'/>         <!-- needed for mysql backups -->
+</Group>
+</Bundle>

@@ -1,0 +1,32 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+#ldaprc_path = /etc/ldap/ldap.conf
+uris = ${' '.join(ldap_URIs)}
+base = ${ldap_root}
+tls_ca_cert_file = /etc/ssl/certs/bcfg2ca.pem
+tls_require_cert = allow
+auth_bind = no
+
+# attributes, extracted from LDAP
+# uid, gid = 654 corresponds to 'vmail' user and group
+user_attrs = \
+  =user=%{ldap:uid}, \
+  =uid=654, \
+  =gid=654, \
+  =home=/var/maildirs/%{ldap:uid}
+
+# Mailboxes exist for every user with mail settings having the
+# primary E-mail address in one of the domain names for this
+# system (the name in the address must coincide with UID).
+#
+# Thus, it is possible to specify the primary address in an
+# external domain, in which case the mailbox is not going to
+# be created.
+user_filter = (&(objectClass=gosaMailAccount)(|${''.join(('(mail=%%n@%s)(gosaMailAlternateAddress=%%n@%s)' % (d,d,)) for d in domain_names )}))
+
+# Attributes and filter to get a list of all users
+iterate_attrs = =user=%{ldap:uid}
+iterate_filter = &((objectClass=gosaMailAccount)(|${''.join(('(mail=*@%s)(gosaMailAlternateAddress=*@%s)' % (d,d,)) for d in domain_names )}))

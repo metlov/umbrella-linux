@@ -1,0 +1,22 @@
+<Bundle name='snmp' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+?>
+<Group name='ubuntu'>
+<py:if test="'monitor' in funchosts">
+    <BoundPOSIXUser name="snmp" home="/var/lib/snmp" gecos="" shell="/usr/sbin/nologin" uid="647" group="snmp"/>
+    <BoundPOSIXGroup name="snmp" gid="647"/>
+    <Path name='/etc/default/snmpd'/>
+    <Path name='/etc/snmp/snmpd.conf'/>
+    <Package name='snmpd'/>
+    <Service name='snmpd'/>
+    <Group name='monitor'>
+        <Package name='snmp'/>
+        <Package name='snmp-mibs-downloader'/>
+        <Path name='/etc/snmp/snmp.conf'/>
+    </Group>
+</py:if>
+</Group>
+</Bundle>

@@ -1,0 +1,21 @@
+#!/bin/sh -e
+
+{% if 'lxd-containers-defined' in metadata.groups %}\
+# this is necessary for lxd containers to start after reboot thanks for
+# lxd on xenial being socket-activated
+echo -n "" | nc -U /var/lib/lxd/unix.socket
+
+# this is necessary for router to function, since the LXD containers
+# can not load kernel modules by themseles.
+modprobe ip_tables
+modprobe iptable_nat
+modprobe nf_nat_ftp
+modprobe nf_conntrack
+modprobe nf_conntrack_ftp
+modprobe nf_conntrack_irc
+modprobe nf_conntrack_tftp
+modprobe nf_conntrack_snmp
+modprobe ip6_tables
+{% end %}\
+
+exit 0

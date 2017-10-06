@@ -1,0 +1,24 @@
+Source: squirrelmail-compose-extras
+Section: web
+Priority: optional
+Maintainer: Konstantin L. Metlov <metlov@donfti.ru>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: https://squirrelmail.org/plugin_view.php?id=194
+Vcs-Git: https://www.donfti.ru/umbrella.git
+
+Package: squirrelmail-compose-extras
+Architecture: all
+Depends: squirrelmail (>= 2:1.4.10), ${misc:Depends}
+Enhances: squirrelmail
+Description: SquirrelMail plugin: Compose Extras
+ This plugin addresses some usability issues with the SquirrelMail compose
+ screen: the tab order can be changed so that the user does not have to tab
+ through all the buttons between the subject line and the message body, access
+ keys can be added to most common elements on the compose page, the user can
+ choose to have a few blank lines inserted at the top of the message body for
+ replies and forwards, the user can be prevented from clicking the "Send"
+ button more than once, pressing Enter in any text field won't invoke any
+ form action (such as auto-clicking the Signature button) and the user can
+ choose to have buttons on the compose screen that remove reply citations
+ and rewrap the message body text.

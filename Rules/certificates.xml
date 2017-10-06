@@ -1,0 +1,3 @@
+<Rules priority="0">
+<Action name='update-ca-certificates' timing='post' when='modified' command='update-ca-certificates' status='ignore'/>
+</Rules>

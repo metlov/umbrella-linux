@@ -1,0 +1,8 @@
+<Bundle name='encfs'>
+<Group name='ubuntu'>
+    <Package name='libpam-encfs'/>
+    <Path name='/etc/security/pam_encfs.conf'/>
+    <Package name='libpam-script'/>
+    <Path name='/usr/share/libpam-script/pam_script_passwd'/>
+</Group>
+</Bundle>

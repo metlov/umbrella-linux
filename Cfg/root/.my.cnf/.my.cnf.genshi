@@ -1,0 +1,3 @@
+[client]
+user     = backup
+password = ${metadata.Properties['umbrella_keys.xml'].xdata.find('MySQLbackuppass').text}

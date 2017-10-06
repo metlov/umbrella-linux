@@ -1,0 +1,18 @@
+#!/bin/bash
+# this script watches home directories of all users and restarts lsyncd
+# once a new top-level public_html directory is created by some user
+#
+# This file is part of Umbrella Linux
+# (c) 2017 Konstantin L. Metlov <metlov@dofti.ru>
+
+root="/export/home"
+while true; do
+    inotifywait -q -r -m ${root} --exclude "^${root}\/[^\/]+\/[^\/]+\/.*$" -e create -e moved_to |
+        while read path action file; do
+            if [ "$file" == "public_html" ]; then
+                # if new public_html directory was created -- restart lsyncd
+                # (and consequiently resync and watch the new directory)
+                systemctl restart lsyncd
+            fi
+        done
+done

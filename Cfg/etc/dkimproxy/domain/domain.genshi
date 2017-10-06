@@ -1,0 +1,5 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+${domain_name} domainkeys(a=rsa-sha1,c=nofws), dkim(a=rsa-sha256,c=relaxed)

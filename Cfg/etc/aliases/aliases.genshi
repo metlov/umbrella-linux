@@ -1,0 +1,31 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+
+mailing_lists=[]
+if mail_in_DMZ and 'mailman-server' in metadata.groups:
+    robots=metadata.Properties['firewall.xml'].xdata.find('mail_in_DMZ').findall('robot')
+    for robot in robots:
+        mailing_list_name=robot.find('list_name')
+        if mailing_list_name is not None:
+          mailing_lists.append(mailing_list_name.text)
+%}\
+{% if 'mail' in metadata.groups %}\
+# See man 5 aliases for format
+postmaster: ${', '.join(admins)}
+root: ${', '.join(admins)}
+itadmins: ${', '.join(admins)}
+{%   for alias in metadata.Properties['mailaliases.xml'].xdata.findall('mailalias') %}\
+${alias.find('alias').text}: ${', '.join([user.text for user in alias.findall('user')])}
+{%   end %}\
+{% end %}\
+{% for mailing_list in mailing_lists %}\
+${mailing_list}: "|/var/lib/mailman/mail/mailman post ${mailing_list}"
+{%   for ml_suffix in ml_suffixes %}\
+${mailing_list}-${ml_suffix}: "|/var/lib/mailman/mail/mailman ${ml_suffix} ${mailing_list}"
+{%   end %}\
+{% end %}\

@@ -1,0 +1,16 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+    <xsd:complexType name="MailAliasType">
+      <xsd:sequence>
+          <xsd:element name="alias" type="xsd:string"/>
+          <xsd:element name="user" type="xsd:string" maxOccurs="unbounded" />
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="mailalias" type="MailAliasType" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

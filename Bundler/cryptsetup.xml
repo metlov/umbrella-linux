@@ -1,0 +1,9 @@
+<Bundle name='cryptsetup'>
+<Group name='ubuntu'>
+    <Package name='cryptsetup'/>
+    <Group name='ubuntu-trusty'>
+        <Service name='cryptdisks'/>
+        <Service name='cryptdisks-udev'/>
+    </Group>
+</Group>
+</Bundle>

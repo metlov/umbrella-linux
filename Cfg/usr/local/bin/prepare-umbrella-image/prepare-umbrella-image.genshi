@@ -1,0 +1,55 @@
+#!/bin/bash
+{% python
+import socket
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+%}\
+
+# stop lightdm to prevent this script from being run in GUI session
+# stop lightdm
+
+# remove lightdm startup script
+# rm -f /etc/init/lightdm.conf
+
+#Prevent to autostart lightdm
+cat >/etc/init/lightdm.override <<EOF;
+manual
+EOF
+
+# remove cached passwords
+rm -f /var/cache/.security.db
+
+# remove cached network interface names
+rm -f /etc/udev/rules.d/70-persistent-net.rules
+
+# override DNS parameters, supplied by local DHCP server
+cat >/etc/dhcp/dhclient.conf <<EOF;
+option rfc3442-classless-static-routes code 121 = array of unsigned integer 8;
+
+request subnet-mask, broadcast-address, time-offset, routers,
+    domain-name, domain-name-servers, domain-search, host-name,
+    dhcp6.name-servers, dhcp6.domain-search,
+    netbios-name-servers, netbios-scope, interface-mtu,
+    rfc3442-classless-static-routes, ntp-servers,
+    dhcp6.fqdn, dhcp6.sntp-servers;
+
+interface "eth0" {
+    supersede domain-name-servers ${routerifs['pubif']};
+    supersede domain-search "${domain_name}.";
+    supersede domain-name "${domain_name}";
+}
+EOF
+
+# reset network interfaces
+cat >/etc/network/interfaces <<EOF;
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+EOF
+
+shutdown -P now

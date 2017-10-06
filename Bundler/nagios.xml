@@ -1,0 +1,42 @@
+<Bundle name='nagios' version='2.0'>
+  <Path name='/etc/nagiosgen.status'/>
+  <Group name='ubuntu'>
+    <Group name='nagios-server'>
+      <BoundPOSIXUser name="nagios" home="/var/lib/nagios" shell="/bin/false" uid="646" group="nagios"/>
+      <BoundPOSIXGroup name="nagios" gid="646"/>
+      <Path name='/etc/monitoring-plugins.ini'/>
+      <Path name='/etc/nagios3/apache2.conf'/>
+      <Path name='/etc/nagios3/cgi.cfg'/>
+      <Path name='/etc/nagios3/conf.d/zzz_nagiosgen.cfg'
+                  altsrc='/etc/nagios/nagiosgen.cfg'/>
+
+      <!-- override the default Nagios configuration files -->
+      <Path name='/etc/nagios3/conf.d/contacts_nagios2.cfg'/>
+      <Path name='/etc/nagios3/conf.d/extinfo_nagios2.cfg'/>
+      <Path name='/etc/nagios3/conf.d/hostgroups_nagios2.cfg'/>
+      <Path name='/etc/nagios3/conf.d/localhost_nagios2.cfg'/>
+      <Path name='/etc/nagios3/conf.d/services_nagios2.cfg'/>
+
+      <Package name='nagios3'/>
+      <Package name='nagios3-common'/>
+      <Package name='nagios-images'/>
+      <Package name='fonts-dejavu-core'/>
+      <Service name='nagios3'/>
+      <Service name='apache2'/>
+      <Group name='ubuntu-trusty'>
+        <Package name='libapache2-mod-php5'/>
+        <Package name='nagios-plugins'/>
+      </Group>
+      <Group name='ubuntu-xenial'>
+        <Package name='libapache2-mod-php'/>
+        <Package name='monitoring-plugins'/>
+      </Group>
+      <Package name='libapache2-mod-authz-unixgroup'/>
+      <Path name='/etc/apache2/sites-available/default-ssl.conf'/>
+      <Path name='/etc/apache2/sites-enabled/000-default.conf'/>
+      <Path name='/etc/apache2/sites-enabled/default-ssl.conf'/>
+      <Package name='libapache2-mod-auth-kerb'/>
+      <Path name='/etc/apache2/http.keytab'/>
+    </Group>
+  </Group>
+</Bundle>

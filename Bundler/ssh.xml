@@ -1,0 +1,22 @@
+<Bundle name='ssh'>
+<Group name='ubuntu'>
+    <Package name='openssh-server'/>
+    <Package name='openssh-client'/>
+    <Package name='ncurses-term'/>
+    <Group name='frontserver'>
+        <!-- front end server needs xauth (and a good deal of X) -->
+        <!-- for X11 forwarding                                  -->
+        <Package name='xauth'/>
+    </Group>
+    <Path name='/etc/ssh/ssh_host_ecdsa_key'/>
+    <Path name='/etc/ssh/ssh_host_ecdsa_key.pub'/>
+    <Path name='/etc/ssh/ssh_host_dsa_key'/>
+    <Path name='/etc/ssh/ssh_host_dsa_key.pub'/>
+    <Path name='/etc/ssh/ssh_host_rsa_key'/>
+    <Path name='/etc/ssh/ssh_host_rsa_key.pub'/>
+    <Path name='/etc/ssh/sshd_config'/>
+    <Path name='/etc/ssh/ssh_config'/>
+    <Path name='/etc/ssh/ssh_known_hosts'/>
+    <Service name='ssh'/>
+</Group>
+</Bundle>

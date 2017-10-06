@@ -1,0 +1,19 @@
+Source: squirrelmail-retrieveuserdata
+Section: web
+Priority: optional
+Maintainer: Konstantin L. Metlov <metlov@donfti.ru>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: http://squirrelmail.org/plugin_view.php?id=11
+Vcs-Git: https://www.donfti.ru/umbrella.git
+
+Package: squirrelmail-retrieveuserdata
+Architecture: all
+Depends: squirrelmail (>= 2:1.4.10), ${misc:Depends}
+Conflicts: squirrelmail (>= 2:1.5)
+Enhances: squirrelmail
+Description: SquirrelMail plugin: Retrieve User Data
+ This plugin retrieves the full name and the email address of a SquirrelMail
+ user from an external source (currently LDAP, Microsoft AD, MySQL,.
+ /etc/passwd, PostgreSQL, plain text file, DB-style databases, VPoPMail)
+ and writes them to the user's preferences file.

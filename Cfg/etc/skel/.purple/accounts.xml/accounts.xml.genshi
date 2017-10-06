@@ -1,0 +1,50 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+<?xml version='1.0' encoding='UTF-8' ?>
+
+<account version='1.0'>
+	<account>
+		<protocol>prpl-jabber</protocol>
+		<name>_LOGIN_@${domain_name}/</name>
+		<statuses>
+			<status type='available' name='Доступен' active='true'>
+				<attributes/>
+			</status>
+			<status type='mood' name='Чувство' active='false'>
+				<attributes/>
+			</status>
+			<status type='freeforchat' name='Готов пообщаться' active='false'>
+				<attributes/>
+			</status>
+			<status type='away' name='Отошёл' active='false'>
+				<attributes/>
+			</status>
+			<status type='extended_away' name='Расширенный &quot;Отошёл&quot;' active='false'>
+				<attributes/>
+			</status>
+			<status type='dnd' name='Не беспокоить' active='false'>
+				<attributes/>
+			</status>
+			<status type='offline' name='Не в сети' active='false'>
+				<attributes/>
+			</status>
+		</statuses>
+		<settings>
+			<setting name='auth_plain_in_clear' type='bool'>0</setting>
+			<setting name='custom_smileys' type='bool'>1</setting>
+			<setting name='port' type='int'>5222</setting>
+			<setting name='ft_proxies' type='string'>${funchosts['proxy']}</setting>
+			<setting name='check-mail' type='bool'>0</setting>
+			<setting name='connection_security' type='string'>require_tls</setting>
+			<setting name='use-global-buddyicon' type='bool'>1</setting>
+			<setting name='silence-suppression' type='bool'>0</setting>
+		</settings>
+		<settings ui='gtk-gaim'>
+			<setting name='auto-login' type='bool'>1</setting>
+		</settings>
+		<current_error/>
+	</account>
+</account>

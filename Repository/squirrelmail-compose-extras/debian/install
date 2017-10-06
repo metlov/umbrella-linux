@@ -1,0 +1,6 @@
+*.php   usr/share/squirrelmail/plugins/compose_extras/
+make_release.sh usr/share/squirrelmail/plugins/compose_extras/
+version usr/share/squirrelmail/plugins/compose_extras/
+locale/* usr/share/squirrelmail/plugins/compose_extras/locale/
+templates/* usr/share/squirrelmail/plugins/compose_extras/templates/
+templates/default/* usr/share/squirrelmail/plugins/compose_extras/templates/default/

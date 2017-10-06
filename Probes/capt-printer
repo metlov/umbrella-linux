@@ -1,0 +1,4 @@
+#!/bin/sh
+
+if [ ! -e /etc/cups/ppd/LBP-810.ppd ]; then exit 0; fi
+echo group:capt-printer

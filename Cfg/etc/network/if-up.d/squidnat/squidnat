@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+. /usr/local/bin/umbrella.sh        # source Umbrella Linux variables
+
+# Only run from ifup.
+if [ "$MODE" != start ]; then
+        exit 0
+fi
+
+if [ "$IFACE" = eth0 ]; then
+        /sbin/iptables -t nat -A PREROUTING -s ${HOST_PROXY} -p tcp --dport 80 -j ACCEPT
+        /sbin/iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 3129
+        /sbin/iptables -t nat -A POSTROUTING -j MASQUERADE
+        exit 0
+fi
+
+exit 0

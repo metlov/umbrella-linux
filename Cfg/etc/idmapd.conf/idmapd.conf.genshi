@@ -1,0 +1,15 @@
+[General]
+
+Verbosity = 0
+Pipefs-Directory = /run/rpc_pipefs
+{% if ('ubuntu-trusty' not in metadata.groups) or ('nfs' not in metadata.groups) %}\
+Domain = ${metadata.Properties['umbrella.xml'].xdata.find('domain_name').text}
+{% end %}\
+{% if 'ubuntu-trusty' in metadata.groups and 'nfs' in metadata.groups %}\
+Domain = ${metadata.Properties['umbrella.xml'].xdata.find('KRB5_realm').text}
+{% end %}\
+
+[Mapping]
+
+Nobody-User = nobody
+Nobody-Group = nogroup

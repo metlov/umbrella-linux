@@ -1,0 +1,14 @@
+<Bundle name='cups'>
+<Group name='ubuntu'>
+    <Package name='cups'/>
+    <Package name='cups-browsed'/>
+    <Package name='cups-pdf'/>
+    <Service name='cups'/>
+    <Service name='cups-browsed'/>
+    <Path name='/etc/cups/cupsd.conf'/>
+    <Path name='/etc/ssl/cups.pem'/>
+    <Path name='/etc/ssl/private/cups.key'/>
+    <Path name='/etc/cups/ssl/server.crt'/>
+    <Path name='/etc/cups/ssl/server.key'/>
+</Group>
+</Bundle>

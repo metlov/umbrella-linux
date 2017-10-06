@@ -1,0 +1,51 @@
+.TH "POPPASSD" 8 "19 March 2004" "Debian" ""
+.SH "NAME"
+poppassd \- Password change server for Eudora and NUPOP mail clients
+.SH "DESCRIPTION"
+.B poppassd
+runs from inetd and listens on TCP port 106 by default.  Its sole purpose
+in life is to engage in short FTP-like conversations from client applications
+and execute (or deny) remote password changes via the PAM facilities
+configured in \fI/etc/pam.d/poppassd\fR.  The conversation looks something like this:
+.IP
+200 poppassd v1.8.4 hello, who are you?
+.br
+user adconrad
+.br
+200 Your password please.
+.br
+pass foo
+.br
+200 Your new password please.
+.br
+newpass bar
+.br
+200 Password changed, thank-you.
+.br
+quit
+.br
+200 Bye.
+.PP
+As can be seen from the example above, unencrypted passwords are transmitted
+over the network.  Because of this, it is recommended that you use this
+daemon only for local loopback password changing (for instance, from Perl,
+Python, or PHP web applications on the same server) and block all non-local
+access to port 106, either via tcpwrappers (\fI/etc/hosts.deny\fR) or with appropriate
+firewall rules.
+.PP
+If sending unencrypted passwords over the wire doesn't bug you terribly much
+(as in the case of an ISP with hundreds of POP3 mail accounts), this daemon
+can provide a simple way for some of your clients (those running mail clients
+that actually support this protocol) to easily change their passwords.
+.SH "FILES"
+.TP
+\fI/etc/pam.d/poppassd\fR
+Contains the PAM configuration for poppassd.  By default on Debian, it
+merely includes the common-auth and common-password files, which should
+work in most cases.  If this doesn't cut it for your site, tailor to
+suit.
+.SH "SEE ALSO"
+pam(7), \fB\fBinetd\fR\fR(8), \fB\fIhosts.deny\fR\fR(5)
+.SH "AUTHOR"
+This manual page was written by Adam Conrad <adconrad@0c3.net>
+for the Debian operating system.

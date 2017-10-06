@@ -1,0 +1,22 @@
+#!/bin/bash
+# Lowest process UID to kill
+USER_UID_BOTTOM=1100
+
+# The time in seconds which the process is allowed to run below (84600=1day)
+KILL_TIME=86400
+
+KILL_LIST=`{
+ps -eo uid,pid,lstart | tail -n+2 |
+    while read PROC_UID PROC_PID PROC_LSTART; do
+        SECONDS=$[$(date +%s) - $(date -d"$PROC_LSTART" +%s)]
+        if [ $PROC_UID -ge $USER_UID_BOTTOM -a $SECONDS -gt $KILL_TIME ]; then
+        echo -n "$PROC_PID "
+        fi
+     done
+}`
+
+# kill
+if [[ -n $KILL_LIST ]]
+then
+        kill $KILL_LIST
+fi

@@ -1,0 +1,54 @@
+#!/bin/bash
+
+mkdir -p /vm/backups/
+mkdir -p /vm/tmp/
+
+snapfiles=(/vm/tmp/snap.qcow2 /vm/tmp/snap_*.qcow2)
+if [ -e $snapfiles ]; then
+    echo "Old snapshot files /vm/tmp/snap_XXX.qcow2 exist."
+    echo "Please perform clean up manually."
+    exit 9
+fi
+
+VMs=`virsh list --name`
+for vm in $VMs; do
+    if virsh domblklist $vm | grep -q 'snap'; then
+        echo "Before VM backup: snapshot is still active for $vm. Aborting..."
+        exit 9
+    fi
+    # compute the diskspec for snapshot creation
+    diskpaths=`virsh domblklist $vm | awk 'NR > 3 { print d "|"p} {d=$1; p=$2}'`
+    diskspec=""
+    for diskpath in $diskpaths; do
+        IFS="|"; set $diskpath; disk=$1; filename=$2; unset IFS;
+        snapfile="/vm/tmp/snap_$disk.qcow2"
+        diskspec="$diskspec --diskspec $disk,file=$snapfile"
+    done
+    # freeze the disks
+    if ! [[ $(virsh snapshot-create-as --domain $vm snap $diskspec --disk-only --atomic --no-metadata) =~ created ]]; then
+        echo "Error creating snapshot for disk $disk of $vm."
+        exit 9
+    fi
+    for diskpath in $diskpaths; do
+        IFS="|"; set $diskpath; disk=$1; filename=$2; unset IFS;
+        snapfile="/vm/tmp/snap_$disk.qcow2"
+        # copy the frozen disk
+        cp --sparse=always $filename /vm/backups/$(basename $filename).partial
+        mv /vm/backups/$(basename $filename).partial /vm/backups/$(basename $filename)
+        if ! [[ $(virsh blockcommit $vm $disk --active --pivot) =~ "Successfully pivoted" ]]; then
+            echo "Error merging snapshot for disk $disk of $vm."
+            exit 9
+        fi
+        # merge back the changes accumulated during the copy and rm the snapshot
+        if virsh domblklist $vm | grep $disk | grep -q 'snap'; then
+            echo "After $disk of $vm backup: snapshot is still active for $vm. Aborting..."
+            exit 9
+        else
+            rm -f $snapfile
+        fi
+    done
+    if virsh domblklist $vm | grep -q 'snap'; then
+        echo "After $vm backup: Snapshot is still active for $vm. Aborting..."
+        exit 9
+    fi
+done

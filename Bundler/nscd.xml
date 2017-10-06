@@ -1,0 +1,6 @@
+<Bundle name='nscd'>
+<Group name='ubuntu'>
+    <Package name='nscd'/>
+    <Service name='nscd'/>
+</Group>
+</Bundle>

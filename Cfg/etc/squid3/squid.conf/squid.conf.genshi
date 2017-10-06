@@ -1,0 +1,88 @@
+{% python
+import itertools
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/35_organization.py')
+netset=set()
+netset |= set(intnets_str.values())
+netset |= set(netclasses.iterkeys())
+localnets=' '.join(netset)
+
+# public networks are the internal networks except DMZ and SEC
+pubnets = intnets.copy()
+pubnets.pop('DMZif', None)
+pubnets.pop('secif', None)
+
+# gather all the network objects for public networks
+netobjs=set()
+netobjs |= set(pubnets.values())
+netobjs |= set(netclasses_obj.iterkeys())
+# Now we are going to remove the networks, which are fully contained
+# in other networks of this set. For this we compare the networks in pairs
+netobjs_contained=set()
+for a, b in itertools.combinations(netobjs, 2):
+    if a.host_first() in b and a.host_last() in b:
+        netobjs_contained.add(a)
+    if b.host_first() in a and b.host_last() in a:
+        netobjs_contained.add(b)
+localnetobjs = netobjs.difference(netobjs_contained)
+
+# convert localnets to ACL string
+localnetstrset=set()
+for lnet in localnetobjs:
+    localnetstrset.add(str(lnet.network())+'/'+str(lnet.mask))
+localnets=' '.join(localnetstrset)
+%}\
+# See squid.conf.orig for description of options
+
+# ports
+http_port 3128
+http_port 3129 transparent
+
+cache_mgr itadmin@${domain_name}
+coredump_dir /var/spool/squid3
+
+cache_mem 800 MB
+
+# disable ipv6
+dns_v4_first on
+
+# access control
+acl localnet src ${localnets}
+acl CONNECT_ports port 443      # SSL
+acl CONNECT_ports port 80       # disqus
+acl Safe_ports port 80          # http
+acl Safe_ports port 21          # ftp
+acl Safe_ports port 443         # https
+acl Safe_ports port 70          # gopher
+acl Safe_ports port 210         # wais
+acl Safe_ports port 1025-65535  # unregistered ports
+acl Safe_ports port 280         # http-mgmt
+acl Safe_ports port 488         # gss-http
+acl Safe_ports port 591         # filemaker
+acl Safe_ports port 777         # multiling http
+acl CONNECT method CONNECT
+http_access deny !Safe_ports
+http_access deny CONNECT !CONNECT_ports
+http_access allow localnet
+http_access deny all
+# delay access for non-registered guests
+#acl guests src 172.16.128.200-172.16.128.250/32
+#delay_pools 1
+#delay_class 1 1
+#delay_parameters 1 18000/18000
+#delay_access 1 allow guests
+#delay_access 1 deny all
+
+# retention of objects with no retention times specified
+refresh_pattern ^ftp:           1440    20%     10080
+refresh_pattern ^gopher:        1440    0%      1440
+refresh_pattern -i (/cgi-bin/|\?) 0     0%      0
+refresh_pattern (Release|Packages(.gz)*)$$      0       20%     2880
+refresh_pattern .               0       20%     4320
+
+# logging
+access_log none
+#access_log /var/log/squid3/access.log squid

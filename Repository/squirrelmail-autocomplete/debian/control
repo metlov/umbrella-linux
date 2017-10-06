@@ -1,0 +1,18 @@
+Source: squirrelmail-autocomplete
+Section: web
+Priority: optional
+Maintainer: Konstantin L. Metlov <metlov@donfti.ru>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: https://squirrelmail.org/plugin_view.php?id=32
+Vcs-Git: https://www.donfti.ru/umbrella.git
+
+Package: squirrelmail-autocomplete
+Architecture: all
+Depends: squirrelmail (>= 2:1.4.10), ${misc:Depends}
+Enhances: squirrelmail
+Description: SquirrelMail plugin: Address Autocomplete
+ This plugin searches user contacts as the user types into the To/Cc/Bcc
+ fields on the compose screen, displaying those that match for quick
+ selection. Various forms of matching and other behaviors are configurable
+ by the administrator and/or each user.

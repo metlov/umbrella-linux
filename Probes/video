@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if hash lspci 2>/dev/null; then
+    if lspci | grep -q 'VGA compatible controller: NVIDIA Corporation C61'; then
+        echo group:nvidia-304
+    elif lspci | grep -q 'VGA compatible controller: nVidia Corporation NV11'; then
+        echo group:nvidia-96
+    elif lspci | grep -q 'VGA compatible controller: nVidia Corporation'; then
+        echo group:nvidia
+    elif lspci | grep -q 'VGA compatible controller: NVIDIA Corporation'; then
+        echo group:nvidia
+    fi
+
+    if lspci | grep -q 'VGA compatible controller: nVidia Corporation GeForce 8500 GT (rev a1)'; then
+        echo group:buggyvideo
+    fi
+
+    if lspci | grep -q 'VGA compatible controller: ATI Technologies Inc Mobility Radeon HD 3600 Series'; then
+        echo group:radeon
+        echo group:buggyvideo
+    fi
+
+    if lspci | grep -q 'VGA compatible controller: Advanced Micro Devices \[AMD\] nee ATI RV630 \[Radeon HD 3600 Series\]'; then
+        echo group:radeon-legacy
+    fi
+
+    if lspci | grep -q 'VGA compatible controller: ATI Technologies Inc RS690'; then
+#        echo group:radeon
+        echo group:radeonold
+    fi
+
+    if lspci | grep -q 'VGA compatible controller: ATI Technologies Inc RV630'; then
+        echo group:radeon-legacy
+    fi
+
+    if lspci | grep -q 'VGA compatible controller: ATI Technologies Inc Mobilitiy Radeon'; then
+        echo group:radeon
+#        echo group:buggyvideo
+    fi
+
+    if lspci | grep -q 'VGA compatible controller: Advanced Micro Devices, Inc. \[AMD/ATI\] RV635'; then
+        echo group:radeon-legacy
+    fi
+fi

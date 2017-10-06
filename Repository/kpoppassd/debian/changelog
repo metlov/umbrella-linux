@@ -1,0 +1,6 @@
+kpoppassd (0.5-2) xenial; urgency=medium
+
+  * rebased Ubuntu popassd package (1.8.5-4) to use the kpoppassd by
+    Alex Withers <awithers@gonzaga.edu>
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Mon, 07 Aug 2017 19:00:17 +0300

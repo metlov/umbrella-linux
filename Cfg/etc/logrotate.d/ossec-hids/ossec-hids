@@ -1,0 +1,15 @@
+# Log rotation for Ossec HIDS
+/var/ossec/logs/*.log {
+    create 640 ossec ossec
+    rotate 31
+    compress
+    missingok
+    notifempty
+    olddir /var/ossec/logs/archives/
+    sharedscripts
+    postrotate
+        if [ -n "`ls /var/ossec/var/run/*.pid`" ]; then
+            /var/ossec/bin/ossec-control restart > /dev/null 2>&1
+        fi
+    endscript
+}

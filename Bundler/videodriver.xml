@@ -1,0 +1,14 @@
+<Bundle name='videodriver'>
+<Group name='ubuntu'>
+    <Group name='nvidia-304'>
+       <Package name='nvidia-304'/>
+       <BoundPOSIXUser name="nvidia-persistenced" home="/" shell="/sbin/nologin" gecos="NVIDIA Persistence Daemon,,," uid="109" group="nvidia-persistenced"/>
+       <BoundPOSIXGroup name="nvidia-persistenced" gid="125"/>
+    </Group>
+    <Group name='nvidia'>
+       <Package name='nvidia-340'/>
+       <BoundPOSIXUser name="nvidia-persistenced" home="/" shell="/sbin/nologin" gecos="NVIDIA Persistence Daemon,,," uid="109" group="nvidia-persistenced"/>
+       <BoundPOSIXGroup name="nvidia-persistenced" gid="125"/>
+    </Group>
+</Group>
+</Bundle>

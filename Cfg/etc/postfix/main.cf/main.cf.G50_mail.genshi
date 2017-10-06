@@ -1,0 +1,187 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+%}\
+# Configuration for the main Umbrella Linux mail server.
+compatibility_level = 2
+
+queue_directory = /var/spool/postfix
+command_directory = /usr/sbin
+{% if 'ubuntu-trusty' in metadata.groups %}\
+daemon_directory = /usr/lib/postfix
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+daemon_directory = /usr/lib/postfix/sbin
+{% end %}\
+mail_owner = postfix
+default_privs = nobody
+
+myhostname = ${funchosts['mail']}
+mydomain = ${domain_name}
+myorigin = $$mydomain
+
+{% if intif_enabled and not extif_enabled and ('mail' in funchosts)%}\
+# the mail is NATed directly to the mail server in PUB
+# the server need to know its external address
+proxy_interfaces = ${routerifs['intif']}
+{% end %}\
+
+{% if 'ubuntu-trusty' in metadata.groups %}\
+mydestination = $$myhostname, localhost.$$mydomain, localhost, ${', '.join(domain_names)}
+local_recipient_maps = unix:passwd.byname $$alias_maps $$transport_maps
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+mydestination = $$myhostname, localhost.$$mydomain, localhost
+local_recipient_maps = proxy:ldap:/etc/postfix/local_recipients.cf $$alias_maps $$transport_maps
+{% end %}\
+
+# Trusted networks (mail will be relayed everywhere by default)
+{% python
+  extra_relays=""
+%}
+mynetworks = ${metadata.Properties['umbrella.xml'].xdata.find('SMTP_incoming_relay').text}/32 ${extra_relays}
+
+# authenticated SMTP
+# By default SASL is disabled, but will be turned on for submission and SMTPS
+# via master.cf options.
+# smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/dovecot-auth
+smtpd_sasl_local_domain = ${realm_name}
+smtpd_recipient_restrictions = permit_tls_clientcerts permit_mynetworks permit_sasl_authenticated reject_unauth_destination
+# check_policy_service unix:private/postgrey
+broken_sasl_auth_clients = yes
+smtpd_tls_cert_file = /etc/ssl/smtp.pem
+smtpd_tls_key_file = /etc/ssl/private/smtp.key
+smtpd_tls_CAfile = /etc/ssl/certs/bcfg2ca.pem
+
+# This relays all outgoing mail (via the SMTP server in DMZ or via an external host)
+relayhost = [${metadata.Properties['umbrella.xml'].xdata.find('SMTP_outbound_relay').text}]
+
+# address rewriting
+masquerade_domains = ${domain_name}
+masquerade_exceptions = root
+
+# Addresses rewriting when mail is about to leave the system
+# smtp_generic_maps = texthash:/etc/postfix/generic
+
+# allow proxying of LDAP maps
+proxy_read_maps = $$default_proxy_read_maps,
+      proxy:ldap:/etc/postfix/alias_map.cf,
+      proxy:ldap:/etc/postfix/alias_map_dupforw.cf,
+      proxy:ldap:/etc/postfix/alias_map_forward.cf,
+      proxy:ldap:/etc/postfix/alias_map_distlist.cf,
+      proxy:ldap:/etc/postfix/map_uid_mail.cf,
+      proxy:ldap:/etc/postfix/alias_map_distlist_ext.cf,
+      proxy:ldap:/etc/postfix/local_recipients.cf
+
+transport_maps = texthash:/etc/postfix/transport
+{% if 'ubuntu-trusty' in metadata.groups %}\
+alias_maps = hash:/etc/aliases
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+virtual_alias_maps = hash:/etc/aliases,
+      proxy:ldap:/etc/postfix/alias_map.cf,
+      proxy:ldap:/etc/postfix/alias_map_dupforw.cf,
+      proxy:ldap:/etc/postfix/alias_map_forward.cf,
+      unionmap:{
+          pipemap:{proxy:ldap:/etc/postfix/alias_map_distlist.cf,
+              proxy:ldap:/etc/postfix/map_uid_mail.cf},
+          proxy:ldap:/etc/postfix/alias_map_distlist_ext.cf}
+{% end %}\
+
+{% if 'ubuntu-trusty' in metadata.groups %}\
+# delivery is done by the procmail
+mailbox_command = /usr/bin/procmail
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+# delivery is done via Dovecot LDA
+dovecot_destination_recipient_limit = 1
+virtual_mailbox_domains = ${', '.join(domain_names)}
+virtual_transport = dovecot
+{% end %}\
+
+# The debugger_command specifies the external command that is executed
+# when a Postfix daemon program is run with the -D option.
+debugger_command =
+	 PATH=/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin
+	 xxgdb $$daemon_directory/$$process_name $$process_id & sleep 5
+
+# If you can't use X, use this to capture the call stack when a
+# daemon crashes. The result is in a file in the configuration
+# directory, and is named after the process name and the process ID.
+#
+# debugger_command =
+#	PATH=/bin:/usr/bin:/usr/local/bin; export PATH; (echo cont;
+#	echo where) | gdb $$daemon_directory/$$process_name $$process_id 2>&1
+#	>$$config_directory/$$process_name.$$process_id.log & sleep 5
+#
+# Another possibility is to run gdb under a detached screen session.
+# To attach to the screen sesssion, su root and run "screen -r
+# <id_string>" where <id_string> uniquely matches one of the detached
+# sessions (from "screen -list").
+#
+# debugger_command =
+#	PATH=/bin:/usr/bin:/sbin:/usr/sbin; export PATH; screen
+#	-dmS $$process_name gdb $$daemon_directory/$$process_name
+#	$$process_id & sleep 1
+
+sendmail_path = /usr/sbin/sendmail
+newaliases_path = /usr/bin/newaliases
+mailq_path = /usr/bin/mailq
+setgid_group = postdrop
+manpage_directory = /usr/share/man
+sample_directory = /etc/postfix
+
+# produce warnings if mail delivery is delayed
+delay_warning_time = 1h
+
+# maximum message size is 40 Mb
+message_size_limit = 40971520
+
+# These are the client and sender restrictions for authenticated SMTPS
+# and SUBMISSION protocols. These are used by users.
+{% if 'ubuntu-trusty' in metadata.groups %}\
+smtpd_sender_login_maps = regexp:/etc/postfix/sender_login_map
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+smtpd_sender_login_maps = regexp:/etc/postfix/sender_login_map, ldap:/etc/postfix/sender_login_map.cf
+{% end %}\
+user_smtpd_sender_restrictions = reject_authenticated_sender_login_mismatch,
+    permit
+
+# These are the client restrictions for the mail acceptor port from DMZ.
+# Used to deliver incoming mail. No DKIM signing is done, obviously.
+acceptor_smtpd_client_restrictions = check_client_access texthash:/etc/postfix/DMZ_relay,
+    reject
+
+{% if mail_in_DMZ and len(robot_servers)>0 %}\
+# These are map targets in for handling outgoing messages from robots
+# (delivery to robots is handled via the transport map).
+smtpd_restriction_classes = ${', '.join(("from_robot_%03d" % (i,)) for i in range(len(robot_servers)) )}
+{% for i in range(len(robot_servers)) %}\
+${"from_robot_%03d" % (i,)} = check_client_access inline:{${str(robot_servers[i])}=OK}, reject
+{% end %}\
+
+{% end %}\
+# These are the client and sender restrictions for local unauthenticated
+# mail delivery. This way of sending mail is used by daemons and robots.
+# The mail is going to be signed by DKIM.
+system_smtpd_recipient_restrictions =  permit_mynetworks,
+    check_recipient_access texthash:/etc/postfix/admin_recipients,
+{% if mail_in_DMZ and len(robot_servers)>0 %}\
+    check_sender_access inline:{${', '.join(('%s@=from_robot_%03d' % (n,i)) for n,i in robot_addresses.iteritems())}},
+{% end %}\
+    reject
+system_smtpd_client_restrictions = check_client_access texthash:/etc/postfix/local_clients,
+    reject
+system_smtpd_relay_restrictions =  permit_mynetworks,
+{% if mail_in_DMZ and len(robot_servers)>0 %}\
+    check_sender_access inline:{${', '.join(('%s@=from_robot_%03d' % (n,i)) for n,i in robot_addresses.iteritems())}},
+{% end %}\
+    permit_sasl_authenticated,
+    defer_unauth_destination

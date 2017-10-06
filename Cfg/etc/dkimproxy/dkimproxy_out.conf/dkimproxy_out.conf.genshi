@@ -1,0 +1,22 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+# specify what address/port DKIMproxy should listen on
+listen    127.0.0.1:10027
+
+# specify what address/port DKIMproxy forwards mail to
+relay     127.0.0.1:10028
+
+# specify what domains DKIMproxy can sign for (comma-separated, no spaces)
+domain    ${domain_name}
+
+# specify what signatures to add
+signature dkim(a=rsa-sha256,c=relaxed)
+signature domainkeys(a=rsa-sha1,c=nofws)
+
+# specify location of the private key
+keyfile   /etc/dkimproxy/private.key
+
+# specify the selector (i.e. the name of the key record put in DNS)
+selector  mail

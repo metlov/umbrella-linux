@@ -1,0 +1,17 @@
+#!/bin/bash
+echo "attempting to change encfs password for" $PAM_USER | /usr/bin/logger
+if [ -d /nfs/modnr/$PAM_USER/.Шифрованные ]; then
+   echo $PAM_USER "encrypted folder exists for" $PAM_USER "." | /usr/bin/logger
+   # attempt to change the old password
+   exec /usr/bin/encfsctl autopasswd /nfs/modnr/$PAM_USER/.Шифрованные << EOF 2>&1 | /usr/bin/logger
+$PAM_OLDAUTHTOK
+$PAM_AUTHTOK
+$PAM_AUTHTOK
+EOF
+   # attempt to change the empty password (in case the user is new)
+   exec /usr/bin/encfsctl autopasswd /nfs/modnr/$PAM_USER/.Шифрованные << EOF 2>&1 | /usr/bin/logger
+
+$PAM_AUTHTOK
+$PAM_AUTHTOK
+EOF
+fi

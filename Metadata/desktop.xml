@@ -1,0 +1,8 @@
+<Groups version='3.0' xmlns:xi="http://www.w3.org/2001/XInclude">
+    <!-- definition of the default desktop environment    -->
+    <!-- This file can be overridden by creating the file -->
+    <!-- ../Local/Metadata/desktop.xml                     -->
+    <Group name='default-desktop'>
+        <Group name='desktop-lxde'/>
+    </Group>
+</Groups>

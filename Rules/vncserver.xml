@@ -1,0 +1,11 @@
+<Rules priority="0">
+<Path type='symlink' name='/usr/local/bin/vnc_view' to='vnc_connect'/>
+<Path type='symlink' name='/usr/local/bin/vnc_gui_view' to='vnc_gui_connect'/>
+
+<!-- cleanup of old vncserver implementation (please remove) -->
+<Path type='nonexistent' name='/usr/local/bin/x11vnc_serve.sh'/>
+<Path type='nonexistent' name='/usr/local/bin/x11vnc_unixpw.sh'/>
+<Path type='nonexistent' name='/etc/x11vnc.pem'/>
+<Path type='nonexistent' name='/etc/ssl/private/x11vnc.key'/>
+<Path type='nonexistent' name='/etc/ssl/x11vnc.pem'/>
+</Rules>

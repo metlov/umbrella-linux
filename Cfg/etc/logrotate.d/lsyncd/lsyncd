@@ -1,0 +1,13 @@
+/var/log/lsyncd/*log {
+	missingok
+	notifempty
+	sharedscripts
+	postrotate
+	if [ -f /var/lock/lsyncd ]; then
+		# KLM: while restarting the daemon is not strictly necessery
+		# this has the second purpose of performing the full sync
+		# at least once a day
+		/sbin/service lsyncd restart > /dev/null 2>/dev/null || true
+	fi
+	endscript
+}

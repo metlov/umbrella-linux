@@ -1,0 +1,63 @@
+Changelog RetrieveUserData plugin
+================================================================================
+14.03.2002 v0.9/1.4.0
+           pgsql.php allows access to PostgreSQL databases (Mark Bergsma
+	   <mark@nedworks.org>), minor change (Ken Brush <ken@wirex.com>)
+17.2.2003  support for multiple identities (Ken Brush <ken@wirex.com>), changed
+	   ldap.php to support multiple identies - it won't work with older
+	   versions of this pluginplugin
+4.2.2003   (additional data sources plugins should work with older versions)
+           support for SM 1.4 by Ken Brush <ken@wirex.com>
+	   change of LDAP pluginplugin: supports more options, you can choose
+	   between anonymous bind or use the user's name and password; form a
+	   RDN to access your LDAP server - thanks to Ken Brush <ken@wirex.com>;
+	   specify the LDAP attribute containing the username on your LDAP
+	   (Ken Brush <ken@wirex.com>, Henrique de Moraes Holschuh
+	   <hmh@ima.sp.gov.br>)
+	   new pluginplugins: ldap.php allows now access to Microsoft Active
+	   Directory by Ken Brush <ken@wirex.com>; textfile.php accesses a
+	   plain text file; dba.php accesses DBM-like databases; vpopmail.php
+	   accesses VPOPMail Userinfos (Dominique Leuenberger
+	   <dominique.leuenberger@gibb.ch>)
+24.5.2002  v0.8/1.2.5
+           new pluginplugin: retrieve username from passwd file, please allow
+	   users to edit their e-mail address, because we can't retrieve it
+	   from the passwd file
+	   an empty retrieved e-mail address is not written to the user's
+	   preferences file 
+7.5.2002   v0.7/1.2.5
+           removed code to disallow users changing their name/e-mail address,
+           use SM's config options instead or edit YOUR_SM_DIR/config/config.php
+	   directly an set:
+	   $edit_identity = false; (users can't change their e-mail address, no
+	                            additional identities are possible)
+           $edit_name = false; (additionally users can't change names)
+6.2.2002   v0.6/1.2.0
+           handling of multiple identities: overwrite first and/or delete
+           additional ones
+Summer '01 v0.5/1.0.x
+           MySQL code released by Thijs Kinkhorst <thijs@jaze.nl>           
+6.2.2001   v0.4/1.0.x
+           some code cleanup, fixed signout bug 
+14.1.2001  there is an error in the error log, when a user isn't 
+           logged in (reload of signout.php), should be fixed
+5.12.2000  fixed missing OneTimePadDecrypt function by adding its
+           include file
+5.10.2000  v0.2/1.0.x 
+           changed hook from login_veryfied to loading_prefs to work for users
+	   without a preferences file
+	   
+Changelog ldap.php
+================================================================================
+4.1.2002   v0.3
+           first steps to use LDAP server entries from main configuration
+           file, thanks to Chris Birmingham
+3.1.2002   v0.2
+           code cleanup, thanks to Lee Hoffman
+6.2.2001   code cleanup
+5.10.2000  v0.1
+
+Changelog mysql.php
+================================================================================
+6.2.2002   v0.2 change of configuration variables
+Summer '01 v0.1 by Thijs Kinkhorst <thijs@jaze.nl>

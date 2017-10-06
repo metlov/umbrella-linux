@@ -1,0 +1,7 @@
+The Debian Package umbrella-plymouth
+----------------------------
+
+Plymouth theme for the Umbrella Linux. Displays (updatable via umbrella-logo)
+logo on the boot screen.
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Wed, 28 Jun 2017 22:59:10 +0300

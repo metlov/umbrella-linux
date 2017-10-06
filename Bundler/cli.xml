@@ -1,0 +1,58 @@
+<Bundle name='cli' xmlns:xi="http://www.w3.org/2001/XInclude">
+    <!-- These are various non system-critical CLI tools installed on top -->
+    <!-- of the desktop environment. Additional tools can be specified in -->
+    <!-- Local/Bundler/cli.xml , which is included here. -->
+    <Package name='aspell-en'/>
+    <Package name='aspell-ru'/>
+    <Package name='at'/>
+    <Package name='dialog'/>
+    <Package name='dnsutils'/>
+    <Package name='dosfstools'/>
+    <Package name='enchant'/>
+    <Package name='info'/>
+    <Package name='hunspell-en-us'/>
+    <Package name='hunspell-ru'/>
+    <Package name='lm-sensors'/>
+    <Package name='libnss3-tools'/>
+    <Package name='manpages'/>
+    <Group name='ntfs-3g'>
+        <Package name='ntfs-3g'/>
+    </Group>
+    <Package name='rar'/>
+    <Package name='schroot'/>
+    <Package name='debootstrap'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='systemd-shim'/>
+    </Group>
+
+    <Package name='fortune-mod'/>
+    <Package name='fortunes'/>
+    <Package name='fortunes-bofh-excuses'/>
+    <Package name='fortunes-debian-hints'/>
+    <Package name='fortunes-off'/>
+
+    <Group name='admworkstation'>
+        <Package name='nmap'/>
+        <Package name='links'/>
+    </Group>
+
+    <Group name='physworkstation'>
+        <Package name='grub-ipxe'/>
+        <Path name='/etc/initramfs-tools/conf.d/framebuffer'/>
+    </Group>
+
+    <Package name='apparmor'/>
+    <Package name='apparmor-utils'/>
+    <Path name='/etc/apparmor.d/tunables/home.d/umbrella'/>
+
+    <Group name='ubuntu-trusty'>
+        <!-- fix anacron message spam if PC is turned on at 7:30 -->
+        <Path name='/etc/cron.d/anacron'/>
+    </Group>
+
+    <Group name='localfspworkstation'>
+        <Path name='/usr/local/bin/prepare-umbrella-image'/>
+    </Group>
+
+    <xi:include href="../Local/Bundler/cli.xml"><xi:fallback/></xi:include>
+</Bundle>

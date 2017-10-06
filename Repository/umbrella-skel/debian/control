@@ -1,0 +1,16 @@
+Source: umbrella-skel
+Section: unknown
+Priority: optional
+Maintainer: Konstantin L. Metlov <metlov@donfti.ru>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: http://www.donfti.ru/umbrella
+Vcs-Git: https://www.donfti.ru/umbrella.git
+
+Package: umbrella-skel
+Architecture: all
+Depends: libnss3-tools, ${misc:Depends}
+Description: Maintains an updatable "skel" directory.
+ An up to date archive with the skel files is updated from 
+ http://<config_server.domain_name>/custom/skel.tar.gz , unpacked
+ and initialized in /var/lib/umbrella-skel/unpacked.

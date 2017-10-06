@@ -1,0 +1,14 @@
+# This is a sample cron file for rsnapshot. 
+# The values used correspond to the examples in /etc/rsnapshot.conf.
+# There you can also set the backup points and many other things.
+#
+# To activate this cron file you have to uncomment the lines below.
+# Feel free to adapt it to your needs.
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=""
+
+# 0 */4		* * *		root	/usr/bin/rsnapshot hourly
+ 30 23  	* * *		root	/usr/bin/rsnapshot daily
+ 0  23  	* * 1		root	/usr/bin/rsnapshot weekly
+ 30 22  	1 * *		root	/usr/bin/rsnapshot monthly

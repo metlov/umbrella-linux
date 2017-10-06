@@ -1,0 +1,21 @@
+<Bundle name='squid'>
+<Group name='ubuntu'>
+    <Group name='ubuntu-trusty'>
+        <Package name='squid3'/>
+        <Service name='squid3'/>
+        <Path name='/etc/squid3/squid.conf'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Package name='squid'/>
+        <Service name='squid'/>
+        <Path name='/etc/squid/squid.conf' altsrc='/etc/squid3/squid.conf'/>
+    </Group>
+    <!-- transparent proxy -->
+    <Package name='iptables'/>
+    <Path name='/etc/network/if-up.d/squidnat'/>
+    <!-- increase conntrack limits -->
+    <Path name='/etc/modprobe.d/conntrack.conf'/>
+    <Path name='/etc/sysctl.d/90-conntrack.conf'/>
+
+</Group>
+</Bundle>

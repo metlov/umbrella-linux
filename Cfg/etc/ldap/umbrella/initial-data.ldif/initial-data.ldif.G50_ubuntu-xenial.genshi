@@ -1,0 +1,653 @@
+{% python
+import socket
+import base64
+from passlib.hash import ldap_salted_sha1 as lsm
+import random
+import string
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+description=long_name
+if dept_name is not None:
+  description=dept_name
+splitnet=str(wholenet).split('.')
+zonename=str(splitnet[1])+'.'+str(splitnet[0])+'.in-addr.arpa.'
+gosa_admin_cn="System Administrator-admin"
+gosa_admin="cn="+gosa_admin_cn+",ou=People,"+ldap_root
+# generate salt
+random.seed(metadata.hostname+metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text)
+passrecoverysaltstr=''.join(random.choice(string.ascii_letters+string.digits) for x in range(32))
+saltstr=''.join(random.choice(string.ascii_letters+string.digits) for x in range(16))
+gosa_admin_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('GOSA_admin_pass').text, salt=saltstr)
+ldap_syncrepl_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_syncrepl_pass').text, salt=saltstr)
+ldap_admin_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_pass').text, salt=saltstr)
+
+# check if we have router
+have_router='router' in funchosts
+
+# collect ip addresses and macs of servers
+srvips={}
+srvlasttwo={}
+srvmacs={}
+for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
+  srvname=server.find('name').text
+  srvfunc=server.find('function').text
+  if srvfunc == 'router' or srvfunc == 'vmhost':
+    iface = server.find('pubif')
+  else:
+    iface=None
+    for interface in iftypes:
+      t=server.find(interface)
+      if t is not None:
+        if iface is None:
+          iface=t
+        else:
+          raise TemplateError('Multiple interfaces are defined for '+srvfunc+' in umbrella.xml.')
+  if iface is None:
+    raise TemplateError('No interfaces are defined for '+srvfunc+' in umbrella.xml.')
+  # now iface is the only interface of the server
+  t = iface.find('ip')
+  if t is None:
+    raise TemplateError('IP address must be defined for '+iface.tag+' on '+srvfunc+' in umbrella.xml.')
+  srvips[srvfunc]=t.text
+  splitip=str(t.text).split('.')
+  srvlasttwo[srvfunc]=str(splitip[3])+'.'+str(splitip[2])
+  srvmacs[srvfunc]=iface.find('mac').text
+%}\
+# ${domain_name}
+dn: ${ldap_root}
+o: ${domain_name}
+dc: ${system_name}
+ou: ${system_name}
+description: ${description}
+objectClass: dcObject
+objectClass: top
+objectClass: organization
+objectClass: gosaDepartment
+objectClass: gosaAcl
+gosaAclEntry: 0:subtree:${base64.b64encode('cn=admin,ou=aclroles,'+ldap_root)}:${base64.b64encode('uid=admin,ou=people,'+ldap_root)}
+gosaAclEntry: 1:subtree:${base64.b64encode('cn=admin,ou=aclroles,'+ldap_root)}:${base64.b64encode('cn=itadmins,ou=groups,'+ldap_root)}
+
+# fusiondirectory, ${domain_name}
+dn: ou=fusiondirectory,${ldap_root}
+objectClass: organizationalUnit
+ou: fusiondirectory
+
+# config, fusiondirectory, ${domain_name}
+dn: cn=config,ou=fusiondirectory,${ldap_root}
+fdTheme: breezy
+fdTimezone: Europe/Moscow
+fdSchemaCheck: TRUE
+fdSaslRealm: ${realm_name}
+fdListSummary: TRUE
+fdModificationDetectionAttribute: entryCSN
+fdLogging: TRUE
+fdLdapSizeLimit: 200
+fdLoginAttribute: uid
+fdWarnSSL: TRUE
+fdSessionLifeTime: 0
+fdHttpHeaderAuthHeaderName: X_AUTH_USER
+fdEnableSnapshots: TRUE
+fdSnapshotBase: ou=snapshots,${ldap_root}
+fdSslKeyPath: /etc/ssl/private/fd.key
+fdSslCertPath: /etc/ssl/certs/fd.cert
+fdCasServerCaCertPath: /etc/ssl/certs/ca.cert
+fdCasHost: localhost
+fdCasPort: 443
+fdCasContext: /cas
+fdAccountPrimaryAttribute: uid
+fdCnPattern: %givenName% %sn%
+fdStrictNamingRules: TRUE
+fdMinId: 1000
+fdUidNumberBase: 1100
+fdGidNumberBase: 1100
+fdUserRDN: ou=people
+fdGroupRDN: ou=groups
+fdAclRoleRDN: ou=aclroles
+fdIdAllocationMethod: traditional
+fdDebugLevel: 0
+fdForcePasswordDefaultHash: FALSE
+fdHandleExpiredAccounts: FALSE
+fdForceSSL: FALSE
+fdHttpAuthActivated: FALSE
+fdHttpHeaderAuthActivated: TRUE
+fdCasActivated: FALSE
+fdRestrictRoleMembers: FALSE
+fdDisplayErrors: FALSE
+fdLdapStats: FALSE
+fdDisplayHookOutput: FALSE
+fdAclTabOnObjects: FALSE
+cn: config
+fdShells: /bin/bash
+fdShells: /bin/csh
+fdShells: /bin/sh
+fdShells: /bin/ksh
+fdShells: /bin/tcsh
+fdShells: /bin/dash
+fdShells: /bin/zsh
+fdShells: /sbin/nologin
+fdShells: /bin/false
+fdShells: /usr/bin/git-shell
+fdDefaultShell: /bin/bash
+fdMailAttribute: uid
+fdCyrusUseSlashes: FALSE
+fdCyrusDeleteMailbox: FALSE
+fdAliasRDN: ou=alias
+fdDnsRDN: ou=dns
+fdDNSFinalDot: TRUE
+fdOGroupRDN: ou=groups
+fdForceSaslPasswordAsk: TRUE
+fdTabHook: user|postmodify|/etc/fusiondirectory/hooks/change_pass %dn% %passwordClear%
+fdDhcpRDN: ou=dhcp
+fdDashboardNumberOfDigit: 3
+fdDashboardPrefix: PC
+fdDashboardExpiredAccountsDays: 15
+fdSudoRDN: ou=sudoers
+fdSystemRDN: ou=systems
+fdServerRDN: ou=servers,ou=systems
+fdWorkstationRDN: ou=workstations,ou=systems
+fdTerminalRDN: ou=terminals,ou=systems
+fdPrinterRDN: ou=printers,ou=systems
+fdComponentRDN: ou=netdevices,ou=systems
+fdPhoneRDN: ou=phones,ou=systems
+fdMobilePhoneRDN: ou=mobile,ou=systems
+fdEncodings: UTF-8=UTF-8
+fdEncodings: ISO8859-1=ISO8859-1 (Latin 1)
+fdEncodings: ISO8859-2=ISO8859-2 (Latin 2)
+fdEncodings: ISO8859-3=ISO8859-3 (Latin 3)
+fdEncodings: ISO8859-4=ISO8859-4 (Latin 4)
+fdEncodings: ISO8859-5=ISO8859-5 (Latin 5)
+fdEncodings: cp850=CP850 (Europe)
+objectClass: fusionDirectoryConf
+objectClass: fdMailPluginConf
+objectClass: fdAliasPluginConf
+objectClass: fdDnsPluginConf
+objectClass: fusionDirectoryPluginsConf
+objectClass: fdDhcpPluginConf
+objectClass: fdDashboardPluginConf
+objectClass: fdSudoPluginConf
+objectClass: fdSystemsPluginConf
+objectClass: fdPasswordRecoveryConf
+fdPasswordRecoveryActivated: FALSE
+fdPasswordRecoveryEmail: itadmins@${domain_name}
+fdPasswordRecoveryValidity: 10
+fdPasswordRecoverySalt: ${passrecoverysaltstr}
+fdPasswordRecoveryUseAlternate: FALSE
+fdPasswordRecoveryMailSubject:: ${base64.b64encode('[FusionDirectory] password recovery link')}
+fdPasswordRecoveryMailBody:: ${base64.b64encode('Hello,\n\nHere is your information:\n - Login : %s\n - Link : %s\n\nThis link is only valid for 10 minutes.')}
+fdPasswordRecoveryMail2Subject:: ${base64.b64encode('[FusionDirectory] password is successfully recovered')}
+fdPasswordRecoveryMail2Body:: ${base64.b64encode('Hello,\n\nYou password was changed.\nYour login is still %s.')}
+fdPasswordDefaultHash: sasl
+fdLanguage: en_US
+fdSslCaCertPath: /etc/ssl/certs/bcfg2ca.pem
+
+# aclroles, ${domain_name}
+dn: ou=aclroles,${ldap_root}
+objectClass: organizationalUnit
+ou: aclroles
+
+# admin, aclroles, ${domain_name}
+dn: cn=admin,ou=aclroles,${ldap_root}
+objectClass: top
+objectClass: gosaRole
+cn: admin
+description: Gives all rights on all objects
+gosaAclTemplate: 0:all;cmdrw
+
+# people, ${domain_name}
+dn: ou=people,${ldap_root}
+objectClass: organizationalUnit
+ou: people
+
+# admin, people, ${domain_name}
+dn: uid=admin,ou=people,${ldap_root}
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+cn: System Administrator
+sn: Administrator
+givenName: System
+uid: admin
+userPassword: ${gosa_admin_pwd_hash}
+
+# syncrepl, people, ${domain_name}
+dn: cn=syncrepl,ou=people,${ldap_root}
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: syncrepl
+userPassword: ${ldap_syncrepl_pwd_hash}
+description: LDAP replication user
+
+# manager, aclroles, ${domain_name}
+dn: cn=manager,ou=aclroles,${ldap_root}
+cn: manager
+description: Full rights for managing users below the selected branch
+objectClass: top
+objectClass: gosaRole
+gosaAclTemplate: 0:user/user;cmdrw,user/posixAccount;cmdrw
+
+# editowninfos, aclroles, ${domain_name}
+dn: cn=editowninfos,ou=aclroles,${ldap_root}
+cn: editowninfos
+description: Allow users to edit their own information (main tab and posix use only on base)
+objectClass: top
+objectClass: gosaRole
+gosaAclTemplate: 0:user/user;srw,user/posixAccount;srw
+
+# editownpwd, aclroles, ${domain_name}
+dn: cn=editownpwd,ou=aclroles,${ldap_root}
+cn: editownpwd
+description: Allow users to edit their own password (use only on base)
+objectClass: top
+objectClass: gosaRole
+gosaAclTemplate: 0:user/user;s#userPassword;rw
+
+# locks, fusiondirectory, ${domain_name}
+dn: ou=locks,ou=fusiondirectory,${ldap_root}
+objectClass: organizationalUnit
+ou: locks
+
+# snapshots, ${domain_name}
+dn: ou=snapshots,${ldap_root}
+objectClass: organizationalUnit
+ou: snapshots
+
+# groups, ${domain_name}
+dn: ou=groups,${ldap_root}
+objectClass: organizationalUnit
+ou: groups
+
+# itadmins, groups, ${domain_name}
+dn: cn=itadmins,ou=groups,${ldap_root}
+objectClass: posixGroup
+cn: itadmins
+gidNumber: 1100
+{% for admin in admins %}\
+memberUid: ${admin}
+{% end %}\
+
+{% python
+uid=1100
+%}\
+{% for admin in admins %}\
+dn: uid=${admin},ou=people,${ldap_root}
+cn: ${admin}
+givenName: Nick:
+sn: ${admin}
+uid: ${admin}
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: posixAccount
+objectClass: shadowAccount
+homeDirectory: /nfs/${system_name}/${admin}
+gecos: ${admin}
+loginShell: /bin/bash
+uidNumber: ${uid}
+gidNumber: 1100
+userPassword:: ${base64.b64encode('{SASL}'+admin+'@'+realm_name)}
+{%   if 'mail' in funchosts %}\
+objectClass: gosaMailAccount
+mail: ${admin}@${domain_name}
+gosaMailServer: funchostsshort['mail']
+gosaMailDeliveryMode: []
+{%   end if 'mail' in funchosts %}\
+{% python
+uid+=1
+%}\
+
+{% end %}\
+# crew, groups, ${domain_name}
+dn: cn=crew,ou=groups,${ldap_root}
+objectClass: posixGroup
+cn: crew
+gidNumber: 1101
+
+# guests, groups, ${domain_name}
+dn: cn=guests,ou=groups,${ldap_root}
+objectClass: posixGroup
+cn: guests
+gidNumber: 1102
+
+# nagios-admins, groups, ${domain_name}
+dn: cn=nagios-admins,ou=groups,${ldap_root}
+objectClass: posixGroup
+cn: nagios-admins
+gidNumber: 1103
+
+# recovery, fusiondirectory, ${domain_name}
+dn: ou=recovery,ou=fusiondirectory,${ldap_root}
+objectClass: organizationalUnit
+ou: recovery
+
+# sudoers, ${domain_name}
+dn: ou=sudoers,${ldap_root}
+objectClass: organizationalUnit
+ou: sudoers
+
+# itadmins, sudoers, ${domain_name}
+dn: cn=itadmins,ou=sudoers,${ldap_root}
+cn: itadmins
+description: Superadmins can SUDO
+sudoCommand: ALL
+sudoRunAsUser: ALL
+sudoRunAsGroup: ALL
+sudoHost: ALL
+sudoUser: %itadmins
+sudoOrder: 0
+objectClass: sudoRole
+
+# ${description}, ${domain_name}
+dn: o=${description},${ldap_root}
+o: ${description}
+ou: ${description}
+description: ${description}
+l: ${location}
+st: ${state}
+co: ${country}
+objectClass: organization
+objectClass: top
+objectClass: gosaDepartment
+
+# systems, ${domain_name}
+dn: ou=systems,${ldap_root}
+objectClass: organizationalUnit
+ou: systems
+
+# servers, systems, ${domain_name}
+dn: ou=servers,ou=systems,${ldap_root}
+objectClass: organizationalUnit
+ou: servers
+
+# dhcp, ${domain_name}
+dn: ou=dhcp,${ldap_root}
+objectClass: organizationalUnit
+ou: dhcp
+
+# dns, ${domain_name}
+dn: ou=dns,${ldap_root}
+objectClass: organizationalUnit
+ou: dns
+{% if have_router %}\
+
+# ${domain_name}., dns, ${domain_name}
+dn: zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+zoneName: ${domain_name}.
+relativeDomainName: @
+dNSClass: IN
+sOARecord: ${funchosts['router']}. itadmins.${domain_name}. 2017032803 2400 1800 720000 6400
+{%   if 'mail' in funchosts %}\
+mXRecord: 10 ${funchosts['mail']}.
+{%   end %}\
+nSRecord: ${funchosts['router']}.
+
+# ${zonename}, ${domain_name}., dns, ${domain_name}
+dn: zoneName=${zonename},zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+zoneName: ${zonename}
+relativeDomainName: @
+dNSClass: IN
+sOARecord: ${funchosts['router']}. itadmins.${domain_name}. 2017032803 2400 1800 720000 6400
+nSRecord: ${funchosts['router']}.
+
+# ${funchostsshort['router']}, servers, systems, ${domain_name}
+dn: cn=${funchostsshort['router']},ou=servers,ou=systems,${ldap_root}
+gotoMode: active
+ipHostNumber: ${routerifs['pubif']}
+macAddress: ${routerifmacs['pubif']}
+description: main router
+fdDNSZoneDn: zoneName=${domain_name}.,ou=dns,${ldap_root}
+dhcpServiceDN: cn=routerDHCP,ou=dhcp,${ldap_root}
+argonautLdap2zoneBindDir: /etc/bind
+argonautLdap2zoneBindCacheDir: /var/cache/bind
+argonautLdap2zoneNoReverse: FALSE
+argonautLdap2zoneAllowNotify: FALSE
+argonautLdap2zoneTTL: 500
+argonautLdap2zoneRndc: /usr/sbin/rndc
+cn: ${funchostsshort['router']}
+objectClass: top
+objectClass: goServer
+objectClass: GOhard
+objectClass: dhcpServer
+objectClass: fdDNSHost
+objectClass: argonautDNSConfig
+
+# routerDHCP, dhcp, ${domain_name}
+dn: cn=routerDHCP,ou=dhcp,${ldap_root}
+objectClass: dhcpService
+cn: routerDHCP
+dhcpStatements: default-lease-time 21600
+dhcpStatements: max-lease-time 21600
+dhcpStatements: authoritative
+dhcpStatements: ddns-update-style none
+{% if 'ltsp' in srvips %}\
+dhcpStatements: filename "/pxelinux.0"
+dhcpStatements: next-server ${srvips['ltsp']}
+{% end %}\
+dhcpStatements: use-host-decl-names on
+dhcpStatements: allow booting
+dhcpStatements: allow bootp
+dhcpPrimaryDN: cn=${funchostsshort['router']},ou=servers,ou=systems,${ldap_root}
+
+# Public network
+# ${networks['pubif'].network()}, routerDHCP, dhcp, ${domain_name}
+dn: cn=${networks['pubif'].network()},cn=routerDHCP,ou=dhcp,${ldap_root}
+objectClass: dhcpSubnet
+cn: ${networks['pubif'].network()}
+dhcpOption: routers ${routerifs['pubif']}
+dhcpOption: domain-name "${domain_name}"
+dhcpOption: subnet-mask ${networks['pubif'].netmask()}
+dhcpOption: broadcast-address ${networks['pubif'].broadcast()}
+dhcpOption: domain-name-servers ${routerifs['pubif']}
+dhcpNetMask: ${networks['pubif'].mask}
+{% if pub_dhcp is not None %}\
+dhcpRange: ${pub_dhcp[0]} ${pub_dhcp[1]}
+{% end %}\
+
+# Secure network
+# ${networks['secif'].network()}, routerDHCP, dhcp, ${domain_name}
+dn: cn=${networks['secif'].network()},cn=routerDHCP,ou=dhcp,${ldap_root}
+objectClass: dhcpSubnet
+cn: ${networks['secif'].network()}
+dhcpOption: routers ${routerifs['secif']}
+dhcpOption: domain-name "${domain_name}"
+dhcpOption: subnet-mask ${networks['secif'].netmask()}
+dhcpOption: broadcast-address ${networks['secif'].broadcast()}
+dhcpOption: domain-name-servers ${routerifs['secif']}
+dhcpNetMask: ${networks['secif'].mask}
+
+# DMZ
+# ${networks['DMZif'].network()}, routerDHCP, dhcp, ${domain_name}
+dn: cn=${networks['DMZif'].network()},cn=routerDHCP,ou=dhcp,${ldap_root}
+objectClass: dhcpSubnet
+cn: ${networks['DMZif'].network()}
+dhcpOption: routers ${routerifs['DMZif']}
+dhcpOption: domain-name "${domain_name}"
+dhcpOption: subnet-mask ${networks['DMZif'].netmask()}
+dhcpOption: broadcast-address ${networks['DMZif'].broadcast()}
+dhcpOption: domain-name-servers ${routerifs['DMZif']}
+dhcpNetMask: ${networks['DMZif'].mask}
+
+{% def DNSandDHCP(func) %}\
+# ${funchostsshort[func]}, routerDHCP, dhcp, ${domain_name}
+dn: cn=${funchostsshort[func]},cn=routerDHCP,ou=dhcp,${ldap_root}
+objectClass: dhcpHost
+cn: ${funchostsshort[func]}
+dhcpHWAddress: ethernet ${srvmacs[func]}
+dhcpStatements: fixed-address ${srvips[func]}
+
+# ${funchostsshort[func]}, ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=${funchostsshort[func]},zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: ${funchostsshort[func]}
+zoneName: ${domain_name}.
+dNSClass: IN
+aRecord: ${srvips[func]}
+
+# ${srvlasttwo[func]}, 168.192.in-addr.arpa., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=${srvlasttwo[func]},zoneName=${zonename},zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+zoneName: ${zonename}
+dNSClass: IN
+pTRRecord: ${funchosts[func]}.
+relativeDomainName: ${srvlasttwo[func]}
+{% end def DNSandDHCP %}\
+{% def CNAME(cname, func) %}\
+# ${cname}, ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=${cname},zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: ${cname}
+zoneName: ${domain_name}.
+dNSClass: IN
+cNAMERecord: ${funchosts[func]}.
+{% end def CNAME %}\
+${ DNSandDHCP('router') }\
+{% end if have_router %}\
+
+{% python
+  remaining_hosts=funchosts.copy();
+  # pop the router (it is already defined)
+  remaining_hosts.pop("router", None)
+  # the remaining hosts are supposed to have a single interface.
+%}\
+{% for host in remaining_hosts %}\
+
+# ${funchostsshort[host]}, servers, systems, ${domain_name}
+dn: cn=${funchostsshort[host]},ou=servers,ou=systems,${ldap_root}
+{% if host in funchostdesc %}\
+description: ${funchostdesc[host]}
+{% end %}\
+gotoMode: active
+ipHostNumber: ${srvips[host]}
+macAddress: ${srvmacs[host]}
+fdDNSZoneDn: zoneName=${domain_name}.,ou=dns,${ldap_root}
+cn: ${funchostsshort[host]}
+{% if host == 'config' or host == 'proxy' %}\
+goLdapBase: dc=${ldap_root}
+goLdapTimeLimit: 15
+goLdapDeref: never
+goLdapReqCert: never
+goLdapCrlCheck: none
+{%     if host =='config' %}\
+goLdapURI: ldap://ldap1.${domain_name}:389/
+{%     end %}\
+{%     if host == 'proxy' %}\
+goLdapURI: ldap://ldap2.${domain_name}:389/
+{%     end %}\
+objectClass: goLdapServer
+{% end if 'config' or 'proxy' %}\
+objectClass: top
+objectClass: goServer
+objectClass: GOhard
+objectClass: fdDNSHost
+{%     if host == 'mail' %}\
+objectClass: fdImapServer
+{% end if 'mail' %}\
+{% if have_router %}\
+
+${ DNSandDHCP(host) }\
+{%   if host == 'config' %}\
+
+${ CNAME('autoconfig', 'config') }
+${ CNAME('packages', 'config') }
+${ CNAME('gosa', 'config') }
+${ CNAME('dir', 'config') }
+${ CNAME('wpad', 'config') }
+# _wpad._tcp, ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_wpad._tcp,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _wpad._tcp
+zoneName: ${domain_name}.
+dNSClass: IN
+sRVRecord: 0 0 80 ${funchosts[host]}.
+
+${ CNAME('kdc1', 'config') }
+${ CNAME('ldap1', 'config') }\
+
+# _kerberos.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_kerberos.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _kerberos.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+tXTRecord: ${realm_name}
+
+# _kerberos._udp.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_kerberos._udp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _kerberos._udp.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+sRVRecord: 0 0 88 ${funchosts[host]}.
+{%     if 'proxy' in funchosts %}\
+sRVRecord: 0 0 88 ${funchosts['proxy']}.
+{%     end if there is 'proxy' %}\
+
+# _kerberos-master._udp.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_kerberos-master._udp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _kerberos-master._udp.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+sRVRecord: 0 0 88 ${funchosts[host]}.
+
+# _kerberos-adm._tcp.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_kerberos-adm._tcp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _kerberos-adm._tcp.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+sRVRecord: 0 0 749 ${funchosts[host]}.
+
+# _kpasswd._udp.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_kpasswd._udp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _kpasswd._udp.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+sRVRecord: 0 0 464 ${funchosts[host]}.
+{%   end if 'config' %}\
+{%   if host == 'proxy' %}\
+
+${ CNAME('kdc2', host) }
+${ CNAME('ldap2', host) }\
+
+# _jabber._tcp.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_jabber._tcp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _jabber._tcp.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+sRVRecord: 5 0 5269 ${funchosts[host]}.
+
+# _xmpp-client._tcp.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=_xmpp-client._tcp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: _xmpp-client._tcp.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+sRVRecord: 5 0 5222 ${funchosts[host]}.
+{%   end if 'proxy' %}\
+{%   if host == 'mail' %}\
+
+# ${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: ${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+tXTRecord: v=spf1 a mx ~all
+
+# mail._domainkey.${domain_name}., ${domain_name}., dns, ${domain_name}
+dn: relativeDomainName=mail._domainkey.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
+objectClass: dNSZone
+relativeDomainName: mail._domainkey.${domain_name}.
+zoneName: ${domain_name}.
+dNSClass: IN
+tXTRecord: v=DKIM1; k=rsa; s=email; p=${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}
+{%   end if 'mail' %}\
+{% end if have_router %}\
+{% end for host in remaining_hosts %}\

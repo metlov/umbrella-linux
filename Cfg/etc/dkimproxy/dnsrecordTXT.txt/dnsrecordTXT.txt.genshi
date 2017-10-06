@@ -1,0 +1,2 @@
+mail._domainkey	IN	TXT	( "v=DKIM1; k=rsa; s=email; "
+	  "p=${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}" )  ; ----- DKIM key mail for our domain

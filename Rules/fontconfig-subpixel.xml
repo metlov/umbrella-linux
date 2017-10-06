@@ -1,0 +1,11 @@
+<Rules priority="0">
+<Group name='subpixel-unknown' negate='true'>
+   <Group name='subpixel-rgb'>
+      <Path type='nonexistent' name='/etc/fonts/conf.d/10-sub-pixel-bgr.conf'/>
+      <!-- <Path type='nonexistent' name='/etc/fonts/conf.d/10-sub-pixel-rgb.conf'/> -->
+      <Path type='symlink' name='/etc/fonts/conf.d/10-sub-pixel-rgb.conf' to='../conf.avail/10-sub-pixel-rgb.conf'/>
+      <Path type='nonexistent' name='/etc/fonts/conf.d/10-sub-pixel-vbgr.conf'/>
+      <Path type='nonexistent' name='/etc/fonts/conf.d/10-sub-pixel-vrgb.conf'/>
+   </Group>
+</Group>
+</Rules>

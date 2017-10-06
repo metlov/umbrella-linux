@@ -1,0 +1,46 @@
+<Bundle name='apache2' xmlns:xi="http://www.w3.org/2001/XInclude">
+<Group name='ubuntu'>
+    <Package name='libaprutil1-dbd-sqlite3'/>
+    <Package name='apache2'/>
+    <Group name='ubuntu-trusty'>
+        <Package name='apache2-mpm-prefork'/>
+    </Group>
+    <Service name='apache2'/>
+    <Group name='www-server-ssl'>
+        <Path name='/etc/apache2/mods-enabled/ssl.conf'/>
+        <Path name='/etc/apache2/mods-enabled/ssl.load'/>
+        <Path name='/etc/apache2/mods-enabled/socache_shmcb.load'/>
+        <Path name='/etc/ssl/www.pem'/>
+        <Path name='/etc/ssl/private/www.key'/>
+    </Group>
+    <Group name='DMZwww'>
+        <Group name='ubuntu-trusty'>
+            <Package name='php5'/>
+            <Package name='php5-curl'/>
+            <Package name='php5-gd'/>
+            <Package name='php5-mysql'/>
+            <Package name='php5-readline'/>
+            <Package name='libapache2-mod-php5'/>
+            <Path name='/etc/php5/apache2/php.ini'/>
+        </Group>
+        <Group name='ubuntu-xenial'>
+            <Package name='php'/>
+            <Package name='php-curl'/>
+            <Package name='php-gd'/>
+            <Group name='auth-krb5'>
+                <Package name='php-ldap'/>
+            </Group>
+            <Package name='php-mysql'/>
+            <Package name='php-readline'/>
+            <Package name='php-mbstring'/>
+            <Package name='libapache2-mod-php7.0'/>
+            <Package name='subversion'/>
+            <Path name='/etc/php/7.0/apache2/conf.d/99-upload-filesize.ini'/>
+        </Group>
+        <Package name='fonts-dejavu-core'/>
+        <Path name='/etc/apache2/mods-enabled/rewrite.load'/>
+    </Group>
+</Group>
+<!-- process local configuration -->
+<xi:include href="../Local/Bundler/apache2.xml"><xi:fallback/></xi:include>
+</Bundle>

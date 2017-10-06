@@ -1,0 +1,56 @@
+# Umbrella Linux parameters are always specific to current installation
+/Properties/*.xml
+
+# Do not store Kerberos keytabs and KDC stash
+*.keytab.H_*
+*.keytab.G50_*
+Cfg/etc/krb5kdc/stash/stash
+
+# Ignore host-specific network configuration overrides
+Cfg/etc/network/interfaces/interfaces.H_*
+
+# Ignore host-specific rc.local overrides
+Cfg/etc/rc.local/rc.local.H_*
+
+# Do not store SSH keys
+/SSHbase/*
+
+# Do not store SSL certificates and keys, but store the XML files,
+# specifying their structure.
+/SSLCA/**/*.pem.H_*
+/SSLCA/**/*.key.H_*
+
+# Do not store the random seed
+/.rnd
+
+# Do not store bcfg2's /etc
+/etc
+
+# Do not store Packages cache
+/Packages/cache/*
+
+# Do not store clients.xml
+/Metadata/clients.xml
+
+# Do not store probed.xml
+/Probes/probed.xml
+
+# Do not store nagios configurations for hosts (except the default one)
+/NagiosGen/nagiosgen.cfg
+/NagiosGen/*-host.cfg
+!/NagiosGen/default-host.cfg
+
+# local rules (the symlink must be ignored too)
+/Rules/local-rules.xml
+
+# local sources (currently hooked via symlink)
+/Packages/local-sources.xml
+
+# ignore built packages and related files (but not pristine source tarballs)
+/Repository/*.deb
+/Repository/*.changes
+/Repository/*.tar.gz
+!/Repository/*.orig.tar.gz
+
+# ignore python-compiled site configuration
+Documentation/website/*.pyc

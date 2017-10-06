@@ -1,0 +1,72 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+
+# Compute relay recipients.
+# If smtp forward server is enabled in DMZ it is wise to have
+# the LDAP access allowed from DMZ to prevent backscatter SPAM.
+relay_rcpt_maps=['texthash:/etc/postfix/relay_users']
+if auth_in_DMZ:    # if LDAP is available -- lookup users there
+  relay_rcpt_maps.append('proxy:ldap:/etc/postfix/relay_recipients.cf')
+else:              # otherwise permit all mail to hosted domains (bad choice)
+  relay_rcpt_maps.append('inline:{'+','.join(('%s=OK' % (domain,)) for domain in domain_names)+'}')
+%}\
+compatibility_level = 2
+smtpd_banner = $$myhostname ESMTP $$mail_name (Ubuntu)
+biff = no
+
+# appending .domain is the MUA's job.
+append_dot_mydomain = no
+
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
+
+readme_directory = no
+
+# TLS parameters
+smtpd_use_tls=no
+
+# See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
+# information on enabling SSL in the smtp client.
+
+myhostname = ${funchosts['DMZsmtp']}
+myorigin = ${domain_name}
+proxy_interfaces = ${ext_address}
+mydestination =
+local_recipient_maps =
+local_transport = error:local mail delivery is disabled
+relay_domains = ${' '.join(domain_names)}
+transport_maps = texthash:/etc/postfix/transport
+
+mailbox_size_limit = 0
+mynetworks = ${funcifs['mail']}/32
+
+smtpd_recipient_restrictions = permit_mynetworks reject_unauth_destination
+
+smtpd_client_restrictions = permit_mynetworks,
+    check_client_access texthash:/etc/postfix/client_restrictions,
+    reject_unauth_destination,
+    reject_invalid_hostname,
+    reject_unauth_pipelining,
+    reject_non_fqdn_sender,
+    reject_unknown_sender_domain,
+    reject_non_fqdn_recipient,
+    reject_unknown_recipient_domain,
+{% for dnsname in dns_smtp_whitelists %}\
+    permit_dnswl_client ${dnsname},
+{% end %}\
+{% for dnsname in dns_smtp_blacklists %}\
+    reject_rbl_client ${dnsname},
+{% end %}\
+    permit
+
+# black list certain well known SPAM domains, based on MAIL FROM
+smtpd_sender_restrictions = check_sender_access texthash:/etc/postfix/access,
+    permit
+
+# rejecting unknown users
+relay_recipient_maps = ${', '.join(relay_rcpt_maps)}

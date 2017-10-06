@@ -1,0 +1,25 @@
+{% python
+from lxml import etree
+execfile(repo+'/Python/40_usbdev.py')
+%}\
+{% if not (haswhitelist and len(whitelistdevices)==0) %}\
+{% if hasblacklist %}\
+{%if len(blacklistdevices)==0 %}
+# blacklist all devices
+SUBSYSTEM=="usb", ATTR{authorized_default}="0"
+SUBSYSTEM=="usb", ATTR{authorized}="0"
+{% end %}\
+{%if len(blacklistdevices)>0 %}
+# blacklist specific devices
+{% for dev in blacklistdevices %}\
+{% python
+devstr = ''
+for attr in dev.iterchildren(etree.Element):
+  devstr+='ATTR{'+str(attr.tag)+'}=="'+str(attr.text)+'", '
+%}
+SUBSYSTEM=="usb", ${devstr}ATTR{authorized_default}="0"
+SUBSYSTEM=="usb", ${devstr}ATTR{authorized}="0"
+{% end %}\
+{% end %}\
+{% end %}\
+{% end %}\

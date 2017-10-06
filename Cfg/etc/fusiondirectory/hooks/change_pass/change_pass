@@ -1,0 +1,27 @@
+#!/bin/bash
+# A Fusion directory hook to change the user's password in Kerberos.
+# Should be plugged as a postmodify hook on a user object with the command
+# /etc/fusiondirectory/hooks/change_pass "%dn%" "%passwordClear%"
+#
+#                         (c) 2017 Konstantin L. Metlov <metlov@fti.dn.ua>
+
+username=`echo $1 | \
+   sed -e "s/^uid=\([A-Za-z0-9._]*\),ou=.*/\1/"`
+if [ -z "$username" ]; then { exit 0; } fi
+password=$2
+if [ -z "$password" ]; then { exit 0; } fi
+
+#KADMIN="/usr/sbin/kadmin.local"
+KADMIN="/usr/bin/kadmin -p hostmanager/`hostname -f` -k -t /etc/fusiondirectory/hostmanager.keytab"
+
+# check if the Kerberos principal exists
+princ=`$KADMIN -q "get_principal -terse \"$username\"" 2>/dev/null`
+if [ $? -ne 0 ]; then { exit 1; } fi
+princ=`echo "$princ" | tail -n +2`
+if [ -z "$princ" ]; then
+    # create kerberos principal if it does not exist
+    $KADMIN -q "addprinc -randkey -clearpolicy \"$username\""
+    if [ $? -ne 0 ]; then { exit 1; } fi
+fi
+$KADMIN -q "change_password -pw \"$password\" \"$username\""
+if [ $? -ne 0 ]; then { exit 1; } fi

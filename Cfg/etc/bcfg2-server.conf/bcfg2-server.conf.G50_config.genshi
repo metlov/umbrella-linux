@@ -1,0 +1,60 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+[server]
+repository = /var/lib/bcfg2
+plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,SSHbase,SSLCA,Properties,Reporting,NagiosGen,GroupPatterns,GroupLogic
+# Uncomment the following to listen on all interfaces
+#listen_all = true
+user = bcfg2
+group = bcfg2
+umask = 007
+
+[POSIXUsers]
+uid_blacklist=1000-
+gid_blacklist=1000-
+
+[statistics]
+sendmailpath = /usr/lib/sendmail
+#web_debug = False
+#time_zone =
+
+[reporting]
+transport = LocalFilesystem
+
+[communication]
+protocol = xmlrpc/ssl
+password = ${metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_pass').text}
+certificate = /etc/ssl/www.pem
+key = /etc/ssl/private/www.key
+ca = /etc/ssl/certs/bcfg2ca.pem
+
+[components]
+bcfg2 = https://${funchosts['config']}:6789
+
+[sslca_default]
+config = /etc/pki/openssl.cnf
+passphrase = ${metadata.Properties['umbrella_keys.xml'].xdata.find('CA_pass').text}
+chaincert = /etc/pki/CA/certs/bcfg2ca.crt
+root_ca = true
+
+[database]
+engine = mysql
+name = ${metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_reports_db_name').text}
+user = ${metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_reports_db_user').text}
+password = ${metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_reports_db_pass').text}
+host = localhost
+port = 3306
+
+[reporting]
+transport = DirectStore
+web_prefix = /bcfg2
+file_limit = 1m
+
+[MergeFiles]
+threshold=1
+
+[errors]
+templated-script = silent

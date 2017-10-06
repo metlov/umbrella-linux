@@ -1,0 +1,83 @@
+<Bundle name='directory'>
+<!-- This bundle describes the directory service frontend, used in Umbrella -->
+<!-- Before Ubuntu Xenial Gosa was used as a frontend, now Fusiondirectory  -->
+<!-- is used. -->
+<Group name='ubuntu'>
+    <Group name='ubuntu-trusty'>
+        <!-- Trusty works well with Gosa and PHP 5 -->
+        <Package name='gosa'/>
+        <Package name='gosa-plugin-dhcp'/>
+        <Package name='gosa-plugin-dns'/>
+        <Package name='gosa-plugin-sudo'/>
+        <Package name='gosa-plugin-systems'/>
+        <Package name='smarty-gettext'/>
+        <Package name='libjs-scriptaculous'/>
+        <Package name='php5-imagick'/>
+        <Package name='php5-mysql'/>
+        <Package name='libapache2-mod-php5'/>
+        <Package name='fonts-dejavu-core'/>
+        <Package name='libaprutil1-dbd-sqlite3'/>
+        <!-- ensure the old config is not enabled -->
+        <Path name='/etc/apache2/conf-enabled/gosa.conf'/>
+        <!-- install and enable web site -->
+        <Path name='/etc/apache2/sites-available/gosa'/>
+        <Path name='/etc/apache2/sites-available/gosa-ssl'/>
+        <Path name='/etc/apache2/sites-enabled/gosa.conf'/>
+        <Path name='/etc/apache2/sites-enabled/gosa-ssl.conf'/>
+        <!-- enable authentication -->
+        <Path name='/etc/gosa/gosa.secrets'/>
+        <!-- configure and enable changing the Kerberos passwords -->
+        <Path name='/etc/gosa/gosa.conf'/>
+        <Path name='/usr/share/gosa/include/password-methods/class_password-methods-sasl.inc'/>
+        <Path name='/etc/gosa/hostmanager.keytab'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Package name='fusiondirectory'/>
+        <Package name='fusiondirectory-plugin-systems'/>
+        <Package name='fusiondirectory-plugin-dhcp'/>
+        <Package name='fusiondirectory-plugin-dns'/>
+        <Package name='fusiondirectory-plugin-sudo'/>
+        <Package name='fusiondirectory-plugin-mail'/>
+        <Package name='fusiondirectory-plugin-alias'/>
+        <Package name='fusiondirectory-plugin-argonaut'/>
+        <Package name='fusiondirectory-plugin-puppet'/>
+        <Package name='fonts-dejavu-core'/>
+        <Package name='libapache2-mod-php7.0'/>
+        <Package name='libcrypt-rijndael-perl'/>
+        <Package name='php-mbstring'/>
+        <Package name='php-cas'/>
+        <!-- ensure the old config is not enabled -->
+        <Path name='/etc/apache2/conf-enabled/fusiondirectory.conf'/>
+        <!-- install and enable web site -->
+        <Path name='/etc/apache2/sites-available/dir'/>
+        <Path name='/etc/apache2/sites-available/dir-ssl'/>
+        <Path name='/etc/apache2/sites-enabled/dir.conf'/>
+        <Path name='/etc/apache2/sites-enabled/dir-ssl.conf'/>
+        <!-- enable authentication -->
+        <Path name='/etc/fusiondirectory/fusiondirectory.secrets'/>
+        <!-- configure -->
+        <Path name='/etc/fusiondirectory/fusiondirectory.conf'/>
+
+        <!-- principal for automatic users/hosts manipulation -->
+        <Path name='/etc/fusiondirectory/hostmanager.keytab' altsrc='/etc/gosa/hostmanager.keytab'/>
+        <Path name='/etc/fusiondirectory/hooks/change_pass'/>
+
+        <!-- fix PHP warning at line 2538 of functions.inc -->
+        <Action name='fix_fusion_warning_2538'/>
+<!--
+        <Package name='php-mysql'/>
+        <Package name='php-xml'/>
+ -->
+    </Group>
+
+    <!-- bcfg2 and Kerberos automatic hosts/users management -->
+    <Path name='/usr/local/bin/ipclass'/>
+    <Path name='/usr/local/bin/mkkeys.sh'/>
+    <Path name='/etc/cron.d/mkkeys'/>
+    <Service name='apache2'/>
+
+    <!-- apache configuration for Kerberos authentication -->
+    <Package name='libapache2-mod-auth-kerb'/>
+    <Path name='/etc/apache2/http.keytab'/>
+</Group>
+</Bundle>

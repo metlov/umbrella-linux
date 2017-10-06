@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+if which update-inetd >/dev/null 2>&1 ; then
+	update-inetd --remove '^poppassd'
+	update-inetd --comment-chars "#disabled#" --enable poppassd
+fi
+
+#DEBHELPER#
+

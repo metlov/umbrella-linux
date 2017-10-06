@@ -1,0 +1,7 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+%}\
+/opt/x2gothinclient/chroot  ${intnets_str['pubif']}(ro,async,no_root_squash,no_subtree_check) ${intnets_str['secif']}(ro,async,no_root_squash,no_subtree_check)

@@ -1,0 +1,11 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+nagios_pass=metadata.Properties['umbrella_keys.xml'].xdata.find('snmp_nagios_pass').text
+%}\
+defSecurityName nagios
+defSecurityLevel authPriv
+defAuthType SHA
+defPrivType AES
+defAuthPassphrase ${nagios_pass}
+defPrivPassphrase ${nagios_pass}

@@ -1,0 +1,35 @@
+<Bundle name='ejabberd'>
+<Group name='ubuntu'>
+    <Package name='ejabberd-gssapi'/>
+    <Package name='erlang-esasl'/>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="ejabberd" home="/var/lib/ejabberd" shell="/bin/sh" gecos="" uid="105" group="ejabberd"/>
+        <BoundPOSIXGroup name="ejabberd" gid="111"/>
+        <Path name='/etc/default/ejabberd'/>
+        <Path name='/etc/ejabberd/ejabberd.cfg'/>
+        <Service name='ejabberd'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="ejabberd" home="/var/lib/ejabberd" shell="/bin/sh" gecos="" uid="621" group="ejabberd"/>
+        <BoundPOSIXUser name="epmd" home="/var/run/epmd" shell="/bin/false" gecos="" uid="630" group="epmd"/>
+        <BoundPOSIXGroup name="ejabberd" gid="621"/>
+        <BoundPOSIXGroup name="epmd" gid="630"/>
+        <Path name='/etc/default/ejabberd-gssapi' altsrc='/etc/default/ejabberd'/>
+        <Path name='/etc/ejabberd/ejabberd.yml'/>
+        <Service name='ejabberd-gssapi'/>
+    </Group>
+    <Path name='/etc/ssl/ejabberd.pem'/>
+    <Path name='/etc/ssl/private/ejabberd.key'/>
+    <Path name='/etc/ejabberd/ejabberd.pem'/>
+    <Package name='libodbc1'/>
+    <Group name='ubuntu-trusty'>
+        <!-- This restarts ejabberd every night to prevent a memory leak. -->
+        <!-- Hopefully, not needed on Xenial -->
+        <Path name='/etc/cron.d/ejabberd'/>
+    </Group>
+    <Path name='/etc/ejabberd/xmpp.keytab'/> 
+<!--        <Path name='/etc/ejabberd/ejabberd.pem'/> -->
+    <Package name='lksctp-tools'/>
+    <Package name='erlang-base'/>
+</Group>
+</Bundle>

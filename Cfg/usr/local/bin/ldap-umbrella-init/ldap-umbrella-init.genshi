@@ -1,0 +1,102 @@
+#!/bin/bash
+SERVICE=slapd
+if ps ax | grep -v grep | grep $$SERVICE > /dev/null ; then
+    echo "The LDAP service slapd is running. Please stop it if you want"
+    echo "to reinitialize the LDAP database. You can use"
+    echo "   /etc/init.d/slapd stop"
+    exit 9
+fi
+if [ "$$(ls -A /var/lib/ldap/)" ]; then
+    echo "The LDAP database in /var/lib/ldap is present. Please remove"
+    echo "all files from /var/lib/ldap if you want to reinitialize the"
+    echo "LDAP database. You can use"
+    echo "   rm -rf /var/lib/ldap/*"
+    exit 9
+fi
+echo "Reinitializing the LDAP database."
+echo "Going to remove old LDAP server configuration in /etc/ldap/slapd.d ."
+read -r -p "Are you sure? [y/N] " response
+response=$${response,,}    # tolower
+if [[ $$response =~ ^(yes|y)$$ ]]; then
+    echo "Removing old LDAP configuration."
+    rm -rf /etc/ldap/slapd.d/*
+    echo "Importing the new configuration and schema."
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/umbrella/initial-config.ldif
+{% if 'ubuntu-trusty' in metadata.groups %}\
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/core.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/cosine.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/rfc2307bis.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/inetorgperson.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/samba3.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gofon.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gosystem.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/goto.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gosa-samba3.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gofax.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/goserver.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/goto-mime.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/trust.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/sudo.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/dnszone.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/dhcp.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/umbrella/initial-databases.ldif
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+    # here we install the basic Fusion Directory schema
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/core.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/cosine.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/nis.ldif
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/inetorgperson.ldif
+    # FD schema need to be converted prior to installation
+    install_FD_schema() {
+        schema2ldif /etc/ldap/schema/fusiondirectory/$1.schema >/etc/ldap/schema/fusiondirectory/$1.ldif
+        slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/fusiondirectory/$1.ldif
+    }
+    # install core schema
+    install_FD_schema core-fd
+    install_FD_schema core-fd-conf
+    install_FD_schema ldapns
+    install_FD_schema template-fd
+    # install plugin schema
+    # systems
+    install_FD_schema service-fd
+    install_FD_schema systems-fd
+    install_FD_schema systems-fd-conf
+    # dhcp
+    install_FD_schema dhcp-fd
+    install_FD_schema dhcp-fd-conf
+    # dns
+    install_FD_schema dnszone
+    install_FD_schema dns-fd
+    install_FD_schema dns-fd-conf
+    # sudo
+    install_FD_schema sudo
+    install_FD_schema sudo-fd-conf
+    # mail
+    install_FD_schema mail-fd
+    install_FD_schema mail-fd-conf
+    # alias
+    install_FD_schema alias-fd
+    install_FD_schema alias-fd-conf
+    # argonaut
+    install_FD_schema argonaut-fd
+    # puppet (used in Umbrella to assign bcfg2 profiles to systems individually)
+    install_FD_schema puppet-fd
+    install_FD_schema puppet
+
+    # create the databases
+    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/umbrella/initial-databases.ldif
+{% end %}\
+
+{% if 'ldap-master' in metadata.groups %}\
+    echo "Importing data."
+    slapadd -F /etc/ldap/slapd.d -n 1 -l /etc/ldap/umbrella/initial-data.ldif
+
+{% end %}\
+    echo "Fixing permissions."
+    chown -R openldap:openldap /etc/ldap/slapd.d
+    chown -R openldap:openldap /var/lib/ldap
+
+    echo "You may now start slapd with"
+    echo "   /etc/init.d/slapd start"
+fi

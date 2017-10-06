@@ -1,0 +1,50 @@
+{% python
+import socket
+from passlib.hash import ldap_salted_sha1 as lsm
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+dn: cn=config
+objectClass: olcGlobal
+cn: config
+olcArgsFile: /run/slapd/slapd.args
+olcAttributeOptions: lang-
+olcAuthzPolicy: none
+olcConcurrency: 0
+olcConnMaxPending: 100
+olcConnMaxPendingAuth: 1000
+olcGentleHUP: FALSE
+olcIdleTimeout: 0
+olcIndexSubstrIfMaxLen: 4
+olcIndexSubstrIfMinLen: 2
+olcIndexSubstrAnyLen: 4
+olcIndexSubstrAnyStep: 2
+olcIndexIntLen: 4
+olcLocalSSF: 71
+olcPidFile: /run/slapd/slapd.pid
+olcReadOnly: FALSE
+olcReverseLookup: FALSE
+olcSaslRealm: ${realm_name}
+olcSaslSecProps: noplain,noanonymous
+olcSockbufMaxIncoming: 262143
+olcSockbufMaxIncomingAuth: 16777215
+olcThreads: 16
+olcTLSCertificateFile: /etc/ssl/ldap.pem
+olcTLSCertificateKeyFile: /etc/ssl/private/ldap.key
+olcTLSVerifyClient: never
+olcToolThreads: 1
+olcWriteTimeout: 0
+olcSizeLimit: -1
+olcAuthzRegexp: {0}"uid=([^,]*),cn=${realm_name.lower()},cn=gssapi,cn=auth" "ldap:///${ldap_root}??sub?(uid=$$1)"
+olcTLSCACertificateFile: /etc/ssl/certs/bcfg2ca.pem
+
+dn: cn=module{0},cn=config
+objectClass: olcModuleList
+cn: module{0}
+olcModulePath: /usr/lib/ldap
+olcModuleLoad: {0}back_hdb
+olcModuleLoad: {1}syncprov
+
+dn: cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: schema

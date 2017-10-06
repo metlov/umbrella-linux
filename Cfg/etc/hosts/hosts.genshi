@@ -1,0 +1,49 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+%}\
+127.0.0.1	 localhost localhost.${domain_name}
+127.0.0.1 localhost
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+{% for server in metadata.Properties['umbrella.xml'].xdata.findall('server') %}\
+{% python
+function=server.find('function').text
+name=server.find('name').text
+namefq=name+'.'+domain_name
+# determine the address
+if (function == 'router'):
+  address=server.find('pubif').find('ip').text
+elif (function == 'vmhost'):
+  address=server.find('pubif').find('ip').text
+else:
+  # the rest of servers have a single IP address
+  address=None
+  for interface in server.iter(*intnet_ifs):
+    if address is not None:
+      raise TemplateError('Server '+name+' has multiple address defined, should be one.')
+    address=interface.find('ip').text
+  if address is None:
+    raise TemplateError('Server '+name+' has no interfaces defined, should have one.')
+if function == 'router':
+  names_add= 'ns1.'+domain_name+' ns1'
+elif function == 'config':
+  names_add= 'kdc1.'+domain_name+' kdc1'
+  names_add+= ' ldap1.'+domain_name+' ldap1'
+  names_add+= ' autoconfig.'+domain_name+' autoconfig'
+  names_add+= ' gosa.'+domain_name+' gosa'
+  names_add+= ' wpad.'+domain_name+' wpad'
+elif function == 'proxy':
+  names_add= 'kdc2.'+domain_name+' kdc2'
+  names_add+= ' ldap2.'+domain_name+' ldap2'
+else:
+  names_add=''
+%}\
+${address}	${namefq} ${name} ${names_add}
+{% end %}\

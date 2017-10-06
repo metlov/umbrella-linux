@@ -1,0 +1,5 @@
+<Bundle name='mdadm'>
+    <Package name='mdadm'/>
+    <Path name='/etc/initramfs-tools/conf.d/mdadm'/>
+    <Service name='mdadm'/>
+</Bundle>

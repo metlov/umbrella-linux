@@ -1,0 +1,8 @@
+<Groups>
+    <!-- This file can be overridden by creating the file -->
+    <!-- ../Local/Metadata/office.xml                     -->
+    <Group name='office'>
+        <Bundle name='parcellite'/>
+        <Bundle name='office'/>
+    </Group>
+</Groups>

@@ -1,0 +1,257 @@
+{% if 'mail' in metadata.groups %}\
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+domain_names_escaped=set()
+for domain in domain_names:
+  domain_names_escaped.add(domain.replace('.','\.'))
+%}\
+# This is the right place to customize your installation of SpamAssassin.
+#
+# See 'perldoc Mail::SpamAssassin::Conf' for details of what can be
+# tweaked.
+#
+# Only a small subset of options are listed below
+#
+###########################################################################
+bayes_auto_expire 0
+
+# Set headers which may provide inappropriate cues to the Bayesian classifier
+#
+bayes_ignore_header X-LOC-Sender-is-local
+bayes_ignore_header X-Bogosity
+bayes_ignore_header X-Virus-Scanned
+bayes_ignore_header X-Authentication-Warning
+bayes_ignore_header X-Trailer
+bayes_ignore_header X-Spam
+bayes_ignore_header X-Spam-Flag
+bayes_ignore_header X-Spam-Status
+bayes_ignore_header X-Spam-Score
+bayes_ignore_header X-Spam-Report
+bayes_ignore_header ReSent-Date
+bayes_ignore_header ReSent-From
+bayes_ignore_header ReSent-Message-ID
+bayes_ignore_header ReSent-Subject
+bayes_ignore_header ReSent-To
+bayes_ignore_header Resent-Date
+bayes_ignore_header Resent-From
+bayes_ignore_header Resent-Message-ID
+bayes_ignore_header Resent-Subject
+bayes_ignore_header Resent-To
+
+{% if extif_enabled and 'ubuntu-trusty' in metadata.groups %}\
+dcc_home /var/lib/dcc
+{% end %}\
+{% if 'ubuntu-trusty' in metadata.groups %}\
+rewrite_header Subject *****SPAM*****
+report_safe 1
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+report_safe 0
+
+# disable networked checks
+skip_rbl_checks         1
+skip_uribl_checks       1
+{% end %}\
+ok_locales en ru uk cz pl fr de
+
+# put more trust in trusted servers
+score ALL_TRUSTED -6.0
+
+# tighten Bayes scores
+score BAYES_99 4.800
+score BAYES_95 3.800
+score BAYES_80 3.300
+score RP_MATCHES_RCVD -0.001
+score RATWARE_MPOP_WEBMAIL 0.1
+
+{% if 'ubuntu-trusty' in metadata.groups %}\
+use_pyzor 1
+pyzor_timeout 10
+
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+pyzor_path /usr/bin/pyzor
+pyzor_options --homedir /var/cache/pyzor
+endif
+
+{% end %}\
+score FUZZY_XPILL 0
+
+#Reference: http://www.ijs.si/software/amavisd/amavisd-new-docs.html#dkim
+ifplugin Mail::SpamAssassin::Plugin::DKIM
+##############"
+
+# DKIM-based whitelisting of domains with good reputation:
+score USER_IN_DKIM_WHITELIST -8.0
+whitelist_from_dkim  *@intl.paypal.com  paypal.com
+whitelist_from_dkim  *@*.paypal.com
+whitelist_from_dkim  *@paypal.com
+whitelist_from_dkim  *@*.paypal.be
+whitelist_from_dkim  *@*.ebay.com
+whitelist_from_dkim  *@ebay.com
+whitelist_from_dkim  *@*.ebay.co.uk
+whitelist_from_dkim  *@ebay.co.uk
+whitelist_from_dkim  *@ebay.at
+whitelist_from_dkim  *@ebay.ca
+whitelist_from_dkim  *@ebay.de
+whitelist_from_dkim  *@ebay.fr
+whitelist_from_dkim  *@amazon.com
+whitelist_from_dkim  *@cisco.com
+whitelist_from_dkim  *@cern.ch
+whitelist_from_dkim  *@welcome.skype.com
+whitelist_from_dkim  *@skype.net
+whitelist_from_dkim  *@alert.bankofamerica.com
+whitelist_from_dkim  *@bankofamerica.com
+whitelist_from_dkim  *@*.cnn.com
+whitelist_from_dkim  *@cnn.com
+
+# DKIM-based whitelisting of domains with less then perfect
+# reputation can be given fewer negative score points:
+score USER_IN_DEF_DKIM_WL -1.5
+score ENV_AND_HDR_DKIM_MATCH 0
+def_whitelist_from_dkim  *@google.com
+def_whitelist_from_dkim  *@googlemail.com
+def_whitelist_from_dkim  *@gmail.com
+def_whitelist_from_dkim  *@yahoo.com
+def_whitelist_from_dkim  *@yahoo.com.au
+def_whitelist_from_dkim  *@yahoo.se
+def_whitelist_from_dkim  *@*googlegroups.com
+def_whitelist_from_dkim  *@*yahoogroups.com
+def_whitelist_from_dkim  *@*yahoogroups.co.uk
+def_whitelist_from_dkim  *@*yahoogroupes.fr
+def_whitelist_from_dkim  *@rogers.com
+
+def_whitelist_from_dkim  *@lh.lufthansa.com
+def_whitelist_from_dkim  *@*.milesandmore.com
+def_whitelist_from_dkim  *@mail.hotels.com
+def_whitelist_from_dkim  *@email.hotels.com
+def_whitelist_from_dkim  *@ealerts.bankofamerica.com
+def_whitelist_from_dkim  *@cc.yahoo-inc.com     yahoo-inc.com
+def_whitelist_from_dkim  *@cc.yahoo-inc.com
+def_whitelist_from_dkim  googlealerts-noreply@google.com
+
+def_whitelist_from_dkim  *@amazon.co.uk
+def_whitelist_from_dkim  *@amazon.de
+def_whitelist_from_dkim  *@amazon.fr
+def_whitelist_from_dkim  *@springer.delivery.net
+def_whitelist_from_dkim  *@sci.scientific-direct.net
+def_whitelist_from_dkim  *@strongmail.the-scientist.com
+def_whitelist_from_dkim  *@ealert.nature.com
+def_whitelist_from_dkim  *@gateways.nature.com
+def_whitelist_from_dkim  *@information.nature.com
+def_whitelist_from_dkim  *@newsdesk.world-nuclear-news.org
+def_whitelist_from_dkim  *@biocompare.com
+def_whitelist_from_dkim  *@dentalcompare.com
+def_whitelist_from_dkim  *@medcompare.com
+def_whitelist_from_dkim  *@itbusinessedge.com
+def_whitelist_from_dkim  *@nl.reuters.com
+def_whitelist_from_dkim  *@email.washingtonpost.com
+def_whitelist_from_dkim  *@washingtontimesmail.com
+def_whitelist_from_dkim  *@info-aaas.org
+def_whitelist_from_dkim  *@*.newsmax.com
+def_whitelist_from_dkim  *@zdnet.online.com
+def_whitelist_from_dkim  *@m-w.com
+
+def_whitelist_from_dkim  *@skype.net
+def_whitelist_from_dkim  *@*.skype.net
+def_whitelist_from_dkim  *@*.skype.net
+def_whitelist_from_dkim  *@*.skype.com
+def_whitelist_from_dkim  *@*.skype.com
+def_whitelist_from_dkim  *@facebookmail.com
+def_whitelist_from_dkim  *@linkedin.com
+def_whitelist_from_dkim  *@bounce.linkedin.com
+def_whitelist_from_dkim  service@youtube.com
+#consider also:
+def_whitelist_from_dkim  *@avaaz.org
+def_whitelist_from_dkim  *@techrepublic.online.com
+def_whitelist_from_dkim  ezines@arcamax.com
+def_whitelist_from_dkim  *@yousendit.com
+def_whitelist_from_dkim  *@meetup.com
+def_whitelist_from_dkim  *@astrology.com
+def_whitelist_from_dkim  *@google.com
+def_whitelist_from_dkim  *@twitter.com
+def_whitelist_from_dkim  *@*.twitter.com
+def_whitelist_from_dkim  *@*.twitter.com
+
+# slightly penalize DKIM in expectation of explicit whitelisting of known good
+# providers
+score DKIM_VERIFIED 0.3
+
+#
+## Another suggestions - penalize mail claiming to be from PayPal, eBay, Yahoo or Gmail but
+## was not signed by their official mailers:
+#
+
+header __L_ML1  Precedence =~ m{\b(list|bulk)\b}i
+header __L_ML2  exists:List-Id
+header __L_ML3  exists:List-Post
+header __L_ML4  exists:Mailing-List
+header __L_ML5  Return-Path:addr =~ m{^([^\@]+-(request|bounces|admin|owner)|owner-[^\@]+)(\@|\z)}mi
+meta   __L_VIA_ML   __L_ML1 || __L_ML2 || __L_ML3 || __L_ML4 || __L_ML5
+
+# yahoo
+header __L_FROM_Y1  From:addr =~ m{[\@.]yahoo\.com$$}mi
+header __L_FROM_Y2  From:addr =~ m{\@yahoo\.com\.(ar|br|cn|hk|my|sg)$$}mi
+header __L_FROM_Y3  From:addr =~ m{\@yahoo\.co\.(id|in|jp|nz|uk)$$}mi
+header __L_FROM_Y4  From:addr =~ m{\@yahoo\.(ca|de|dk|es|fr|gr|ie|it|pl|se)$$}mi
+meta   __L_FROM_YAHOO __L_FROM_Y1 || __L_FROM_Y2 || __L_FROM_Y3 || __L_FROM_Y4
+
+# gmail
+header __L_FROM_GMAIL From:addr =~ m{\@gmail\.com$$}mi
+meta     L_NOTVALID_YAHOO  !DKIM_VERIFIED && __L_FROM_YAHOO && !__L_VIA_ML
+priority L_NOTVALID_YAHOO  500
+score    L_NOTVALID_YAHOO  2.8
+meta     L_NOTVALID_GMAIL  !DKIM_VERIFIED && __L_FROM_GMAIL && !__L_VIA_ML
+priority L_NOTVALID_GMAIL  500
+score    L_NOTVALID_GMAIL  2.8
+
+# paypal
+header __L_FROM_PAYPAL From:addr =~ /[\@.]paypal\.com$$/mi
+header __L_FROM_EBAY   From:addr =~ /[\@.]ebay\.(com|at|be|ca|ch|de|ee|es|fr|hu|ie|in|it|nl|ph|pl|pt|se|co\.(kr|uk)|com\.(au|cn|hk|mx|my|sg))$$/mi
+meta     L_NOTVALID_PAY !DKIM_VERIFIED && (__L_FROM_PAYPAL || __L_FROM_EBAY)
+score    L_NOTVALID_PAY 6
+
+# our domains
+header __L_FROM_US From:addr =~ /[\@.](${'|'.join(domain_names_escaped)})$$/mi
+meta     L_NOTVALID_US !DKIM_VERIFIED && __L_FROM_US
+score    L_NOTVALID_US 6
+
+###############
+endif # Mail::SpamAssassin::Plugin::DKIM
+
+
+#
+#   Some shortcircuiting, if the plugin is enabled
+# 
+ifplugin Mail::SpamAssassin::Plugin::Shortcircuit
+#
+#   default: strongly-whitelisted mails are *really* whitelisted now, if the
+#   shortcircuiting plugin is active, causing early exit to save CPU load.
+#   Uncomment to turn this on
+#
+# shortcircuit USER_IN_WHITELIST       on
+# shortcircuit USER_IN_DEF_WHITELIST   on
+# shortcircuit USER_IN_ALL_SPAM_TO     on
+# shortcircuit SUBJECT_IN_WHITELIST    on
+
+#   the opposite; blacklisted mails can also save CPU
+#
+# shortcircuit USER_IN_BLACKLIST       on
+# shortcircuit USER_IN_BLACKLIST_TO    on
+# shortcircuit SUBJECT_IN_BLACKLIST    on
+
+#   if you have taken the time to correctly specify your "trusted_networks",
+#   this is another good way to save CPU
+#
+# shortcircuit ALL_TRUSTED             on
+
+#   and a well-trained bayes DB can save running rules, too
+#
+# shortcircuit BAYES_99                spam
+# shortcircuit BAYES_00                ham
+
+endif # Mail::SpamAssassin::Plugin::Shortcircuit
+

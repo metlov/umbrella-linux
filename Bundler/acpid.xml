@@ -1,0 +1,8 @@
+<Bundle name='acpid'>
+<Group name='ubuntu'>
+    <Group name='virt-lxc' negate='true'>
+        <Package name='acpid'/>
+        <Service name='acpid'/>
+    </Group>
+</Group>
+</Bundle>

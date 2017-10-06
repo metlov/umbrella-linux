@@ -1,0 +1,69 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides: firewall
+# Required-Start: $remote_fs $syslog
+# Required-Stop: $remote_fs $syslog
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start daemon at boot time
+# Description: User description here
+### END INIT INFO
+
+. /etc/umbrella.conf
+
+DEPMOD=/sbin/depmod
+MODPROBE=/sbin/modprobe
+
+echo
+echo -n "Verifying that all kernel modules are ok"
+$DEPMOD -a
+echo "done."
+
+echo -en "ip_tables, "
+$MODPROBE ip_tables
+echo -en "nf_conntrack, " 
+$MODPROBE nf_conntrack
+echo -en "nf_conntrack_ftp, " 
+$MODPROBE nf_conntrack_ftp
+echo -en "nf_conntrack_irc, " 
+$MODPROBE nf_conntrack_irc
+echo -en "iptable_nat, "
+$MODPROBE iptable_nat
+echo -en "nf_nat_ftp, "
+$MODPROBE nf_nat_ftp
+echo -en "nf_conntrack_tftp, "
+$MODPROBE nf_conntrack_tftp
+echo -en "nf_conntrack_snmp, "
+$MODPROBE nf_conntrack_snmp
+echo
+echo -e "   Done loading modules.\n"
+
+if [ -n "$TRANSPARENT_PROXY" -a -n "$IP_PROXY" ]; then
+echo
+echo -n "Setting up proxy routing table... "
+ip rule add fwmark 3 table 2
+ip route flush table 2
+ip route add default via ${IP_PROXY} dev eth0 table 2
+echo "done."
+fi
+
+echo
+echo -n "Loading rules..."
+
+# Enabling IP forwarding
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# clear the old chains
+iptables -F INPUT
+iptables -F OUTPUT
+iptables -F FORWARD
+iptables -t nat -F PREROUTING
+iptables -t nat -F POSTROUTING
+iptables -t mangle -F PREROUTING
+iptables -t mangle -F POSTROUTING
+
+/sbin/iptables-restore -n </etc/network/firewall.4rules
+
+/sbin/ip6tables-restore </etc/network/firewall.6rules
+
+echo " done."

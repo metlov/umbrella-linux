@@ -1,0 +1,17 @@
+Source: umbrella-logo
+Section: unknown
+Priority: optional
+Maintainer: Konstantin L. Metlov <metlov@donfti.ru>
+Build-Depends: debhelper (>= 8.0.0), librsvg2-bin, imagemagick, ttf-ubuntu-font-family
+Standards-Version: 3.9.4
+Homepage: http://www.donfti.ru/umbrella
+Vcs-Git: https://www.donfti.ru/umbrella.git
+
+Package: umbrella-logo
+Architecture: all
+Depends: ${misc:Depends}
+Description: Installs and updates different logo variants for Umbrella Linux.
+ This package contains some default logo variants as well as a cronjob, which
+ checks the http://<config_server_name>/custom/logo/ directory for an updated
+ logo files and, if updates are found, installs them. It maintains an up to
+ date versions of logo files and the wallpaper in /var/lib/umbrella-logo/ .

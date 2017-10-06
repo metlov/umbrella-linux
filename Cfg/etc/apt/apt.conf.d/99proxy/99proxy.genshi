@@ -1,0 +1,8 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+{% if 'proxy' in funchosts %}\
+Acquire::http { Proxy "http://${funchosts['proxy']}:3142"; };
+{% end %}\

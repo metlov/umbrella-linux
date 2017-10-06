@@ -1,0 +1,47 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+nagios_pass=metadata.Properties['umbrella_keys.xml'].xdata.find('snmp_nagios_pass').text
+%}\
+agentAddress udp:161
+
+{% if 'no-snmp-user-nagios' in metadata.groups %}\
+createUser nagios SHA "${nagios_pass}"  AES
+
+{% end %}\
+rouser nagios priv
+
+sysLocation    ${location}, ${state}
+sysContact     IT admin <itadmin@${domain_name}>
+# Application + End-to-End layers
+sysServices    72
+
+#  Process Monitoring
+proc automount
+proc sshd
+
+#  Disk Monitoring
+disk       /     100000
+{% if 'nfs' in metadata.groups %}\
+disk       /export/home     100000
+{% end %}\
+{% if 'mail' in metadata.groups %}\
+disk       /var/maildirs     100000
+{% end %}\
+ignoreDisk ram*
+ignoreDisk loop*
+ignoreDisk fd*
+ignoreDisk md*
+ignoreDisk /proc
+ignoreDisk /proc/*
+ignoreDisk /sys
+ignoreDisk /sys/*
+ignoreDisk /sys/kernel/debug/tracing
+ignoreDisk /dev/*
+ignoreDisk /var/lib/nfs/rpc_pipefs
+ignoreDisk /nfs/${system_name}
+skipNFSInHostResources true
+includeAllDisks  10%
+
+#  System Load Monitoring
+load   12 10 5

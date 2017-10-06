@@ -1,0 +1,8 @@
+<FileInfo>
+<Group name="config">
+  <Info owner="bcfg2" group="www-data" mode="0640"/>
+</Group>
+<Group name="config" negate="true">
+  <Info owner="root" group="www-data" mode="0640"/>
+</Group>
+</FileInfo>

@@ -1,0 +1,10 @@
+<Rules priority="0">
+<Group name='ubuntu-trusty'>
+    <Service name='qemu-kvm' status='on' type='upstart'/>
+    <Service name='libvirt-bin' status='on' type='upstart'/>
+</Group>
+<Group name='ubuntu-xenial'>
+    <Service name='libvirt-bin' status='on' type='systemd'/>
+    <Service name='qemu-kvm' status='on' type='systemd'/>
+</Group>
+</Rules>

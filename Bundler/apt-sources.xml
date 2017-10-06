@@ -1,0 +1,18 @@
+<Bundle name='apt-sources' xmlns:xi="http://www.w3.org/2001/XInclude">
+   <Package name='apt-transport-https'/>
+   <Path name='/etc/apt/apt.conf.d/99proxy'/>
+   <Path name='/etc/apt/apt.conf.d/90norecommends'/>
+   <Path name='/etc/apt/sources.list'/>
+   <Path name='/etc/apt/sources.list.d/multiverse.list'/>
+   <Path name='/etc/apt/sources.list.d/umbrella.list'/>
+   <Path name='/etc/apt/trusted.gpg'/>
+   <Path name='/etc/apt/trusted.gpg.d/umbrella.gpg'/>
+   <Group name='workstation'>
+       <!-- for workstations there are some more trusted package sources -->
+       <Path name='/etc/apt/trusted.gpg.d/ubuntu_extras.gpg'/>
+       <!-- The next line is needed for Google Earth, which we do not -->
+       <!-- install at present                                        -->
+       <!-- <Path name='/etc/apt/trusted.gpg.d/google.gpg'/> -->
+   </Group>
+   <xi:include href="../Local/Bundler/apt-sources.xml"><xi:fallback/></xi:include>
+</Bundle>

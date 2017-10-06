@@ -1,0 +1,100 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+    <xsd:include schemaLocation="../Python/xsd_types.xsd"/>
+
+    <xsd:complexType name="SSHfromEXTtype">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="SSHfromINTtype">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="forwardSSHtoLTSPtype">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="WWWHomes">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="AUTHinDMZ">
+      <xsd:sequence>
+        <xsd:element name="www_homes" type="WWWHomes" minOccurs="0" maxOccurs="1"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="MAILatIP">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="name" type="EMAILlocalpart"/>
+                <xsd:element name="list_name" type="EMAILlocalpart"/>
+            </xsd:choice>
+            <xsd:element name="ip" type="IPaddressType" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="MAILinDMZ">
+        <xsd:sequence>
+            <xsd:element name="robot" type="MAILatIP" minOccurs="0" maxOccurs="999"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="DNSlists">
+        <xsd:sequence>
+            <xsd:element name="whitelist" type="FQDN" minOccurs="0" maxOccurs="999"/>
+            <xsd:element name="blacklist" type="FQDN" minOccurs="0" maxOccurs="999"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="SSHtoSECtype">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="PubNFSFromSecType">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="JabberFromSecType">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="MailFromSecType">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="VNCInGUIType">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="TransparentProxyType">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:complexType name="SlowDownDynamicHostsType">
+      <xsd:sequence/>
+    </xsd:complexType>
+
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="ssh_from_ext" type="SSHfromEXTtype" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="ssh_from_int" type="SSHfromINTtype" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="forward_ssh_to_ltsp" type="forwardSSHtoLTSPtype" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="auth_in_DMZ" type="AUTHinDMZ" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="mail_in_DMZ" type="MAILinDMZ" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="DNS_SMTP_lists" type="DNSlists" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="ssh_to_sec" type="SSHtoSECtype" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="pub_nfs_from_sec" type="PubNFSFromSecType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="jabber_from_sec" type="JabberFromSecType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="mail_from_sec" type="MailFromSecType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="vnc_in_gui_sessions" type="VNCInGUIType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="transparent_proxy" type="TransparentProxyType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="slow_down_dynamic_hosts" type="SlowDownDynamicHostsType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="input" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="output" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="forward" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="prerouting" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

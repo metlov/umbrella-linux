@@ -1,0 +1,7 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+root@${domain_name} OK
+itadmins@${domain_name} OK
+postmaster@${domain_name} OK

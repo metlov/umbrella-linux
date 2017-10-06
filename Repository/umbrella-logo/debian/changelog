@@ -1,0 +1,17 @@
+umbrella-logo (0.3) xenial; urgency=medium
+
+  * Made logo image on 640x480-nw.png smaller.
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Fri, 11 Aug 2017 22:35:27 +0300
+
+umbrella-logo (0.2) xenial; urgency=medium
+
+  * Changed generated image resolutions to have 4:3 or 16:9 aspect ratios.
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Wed, 26 Jul 2017 11:29:59 +0300
+
+umbrella-logo (0.1) xenial; urgency=low
+
+  * Initial Release.
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Sat, 24 Jun 2017 11:10:59 +0300

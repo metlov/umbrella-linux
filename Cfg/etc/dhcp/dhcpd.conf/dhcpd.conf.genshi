@@ -1,0 +1,9 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+ldap-server "ldap1.${domain_name}";
+ldap-port 389;
+ldap-base-dn "${ldap_root}";
+ldap-method dynamic;
+ldap-debug-file "/var/log/dhcp-ldap-startup.log";

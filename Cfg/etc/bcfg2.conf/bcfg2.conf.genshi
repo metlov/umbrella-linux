@@ -1,0 +1,29 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+[client]
+drivers=APT,POSIXUsers,VCS,Action,POSIX,Systemd
+
+{% end %}\
+[POSIXUsers]
+uid_blacklist=1000-
+gid_blacklist=1000-
+
+[communication]
+protocol = xmlrpc/ssl
+{% if metadata.uuid is not None %}\
+user = ${metadata.uuid}
+{% end %}\
+{% if metadata.password is not None %}\
+password = ${metadata.password}
+{% end %}\
+{% if metadata.password is None %}\
+password = ${metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_pass').text}
+{% end %}\
+ca = /etc/ssl/certs/bcfg2ca.pem
+
+[components]
+bcfg2 = https://${funchosts['config']}:6789

@@ -1,0 +1,75 @@
+SquirrelMail Retrieve User Data Plugin 0.9 for SquirrelMail 1.4.0 and above
+By Ralf Kraudelt <kraude@wiwi.uni-rostock.de>
+
+This plugin retrieves the full name and the email address of a SquirrelMail
+user from an external source and writes them to the user's preferences. Your
+users don't have to enter their name and email address before they write their
+first email. If you want to prevent or reduce misuse of your mail system, you
+can also forbid them to change their name and email address (From: line in
+email headers). You can also retrieve the users' data on every login to be up
+to date with your external source. Supported data sources are listed at the end
+this file.
+
+Installation:
+1. Please follow the instructions in YOUR_SM_DIR/plugins/README.plugins to
+   install this plugin.
+2. Edit this plugin's config.php (YOUR_SM_DIR/plugins/retrieveuserdata/config.php)
+   and set the necessary options. In general set your data source
+   in $SQRUD_RETRIEVE_DATA_FROM and how often you want to access your data
+   source in $SQRUD_RETRIEVE_ON_EVERY_LOGIN.
+3. Edit the configuration of your data source in the same file, depending on
+   your choice for a data source. Don't forget to remove the
+   comments when necessary and beware of PHP syntax errors.
+4. Shouldn't your users change their names or e-mail addresses? Use SM's
+   configuration tool, choose "4. General Options" and set "Allow editing of
+   identity" to false to turn off the support of multiple identities and prevent
+   your users from changing their e-mail address of outgoing mail. Additionally
+   set "Allow editing of name" to false to prevent your users from changing
+   their name in outgoing mail.
+
+If you want to access other data sources than sources from below, please
+read the comments in ldap.php on how to extend this plugin. Please allow your
+users to change their e-mail address, if you use the the passwd file as your
+data source. It's doesn't contain the e-mail address.
+
+If you need help with this, or see improvements that can be made, please
+email me directly at the address above.  I definately welcome suggestions
+and comments.  This plugin, as is the case with all SquirrelMail plugins,
+is not directly supported by the developers.  Please come to me off the
+mailing list if you have trouble with it.
+
+Please visit my homepage at http://www.ralfkraudelt.de/software (only German)
+and Alexandros Vellis' LDAPUserData plugin efforts at 
+http://www.pspa.uoa.gr/%7Eavellis/page.php?page=ldapuserdata
+
+Ralf Kraudelt
+
+
+
+Thanks for contribution:
+Chris Birmingham <Chris.Birmingham@opentelecommunications.com> (LDAP code and ideas)
+Luke Ehresmann <luke@squirrelmail.org> (some english sentences)
+Lee Hoffman <lee@terabolic.com> (LDAP code cleanup)
+Thijs Kinkhorst <thijs@jaze.nl> (MySQL access)
+Hannu Tikka <hannu.tikka@rpkk.fi> (code cleanup)
+Mark Bergsma <mark@nedworks.org> (PostgreSQL support)
+Dominique Leuenberger <dominique.leuenberger@gibb.ch> (VPoPMail support)
+Ken Brush <ken@wirex.com> (Microsoft AD support, SM 1.4.0 support, support for
+                           multiple identities)
+Henrique de Moraes Holschuh <hmh@ima.sp.gov.br> (LDAP code suggestions)
+
+
+Data sources (set $SQRUD_RETRIEVE_DATA_FROM in config.php to this value):
+ldap.php - LDAP and Microsoft Active Directory access, all configuration options
+           start with $SQRUD_LDAP, supports multiple identities
+dba.php - DBM-like database access, all configuration options start with
+          $SQRUD_DBA, to create a DBM-database file from a plain text file,
+	  you can use the supplied create_db.php
+mysql.php - MySQL access, all configuration options start with $SQRUD_MYSQL
+passwd.php - /etc/passwd access through POSIX-functions, there are no
+             configuration options
+textfile.php - Plain text file access, all configuration options start with
+               $SQRUD_TEXTFILE
+vpopmail.php - Vpopmail access through it's vuserinfo program, all configuration
+               options start with $SQRUD_VPOP
+pgsql.php - PostgreSQL access, all configuration options start with $SQRUD_PGSQL

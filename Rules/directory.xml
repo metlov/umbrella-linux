@@ -1,0 +1,12 @@
+<Rules priority="0">
+<Group name='config'>
+   <!-- for Gosa -->
+   <Path type='symlink' name='/etc/apache2/sites-enabled/gosa.conf' to='../sites-available/gosa'/>
+   <Path type='symlink' name='/etc/apache2/sites-enabled/gosa-ssl.conf' to='../sites-available/gosa-ssl'/>
+   <Path type='nonexistent' name='/etc/apache2/conf-enabled/gosa.conf'/>
+   <!-- for Fusion directory -->
+   <Path type='symlink' name='/etc/apache2/sites-enabled/dir.conf' to='../sites-available/dir'/>
+   <Path type='symlink' name='/etc/apache2/sites-enabled/dir-ssl.conf' to='../sites-available/dir-ssl'/>
+   <Path type='nonexistent' name='/etc/apache2/conf-enabled/fusiondirectory.conf'/>
+</Group>
+</Rules>

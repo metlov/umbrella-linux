@@ -1,0 +1,28 @@
+<Bundle name='gui-services'>
+<Group name='ubuntu-trusty'>
+    <Service name='alsa-restore'/>
+    <Service name='alsa-state'/>
+    <Service name='alsa-store'/>
+    <Service name='anacron'/>
+    <Service name='atd'/>
+    <Group name="i386">
+        <Service name='binfmt-support'/>
+    </Group>
+    <Service name='bluetooth'/>
+    <Service name='dbus'/>
+    <Service name='gpu-manager'/>
+    <Service name='lightdm'/>
+    <Service name='modemmanager'/>
+    <Service name='network-manager'/>
+    <Service name='pppd-dns'/>
+    <Service name='pulseaudio'/>
+    <Service name='rfkill-restore'/>
+    <Service name='rfkill-store'/>
+    <Service name='schroot'/>
+    <Service name='systemd-logind'/>
+    <Service name='usb-modeswitch-upstart'/>
+</Group>
+<Group name='ubuntu-xenial'>
+    <Service name='gpu-manager'/>
+</Group>
+</Bundle>

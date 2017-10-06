@@ -1,0 +1,9 @@
+<Bundle name='dcc'>
+<!-- DCC is configured now only on Ubuntu Trusty. The newer Xenial version -->
+<!-- of Umbrella uses offline spamassassin checks only.                    -->
+<Group name='ubuntu-trusty'>
+    <Path name='/var/lib/dcc/dcc_conf'/>
+    <Path name='/var/lib/dcc/whitecommon'/>
+    <Service name='rcDCC'/>
+</Group>
+</Bundle>

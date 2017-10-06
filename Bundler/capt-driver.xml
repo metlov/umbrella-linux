@@ -1,0 +1,7 @@
+<Bundle name='capt-driver'>
+<Group name='ubuntu'>
+    <Package name='cndrvcups-capt'/>
+    <Package name='cndrvcups-common'/>
+    <Service name='ccpd-start'/>
+</Group>
+</Bundle>

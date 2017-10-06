@@ -1,0 +1,41 @@
+<Bundle name='spamassassin'>
+<Group name='ubuntu'>
+    <Package name='spamassassin'/>
+    <Package name='spamc'/>
+    <Package name='libwww-perl'/>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="debian-spamd" home="/var/lib/spamassassin" shell="/bin/sh" gecos="" uid="104" group="debian-spamd"/>
+        <BoundPOSIXGroup name="debian-spamd" gid="109"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="debian-spamd" home="/var/lib/spamassassin" shell="/bin/sh" gecos="" uid="623" group="debian-spamd"/>
+        <BoundPOSIXGroup name="debian-spamd" gid="623"/>
+    </Group>
+    <Package name='pyzor'/>
+    <Path name='/var/cache/pyzor'/>
+    <Path name='/var/cache/pyzor/servers'/>
+
+    <Package name='razor'/>
+    <Package name='libdbd-mysql-perl'/>
+    <Package name='libio-socket-inet6-perl'/>
+    <Package name='libhtml-format-perl'/>
+    <Package name='libmail-dkim-perl'/>
+    <Package name='libmail-spf-perl'/>
+    <Package name='libc6-dev'/>
+    <Package name='gcc'/>
+    <Package name='re2c'/>
+
+<!--    <Package name='libcrypt-openssl-bignum-perl'/> -->
+    <Path name='/etc/spamassassin/init.pre'/>
+    <Path name='/etc/spamassassin/local.cf'/>
+    <Path name='/etc/spamassassin/secrets.cf'/>
+    <Path name='/etc/spamassassin/v310.pre'/>
+    <Path name='/etc/spamassassin/v312.pre'/>
+    <Path name='/etc/spamassassin/v320.pre'/>
+
+<!--    <Path name='/etc/cron.daily/learnSPAM'/> -->
+
+    <Path name='/etc/default/spamassassin'/>
+    <Service name='spamassassin'/>
+</Group>
+</Bundle>

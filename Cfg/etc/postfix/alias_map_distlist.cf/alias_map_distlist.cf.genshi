@@ -1,0 +1,15 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+server_host = ${' '.join(ldap_URIs)}
+search_base = ${ldap_root}
+search_timeout = 30
+scope = sub
+bind = no
+query_filter = (&(objectClass=posixGroup)(objectClass=fdGroupMail)(|${''.join(('(mail=%%s@%s)(gosaMailAlternateAddress=%%s@%s)' % (domain,domain,)) for domain in domain_names )}))
+exclude_internal = yes
+result_filter = %s
+result_attribute = memberUid, mail
+terminal_result_attribute = memberuid

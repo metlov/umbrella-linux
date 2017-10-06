@@ -1,0 +1,7 @@
+The Debian Package umbrella-logo
+----------------------------
+
+This package maintains updated Umbrella Linux logo and wallpapers in
+/usr/share/umbrella/logo/ and /usr/share/wallpapers/Umbrella/ .
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Sat, 24 Jun 2017 11:10:59 +0300

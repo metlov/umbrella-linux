@@ -1,0 +1,28 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+%}\
+# permit common service addresses
+postmaster@ OK
+{% python
+aliases = metadata.Properties['mailaliases.xml'].xdata.findall('mailalias')
+%}\
+{% if len(aliases)>0 %}\
+# permit mail forwarding to aliases in mailaliases.xml
+{% end %}\
+{% for alias in aliases %}\
+${alias.find('alias').text} OK
+{% end %}\
+{% if mail_in_DMZ %}\
+{%   if len(robot_addresses)>0 %}\
+# permit mail forwarding to robots
+{%   end %}\
+{%   for domain in domain_names %}\
+{%     for addr in robot_addresses.iterkeys() %}\
+${addr}@${domain} OK
+{%     end %}\
+{%   end %}\
+{% end %}\

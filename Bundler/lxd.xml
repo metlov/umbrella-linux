@@ -1,0 +1,16 @@
+<Bundle name='lxd'>
+<Group name='ubuntu'>
+    <BoundPOSIXGroup name="lxd" gid="660"/>
+    <BoundPOSIXUser name="lxd" home="/var/lib/lxd/" shell="/bin/false" gecos="" uid="660" group="nogroup"/>
+
+    <Package name='lxd'/>
+    <Package name='lxd-client'/>
+    <Package name='lxd-tools'/>
+    <Package name='ebtables'/>
+    <Package name='xdelta3'/>
+    <Package name='bridge-utils'/>
+    <Package name='ufw'/>
+
+    <Path name='/etc/rc.local'/>            <!-- bufferbloat fix -->
+</Group>
+</Bundle>

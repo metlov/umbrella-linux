@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Conky
+GenericName=Conky
+Comment=Conky
+Exec=/usr/local/bin/autounison.sh
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=SystemMonitoring;

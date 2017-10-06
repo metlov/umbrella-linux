@@ -1,0 +1,3 @@
+if [ -e /var/lib/bcfg2/Local/Rules/local-rules.xml ]; then
+    echo group:local-bcfg2-rules-defined
+fi

@@ -1,0 +1,24 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+
+# check if this host has some robots defined
+ipaddr=ipcalc.IP(socket.gethostbyname(metadata.hostname))
+localrobots=[]
+if ipaddr in robot_servers:
+    # this host serves robots
+    local_robot_number=robot_servers.index(ipaddr)
+    for name, num in robot_addresses.iteritems():
+        if num==local_robot_number:
+            localrobots.append(name)
+
+import os.path
+local_access=os.path.isfile(repo+'/Local/Cfg/etc/postfix/access/access.genshi')
+%}\
+{% if local_access %}\
+{% include ${repo+'/Local/Cfg/etc/postfix/access/access.genshi'} %}\
+{% end %}\

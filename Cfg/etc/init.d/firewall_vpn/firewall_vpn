@@ -1,0 +1,51 @@
+#!/bin/bash
+
+DEPMOD=/sbin/depmod
+MODPROBE=/sbin/modprobe
+
+echo -en "ip_tables, "
+$MODPROBE ip_tables
+echo -en "nf_conntrack, " 
+$MODPROBE nf_conntrack
+echo -en "nf_conntrack_ftp, " 
+$MODPROBE nf_conntrack_ftp
+echo -en "nf_conntrack_irc, " 
+$MODPROBE nf_conntrack_irc
+echo -en "iptable_nat, "
+$MODPROBE iptable_nat
+echo -en "nf_nat_ftp, "
+$MODPROBE nf_nat_ftp
+echo -en "nf_conntrack_tftp, "
+$MODPROBE nf_conntrack_tftp
+echo -en "nf_conntrack_snmp, "
+$MODPROBE nf_conntrack_snmp
+echo
+echo -e "   Done loading modules.\n"
+
+echo
+echo -n "Loading rules..."
+
+iptables -F VPNINPUT
+iptables -F VPNOUTPUT
+iptables -F VPNFORWARD
+
+if [ "$1" == "stop" ]; then
+  /sbin/iptables-restore -n <<-EOF;
+
+*filter
+-A VPNINPUT -j RETURN
+-A VPNOUTPUT -j RETURN
+-A VPNFORWARD -j RETURN
+
+COMMIT
+
+EOF
+  echo " rules flushed."
+  exit 0
+fi
+
+/sbin/iptables-restore -n </etc/network/firewall_vpn.4rules
+
+/sbin/ip6tables-restore -n </etc/network/firewall_vpn.6rules
+
+echo " done."

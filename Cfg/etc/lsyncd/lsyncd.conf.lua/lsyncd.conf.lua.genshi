@@ -1,0 +1,34 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+local lfs = require"lfs"
+
+settings{
+        logfile = "/var/log/lsyncd/lsyncd.log",
+        statusFile = "/var/log/lsyncd/lsyncd-status.log",
+        maxProcesses = 1,
+        statusInterval = 1,
+}
+
+local homedirs_path="/export/home"
+local remote_path="/var/www/www-homepages"
+for file in lfs.dir(homedirs_path) do
+    if file ~= "." and file ~= ".." then
+        local f = homedirs_path..'/'..file..'/public_html'
+        local attr = lfs.attributes (f)
+        if attr and attr.mode == "directory" then
+            -- we generate the replication configuration
+            local rf = remote_path..'/'..file
+            sync{
+                default.rsyncssh,
+                delete = 'running',
+                source=f,
+                host='www-homepages@${funchosts['DMZwww']}',
+                targetdir=rf,
+                delay = 5,
+            }
+        end
+    end
+end

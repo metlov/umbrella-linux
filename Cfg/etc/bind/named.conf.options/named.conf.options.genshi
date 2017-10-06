@@ -1,0 +1,42 @@
+{% python
+import socket
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+execfile(repo+'/Python/35_organization.py')
+DNScache=metadata.Properties['umbrella.xml'].xdata.find('DNScache')
+if DNScache is not None:
+  DNScache=DNScache.text
+%}\
+options {
+        directory "/var/cache/bind";
+{% if DNScache is not None %}\
+        forwarders { ${DNScache}; };
+{% end %}\
+{% if not 'DMZsmtp' in metadata.groups %}\
+{% python
+# external interface is not served by DNS
+ifs.pop('extif', None)
+networks.pop('extif', None)
+strifaces=''
+for interface in ifs.values():
+  strifaces += str(interface) + '; '
+strnets=''
+for network in networks.values():
+  strnets += str(network.network()) + '/' + str(network.mask) + '; '
+# add networks from organization.xml
+for net in netclasses.iterkeys():
+  strnets += net + '; '
+%}\
+        listen-on { ${strifaces}127.0.0.1;};
+        allow-recursion { ${strnets}127.0.0.0/24;};
+{% end %}\
+        auth-nxdomain no;    # conform to RFC1035
+        listen-on-v6 { none; };
+};
+
+server 0.0.0.0/0 {
+        edns no;
+};

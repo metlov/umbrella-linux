@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# detect CPU architecture
+
+ARCH=`uname -m`
+ARCH=${ARCH/i686/i386}
+ARCH=${ARCH/x86_64/amd64}
+echo group:${ARCH}
+
+if type "systemd-detect-virt" > /dev/null; then
+  # we have systemd (Xenial), use it
+  virt=`systemd-detect-virt`
+  if [ "$virt" = "none" ]; then
+    echo "group:physical"
+  else
+    echo "group:virt-$virt"
+    echo "group:vm"
+  fi
+else
+  # no systemd, do the tricks
+  if grep -qa container=lxc /proc/1/environ; then
+    echo "group:virt-lxc"
+    echo "group:vm"
+  elif grep -q QEMU /proc/cpuinfo; then
+    echo "group:virt-kvm"
+    echo "group:vm"
+  else
+    echo "group:physical"
+  fi
+fi

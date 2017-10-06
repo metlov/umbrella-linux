@@ -1,0 +1,13 @@
+#!/bin/sh -e
+echo -n "                         \033[1m"
+echo -n `hostname -f` |  awk '{print toupper($0)}'
+echo -n "\033[0m"
+
+if grep -q QEMU /proc/cpuinfo;
+then
+    echo 'This is Virtual Machine.' | sed -e :a -e 's/^.\{1,68\}$/ &/;ta'
+    free | awk '/^Mem/ {mem=$2}; /^Swap/ {swap=$2}; END {print "Memory",mem,"kB, swap",swap,"kB"};' | sed -e :a -e 's/^.\{1,68\}$/ &/;ta'
+else
+    cat /proc/cpuinfo | grep "model name" | head -n 1 | sed -e 's/model name\t://g' | sed -e 's/  \+/ /g' | sed -e :a -e 's/^.\{1,68\}$/ &/;ta'
+    free | awk '/^Mem/ {mem=$2}; /^Swap/ {swap=$2}; END {print "Memory",mem,"kB, swap",swap,"kB"};' | sed -e :a -e 's/^.\{1,68\}$/ &/;ta'
+fi

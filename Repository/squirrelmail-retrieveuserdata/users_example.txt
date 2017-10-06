@@ -1,0 +1,10 @@
+chris, Chris Birmingham, Chris.Birmingham@opentelecommunications.com
+luke, Luke Ehresmann, luke@squirrelmail.org
+lee, Lee Hoffman, lee@terabolic.com
+thijs, Thijs Kinkhorst, thijs@jaze.nl
+hannu, Hannu Tikka, hannu.tikka@rpkk.fi
+mark, Mark Bergsma, mark@nedworks.org
+dominique, Dominique Leuenberger, dominique.leuenberger@gibb.ch
+ken, Ken Brush, ken@wirex.com
+henrique, Henrique de Moraes Holschuh, hmh@ima.sp.gov.br
+kraude, Ralf Kraudelt, kraude@wiwi.uni-rostock.de

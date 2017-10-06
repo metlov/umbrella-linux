@@ -1,0 +1,18 @@
+<Rules priority="0">
+<Group name='ubuntu-xenial'>
+    <Service name='cups' status='ignore' type='systemd'/>
+    <Service name='cups-browsed' status='on' type='systemd'/>
+    <Service name='nbd-server' status='on' type='systemd'/>
+    <Service name='stunnel4' status='on' type='systemd'/>
+    <Service name='tftpd-hpa' status='on' type='systemd'/>
+    <Group name='ltsp'>
+        <!-- disable GPU manager on the terminal server, since -->
+        <!-- its GPU is irrelevant for its operation (most of  -->
+        <!-- the time it has no GPU at all).                   -->
+        <Service name='gpu-manager' status='off' type='systemd'/>
+    </Group>
+    <Group name='ltsp' negate='true'>
+        <Service name='gpu-manager' status='ignore' type='systemd'/>
+    </Group>
+</Group>
+</Rules>

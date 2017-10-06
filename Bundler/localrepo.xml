@@ -1,0 +1,9 @@
+<Bundle name='localrepo'>
+  <Package name='screen'/>
+  <Package name='libarchive13'/>
+  <Package name='libassuan0'/>
+  <Package name='libgpgme11'/>
+  <Package name='liblzo2-2'/>
+  <Package name='libnettle4'/>
+  <Package name='reprepro'/>
+</Bundle>

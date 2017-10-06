@@ -1,0 +1,47 @@
+<Bundle name='libvirt'>
+<Group name='ubuntu'>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXGroup name="kvm" gid="112"/>
+        <BoundPOSIXGroup name="libvirtd" gid="113"/>
+        <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="105" group="nogroup"/>
+        <BoundPOSIXUser name="libvirt-dnsmasq" home="/var/lib/libvirt/dnsmasq" shell="/bin/false" gecos="Libvirt Dnsmasq,,," uid="107" group="libvirtd"/>
+        <BoundPOSIXUser name="libvirt-qemu" home="/var/lib/libvirt" shell="/bin/false" gecos="Libvirt Qemu,,," uid="106" group="kvm"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXGroup name="kvm" gid="117"/>
+        <BoundPOSIXGroup name="libvirtd" gid="118"/>
+        <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="109" group="nogroup"/>
+        <BoundPOSIXUser name="libvirt-dnsmasq" home="/var/lib/libvirt/dnsmasq" shell="/bin/false" gecos="Libvirt Dnsmasq,,," uid="112" group="libvirtd"/>
+        <BoundPOSIXUser name="libvirt-qemu" home="/var/lib/libvirt" shell="/bin/false" gecos="Libvirt Qemu,,," uid="111" group="kvm"/>
+    </Group>
+    <Group name='ubuntu-trusty'>
+        <!-- on xenial this lxc dependence is handled by systemd-->
+        <Package name='cgroup-lite'/>
+        <Service name='cgroup-lite'/>
+    </Group>
+    <Package name='libvirt-bin'/>
+    <Package name='python-libvirt'/>
+    <Package name='qemu-kvm'/>
+    <Package name='qemu-utils'/>
+
+    <Package name='libnspr4'/>
+    <Package name='libnss3'/>
+
+    <Package name='ubuntu-vm-builder'/>
+    <Package name='python-vm-builder'/>
+    <Package name='devscripts'/>
+    <Package name='fakeroot'/>
+    <Package name='build-essential'/>
+
+    <Service name='libvirt-bin'/>
+    <Service name='qemu-kvm'/>
+    <Path name='/etc/rc.local'/>            <!-- bufferbloat fix -->
+
+    <!-- enable read access to Umbrella VM images -->
+    <Path name='/etc/apparmor.d/usr.lib.libvirt.virt-aa-helper'/>
+
+    <!-- VM backup -->
+    <Path name='/usr/local/bin/umbrella-backup-vms'/>
+    <Path name='/etc/cron.d/backup-vms'/>
+</Group>
+</Bundle>

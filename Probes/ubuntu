@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ ! -e /etc/lsb-release ]; then exit 0; fi
+. /etc/lsb-release
+echo group:ubuntu-$DISTRIB_CODENAME

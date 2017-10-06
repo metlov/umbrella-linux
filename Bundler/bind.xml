@@ -1,0 +1,59 @@
+<Bundle name='bind' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+import socket
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+addr=socket.gethostbyname(metadata.hostname)
+?>
+<Group name='ubuntu'>
+    <Package name='bind9'/>
+    <Package name='bind9-host'/>
+    <Group name='DMZsmtp' negate='true'>
+        <Group name='ubuntu-trusty'>
+            <Package name='ldap2zone'/>
+            <Path name='/etc/default/ldap2zone'/>
+            <Path name='/etc/cron.d/ldap2zone'/>
+            <Path name='/usr/sbin/ldap2bind'/>
+            <Path name='/etc/bind/named.conf.ldap2zone'/>
+        </Group>
+        <Group name='ubuntu-xenial'>
+            <Package name='argonaut-ldap2zone'/>
+            <Path name='/etc/argonaut/argonaut.conf'/>
+            <Package name='libapp-daemon-perl'/>
+            <Package name='libhttp-daemon-perl'/>
+            <Package name='liblog-handler-perl'/>
+            <Path name='/etc/bind'/> <!-- make writable for bind user -->
+            <Path name='/etc/cron.d/ldap2zone'/> <!-- runs as bind user -->
+        </Group>
+    </Group>
+    <Service name='bind9'/>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="103" group="bind"/>
+        <BoundPOSIXGroup name="bind" gid="108"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Package name='dns-root-data'/>
+        <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="108" group="bind"/>
+        <BoundPOSIXGroup name="bind" gid="113"/>
+    </Group>
+    <Path name='/etc/default/bind9'/>
+    <Path name='/etc/bind/named.conf'/>
+    <Path name='/etc/bind/named.conf.local'/>
+    <Path name='/etc/bind/named.conf.options'/>
+    <Group name='DMZsmtp'>
+        <py:if test="ext_address is not None and ext_address.strip()">
+            <py:for each="i in range(len(domain_names_list))">
+            <Path name='/etc/bind/mydomain${"%02d" % (i,)}-ext'/>
+            </py:for>
+        </py:if>
+        <py:if test="int_address is not None and int_address.strip()">
+            <py:for each="i in range(len(domain_names_list))">
+            <Path name='/etc/bind/mydomain${"%02d" % (i,)}-int'/>
+            </py:for>
+        </py:if>
+    </Group>
+</Group>
+</Bundle>

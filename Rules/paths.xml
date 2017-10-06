@@ -1,0 +1,51 @@
+<Rules priority="0">
+<Group name='config'>
+   <Path type='directory' name="/etc/ssl/private" mode='711' owner='root' group='ssl-cert'/>
+</Group>
+<Group name='config' negate='true'>
+   <Path type='directory' name="/etc/ssl/private" mode='710' owner='root' group='ssl-cert'/>
+</Group>
+<Group name='nfs-server'>
+   <Path type='directory' name="/export" mode='755' owner='root' group='root'/>
+   <Path type='directory' name="/export/home" mode='755' owner='root' group='root'/>
+</Group>
+<Group name='virt-lxc'>
+   <Path type='nonexistent' name='/etc/update-motd.d/51-cloudguest'/>
+</Group>
+<Path type='symlink' name='/etc/apache2/mods-enabled/socache_shmcb.load' to='../mods-available/socache_shmcb.load'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/proxy.conf' to='../mods-available/proxy.conf'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/proxy_http.load' to='../mods-available/proxy_http.load'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/rewrite.load' to='../mods-available/rewrite.load'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/proxy.load' to='../mods-available/proxy.load'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/cgid.conf' to='../mods-available/cgid.conf'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/cgid.load' to='../mods-available/cgid.load'/>
+<Path type='symlink' name='/etc/apache2/sites-enabled/packages.conf' to='../sites-available/packages'/>
+<Path type='symlink' name='/etc/apache2/sites-enabled/000-default.conf' to='../sites-available/000-default.conf'/>
+<Path type='symlink' name='/etc/apache2/sites-enabled/default-ssl.conf' to='../sites-available/default-ssl.conf'/>
+<Path type='symlink' name='/etc/apache2/conf-enabled/umbrella-logo.conf' to='../conf-available/umbrella-logo.conf'/>
+<Path type='symlink' name='/etc/apache2/conf-enabled/squirrelmail.conf' to='../conf-available/squirrelmail.conf'/>
+<Path type='symlink' name='/etc/apache2/conf-available/squirrelmail.conf' to='../../squirrelmail/apache.conf'/>
+<Path type='symlink' name='/etc/apache2/conf-available/mailman.conf' to='/etc/mailman/apache.conf'/>
+<Path type='symlink' name='/etc/apache2/conf-enabled/mailman.conf' to='../conf-available/mailman.conf'/>
+<Path type='symlink' name='/usr/bin/pine' to='/usr/bin/alpine'/>
+<Path type='symlink' name='/usr/share/man/man1/pine.1.gz' to='alpine.1.gz'/>
+<Path type='symlink' name='/etc/sudo-ldap.conf' to='ldap.conf'/>
+<Path type='directory' name="/scratch" mode='1777' owner='root' group='root'/>
+<Path type='nonexistent' name='/etc/xdg/autostart/update-notifier.desktop'/>
+<Path type='nonexistent' name='/usr/share/applications/sylpheed.desktop'/>
+<Path type='symlink' name='/etc/xdg/autostart/pidgin.desktop' to='/usr/share/applications/pidgin.desktop'/>
+<Path type='symlink' name='/etc/cups/ssl/server.crt' to='../../ssl/cups.pem'/>
+<Path type='symlink' name='/etc/cups/ssl/server.key' to='../../ssl/private/cups.key'/>
+<Path type='directory' name="/var/lib/ntp" mode='755' owner='ntp' group='ntp'/>
+<Path type='directory' name="/var/lib/lightdm" mode='755' owner='lightdm' group='lightdm'/>
+<Path type='directory' name="/var/cache/pyzor" mode='0755' owner='mail' group='mail'/>
+<Path type='directory' name="/var/ossec/logs/archives" mode='750' owner='ossec' group='ossec'/>
+<Path type='directory' name="/etc/bind" mode='2775' owner='root' group='bind'/>
+<Group name='local-bcfg2-rules-defined'>
+    <Path type='symlink' name='/var/lib/bcfg2/Rules/local-rules.xml' to='../Local/Rules/local-rules.xml'/>
+</Group>
+<Group name='local-bcfg2-rules-defined' negate='true'>
+    <Path type='nonexistent' name='/var/lib/bcfg2/Rules/local-rules.xml'/>
+</Group>
+<Path type='directory' name="/var/maildirs" mode='0700' owner='vmail' group='vmail'/>
+</Rules>

@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+tmp_path = debian/squirrelmail-compose-extras
+
+config_dpath = /etc/squirrelmail
+config_dtpath = $(tmp_path)$(config_dpath)
+
+install_dir = install -o root -g root -m 755 -d
+install_file = install -o root -g root -m 644 -c
+
+%:
+	dh $@ 
+
+override_dh_install:
+	# copy the example config
+	$(install_dir) $(config_dtpath)/
+	$(install_file) config_example.php $(config_dtpath)/config_compose_extras.php
+	# Continue with regular dh_install
+	dh_install

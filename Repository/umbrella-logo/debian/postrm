@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# compute the dynamically updated logo store pathname
+varpath="/var"
+dest_path=${varpath}/lib/umbrella-logo
+
+# delete the dynamic logo store
+rm -rf ${dest_path}

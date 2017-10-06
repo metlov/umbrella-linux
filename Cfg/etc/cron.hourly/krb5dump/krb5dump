@@ -1,0 +1,12 @@
+#!/bin/bash
+. /usr/local/bin/umbrella.sh        # source Umbrella Linux variables
+SLAVES="kdc2.${DOMAIN_NAME}"
+DUMPFILE="/var/lib/krb5kdc/slave_datatrans"
+
+/usr/sbin/kdb5_util dump $DUMPFILE
+
+for SLAVE in $SLAVES ; do
+    /usr/sbin/kprop -f $DUMPFILE $SLAVE | grep -v SUCCEEDED
+done
+
+exit 0

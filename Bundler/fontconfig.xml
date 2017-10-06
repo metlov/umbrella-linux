@@ -1,0 +1,16 @@
+<Bundle name='fontconfig'>
+<Group name='ubuntu'>
+    <Package name='read-edid'/>
+    <!-- hinting -->
+    <Path name='/etc/fonts/conf.d/10-hinting-medium.conf'/>
+    <Path name='/etc/fonts/conf.d/10-hinting-slight.conf'/>
+    <Path name='/etc/fonts/conf.d/10-hinting-full.conf'/>
+    <!-- subpixel rendering -->
+    <Group name='subpixel-unknown' negate='true'>
+       <Path name='/etc/fonts/conf.d/10-sub-pixel-bgr.conf'/>
+       <Path name='/etc/fonts/conf.d/10-sub-pixel-rgb.conf'/>
+       <Path name='/etc/fonts/conf.d/10-sub-pixel-vbgr.conf'/>
+       <Path name='/etc/fonts/conf.d/10-sub-pixel-vrgb.conf'/>
+    </Group>
+</Group>
+</Bundle>

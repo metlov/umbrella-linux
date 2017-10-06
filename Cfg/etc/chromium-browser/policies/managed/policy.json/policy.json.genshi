@@ -1,0 +1,27 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+start_page=metadata.Properties['umbrella.xml'].xdata.find('start_pages')
+if start_page is not None:
+  start_pages=start_page.findall('start_page')
+  start_page=None
+  for page in start_pages:
+    group = page.find('group')
+    url = page.find('url').text
+    if group is None:
+      start_page=url
+    else:
+      if group.text in metadata.groups:
+        start_page=url
+%}\
+{
+  "ShowHomeButton": true,
+  "BookmarkBarEnabled": true,
+  "HomepageIsNewTabPage": false,
+{% if start_page is not None %}\
+  "HomepageLocation": "${start_page}",
+  "RestoreOnStartupURLs": ["${start_page}"],
+{% end %}\
+  "RestoreOnStartup": 4,
+  "PasswordManagerEnabled": false
+}

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ -f /scripts/alert ]; then
+    if ! grep -q '^usmUser.*nagios.*nagios' "/var/lib/snmp/snmpd.conf"; then 
+        echo group:no-snmp-user-nagios
+    fi
+fi

@@ -1,0 +1,7 @@
+<Bundle name='cachefilesd'>
+<Group name='ubuntu'>
+    <Package name='cachefilesd'/>
+    <Path name='/etc/default/cachefilesd'/>
+    <Service name='cachefilesd'/>
+</Group>
+</Bundle>

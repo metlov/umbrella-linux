@@ -1,0 +1,21 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+LOGFILE=/var/maildirs/$${LOGNAME}/log
+MAILDIR=/var/maildirs/$${LOGNAME}/mail/
+HOME=/var/lib/procmail/
+DEFAULT=/var/maildirs/$${LOGNAME}/mail/
+DROPPRIVS=yes
+
+:0fw
+| /usr/bin/spamc
+
+:0
+* ^X-Spam-Status: Yes
+$$DEFAULT/.SPAM/
+
+:0
+* ^From.*arpwatch@${funchostsshort['router']}
+$$DEFAULT/.ARPwatch/

@@ -1,0 +1,50 @@
+<Bundle name='zabbix' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+import socket
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+addr=socket.gethostbyname(metadata.hostname)
+?>
+<py:if test="install_zabbix and 'monitor' in funchosts">
+<Group name='ubuntu'>
+    <Group name='monitor'>
+        <Group name='ubuntu-trusty'>
+            <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="105" group="zabbix"/>
+            <BoundPOSIXGroup name="zabbix" gid="111"/>
+        </Group>
+        <Package name='zabbix-server-mysql'/>
+        <Path name='/etc/zabbix/zabbix_server.conf'/>
+        <Path name='/etc/default/zabbix-server'/>
+        <Service name='zabbix-server'/>
+        <Package name='zabbix-frontend-php'/>
+        <Package name='php5-mysql'/>
+        <Path name='/etc/apache2/sites-available/zabbix'/>
+        <Path name='/etc/apache2/sites-enabled/zabbix.conf'/>
+        <Path name='/etc/zabbix/zabbix.conf.php'/>
+    </Group>
+    <Group name='archive'>
+        <Package name='zabbix-proxy-mysql'/>
+        <Service name='zabbix-proxy'/>
+        <Path name='/etc/zabbix/zabbix_proxy.conf'/>
+        <Path name='/etc/default/zabbix-proxy'/>
+    </Group>
+    <Group name='monitor' negate='true'>
+        <Group name='ubuntu-trusty'>
+            <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="650" group="zabbix"/>
+            <BoundPOSIXGroup name="zabbix" gid="650"/>
+        </Group>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="218" group="zabbix"/>
+        <BoundPOSIXGroup name="zabbix" gid="226"/>
+    </Group>
+    <py:if test="('router' in metadata.groups or 'vmhost' in metadata.groups) or ((not addr in networks['DMZif']) and (not addr in networks['secif'])) or (addr in networks['secif'] and 'archive' in funchosts)">
+        <Package name='zabbix-agent'/>
+        <Path name='/etc/zabbix/zabbix_agentd.conf.d/zabbix_agentd.conf'/>
+        <Service name='zabbix-agent'/>
+    </py:if>
+</Group>
+</py:if>
+</Bundle>

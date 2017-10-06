@@ -1,0 +1,20 @@
+Source: kpoppassd
+Section: mail
+Priority: optional
+Maintainer: Konstantin L. Metlov <metlov@donfti.ru>
+Build-Depends: debhelper (>> 4.0.0), libkrb5-dev
+Standards-Version: 3.6.2
+
+Package: kpoppassd
+Architecture: any
+Depends: netbase, update-inetd, openbsd-inetd | inet-superserver, ${shlibs:Depends}
+Conflicts: poppassd
+Description: password change server for Eudora and NUPOP (Kerberos version)
+ This package provides a daemon for changing passwords on POP mail accounts,
+ a feature common to Eudora and other MacOS/Win32 mail user agents.  This
+ feature is also commonly used for TCP loopback password changing from web
+ scripting languages like PHP or Perl, so that the webserver process doesn't
+ need to be run as root (on in the shadow group).
+ .
+ This version of poppassd changes passwords via Kerberos as implemented
+ by Alex Withers <awithers@gonzaga.edu> .

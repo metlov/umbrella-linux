@@ -1,0 +1,31 @@
+These are for local overlay over the Umbrella configuration repository.
+The directories here are not scanned by Bcfg2 server, only a specific
+files are looked for and included at specific points into the main
+configuration. Thus, one can not create an arbitrary bundles into the
+Bundler directory here or include an arbitrarily named rules file into
+the Rules directory. You can roughly get a list of what is included by
+scanning the main Umbrella repository for the "xi:include" directive.
+
+The configuration files, placed in the Cfg directory will appear under
+the path prefixed by "/local". That is, to install a local configuration
+file "/etc/myconf.cfg" in the local bundle one may use the directive
+<Path name="/etc/myconf.cfg" altsrc="/local/etc/myconf.cfg"> assuming
+the file "myconf.cfg" (as well as corresponding info.xml) is placed 
+in the Cfg/etc/myconf.cfg relatively to the Local configuration 
+directory (where this file is). Genshi templating can be used within
+the local configuration files and the template code has full access to
+all Umbrella Linux parameters and modules.
+
+Despite the restrictions, the overlay gives a useful possibility to amend
+the standard Umbrella Linux with locally-managed software and configuration.
+
+Please also note that the software installed via this mechanism is not
+supported by Umbrella Linux neither the software itself, nor its interaction
+with the standard software configured in Umbrella Linux. Use this mechanism
+of amending configuration on your own risk and at your own responsibility.
+
+The main reason for creating this overlay mechanism is not to permit an
+ever diverging set of software and configurations, but use it as a local
+staging area for testing the configuration options and templates before
+they are submitted for inclusion into the main Umbrella configuration
+repository.

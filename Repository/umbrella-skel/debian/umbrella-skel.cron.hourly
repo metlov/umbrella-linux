@@ -1,0 +1,20 @@
+#!/bin/bash
+# Keeps Umbrella Linux logo files up to date.
+# (c) 2017 Konstantin L. Metlov <metlov@donfti.ru>
+
+# source the Umbrella Linux configuration
+. /etc/umbrella.conf
+
+# compute the URLs for logos
+skel_url="http://$HOST_CONFIG/custom/skel.tar.gz"
+
+# compute the destination pathname
+dest_path="/var/lib/umbrella-skel"
+
+# update the skel archive
+wget -N -P "${dest_path}" "${skel_url}" &>/dev/null
+
+# unpack and initialize the skel if archive was updated
+su - umbrella-skel -s /bin/bash -c /usr/bin/umbrella-skel-unpack
+
+exit 0

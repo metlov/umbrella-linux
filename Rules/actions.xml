@@ -1,0 +1,13 @@
+<Rules priority="0">
+   <Action name='reconfigure-TZ' timing='post' when='modified' command='timedatectl set-timezone `cat /etc/timezone` &amp;&amp; dpkg-reconfigure --frontend noninteractive tzdata' status='ignore'/>
+   <Action name='systemctl-daemon-reload' timing='post' when='modified' command='systemctl daemon-reload' status='ignore'/>
+   <Action name='ossec-reconfigure-TZ' timing='post' when='modified' command='cp /etc/localtime /var/ossec/etc/' status='ignore'/>
+   <Action name='sieve-recompile-default' timing='post' when='modified' command='sievec /etc/sieve/default.sieve' status='check'/>
+   <Action name='update-grub' timing='post' when='modified' command='update-grub' status='ignore'/>
+   <Action name='newaliases' timing='post' when='modified' command='newaliases' status='ignore'/>
+   <Action name='fix_squirrelmail_charset_conversion' timing='post' when='modified' command="perl -pi -e 's/sm_encode_html_special_chars \(\$string\)/sm_encode_html_special_chars \(\$string,ENT_COMPAT \| ENT_HTML401,\$charset,true\)/g' /usr/share/squirrelmail/functions/i18n.php" status='ignore'/>
+   <Action name='fix_squirrelmail_spam_buttons' timing='post' when='modified' command="perl -pi -e 's|eregi\(\&quot;(.*)\&quot;,|preg_match\(\&quot;/$1/i\&quot;,|g' /usr/share/squirrelmail/plugins/spam_buttons/functions.php" status='ignore'/>
+   <Action name='fix_fusion_warning_2538' timing='post' when='modified' command="perl -pi -e  's/\$ldap = new ldapMultiplexer\(new LDAP\((\$cfg.*)\)/\$ldapObj = new LDAP(\1;\n  \$ldap = new ldapMultiplexer(\$ldapObj)/g' /usr/share/fusiondirectory/include/functions.inc" status='ignore'/>
+   <!-- copy the files to tftpd chroot -->
+   <Action name='update-tftpboot' timing='post' when='modified' command='umbrella-update-tftpboot' status='ignore'/>
+</Rules>

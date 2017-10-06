@@ -1,0 +1,252 @@
+{% python
+import socket
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+
+import itertools
+
+external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
+if external_vpn is not None:
+  ext_vpn_dev=external_vpn.find('dev').text
+  vpn_secnets={}
+  i=1
+  for net in external_vpn.findall('secnetwork'):
+    ipcalcnet=ipcalc.Network(net.text)
+    vpn_secnets[i]=ipcalcnet
+    i+=1
+  vpn_pubnets={}
+  i=1
+  for net in external_vpn.findall('pubnetwork'):
+    ipcalcnet=ipcalc.Network(net.text)
+    vpn_pubnets[i]=ipcalcnet
+    i+=1
+
+# Substitution variables
+UNIVERSE="0.0.0.0/0"
+UNIVERSE6="::/0"
+
+if extif_enabled:
+  EXTIF=routerifdevs['extif']
+  if not 'extif' in routerifs:
+    raise TemplateError('Static IP address must be defined for the external '+\
+                        'router interface in umbrella.xml.')
+  EXTIPADDR=routerifs['extif']
+  EXTIP=str(EXTIPADDR)+'/32'
+
+if intif_enabled:
+  INTIF=routerifdevs['intif']
+  if not 'intif' in routerifs:
+    raise TemplateError('Static IP address must be defined for the intranet '+\
+                        'router interface in umbrella.xml.')
+  INTIPADDR=routerifs['intif']
+  INTIP=str(INTIPADDR)+'/32'
+
+IFPUB=routerifdevs['pubif']
+IPPUB=str(routerifs['pubif'])+'/32'
+NETPUB=str(networks['pubif'].network())+'/'+str(networks['pubif'].mask)
+
+IFSEC=routerifdevs['secif']
+IPSEC=str(routerifs['secif'])+'/32'
+NETSEC=str(networks['secif'].network())+'/'+str(networks['secif'].mask)
+
+IFDMZ=routerifdevs['DMZif']
+IPDMZ=str(routerifs['DMZif'])+'/32'
+NETDMZ=str(networks['DMZif'].network())+'/'+str(networks['DMZif'].mask)
+
+
+if external_vpn is not None:
+  IFEXTVPN=ext_vpn_dev            # network device for accessing the external
+
+if 'DMZsmtp' in funchosts:
+  DMZ_DNS_IP=funcifs['DMZsmtp']     # address of the DNS server in DMZ
+  DMZ_SKS_IP=funcifs['DMZsmtp']     # address of the SKS server in DMZ
+  DMZ_SMTP_IP=funcifs['DMZsmtp']    # address of the incoming MAIL server in DMZ
+
+if 'DMZwww' in funchosts:
+  DMZ_HTTP_IP=funcifs['DMZwww']     # address of the WEB server in DMZ
+
+if 'DMZwww-test' in funchosts:
+  DMZ_HTTP_TEST_IP=funcifs['DMZwww-test'] # address of the test WEB server in DMZ
+
+if 'mail' in funchosts:
+  PUB_SMTP_IP=funcifs['mail']       # address of the SMTP server in Public net
+  PUB_SMTPS_IP=funcifs['mail']      # address of the SMTPS server in Public net
+  PUB_IMAPS_IP=funcifs['mail']      # address of the IMAPS server in Public net
+  PUB_RABBIT_IP=funcifs['mail']     # address of the RABBITMQ server in Public net
+
+PUB_BCFG2_IP=funcifs['config']      # address of the BCFG2 server in Public net
+PUB_HTTP_IP=funcifs['config']       # address of the HTTP server in Public net
+
+if 'proxy' in funchosts:
+  PUB_PRX_IP=funcifs['proxy']       # address of apt-cacher proxy in Public net
+
+if 'ltsp' in funchosts:
+  PUB_TFTP_IP=funcifs['ltsp']       # address of the TFTP server in Public net
+  PUB_NBD_IP=funcifs['ltsp']        # address of the NBD server in Public net
+  PUB_LTSP_IP=funcifs['ltsp']       # address of the LTSP server in Public net
+
+PUB_KDC1_IP=funcifs['config']       # address of the Kerberos kdc1 in Public net
+if 'proxy' in funchosts:
+  PUB_KDC2_IP=funcifs['proxy']      # address of the Kerberos kdc2 in Public net
+
+PUB_MYSQL_IP=funcifs['config']      # address of the Mysql server in Public net
+
+PUB_LDAPS1_IP=funcifs['config']     # address of the LDAP1 server in Public net
+if 'proxy' in funchosts:
+  PUB_LDAPS2_IP=funcifs['proxy']    # address of the LDAP2 server in Public net
+
+PUB_NTP_IP=NTP_server        # address of the NTP server in Public net
+if 'nfs' in funchosts:
+  PUB_NFS_IP=funcifs['nfs']         # address of the NFS server in Public net
+
+if 'proxy' in funchosts:
+  PUB_JAB_IP=funcifs['proxy']       # address of the Jabber server in Public net
+
+if 'monitor' in funchosts:
+  PUB_MONITOR_IP=funcifs['monitor'] # address of the monitoring server in Public net
+
+if 'glpi' in funchosts:
+  PUB_GLPI_IP=funcifs['glpi']       # address of the GLPI server in Public net
+%}\
+{% def REJECT_INTERNAL_INPUT_ON_IF(chain, ifvar) %}\
+{%   if chain=='INPUT' %}\
+-A ${chain} -i ${ifvar} -s ${NETPUB} -d ${UNIVERSE} -j REJECT
+-A ${chain} -i ${ifvar} -s ${NETSEC} -d ${UNIVERSE} -j REJECT
+-A ${chain} -i ${ifvar} -s ${NETDMZ} -d ${UNIVERSE} -j REJECT
+{%   end %}
+{%   if chain=='VPNINPUT' and external_vpn is not None %}\
+{%     for net in vpn_secnets.itervalues() %}\
+-A ${chain} -i ${ifvar} -s ${str(net)}/${str(net.mask)} -d ${UNIVERSE} -j REJECT
+{%     end %}\
+{%     for net in vpn_pubnets.itervalues() %}\
+-A ${chain} -i ${ifvar} -s ${str(net)}/${str(net.mask)} -d ${UNIVERSE} -j REJECT
+{%     end %}\
+{%   end %}\
+{% end %}\
+{% def ALLOW_ROUTER_DNS_ACCESS_IN(chain, ifvar, ipvar) %}\
+-A ${chain} -p tcp -i ${ifvar} -d ${ipvar} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -d ${ipvar} --dport 53 -j ACCEPT
+-A ${chain} -p icmp -i ${ifvar} -d ${ipvar} -j ACCEPT
+{% end %}\
+{% def ACCEPT_INTERNAL_OUTPUT_FROM_IP(chain, ipvar) %}\
+{%   if chain=='OUTPUT' %}\
+-A ${chain} -o ${IFPUB} -s ${ipvar} -d ${NETPUB} -j ACCEPT
+-A ${chain} -o ${IFSEC} -s ${ipvar} -d ${NETSEC} -j ACCEPT
+-A ${chain} -o ${IFDMZ} -s ${ipvar} -d ${NETDMZ} -j ACCEPT
+{%   end %}\
+{%   if chain=='VPNOUTPUT' and external_vpn is not None %}\
+{%     for net in vpn_secnets.itervalues() %}\
+-A ${chain} -o ${IFEXTVPN} -s ${ipvar} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%     end %}\
+{%     for net in vpn_pubnets.itervalues() %}\
+-A ${chain} -o ${IFEXTVPN} -s ${ipvar} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%     end %}\
+{%   end %}\
+{% end %}\
+{% def REJECT_STUFFED_ROUTING_ON_IF(chain, ifvar) %}\
+{%   if chain=='OUTPUT' %}\
+-A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${NETPUB} -j REJECT
+-A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${NETSEC} -j REJECT
+-A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${NETDMZ} -j REJECT
+{%   end %}\
+{%   if chain=='VPNOUTPUT' and external_vpn is not None %}\
+{%     for net in vpn_secnets.itervalues() %}\
+-A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${str(net)}/${str(net.mask)} -j REJECT
+{%     end %}\
+{%     for net in vpn_pubnets.itervalues() %}\
+-A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${str(net)}/${str(net.mask)} -j REJECT
+{%     end %}\
+{%   end %}\
+{% end %}\
+{% def ALLOW_ROUTER_DNS_ACCESS_OUT(chain, ifvar, ipvar) %}\
+-A ${chain} -p tcp -o ${ifvar} -s ${ipvar} --sport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A ${chain} -p udp -o ${ifvar} -s ${ipvar} --sport 53 -j ACCEPT
+-A ${chain} -p icmp -o ${ifvar} -s ${ipvar} -j ACCEPT
+{% end %}\
+{% def ACCEPT_SOLICITED_ON_EXTERNAL_IF(chain, ifvar) %}\
+-A ${chain} -i ${ifvar} -o ${IFPUB} -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+-A ${chain} -i ${ifvar} -o ${IFDMZ} -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+{%   if external_vpn is not None %}\
+{%     for net in vpn_pubnets.itervalues() %}\
+-A ${chain} -i ${ifvar} -o ${IFEXTVPN} -d ${str(net)}/${str(net.mask)} -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+{%     end %}\
+{%   end %}\
+{% end %}\
+{% def ACCEPT_AUTH_FROM_IF(chain, ifvar) %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 88 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 88 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 750 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 750 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 749 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 749 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 464 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC1_IP} --dport 464 -j ACCEPT
+{%   if 'proxy' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 88 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 88 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 750 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 750 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 749 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 749 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 464 -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_KDC2_IP} --dport 464 -j ACCEPT
+{%   end %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_LDAPS1_IP} --dport 389 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_LDAPS1_IP} --dport 636 -j ACCEPT
+{%   if 'proxy' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_LDAPS2_IP} --dport 389 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_LDAPS2_IP} --dport 636 -j ACCEPT
+{%   end %}\
+{% end %}\
+{% def ACCEPT_FORWARDING_FROM_IF(chain, ifvar) %}\
+{%   if 'mail' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_SMTP_IP} --dport 25 -j ACCEPT
+{%     if mail_from_sec %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_SMTPS_IP} --dport 465 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_SMTPS_IP} --dport 587 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_IMAPS_IP} --dport 993 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_IMAPS_IP} --dport 4190 -j ACCEPT
+{%     end %}\
+{%   end %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_HTTP_IP} --dport 80 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_HTTP_IP} --dport 443 -j ACCEPT
+{%   if 'proxy' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_PRX_IP} --dport 3142 -j ACCEPT
+{%   end %}\
+${ ACCEPT_AUTH_FROM_IF(chain, ifvar) }\
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_NTP_IP} --dport 123 -j ACCEPT
+{%   if 'DMZwww' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_HTTP_IP} --dport 80 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_HTTP_IP} --dport 443 -j ACCEPT
+{%   end %}\
+{%   if 'DMZwww-test' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_HTTP_TEST_IP} --dport 80 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_HTTP_TEST_IP} --dport 443 -j ACCEPT
+{%   end %}\
+{% if 'monitor' in funchosts %}\
+-A FORWARD -p udp -i ${IFPUB} -o ${ifvar} -s ${PUB_MONITOR_IP} --dport 161 -j ACCEPT
+-A FORWARD -p udp -i ${IFPUB} -o ${ifvar} -s ${PUB_MONITOR_IP} --dport 1514 -j ACCEPT
+-A FORWARD -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_MONITOR_IP} --dport 1514 -j ACCEPT
+{% end %}\
+{%   if pub_nfs_from_sec and 'nfs' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_NFS_IP} -j ACCEPT
+-A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_NFS_IP} -j ACCEPT
+{%   end %}\
+{%   if jabber_from_sec and 'proxy' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5269 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5280 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 7777 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5222 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5223 -j ACCEPT
+{%   end %}\
+{%   if 'glpi' in funchosts %}\
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_GLPI_IP} --dport 80 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_GLPI_IP} --dport 443 -j ACCEPT
+{%   end %}\
+
+{% end %}\

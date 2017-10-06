@@ -1,0 +1,542 @@
+{% include ../../../../Python/firewall_lib.genshi %}\
+
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+
+###################################################
+# INPUT: Incoming traffic from various interfaces #
+###################################################
+
+# Loopback interface is valid
+-A INPUT -i lo -s ${UNIVERSE} -d ${UNIVERSE} -j ACCEPT
+
+# Local interface, local machines, going anywhere is valid
+-A INPUT -i ${IFPUB} -s ${NETPUB} -d ${UNIVERSE} -j ACCEPT
+
+# Remote interface, claiming to be local machines, IP spoofing, get lost
+{% if extif_enabled %}\
+${REJECT_INTERNAL_INPUT_ON_IF('INPUT', EXTIF)}
+{% end %}\
+{% if intif_enabled %}\
+${REJECT_INTERNAL_INPUT_ON_IF('INPUT', INTIF)}
+{% end %}\
+{% if extif_enabled %}\
+# External interface, from any source, for ICMP traffic is valid
+-A INPUT -i ${EXTIF} -p ICMP -s ${UNIVERSE} -d ${EXTIP} -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+# Intranet interface, from any source, for ICMP traffic is valid
+-A INPUT -i ${INTIF} -p ICMP -s ${UNIVERSE} -d ${INTIP} -j ACCEPT
+{% end %}\
+
+# Allow any related traffic coming back to the MASQ server in.
+{% if extif_enabled %}\
+-A INPUT -i ${EXTIF} -s ${UNIVERSE} -d ${EXTIP} -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+-A INPUT -i ${INTIF} -s ${UNIVERSE} -d ${INTIP} -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+
+# Internal interface, DHCP traffic accepted
+-A INPUT -i ${IFPUB} -p tcp --sport 68 --dport 67 -j ACCEPT
+-A INPUT -i ${IFPUB} -p udp --sport 68 --dport 67 -j ACCEPT
+-A INPUT -i ${IFSEC} -p tcp --sport 68 --dport 67 -j ACCEPT
+-A INPUT -i ${IFSEC} -p udp --sport 68 --dport 67 -j ACCEPT
+
+{% if ssh_to_router and extif_enabled %}\
+# External interface, SSH traffic allowed
+-A INPUT -i ${EXTIF} -m conntrack --ctstate NEW,ESTABLISHED,RELATED -p tcp -s ${UNIVERSE} -d ${EXTIP} --dport 22 -j ACCEPT
+
+{% end %}\
+{% if ssh_to_router and intif_enabled %}\
+# Intranet interface, SSH traffic allowed
+-A INPUT -i ${INTIF} -m conntrack --ctstate NEW,ESTABLISHED,RELATED -p tcp -s ${UNIVERSE} -d ${INTIP} --dport 22 -j ACCEPT
+
+{% end %}\
+{% if ssh_to_ltsp %}\
+{% if extif_enabled %}\
+# External interface, SSH traffic to LTSP server
+-A FORWARD -i ${EXTIF} -o ${IFPUB} -d ${PUB_LTSP_IP} -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${EXTIF} -s ${PUB_LTSP_IP} -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+# Intranet interface, SSH traffic to LTSP server
+-A FORWARD -i ${INTIF} -o ${IFPUB} -d ${PUB_LTSP_IP} -p tcp --dport 22 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${INTIF} -s ${PUB_LTSP_IP} -p tcp --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+
+{% end %}\
+{% if 'DMZwww' in funchosts %}\
+{% if extif_enabled %}\
+# External interface, HTTP/HTTPS traffic to DMZ
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_HTTP_IP} -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_HTTP_IP} -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_HTTP_IP} -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_HTTP_IP} -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+# Intranet interface, HTTP/HTTPS traffic to DMZ
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_HTTP_IP} -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_HTTP_IP} -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_HTTP_IP} -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_HTTP_IP} -p tcp --sport 443 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+
+{% end %}\
+{% if extif_enabled and not intif_enabled and ('mail' in funchosts)%}\
+# External interface, SMTP traffic to DMZ
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -p tcp --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+
+{% end %}\
+{% if intif_enabled and not extif_enabled and ('mail' in funchosts)%}\
+# Intranet interface, SMTP traffic to the mail server
+-A FORWARD -i ${INTIF} -o ${IFPUB} -d ${PUB_SMTP_IP} -p tcp --dport 10025 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+
+{% end %}\
+{% if extif_enabled and intif_enabled and ('mail' in funchosts)%}\
+# TODO: implement forwarding of SMTP when both internal and external
+#       interfaces are enabled.
+
+{% end %}\
+{% if 'DMZsmtp' in funchosts %}\
+{%   if extif_enabled %}\
+# External interface, DNS traffic to DMZ
+-A FORWARD -p tcp -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -p udp -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -j ACCEPT
+-A FORWARD -p icmp -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} -j ACCEPT
+{%   end %}\
+{%   if intif_enabled %}\
+# Intranet interface, DNS traffic to DMZ
+-A FORWARD -p tcp -i ${INTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -p udp -i ${INTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -j ACCEPT
+-A FORWARD -p udp -i ${IFDMZ} -o ${INTIF} -s ${DMZ_DNS_IP} --sport 53 -j ACCEPT
+-A FORWARD -p tcp -i ${IFDMZ} -o ${INTIF} -s ${DMZ_DNS_IP} --sport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -p icmp -i ${INTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} -j ACCEPT
+
+{%   end %}\
+
+{% end %}\
+{% if 'DMZsmtp' in funchosts %}\
+# allow communication from DNS server in DMZ
+-A INPUT -p tcp -i ${IFDMZ} -s ${DMZ_DNS_IP} --sport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p udp -i ${IFDMZ} -s ${DMZ_DNS_IP} --sport 53 -j ACCEPT
+-A INPUT -p icmp -i ${IFDMZ} -s ${DMZ_DNS_IP} -j ACCEPT
+{% end %}\
+
+# allow DNS server access from Secure subnet
+${ALLOW_ROUTER_DNS_ACCESS_IN('INPUT', IFSEC, IPSEC)}
+{% if ('DMZsmtp' in funchosts) or ('DMZsmtp' in funchosts) %}\
+# allow communication from SSH servers in DMZ
+{%   if 'DMZsmtp' in funchosts %}\
+-A INPUT -p tcp -i ${IFDMZ} -s ${DMZ_DNS_IP} --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{%   end %}\
+{%   if 'DMZwww' in funchosts %}\
+-A INPUT -p tcp -i ${IFDMZ} -s ${DMZ_HTTP_IP} --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{%   end %}\
+{%   if 'DMZwww-test' in funchosts %}\
+-A INPUT -p tcp -i ${IFDMZ} -s ${DMZ_HTTP_TEST_IP} --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{%   end %}\
+{% end %}\
+
+# allow communication from SSH clients/servers in Secure network
+-A INPUT -p tcp -i ${IFSEC} --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p tcp -i ${IFSEC} --dport 22 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+
+{% if external_vpn is not None %}\
+# process the input chain for the VPN interface
+-A INPUT -j VPNINPUT
+
+{% end %}\
+{% if metadata.Properties['firewall.xml'].xdata.find('input') is not None %}\
+# extra INPUT rules from the firewall.xml
+{%   for inrule in metadata.Properties['firewall.xml'].xdata.findall('input') %}\
+-A INPUT ${inrule.text}
+{%   end %}\
+
+{% end %}\
+# LOG REJECTED INPUTS
+-A INPUT -j LOG --log-level 4
+
+# Catch-all rule, reject anything else
+-A INPUT -s ${UNIVERSE} -d ${UNIVERSE} -j REJECT
+
+
+####################################################
+# OUTPUT: Outgoing traffic from various interfaces #
+####################################################
+
+# Workaround bug in netfilter
+-A OUTPUT -m conntrack -p icmp --ctstate INVALID -j DROP
+
+# Loopback interface is valid.
+-A OUTPUT -o lo -s ${UNIVERSE} -d ${UNIVERSE} -j ACCEPT
+
+# Local interfaces, any source going to local net is valid
+{% if extif_enabled %}\
+${ACCEPT_INTERNAL_OUTPUT_FROM_IP('OUTPUT', EXTIP)}
+{% end %}\
+{% if intif_enabled %}\
+${ACCEPT_INTERNAL_OUTPUT_FROM_IP('OUTPUT', INTIP)}
+{% end %}\
+# local interface, MASQ server source going to the local net is valid
+-A OUTPUT -o ${IFPUB} -s ${IPPUB} -d ${NETPUB} -j ACCEPT
+-A OUTPUT -o ${IFSEC} -s ${IPSEC} -d ${NETSEC} -j ACCEPT
+-A OUTPUT -o ${IFDMZ} -s ${IPDMZ} -d ${NETDMZ} -j ACCEPT
+
+# outgoing to local net on remote interface, stuffed routing, deny
+{% if extif_enabled %}\
+${REJECT_STUFFED_ROUTING_ON_IF('OUTPUT', EXTIF)}
+{% end %}\
+{% if intif_enabled %}\
+${REJECT_STUFFED_ROUTING_ON_IF('OUTPUT', INTIF)}
+{% end %}\
+
+# anything else outgoing on remote interface is valid
+{% if extif_enabled %}\
+-A OUTPUT -o ${EXTIF} -s ${EXTIP} -d ${UNIVERSE} -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+-A OUTPUT -o ${INTIF} -s ${INTIP} -d ${UNIVERSE} -j ACCEPT
+{% end %}\
+
+# Internal interface, DHCP traffic accepted
+-A OUTPUT -o ${IFPUB} -p tcp -s ${IPPUB} --sport 67 -d 255.255.255.255 --dport 68 -j ACCEPT
+-A OUTPUT -o ${IFPUB} -p udp -s ${IPPUB} --sport 67 -d 255.255.255.255 --dport 68 -j ACCEPT
+-A OUTPUT -o ${IFSEC} -p tcp -s ${IPSEC} --sport 67 -d 255.255.255.255 --dport 68 -j ACCEPT
+-A OUTPUT -o ${IFSEC} -p udp -s ${IPSEC} --sport 67 -d 255.255.255.255 --dport 68 -j ACCEPT
+
+# allow established communication to SSH servers in Secure network
+-A OUTPUT -p tcp -o ${IFSEC} --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A OUTPUT -p tcp -o ${IFSEC} --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# allow DNS server access from Secure subnet
+${ALLOW_ROUTER_DNS_ACCESS_OUT('OUTPUT', IFSEC, IPSEC)}\
+
+{% if external_vpn is not None %}\
+# process the output chain for the VPN interface
+-A OUTPUT -j VPNOUTPUT
+
+{% end %}\
+{% if metadata.Properties['firewall.xml'].xdata.find('output') is not None %}\
+# extra OUTPUT rules from the firewall.xml
+{%   for outrule in metadata.Properties['firewall.xml'].xdata.findall('output') %}\
+-A OUTPUT ${outrule.text}
+{%   end %}\
+
+{% end %}\
+# LOG REJECTED OUTPUTS
+-A OUTPUT -j LOG --log-level 4
+
+# Catch all rule, all other outgoing is denied and logged. 
+-A OUTPUT -s ${UNIVERSE} -d ${UNIVERSE} -j REJECT
+
+######################################################
+# FORWARD: Routed traffic between various interfaces #
+######################################################
+
+{% if pub_dhcp is not None and slow_down_dynamic_hosts %}\
+# randomly drop the packets for dynamic (unregistered) hosts
+-A FORWARD -i ${IFPUB} -o ${EXTIF} -m iprange --src-range=${pub_dhcp[0]}-${pub_dhcp[1]} -m statistic --mode random --probability 0.11 -j DROP
+-A FORWARD -i ${EXTIF} -o ${IFPUB} -m iprange --dst-range=${pub_dhcp[0]}-${pub_dhcp[1]} -m statistic --mode random --probability 0.11 -j DROP
+
+{% end %}\
+# forward icmp packets to anywhere
+-A FORWARD -i ${IFDMZ} -p icmp -d ${UNIVERSE} -j ACCEPT
+-A FORWARD -i ${IFPUB} -p icmp -d ${UNIVERSE} -j ACCEPT
+
+{%   if 'DMZsmtp' in funchosts %}\
+# access DNS servers from the DMZ DNS server
+{% if extif_enabled %}\
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -p tcp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -p udp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --dport 53 -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -p tcp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -p udp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --dport 53 -j ACCEPT
+{% end %}\
+
+# allow DNS replies by the DMZ DNS server
+{% if extif_enabled %}\
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -p tcp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --sport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -p udp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --sport 53 -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -p tcp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --sport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -p udp -s ${DMZ_DNS_IP} -d ${UNIVERSE} --sport 53 -j ACCEPT
+{% end %}\
+
+{% end %}\
+# Accept solicited tcp packets
+{% if extif_enabled %}\
+${ACCEPT_SOLICITED_ON_EXTERNAL_IF('FORWARD', EXTIF)}\
+{% end %}\
+{% if intif_enabled %}\
+${ACCEPT_SOLICITED_ON_EXTERNAL_IF('FORWARD', INTIF)}\
+{% end %}\
+{% python
+all_interfaces=[IFPUB,IFSEC,IFDMZ]
+%}\
+{% for if1 in all_interfaces %}\
+{%   for if2 in all_interfaces %}\
+{%     if if1 == if2 %}\
+-A FORWARD -i $if1 -o $if2 -j ACCEPT
+{%     end %}\
+{%     if if1 > if2 %}\
+-A FORWARD -i $if1 -o $if2 -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+-A FORWARD -i $if2 -o $if1 -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+{%     end %}\
+{%   end %}\
+{% end %}\
+
+${ACCEPT_FORWARDING_FROM_IF('FORWARD', IFSEC)}\
+
+{% python
+all_interfaces=[IFPUB,IFSEC]
+%}\
+{% for if1 in all_interfaces %}\
+{%   for if2 in all_interfaces %}\
+{%     if if1 > if2 %}\
+-A FORWARD -p tcp -i $if1 -o $if2 --dport 22 -j ACCEPT
+-A FORWARD -p tcp -i $if2 -o $if1 --dport 22 -j ACCEPT
+{%     end %}\
+{%   end %}\
+{% end %}\
+-A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_MYSQL_IP} --dport 3306 -j ACCEPT
+{% if 'ltsp' in funchosts %}\
+-A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_TFTP_IP} --dport 9571 -j ACCEPT
+-A FORWARD -p udp -i ${IFSEC} -o ${IFPUB} -d ${PUB_TFTP_IP} --dport 69 -j ACCEPT
+-A FORWARD -p udp -i ${IFPUB} -o ${IFSEC} -s ${PUB_TFTP_IP} --dport 1024 -j ACCEPT
+-A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_NBD_IP} --dport 10809 -j ACCEPT
+{% end %}\
+{% if 'proxy' in funchosts %}\
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_PRX_IP} --dport 3142 -j ACCEPT
+{% end %}\
+-A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} --dport 22 -j ACCEPT
+{% if auth_in_DMZ %}\
+# Access to authentication/authorization servers from within DMZ
+# is enabled in firewall.xml.
+${ACCEPT_AUTH_FROM_IF('FORWARD', IFDMZ)}\
+# end of auth services access
+{% end %}\
+{% if mail_in_DMZ %}\
+# This is for encrypted authenticated mail submission (via SMTPS or SUBMISSION)
+# and reading (via IMAPS protocol with ManageSieve support) as enabled in
+# firewall.xml .
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_SMTPS_IP} --dport 465 -j ACCEPT
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_SMTPS_IP} --dport 587 -j ACCEPT
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_IMAPS_IP} --dport 993 -j ACCEPT
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_IMAPS_IP} --dport 4190 -j ACCEPT
+# This is for access to the logotype images and configuration options, 
+# which are accessible via http at the configuration server.
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_BCFG2_IP} --dport 80 -j ACCEPT
+{% end %}\
+# Enable NTP access from DMZ
+-A FORWARD -p udp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_NTP_IP} --dport 123 -j ACCEPT
+{% if 'mail' in funchosts %}\
+# this is the standard unencrypted mail delivery port, allowing to
+# send the messages to itadmins as well as messages from the robots,
+# specified in firewall.xml .
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_SMTP_IP} --dport 25 -j ACCEPT
+{%   if mail_in_DMZ and len(robot_servers)>0 %}\
+# here we open communication to robot hosts in DMZ
+{%     for srv in robot_servers %}\
+-A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -s ${PUB_SMTP_IP} -d ${srv} --dport 25 -j ACCEPT
+{%     end %}\
+{%   end %}\
+{% end %}\
+{% if 'monitor' in funchosts %}\
+-A FORWARD -p udp -i ${IFPUB} -o ${IFDMZ} -s ${PUB_MONITOR_IP} --dport 161 -j ACCEPT
+# access OSSEC agents in DMZ
+-A FORWARD -p udp -i ${IFPUB} -o ${IFDMZ} -s ${PUB_MONITOR_IP} --dport 1514 -j ACCEPT
+-A FORWARD -p udp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_MONITOR_IP} --dport 1514 -j ACCEPT
+{% end %}\
+{% if 'DMZsmtp' in funchosts and 'mail' in funchosts %}\
+# allow mail delivery between DMZ SMTP and the main mail server
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_SMTP_IP} -d ${PUB_SMTP_IP} --dport 10025 -j ACCEPT
+-A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -s ${PUB_SMTP_IP} --dport 25 -j ACCEPT
+{% end %}\
+{% if 'DMZwww' in funchosts %}\
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_HTTP_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
+{% end %}\
+{% if 'DMZwww-test' in funchosts %}\
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_HTTP_TEST_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
+{% end %}\
+{% if 'DMZsmtp' in funchosts %}\
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_DNS_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
+{% end %}\
+
+# allow Zabbix proxy to connect to the main Zabbix server
+-A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_BCFG2_IP} --dport 10051 -j ACCEPT
+
+{% if 'DMZsmtp' in funchosts %}\
+# access DNS server in DMZ from router
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -p udp -i ${IFDMZ} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -j ACCEPT
+-A FORWARD -p icmp -i ${IFDMZ} -o ${IFDMZ} -d ${DMZ_DNS_IP} -j ACCEPT
+{% end %}\
+
+{%   if 'DMZwww' in funchosts %}\
+# allow access to WWW server from PUB
+-A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_HTTP_IP} --dport 80 -j ACCEPT
+-A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_HTTP_IP} --dport 443 -j ACCEPT
+{%   end %}\
+{%   if 'DMZwww-test' in funchosts %}\
+# allow access to WWW server from PUB
+-A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_HTTP_TEST_IP} --dport 80 -j ACCEPT
+-A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_HTTP_TEST_IP} --dport 443 -j ACCEPT
+{%   end %}\
+
+# Reject ALL PORT 25 outgoing connections, except for legal ones
+{% if intif_enabled and 'mail' in funchosts %}\
+-A FORWARD -p tcp -i ${IFPUB} -s ${PUB_SMTP_IP} --dport 25 -j ACCEPT
+{% end %}\
+{% if extif_enabled %}\
+{%   if 'DMZsmtp' in funchosts %}
+-A FORWARD -p tcp -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_SMTP_IP} --sport 25 -j ACCEPT
+{%   end %}\
+{%   if 'DMZsmtp' in funchosts and smtp_outbound_relay==DMZ_SMTP_IP %}\
+# mail server sends mail via DMZsmtp, which makes outbound port 25 connections
+-A FORWARD -p tcp -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_SMTP_IP} --dport 25 -j ACCEPT
+{%   end %}\
+{%   if 'DMZsmtp' in funchosts and smtp_outbound_relay!=DMZ_SMTP_IP %}\
+# mail server sends mail via smtp_outbound_relay
+-A FORWARD -p tcp -i ${IFPUB} -o ${EXTIF} -s ${PUB_SMTP_IP} -d ${smtp_outbound_relay} --dport 25 -j ACCEPT
+# DMZsmtp sends mail (mainly internally-generated bounces) via smtp_outbound_relay
+-A FORWARD -p tcp -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_SMTP_IP} -d ${smtp_outbound_relay} --dport 25 -j ACCEPT
+{%   end %}\
+{% end %}\
+{% if extif_enabled %}\
+-A FORWARD -p tcp -o ${EXTIF} --dport 25 -j LOG --log-level 4
+-A FORWARD -p tcp -o ${EXTIF} --dport 25 -j REJECT
+{% end %}\
+{% if intif_enabled %}\
+-A FORWARD -p tcp -o ${INTIF} --dport 25 -j LOG --log-level 4
+-A FORWARD -p tcp -o ${INTIF} --dport 25 -j REJECT
+{% end %}\
+
+# Forward packets from the internal network to the Internet
+{% if extif_enabled %}\
+-A FORWARD -i ${IFPUB} -o ${EXTIF} -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+-A FORWARD -i ${IFPUB} -o ${INTIF} -j ACCEPT
+{% end %}\
+
+{% if external_vpn is not None %}\
+# process the forward chain for the VPN interface
+-A FORWARD -j VPNFORWARD
+
+{% end %}\
+{% if metadata.Properties['firewall.xml'].xdata.find('forward') is not None %}\
+# extra FORWARD rules from the firewall.xml
+{%   for forwardrule in metadata.Properties['firewall.xml'].xdata.findall('forward') %}\
+-A FORWARD ${forwardrule.text}
+{%   end %}\
+
+{% end %}\
+# LOG REJECTED FORWARDS
+-A FORWARD -j LOG --log-level 4
+
+# Catch-all REJECT rule
+-A FORWARD -j REJECT
+
+COMMIT
+
+
+###########################
+# Address translations (only; there is no actual forwarding done here)
+###########################
+*nat
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+{% if 'DMZwww' in funchosts %}\
+# Forward incoming WWW requests to DMZ servers
+{%   if extif_enabled and not intif_enabled %}\
+-A PREROUTING -p tcp -d ${EXTIP} --dport 80 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_HTTP_IP}:80
+-A PREROUTING -p tcp -d ${EXTIP} --dport 443 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_HTTP_IP}:443
+{%   end %}\
+{%   if intif_enabled and not extif_enabled %}\
+-A PREROUTING -p tcp -d ${INTIP} --dport 80 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_HTTP_IP}:80
+-A PREROUTING -p tcp -d ${INTIP} --dport 443 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_HTTP_IP}:443
+{%   end %}\
+{%   if extif_enabled and intif_enabled %}\
+# TODO: implement forwarding of WWW when both internal and external
+#       interfaces are enabled.
+{%   end %}\
+
+{% end %}\
+{% if extif_enabled and not intif_enabled and ('mail' in funchosts) and ('DMZsmtp' in funchosts) %}\
+# NAT SMTP traffic from the external interface to DMZ
+-A PREROUTING -p tcp -d ${EXTIP} --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_SMTP_IP}:25
+{% end %}\
+{% if intif_enabled and not extif_enabled and ('mail' in funchosts)%}\
+# NAT SMTP traffic from the intranet interface to the mail server in PUB
+-A PREROUTING -p tcp -d ${INTIP} --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_SMTP_IP}:10025
+{% end %}\
+{% if extif_enabled and intif_enabled and ('mail' in funchosts)%}\
+# TODO: implement forwarding of SMTP when both internal and external
+#       interfaces are enabled.
+{% end %}\
+
+{% if 'DMZsmtp' in funchosts %}\
+{%   if extif_enabled %}\
+# NAT external DNS requests to DMZ
+-A PREROUTING -p tcp -d ${EXTIP} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_DNS_IP}:53
+-A PREROUTING -p udp -d ${EXTIP} --dport 53 -j DNAT --to ${DMZ_DNS_IP}:53
+{%   end %}\
+{%   if intif_enabled %}\
+# NAT intranet DNS requests to DMZ
+-A PREROUTING -p tcp -d ${INTIP} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_DNS_IP}:53
+-A PREROUTING -p udp -d ${INTIP} --dport 53 -j DNAT --to ${DMZ_DNS_IP}:53
+{%   end %}\
+
+{% end %}\
+{% if ssh_to_ltsp %}\
+{%   if extif_enabled %}\
+# NAT external SSH requests to LTSP
+-A PREROUTING -p tcp -d ${EXTIP} --dport 22 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_LTSP_IP}:22
+{%   end %}\
+{%   if intif_enabled %}\
+# NAT intranet SSH requests to LTSP
+-A PREROUTING -p tcp -d ${INTIP} --dport 22 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_LTSP_IP}:22
+{%   end %}\
+
+{% end %}\
+{% if metadata.Properties['firewall.xml'].xdata.find('prerouting') is not None %}\
+# extra PREROUTING rules from the firewall.xml
+{%   for preroutingrule in metadata.Properties['firewall.xml'].xdata.findall('prerouting') %}\
+-A PREROUTING ${preroutingrule.text}
+{%   end %}\
+
+{% end %}\
+{% if extif_enabled or intif_enabled %}\
+# IP-Masquerade
+{%   if extif_enabled %}\
+-A POSTROUTING -o ${EXTIF} -j MASQUERADE
+{% end %}\
+{%   if intif_enabled %}\
+-A POSTROUTING -o ${INTIF} -j MASQUERADE
+{% end %}\
+
+COMMIT
+
+###########################
+# Packet mangling
+###########################
+*mangle
+:PREROUTING ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+
+{% if transparent_proxy and 'proxy' in funchosts %}\
+-A PREROUTING -j ACCEPT -p tcp --dport 80 -s ${PUB_PRX_IP}
+-A PREROUTING -j MARK --set-mark 3 -p tcp --dport 80
+
+{% end %}\
+COMMIT

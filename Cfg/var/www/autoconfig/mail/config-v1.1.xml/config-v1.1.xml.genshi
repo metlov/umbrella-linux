@@ -1,0 +1,43 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+<?xml version="1.0"?>
+<clientConfig version="1.1">
+    <emailProvider id="${system_name}">
+      <domain>${domain_name}</domain>
+
+      <displayName>${long_name} Mail</displayName>
+      <displayShortName>${system_name.upper()}</displayShortName>
+
+      <incomingServer type="imap">
+         <hostname>${imap_server}</hostname>
+         <port>143</port>
+         <socketType>SSL</socketType>
+         <username>%EMAILLOCALPART%</username>
+         <authentication>GSSAPI</authentication>
+      </incomingServer>
+
+      <outgoingServer type="smtp">
+         <hostname>${smtp_server}</hostname>
+         <port>587</port>
+         <socketType>STARTTLS</socketType> <!-- see above -->
+         <username>%EMAILLOCALPART%</username>
+         <authentication>GSSAPI</authentication>
+         <!-- remove the following and leave to client/user? -->
+         <addThisServer>true</addThisServer>
+         <useGlobalPreferredServer>true</useGlobalPreferredServer>
+      </outgoingServer>
+
+      <identity>
+         <!-- needed? -->
+         <!-- We don't want Verizon setting "Organization: Verizon"
+              for its customers -->
+      </identity>
+
+    </emailProvider>
+
+    <clientConfigUpdate url="https://www.example.com/config/mozilla.xml" />
+
+</clientConfig>

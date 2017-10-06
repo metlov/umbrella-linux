@@ -1,0 +1,130 @@
+<Rules priority="0">
+<Group name='ubuntu-trusty'>
+<Service name='acpid' status='on' type='upstart'/>
+<Service name='apache2' status='on' type='deb'/>
+<Service name='apt-cacher-ng' status='on' type='deb'/>
+<Service name='arpwatch' status='ignore' type='deb'/>
+<Service name='atd' status='on' type='upstart'/>
+<Service name='autofs' status='on' type='upstart'/>
+<Service name='bind9' status='on' type='deb'/>
+<Service name='bootmisc.sh' status='on' type='upstart'/>
+<Service name='cachefilesd' status='on' type='deb'/>
+<Service name='cgroup-lite' status='on' type='upstart'/>
+<Service name='checkfs.sh' status='on' type='upstart'/>
+<Service name='checkroot-bootclean.sh' status='on' type='upstart'/>
+<Service name='checkroot.sh' status='on' type='upstart'/>
+<Service name='container-detect' status='off' type='upstart'/>
+<Service name='cron' status='on' type='upstart'/>
+<Service name='dbus' status='on' type='upstart'/>
+<Service name='dkimproxy' status='ignore' type='deb'/>
+<Service name='dmesg' status='off' type='upstart'/>
+<Service name='dovecot' status='on' type='upstart'/>
+<Service name='ejabberd' status='ignore' type='deb'/>
+<Service name='failsafe' status='off' type='upstart'/>
+<Service name='flush-early-job-log' status='off' type='upstart'/>
+<Service name='friendly-recovery' status='ignore' type='upstart'/>
+<Service name='grub-common' status='on' type='deb'/>
+<Service name='hostname' status='off' type='upstart'/>
+<Service name='hwclock' status='off' type='upstart'/>
+<Service name='hwclock-save' status='off' type='upstart'/>
+<Service name='iptables-persistent' status='ignore' type='deb'/>
+<Service name='irqbalance' status='ignore' type='upstart'/>
+<Group name='router'>
+    <Service name='isc-dhcp-server' status='on' type='upstart'/>
+</Group>
+<Group name='ltsp'>
+    <Service name='isc-dhcp-server' status='off' type='upstart'/>
+</Group>
+<Service name='isc-dhcp-server6' status='off' type='upstart'/>
+<Service name='killprocs' status='ignore' type='deb' restart='false' install='false'/>
+<Service name='kmod' status='off' type='upstart'/>
+<Service name='krb5-kdc' status='on' type='deb'/>
+<Service name='krb5-admin-server' status='on' type='deb'/>
+<Service name='libnss-ldap' status='ignore' type='deb'/>
+<Service name='mdadm' status='on' type='deb'/>
+<Service name='mysql' status='on' type='upstart'/>
+<Service name='nbd-server' status='ignore' type='deb'/>
+<Service name='networking' status='on' type='upstart'/>
+<Group name='nfs'>
+    <Service name='nfs-kernel-server' status='on' type='deb'/>
+</Group>
+<Group name='nfs' negate='true'>
+    <Service name='nfs-kernel-server' status='ignore' type='deb'/>
+</Group>
+<Service name='nscd' status='on' type='deb'/>
+<Service name='ntp' status='ignore' type='deb'/>
+<Service name='ondemand' status='ignore' type='deb' restart='false' install='false'/>
+<Service name='ossec' status='on' type='deb'/>
+<Service name='passwd' status='off' type='upstart'/>
+<Service name='plymouth' status='off' type='upstart'/>
+<Service name='plymouth-log' status='off' type='upstart'/>
+<Service name='plymouth-ready' status='ignore' type='upstart'/>
+<Service name='plymouth-shutdown' status='off' type='upstart'/>
+<Service name='plymouth-splash' status='off' type='upstart'/>
+<Service name='plymouth-stop' status='ignore' type='upstart'/>
+<Service name='plymouth-upstart-bridge' status='off' type='upstart'/>
+<Service name='postfix' status='on' type='deb'/>
+<Service name='procps' status='off' type='upstart'/>
+<Service name='psad' status='ignore' type='deb'/>
+<Service name='rc' status='ignore' type='upstart'/>
+<Service name='rc-sysinit' status='ignore' type='upstart'/>
+<Service name='rc.local' status='ignore' type='deb' restart='false' install='false'/>
+<Service name='rcDCC' status='ignore' type='deb'/>
+<Service name='rcS' status='off' type='upstart'/>
+<Service name='resolvconf' status='ignore' type='upstart'/>
+<Service name='rsync' status='ignore' type='deb'/>
+<Service name='rsyslog' status='on' type='upstart'/>
+<Service name='saslauthd' status='on' type='deb'/>
+<Service name='schroot' status='ignore' type='deb'/>
+<Service name='setvtrgb' status='off' type='upstart'/>
+<Service name='shutdown' status='off' type='upstart'/>
+<Service name='stunnel4' status='on' type='deb'/>
+<Service name='slapd' status='on' type='deb'/>
+<Service name='smartmontools' status='ignore' type='deb'/>
+<Service name='single' status='ignore' type='deb' restart='false' install='false'/>
+<Service name='spamassassin' status='on' type='deb'/>
+<Service name='ssh' status='on' type='upstart'/>
+<Service name='startpar-bridge' status='ignore' type='upstart'/>
+<Service name='squid3' status='on' type='upstart'/>
+<Service name='tftpd-hpa' status='on' type='upstart'/>
+<Service name='udev' status='on' type='upstart'/>
+<Service name='udev-fallback-graphics' status='off' type='upstart'/>
+<Service name='udev-finish' status='off' type='upstart'/>
+<Service name='udevmonitor' status='off' type='upstart'/>
+<Service name='udevtrigger' status='off' type='upstart'/>
+<Service name='upstart-file-bridge' status='on' type='upstart'/>
+<Service name='upstart-socket-bridge' status='on' type='upstart'/>
+<Service name='upstart-udev-bridge' status='on' type='upstart'/>
+<Service name='ureadahead' status='ignore' type='upstart'/>
+<Service name='ureadahead-other' status='ignore' type='upstart'/>
+<Service name='wait-for-state' status='ignore' type='upstart'/>
+<Service name='xinetd' status='on' type='upstart'/>
+
+<!-- console services -->
+<Service name='console' status='off' type='upstart'/>
+<Service name='console-font' status='off' type='upstart'/>
+<Service name='console-setup' status='off' type='upstart'/>
+<Service name='control-alt-delete' status='off' type='upstart'/>
+<Service name='tty1' status='on' type='upstart'/>
+<Service name='tty2' status='on' type='upstart'/>
+<Service name='tty3' status='on' type='upstart'/>
+<Service name='tty4' status='on' type='upstart'/>
+<Service name='tty5' status='on' type='upstart'/>
+<Service name='tty6' status='on' type='upstart'/>
+
+<!-- nfsv4 services -->
+<Service name='gssd' status='on' type='upstart'/>
+<Service name='idmapd' status='on' type='upstart'/>
+<Service name='statd' status='on' type='upstart'/>
+<!-- <Service name='portmap' status='on' type='upstart'/> -->
+<Service name='gssd-mounting' status='ignore' type='upstart'/>
+<Service name='idmapd-mounting' status='ignore' type='upstart'/>
+<Service name='statd-mounting' status='ignore' type='upstart'/>
+<Service name='portmap-wait' status='ignore' type='upstart'/>
+<Service name='rpcbind' status='on' type='upstart'/>
+<Service name='rpcbind-boot' status='off' type='upstart'/>
+
+<Service name='fusioninventory-agent' status='ignore' type='deb'/>
+<Service name='nagios3' status='on' type='deb'/>
+</Group>
+</Rules>

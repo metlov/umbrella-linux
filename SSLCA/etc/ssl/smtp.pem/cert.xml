@@ -1,0 +1,5 @@
+<CertInfo>
+  <Cert format="pem" key="/etc/ssl/private/smtp.key"
+        ca="default" days="365" c="RU" st="UNDEFINED" l="World"
+        o="Umbrella Linux Internal Certificate"/>
+</CertInfo>

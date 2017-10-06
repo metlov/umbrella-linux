@@ -1,0 +1,8 @@
+<FileInfo>
+  <Group name='config'>
+      <Info owner="root" group="bcfg2" mode="0640" sensitive="true"/>
+  </Group>
+  <Group name='monitor'>
+      <Info owner="root" group="www-data" mode="0640" sensitive="true"/>
+  </Group>
+</FileInfo>

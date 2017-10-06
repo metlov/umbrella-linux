@@ -1,0 +1,21 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+splitnet=str(wholenet).split('.')
+%}\
+zone "${splitnet[1]}.${splitnet[0]}.in-addr.arpa." {
+	type master;
+	
+	file "/var/cache/bind/${splitnet[1]}.${splitnet[0]}.in-addr.arpa.";
+	
+	
+};
+zone "${domain_name}." {
+	type master;
+	
+	file "/var/cache/bind/${domain_name}.";
+	
+	
+};

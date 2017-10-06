@@ -1,0 +1,11 @@
+<Bundle name='timezone'>
+<Group name='ubuntu'>
+    <Package name='tzdata'/>
+    <Path name='/etc/timezone'/>
+    <Action name='reconfigure-TZ'/>
+    <Group name='monitor'>
+        <!-- on monitor we update the OSSEC timezone manually -->
+        <Action name='ossec-reconfigure-TZ'/>
+    </Group>
+</Group>
+</Bundle>

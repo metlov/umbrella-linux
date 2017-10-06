@@ -1,0 +1,1 @@
+export KRB5_KTNAME="/etc/ejabberd/xmpp.keytab"

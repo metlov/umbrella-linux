@@ -1,0 +1,2 @@
+# this is necessary to enable cyrillic in console
+FRAMEBUFFER=Y

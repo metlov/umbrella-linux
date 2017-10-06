@@ -1,0 +1,26 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+
+import os.path
+custom_motd=os.path.isfile(repo+'/Local/Cfg/etc/motd/motd.genshi')
+%}\
+{% if custom_motd %}\
+{% include ${repo+'/Local/Cfg/etc/motd/motd.genshi'} %}\
+{% end %}\
+{% if not custom_motd %}\
+{# ----  Here is the default version of motd ----- #}\
+{%   if ssh_to_ltsp and ('ltsp' in metadata.groups) %}\
+Welcome to ${long_name} !
+
+A few useful commands are: mc, w, ssh, lynx, pine. Their description
+can be obtained using the man command, like "man pine" (in the command
+line, unqoted). To view the man page use PgUp/PgDn for scrolling and "q"
+to quit, the other commands of the text scroller are described on its
+manual page: "man less".
+
+{%   end %}\
+{% end %}\

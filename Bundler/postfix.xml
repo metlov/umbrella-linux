@@ -1,0 +1,61 @@
+<Bundle name='postfix'>
+<Group name='ubuntu'>
+    <Package name='postfix'/>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="postfix" home="/var/spool/postfix" shell="/bin/false" gecos="" uid="204" group="postfix">
+            <MemberOf>ssl-cert</MemberOf>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="postdrop" gid="210"/>
+        <BoundPOSIXGroup name="postfix" gid="209"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="postfix" home="/var/spool/postfix" shell="/bin/false" gecos="" uid="628" group="postfix">
+            <MemberOf>ssl-cert</MemberOf>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="postdrop" gid="627"/>
+        <BoundPOSIXGroup name="postfix" gid="628"/>
+    </Group>
+    <Path name='/etc/postfix/master.cf'/>
+    <Path name='/etc/postfix/main.cf'/>
+    <Path name='/etc/aliases'/>
+    <Action name='newaliases'/>
+    <Path name='/etc/postfix/transport'/>
+    <Group name='mail'>
+        <Group name='ubuntu-trusty'>
+            <Package name='procmail'/>
+            <Path name='/etc/procmailrc'/>
+        </Group>
+        <Group name='ubuntu-xenial'>
+            <Package name='postfix-ldap'/>
+            <Path name='/etc/postfix/local_recipients.cf'/>
+            <Path name='/etc/postfix/alias_map.cf'/>
+            <Path name='/etc/postfix/alias_map_forward.cf'/>
+            <Path name='/etc/postfix/alias_map_dupforw.cf'/>
+            <Path name='/etc/postfix/sender_login_map.cf'/>
+            <!-- distribution lists for posix groups -->
+            <Path name='/etc/postfix/alias_map_distlist.cf'/>
+            <Path name='/etc/postfix/alias_map_distlist_ext.cf'/>
+            <Path name='/etc/postfix/map_uid_mail.cf'/>
+        </Group>
+        <Path name='/etc/postfix/sender_login_map'/>
+        <Path name='/etc/ssl/smtp.pem'/>
+        <Path name='/etc/ssl/private/smtp.key'/>
+        <Path name='/etc/postfix/admin_recipients'/>
+        <Path name='/etc/postfix/local_clients'/>
+        <Path name='/etc/postfix/robot_clients'/>
+        <Path name='/etc/postfix/DMZ_relay'/>
+    </Group>
+    <Group name='DMZsmtp'>
+          <Package name='postfix-ldap'/>
+          <Path name='/etc/postfix/access'/>
+          <Group name='auth-krb5'>
+              <!-- only if LDAP access is enabled in DMZ -->
+              <Path name='/etc/postfix/relay_recipients.cf'/>
+          </Group>
+          <Path name='/etc/postfix/relay_users'/>
+          <Path name='/etc/postfix/client_restrictions'/>
+          <Path name='/etc/postfix/access'/>
+    </Group>
+    <Service name='postfix'/>
+</Group>
+</Bundle>

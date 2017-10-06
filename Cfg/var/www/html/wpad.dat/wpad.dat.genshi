@@ -1,0 +1,36 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/35_organization.py')
+netset=set()
+netset |= set(intnets.values())
+netset |= set(netclasses_obj.iterkeys())
+%}\
+function FindProxyForURL(url, host)
+{
+{% if not transparent_proxy %}\
+  return "DIRECT";
+{% end %}\
+{% if transparent_proxy %}\
+ if (isPlainHostName(host) || dnsDomainIs(host, ".${domain_name}") ||
+{%   for net in sorted(netset, key=str) %}\
+        isInNet (host, "${str(net.network())}", "${str(net.netmask())}") ||
+{%   end %}\
+        isInNet (host, "127.0.0.0", "255.0.0.0")
+    )
+  return "DIRECT";
+ else
+{%   if upstream_proxy is None and 'proxy' in funchosts %}\
+  return "PROXY ${funchosts['proxy']}:3128";
+{%   end %}\
+{%   if upstream_proxy is None and not 'proxy' in funchosts %}\
+  return "DIRECT";
+{%   end %}\
+{%   if upstream_proxy is not None %}\
+  return "PROXY ${upstream_proxy}";
+{%   end %}\
+{% end if transparent_proxy %}\
+}

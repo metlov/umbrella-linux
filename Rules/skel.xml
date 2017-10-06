@@ -1,0 +1,10 @@
+<Rules priority="0">
+    <Path type='directory' name="/etc/skel/Видео" mode='700' owner='root' group='root'/>
+    <Path type='directory' name="/etc/skel/Документы" mode='700' owner='root' group='root'/>
+    <Path type='directory' name="/etc/skel/Загрузки" mode='700' owner='root' group='root'/>
+    <Path type='directory' name="/etc/skel/Изображения" mode='700' owner='root' group='root'/>
+    <Path type='directory' name="/etc/skel/Музыка" mode='700' owner='root' group='root'/>
+    <Path type='directory' name="/etc/skel/Общедоступные" mode='755' owner='root' group='root'/>
+    <Path type='directory' name="/etc/skel/Рабочий стол" mode='700' owner='root' group='root'/>
+    <Path type='directory' name="/etc/skel/Шаблоны" mode='700' owner='root' group='root'/>
+</Rules>

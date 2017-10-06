@@ -1,0 +1,33 @@
+{% python
+from genshi.template import TemplateError
+import ipcalc
+import hashlib
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+id = 0
+%}\
+{% for server in metadata.Properties['umbrella.xml'].xdata.findall('server') %}\
+{% python
+srvname=server.find('name').text
+srvfunc=server.find('function').text
+%}\
+{%   if srvfunc != 'monitor' %}\
+{% python
+id += 1
+idstr = "%03d" % (id,)
+
+dkim_key = metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text
+srvkey1 = hashlib.md5(dkim_key+idstr+srvname).hexdigest()
+srvkey2 = hashlib.md5(dkim_key+str(funcifs[srvfunc])+srvfunc).hexdigest()
+
+%}\
+{%     if 'monitor' in metadata.groups %}\
+${idstr} ${srvname}.${domain_name} ${funcifs[srvfunc]} ${srvkey1}${srvkey2}
+{%     end %}\
+{%     if 'monitor' not in metadata.groups and metadata.hostname == srvname+'.'+domain_name %}\
+${idstr} ${srvname}.${domain_name} ${funcifs[srvfunc]} ${srvkey1}${srvkey2}
+{%     end %}\
+{%   end %}\
+{% end %}\

@@ -1,0 +1,36 @@
+{% python
+import socket
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+%}\
+option rfc3442-classless-static-routes code 121 = array of unsigned integer 8;
+
+request subnet-mask, broadcast-address, time-offset, routers,
+	domain-name, domain-name-servers, domain-search, host-name,
+	dhcp6.name-servers, dhcp6.domain-search,
+	netbios-name-servers, netbios-scope, interface-mtu,
+	rfc3442-classless-static-routes, ntp-servers,
+	dhcp6.fqdn, dhcp6.sntp-servers;
+{% if entry is not None %}\
+{%   for iftype in iftypes %}\
+{% python
+       interface = entry.find(iftype)
+%}\
+{%       if interface is not None %}\
+{% python
+           dev = interface.find('dev').text
+           ip = interface.find('ip')
+%}\
+{%           if ip is None or ip.text is None or not ip.text.strip() %}\
+interface "${dev}" {
+    supersede domain-name-servers 127.0.0.1;
+    supersede domain-search "${domain_name}.";
+    supersede domain-name "${domain_name}";
+}
+{%           end %}\
+{%       end %}\
+{%   end %}\
+{% end %}\

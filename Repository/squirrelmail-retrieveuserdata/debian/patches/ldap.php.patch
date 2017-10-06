@@ -1,0 +1,32 @@
+diff -c orig/ldap.php new/ldap.php
+*** orig/ldap.php	2003-02-18 21:58:49.000000000 +0300
+--- new/ldap.php	2017-06-24 23:33:16.151448858 +0300
+***************
+*** 29,35 ****
+             $SQRUD_LDAP_MAIL_ALIASES, $SQRUD_LDAP_MAIL_ALIAS_PREFIX,
+  	   $ldap_server;
+  	   
+!     require_once('../config/config.php');
+  
+      $ldap_error = 0;
+      $common_name = '';
+--- 29,35 ----
+             $SQRUD_LDAP_MAIL_ALIASES, $SQRUD_LDAP_MAIL_ALIAS_PREFIX,
+  	   $ldap_server;
+  	   
+!     require_once('/etc/squirrelmail/config.php');
+  
+      $ldap_error = 0;
+      $common_name = '';
+***************
+*** 57,62 ****
+--- 57,65 ----
+        $ldap_error = 1;
+      }
+  
++     // Set protocol version K.L.M.
++     ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
++ 
+      // Bind to server
+      if ($ldap_error == 0) {
+        if ($SQRUD_LDAP_ANONYMOUS_BIND == 1) {

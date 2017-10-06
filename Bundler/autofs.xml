@@ -1,0 +1,11 @@
+<Bundle name='autofs'>
+<Group name='ubuntu'>
+    <!-- starting with Precise homes are mounted via autofs    -->
+    <!-- this works even if no nfs server is defined, in which -->
+    <!-- case they are bound to local /home                    -->
+    <Path name='/etc/auto.master'/>
+    <Path name='/etc/auto.nfs'/>
+    <Package name='autofs'/>
+    <Service name='autofs'/>
+</Group>
+</Bundle>

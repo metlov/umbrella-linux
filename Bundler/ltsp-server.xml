@@ -1,0 +1,92 @@
+<Bundle name='ltsp-server'>
+<Group name='ubuntu'>
+    <Package name='irqbalance'/>
+    <Service name='irqbalance'/>
+    <Package name='tftpd-hpa'/>
+    <Path name='/etc/default/tftpd-hpa'/>
+    <Service name='tftpd-hpa'/>
+    <Package name='schroot'/>
+    <Group name='ubuntu-trusty'>
+        <!-- These are specific to trusty-->
+        <Package name='ltsp-server-standalone'/>
+        <Package name='isc-dhcp-server'/>
+        <BoundPOSIXUser name="dhcpd" home="/var/run" shell="/bin/false" gecos="" uid="113" group="dhcpd"/>
+        <BoundPOSIXGroup name="dhcpd" gid="120"/>
+        <BoundPOSIXUser name="nbd" home="/etc/nbd-server" shell="/bin/false" gecos="" uid="114" group="nbd"/>
+        <BoundPOSIXGroup name="nbd" gid="121"/>
+        <BoundPOSIXUser name="tftp" home="/var/lib/tftpboot" shell="/bin/false" gecos="tftp daemon,,," uid="112" group="tftp"/>
+        <BoundPOSIXGroup name="tftp" gid="119"/>
+        <Service name='isc-dhcp-server'/>
+        <Service name='isc-dhcp-server6'/>
+        <Service name='schroot'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="tftp" home="/var/lib/tftpboot" shell="/bin/false" gecos="tftp daemon,,," uid="632" group="tftp"/>
+        <BoundPOSIXGroup name="tftp" gid="632"/>
+    </Group>
+<!--    <Group name='ubuntu-xenial'>
+        <Package name='ltsp-server'/>
+        <Package name='libasound2-plugins'/>
+        <Package name='nbd-server'/>
+        <BoundPOSIXUser name="nbd" home="/etc/nbd-server" shell="/bin/false" gecos="" uid="631" group="nbd"/>
+        <BoundPOSIXGroup name="nbd" gid="631"/>
+        <Package name='squashfs-tools'/>
+        <Package name='libxtables11'/>
+    </Group> -->
+    <Group name='ubuntu-trusty'>
+        <!-- these can also be installed on xenial to enable LTSP -->
+        <!-- but they will not be, since xenial now uses x2go     -->
+        <Service name='nbd-server'/>
+        <Package name='xinetd'/>
+        <Service name='xinetd'/>
+        <Package name='ltspfs'/>
+        <Package name='ldm-server'/>
+        <Package name='iproute'/>
+        <Package name='libatm1'/>
+    </Group>
+    <Path name='/etc/X11/Xsession.d/40-ltsp-server'/>
+    <Group name='ubuntu-xenial'>
+        <!-- Om xenial the terminals are now based on x2go -->
+        <BoundPOSIXGroup name="x2gouser" gid="655"/>
+        <BoundPOSIXGroup name="x2goprint" gid="656"/>
+        <BoundPOSIXGroup name="x2godesktopsharing" gid="657"/>
+        <BoundPOSIXUser name="x2gouser" home="/var/lib/x2go" shell="/bin/false" gecos="" uid="655" group="x2gouser"/>
+        <BoundPOSIXUser name="x2goprint" home="/var/spool/x2goprint" shell="/bin/false" gecos="" uid="656" group="x2goprint"/>
+        <Package name='x2goserver'/>
+        <Package name='x2goserver-xsession'/>
+        <Package name='x2goserver-fmbindings'/>
+        <Package name='x2goserver-extensions'/>
+        <Package name='x2goserver-printing'/>
+        <!-- There is a bug in x2go agent package, which requires to move the -->
+        <!-- folder /usr/lib/x86_64-linux-gnu/nx to /usr/lib/i386-linux-gnu/nx-->
+        <!-- in i386 architecture. Hopefully this will be fixed in future.    -->
+        <Package name='x2goserver-x2goagent'/>
+        <Package name='x2godesktopsharing'/>
+        <Package name='x2gothinclient-management'/>
+        <Package name='cups-x2go'/>
+        <Package name='sshfs'/>
+        <Package name='x11-xfs-utils'/>
+        <Path name="/etc/X11/Xsession.d/90krenew" altsrc="/etc/profile.d/krenew.sh"/>
+        <Path name="/etc/x2go/x2go_logout.d/020_killall.sh"/>
+        <Path name="/usr/local/bin/umbrella-session"/>
+        <Path name="/opt/x2gothinclient/etc/x2gothinclient-displaymanager_start"/>
+        <Path name="/opt/x2gothinclient/etc/x2gothinclient_sessions"/>
+        <Package name='pxelinux'/>
+        <Path name='/usr/local/bin/umbrella-update-tftpboot'/>
+        <Path name='/var/lib/tftpboot/default.cfg'/>
+        <Path name='/var/lib/tftpboot/local-boot.cfg'/>
+        <Path name='/var/lib/tftpboot/memtest.cfg'/>
+        <Path name='/var/lib/tftpboot/netinstall.cfg'/>
+        <Path name='/var/lib/tftpboot/x2go-tce.cfg'/>
+        <Path name='/etc/x2go/x2gothinclient_settings'/>
+        <!-- add tmpfs mounts to permit Jessy booting -->
+        <Path name='/opt/x2gothinclient/chroot/etc/fstab'/>
+        <Action name='update-tftpboot'/>
+    </Group>
+<!--    <Path name='/etc/xinetd.d/nbdrootd'/>
+    <Path name='/etc/xinetd.d/nbdswapd'/> -->
+    <Path name='/etc/cron.hourly/killold'/>
+    <Package name='unison'/>
+    <Package name='unison-gtk'/>
+</Group>
+</Bundle>

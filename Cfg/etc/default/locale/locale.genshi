@@ -1,0 +1,12 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+{% choose %}\
+{% when  'server' in metadata.groups %}\
+LANG="en_US.UTF-8"
+{% end %}\
+{% otherwise %}\
+LANG="${language}.UTF-8"
+{% end %}\
+{% end %}\

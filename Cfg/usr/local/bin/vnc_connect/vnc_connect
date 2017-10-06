@@ -1,0 +1,39 @@
+#!/bin/bash
+scriptname=`basename $0`
+if [[ $# != 1 ]]; then
+  echo "Usage:"
+  echo "    $scriptname host[:display]"
+  echo
+  echo "If display is omitted it defaults to 0 (the first display)."
+  echo
+  echo "Examples:"
+  echo "    $scriptname host"
+  echo "    $scriptname host:1"
+  exit 1
+fi
+
+viewoption=""
+if [[ $scriptname == "vnc_view" ]]; then
+  viewoption="-viewonly"
+fi
+hostdisplay=$1
+colons="${hostdisplay//[^:]}"
+if [[ ${#colons} > 1 ]]; then
+  echo "There must be at most one colon in host specification."
+  exit 1
+fi
+port=5900
+vnchost=$hostdisplay
+if [[ ${#colons} = 1 ]]; then
+  vnchost="${hostdisplay%:*}"
+  display="${hostdisplay#*:}"
+  if [ "$display" -eq "$display" ] 2>/dev/null; then
+      port=$(( 10#$display + $port ))
+    else
+      echo "The display number must be an integer."
+      exit 1
+  fi
+fi
+localport=`python -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()'`
+ssh -f -o ExitOnForwardFailure=yes -L $localport:localhost:$port $vnchost sleep 5
+ssvncviewer $viewoption localhost::$localport

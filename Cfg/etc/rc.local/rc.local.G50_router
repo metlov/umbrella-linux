@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+# minimal routing with no restrictions
+#iptables -t nat -A POSTROUTING -o eth2 -j MASQUERADE
+#iptables -A FORWARD -i eth0 -j ACCEPT
+
+# full firewall
+/etc/init.d/firewall
+
+exit 0

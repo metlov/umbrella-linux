@@ -1,0 +1,19 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+#!/bin/bash
+/usr/bin/x2goclient --no-menu \\
+                    --maximize \\
+                    --link=lan \\
+                    --kbd-type=auto \\
+                    --set-kbd=1 \\
+                    --geometry=fullscreen \\
+                    --thinclient \\
+                    --haltbt \\
+                    --read-exports-from=~x2gothinclient/export \\
+                    --external-login=~x2gothinclient/logins \\
+                    --background=/etc/x2go/x2gothinclient-displaymanager_background.svg \\
+                    --no-session-edit \\
+                    --session=${realm_name} \\
+                    --add-to-known-hosts &

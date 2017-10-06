@@ -1,0 +1,47 @@
+<Bundle name='login'>
+<Group name='ubuntu'>
+    <Package name='libpam-ldap'/>
+    <Package name='libpam-modules'/>
+    <Group name='ubuntu-trusty'>
+      <Package name='libpam-foreground'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+      <Package name='libpam-ck-connector'/>
+      <Package name='libpam-systemd'/>
+    </Group>
+    <Package name='libpam-ccreds'/>
+    <Package name='libpam-cracklib'/>
+    <Package name='wamerican'/>
+    <Package name='sudo-ldap'/>
+    <Path name='/etc/sudo-ldap.conf'/>
+    <Path name='/etc/pam.d/common-account'/>
+    <Path name='/etc/pam.d/common-auth'/>
+    <Path name='/etc/pam.d/common-password'/>
+    <Path name='/etc/pam.d/common-session'/>
+    <Path name='/etc/pam.d/common-session-noninteractive'/>
+    <Group name='ubuntu-trusty'>
+        <Group name='ltsp'>
+            <Path name='/etc/pam_session.sh'/>
+        </Group>
+    </Group>
+    <Path name='/etc/security/access.conf'/>
+    <Path name='/etc/sudoers'/>
+    <Path name='/etc/security/group.conf'/>
+    <!-- USB devices whitelisting -->
+    <Path name='/etc/udev/rules.d/99-blacklist.rules'/>
+    <Path name='/etc/udev/rules.d/99-whitelist.rules'/>
+    <Group name='router' negate='true'>
+        <!-- not on servers where users login using SSH with plain passwords -->
+        <!-- the problem seems to be that SSH goes to user's home before the -->
+        <!-- ticket is obtained and krenew seems to interfere with this      -->
+        <!-- may be I just need to disable PK on these servers for users     -->
+        <!-- somehow -->
+        <!-- automatically renew Kerberos tickets -->
+        <Path name='/etc/profile.d/krenew.sh'/>
+        <Path name='/etc/profile.d/krenew.csh'/>
+        <!-- the following script stops krenew on logout in bash -->
+        <!-- TODO: need the equivalent scripts for other shells -->
+        <Path name='/etc/bash.bash_logout'/>
+    </Group>
+</Group>
+</Bundle>

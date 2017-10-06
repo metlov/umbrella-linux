@@ -1,0 +1,40 @@
+<Bundle name='www-homepages'>
+<Group name='ubuntu'>
+        <!-- implements the user's WWW homepages replication from PUB   -->
+        <!-- to DMZ and their serving by the main WWW server.           -->
+        <!-- see firewall.xml <www_homes> tag for the details on how to -->
+        <!-- enable.  -->
+    <Group name='nfs'>
+        <Group name='www-homepages'>
+            <!-- NFS server initiates the ~/public_html/ replication -->
+            <Package name='inotify-tools'/>
+            <Package name='lsyncd'/>
+            <Package name='lua-filesystem'/>
+            <Path name='/etc/lsyncd/lsyncd.conf.lua'/>
+            <Path name="/var/log/lsyncd"/>
+            <Path name="/etc/logrotate.d/lsyncd"/>
+            <Service name='lsyncd'/>
+            <!-- increase the number of inotify watches (may need further tweaking) -->
+            <Path name='/etc/sysctl.d/90-inotify.conf'/>
+            <Path name="/usr/local/bin/umbrella-pubhtml-watch"/>
+            <Path name="/etc/systemd/system/umbrella-pubhtml-watch.service"/>
+            <Service name='umbrella-pubhtml-watch'/>
+        </Group>
+    </Group>
+    <Group name='DMZwww'>
+        <Path name="/var/www/www-homepages"/>
+        <Path name='/etc/apache2/mods-available/userdir.conf'/>
+        <Path name='/etc/apache2/mods-enabled/userdir.conf'/>
+        <Path name='/etc/apache2/mods-enabled/userdir.load'/>
+        <Service name='apache2'/>
+        <Group name='www-homepages'>
+            <!-- WWW server in DMZ receives the ~/public_html/ replication -->
+            <!-- and serves the webhomes.                                  -->
+            <BoundPOSIXGroup name="www-homepages" gid="659"/>
+            <BoundPOSIXUser name="www-homepages" home="/var/www/www-homepages" shell="/bin/bash" gecos="Umbrella WWW homepages updater" uid="659" group="www-homepages"/>
+            <Path name="/var/www/www-homepages/.ssh"/>
+            <Path name="/var/www/www-homepages/.ssh/authorized_keys2"/>
+        </Group>
+    </Group>
+</Group>
+</Bundle>

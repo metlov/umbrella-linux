@@ -1,0 +1,17 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+# Maps the addresses to the UIDs of who can send mail from them.
+{% for domain in domain_names %}\
+
+# ${domain} domain
+/^itadmins@${domain}$$/           ${', '.join(admins)}
+/^postmaster@${domain}$$/        ${', '.join(admins)}
+{%   for alias in metadata.Properties['mailaliases.xml'].xdata.findall('mailalias') %}\
+/^${alias.find('alias').text}@${domain}$$/            ${', '.join([user.text for user in alias.findall('user')])}
+{%   end %}\
+{%   if 'ubuntu-trusty' in metadata.groups %}\
+/^(.*)@${domain}$$/              $$1
+{%   end %}\
+{% end %}\

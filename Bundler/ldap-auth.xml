@@ -1,0 +1,16 @@
+<Bundle name='ldap-auth'>
+<Group name='ubuntu'>
+    <Package name='libsasl2-modules'/>
+    <Package name='libsasl2-modules-gssapi-mit'/>
+    <Package name='libnss-ldap'/>
+    <Package name='ldap-utils'/>  <!-- not obligatory, but convevenient -->
+    <Service name='libnss-ldap'/>
+    <Path name='/etc/ldap.conf'/>
+    <Path name='/etc/ldap/ldap.conf'/>
+    <Path name='/etc/nsswitch.conf'/>
+    <!-- cache user database for offline use -->
+    <Package name='libnss-db'/>
+    <Package name='nss-updatedb'/>
+    <Path name='/etc/cron.hourly/nssupdate'/>
+</Group>
+</Bundle>

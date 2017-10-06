@@ -1,0 +1,11 @@
+<Bundle name='tor'>
+<Group name='ubuntu'>
+    <Group name='sworkstation' negate='true'>
+        <Path name='/etc/apt/sources.list.d/tor.list'/>
+        <Path name='/etc/apt/trusted.gpg.d/torproject.gpg'/>
+        <Package name='torchat'/>
+        <Package name='torbrowser-launcher'/>
+        <Service name='tor'/>
+    </Group>
+</Group>
+</Bundle>

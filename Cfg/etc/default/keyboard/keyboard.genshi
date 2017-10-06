@@ -1,0 +1,19 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+XKBMODEL="pc105"
+{% choose %}\
+{%   when language.startswith('ru') %}\
+XKBLAYOUT="us,ru"
+XKBVARIANT=","
+XKBOPTIONS="grp:ctrl_shift_toggle,grp:lwin_switch,grp_led:scroll"
+{%   end %}\
+{%   otherwise %}\
+XKBLAYOUT="us"
+XKBVARIANT="intl"
+XKBOPTIONS=""
+{%   end %}\
+{% end %}\
+
+BACKSPACE="guess"

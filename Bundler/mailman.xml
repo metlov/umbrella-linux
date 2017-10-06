@@ -1,0 +1,9 @@
+<Bundle name='mailman'>
+    <Package name='mailman'/>
+    <Path name='/etc/apache2/conf-available/mailman.conf'/>
+    <Path name='/etc/apache2/conf-enabled/mailman.conf'/>
+    <Path name='/etc/apache2/mods-enabled/cgid.conf'/>
+    <Path name='/etc/apache2/mods-enabled/cgid.load'/>
+    <Path name='/etc/mailman/mm_cfg.py'/>
+    <Service name='postfix'/>
+</Bundle>

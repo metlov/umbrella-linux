@@ -1,0 +1,2 @@
+KRB5_KTNAME=/etc/ejabberd/xmpp.keytab
+EJABBERD_PID_PATH=/run/ejabberd/ejabberd.pid

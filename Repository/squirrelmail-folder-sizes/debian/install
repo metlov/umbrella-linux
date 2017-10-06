@@ -1,0 +1,4 @@
+*.php   usr/share/squirrelmail/plugins/folder_sizes/
+*.pot   usr/share/squirrelmail/plugins/folder_sizes/
+version usr/share/squirrelmail/plugins/folder_sizes/
+xgetpot usr/share/squirrelmail/plugins/folder_sizes/

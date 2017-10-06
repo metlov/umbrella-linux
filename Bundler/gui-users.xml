@@ -1,0 +1,105 @@
+<Bundle name="gui-users">
+<Group name='ubuntu-trusty'>
+    <BoundPOSIXGroup name="bluetooth" gid="117"/>
+    <Group name='ltsp'>
+        <BoundPOSIXGroup name="colord" gid="122"/>
+        <BoundPOSIXGroup name="debian-tor" gid="118"/>
+        <BoundPOSIXGroup name="fuse" gid="112"/>
+        <BoundPOSIXGroup name="lightdm" gid="115"/>
+        <BoundPOSIXGroup name="lpadmin" gid="109"/>
+        <BoundPOSIXGroup name="messagebus" gid="108"/>
+        <BoundPOSIXGroup name="nopasswdlogin" gid="116"/>
+        <BoundPOSIXGroup name="pulse" gid="123"/>
+        <BoundPOSIXGroup name="pulse-access" gid="124"/>
+        <BoundPOSIXGroup name="rtkit" gid="125"/>
+        <BoundPOSIXGroup name="saned" gid="126"/>
+        <BoundPOSIXGroup name="scanner" gid="111"/>
+        <BoundPOSIXGroup name="utempter" gid="113"/>
+<!--        <BoundPOSIXGroup name="whoopsie" gid="114"/> -->
+    </Group>
+    <Group name='ltsp' negate='true'>
+    <Group name='workstation'>
+        <BoundPOSIXGroup name="colord" gid="118"/>
+        <BoundPOSIXGroup name="debian-tor" gid="124"/>
+        <BoundPOSIXGroup name="fuse" gid="106"/>
+        <BoundPOSIXGroup name="lightdm" gid="111"/>
+        <BoundPOSIXGroup name="lpadmin" gid="108"/>
+        <BoundPOSIXGroup name="messagebus" gid="105"/>
+        <BoundPOSIXGroup name="mlocate" gid="114"/>
+        <BoundPOSIXGroup name="nopasswdlogin" gid="112"/>
+        <BoundPOSIXGroup name="pulse" gid="119"/>
+        <BoundPOSIXGroup name="pulse-access" gid="120"/>
+        <BoundPOSIXGroup name="rtkit" gid="122"/>
+        <BoundPOSIXGroup name="saned" gid="123"/>
+        <BoundPOSIXGroup name="scanner" gid="110"/>
+        <BoundPOSIXGroup name="utempter" gid="116"/>
+        <BoundPOSIXGroup name="whoopsie" gid="121"/> 
+    </Group>
+    </Group>
+
+    <Group name='ltsp'>
+        <BoundPOSIXUser name="colord" home="/var/lib/colord" shell="/bin/false" gecos="colord colour management daemon,,," uid="115" group="colord"/>
+        <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="105" group="nogroup"/>
+        <BoundPOSIXUser name="debian-tor" home="/var/lib/tor" shell="/bin/false" gecos="" uid="110" group="debian-tor"/>
+        <BoundPOSIXUser name="festival" home="/home/festival" shell="/bin/false" gecos="" uid="111" group="audio"/>
+        <BoundPOSIXUser name="hplip" home="/var/run/hplip" shell="/bin/false" gecos="HPLIP system user,,," uid="109" group="lp"/>
+        <BoundPOSIXUser name="lightdm" home="/var/lib/lightdm" shell="/bin/false" gecos="Light Display Manager" uid="107" group="lightdm"/>
+        <BoundPOSIXUser name="messagebus" home="/var/run/dbus" shell="/bin/false" gecos="" uid="103" group="messagebus"/>
+        <BoundPOSIXUser name="pulse" home="/var/run/pulse" shell="/bin/false" gecos="PulseAudio daemon,,," uid="116" group="pulse">
+            <MemberOf group="audio"/>
+        </BoundPOSIXUser>
+        <BoundPOSIXUser name="rtkit" home="/proc" shell="/bin/false" gecos="RealtimeKit,,," uid="117" group="rtkit"/>
+        <BoundPOSIXUser name="saned" home="/home/saned" shell="/bin/false" gecos="" uid="118" group="saned">
+            <MemberOf group="scanner"/>
+        </BoundPOSIXUser>
+        <BoundPOSIXUser name="usbmux" home="/home/usbmux" shell="/bin/false" gecos="usbmux daemon,,," uid="104" group="plugdev"/>
+<!--        <BoundPOSIXUser name="whoopsie" home="/nonexistent" shell="/bin/false" gecos="" uid="106" group="whoopsie"/> -->
+    </Group>
+
+    <Group name='ltsp' negate='true'>
+    <Group name='workstation'>
+        <BoundPOSIXUser name="colord" home="/var/lib/colord" shell="/bin/false" gecos="colord colour management daemon,,," uid="108" group="colord"/>
+        <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="106" group="nogroup"/>
+        <BoundPOSIXUser name="debian-tor" home="/var/lib/tor" shell="/bin/false" gecos="" uid="117" group="debian-tor"/>
+        <BoundPOSIXUser name="festival" home="/home/festival" shell="/bin/false" gecos="" uid="116" group="audio"/>
+        <BoundPOSIXUser name="hplip" home="/var/run/hplip" shell="/bin/false" gecos="HPLIP system user,,," uid="114" group="lp"/>
+        <BoundPOSIXUser name="lightdm" home="/var/lib/lightdm" shell="/bin/false" gecos="Light Display Manager" uid="105" group="lightdm"/>
+        <BoundPOSIXUser name="messagebus" home="/var/run/dbus" shell="/bin/false" gecos="" uid="102" group="messagebus"/>
+        <BoundPOSIXUser name="pulse" home="/var/run/pulse" shell="/bin/false" gecos="PulseAudio daemon,,," uid="110" group="pulse">
+            <MemberOf group="audio"/>
+        </BoundPOSIXUser>
+        <BoundPOSIXUser name="rtkit" home="/proc" shell="/bin/false" gecos="RealtimeKit,,," uid="112" group="rtkit"/>
+        <BoundPOSIXUser name="saned" home="/home/saned" shell="/bin/false" gecos="" uid="113" group="saned">
+            <MemberOf group="scanner"/>
+        </BoundPOSIXUser>
+        <BoundPOSIXUser name="usbmux" home="/home/usbmux" shell="/bin/false" gecos="usbmux daemon,,," uid="103" group="plugdev"/>
+        <BoundPOSIXUser name="whoopsie" home="/nonexistent" shell="/bin/false" gecos="" uid="111" group="whoopsie"/>
+    </Group>
+    </Group>
+</Group>
+<Group name='ubuntu-xenial'>
+    <BoundPOSIXUser name="colord" home="/var/lib/colord" shell="/bin/false" gecos="colord colour management daemon,,," uid="638" group="colord"/>
+    <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="644" group="nogroup"/>
+    <BoundPOSIXUser name="festival" home="/home/festival" shell="/bin/false" gecos="" uid="641" group="audio"/>
+    <BoundPOSIXUser name="hplip" home="/var/run/hplip" shell="/bin/false" gecos="HPLIP system user,,," uid="642" group="lp"/>
+    <BoundPOSIXUser name="lightdm" home="/var/lib/lightdm" shell="/bin/false" gecos="Light Display Manager" uid="633" group="lightdm"/>
+    <BoundPOSIXGroup name="lightdm" gid="633"/>
+    <BoundPOSIXGroup name="nopasswdlogin" gid="634"/>
+    <BoundPOSIXUser name="pulse" home="/var/run/pulse" shell="/bin/false" gecos="PulseAudio daemon,,," uid="639" group="pulse">
+        <MemberOf group="audio"/>
+    </BoundPOSIXUser>
+    <BoundPOSIXUser name="rtkit" home="/proc" shell="/bin/false" gecos="RealtimeKit,,," uid="643" group="rtkit"/>
+    <BoundPOSIXUser name="saned" home="/var/lib/saned" shell="/bin/false" gecos="" uid="645" group="saned">
+        <MemberOf group="scanner"/>
+    </BoundPOSIXUser>
+    <BoundPOSIXUser name="usbmux" home="/var/lib/usbmux" shell="/bin/false" gecos="usbmux daemon,,," uid="649" group="plugdev"/>
+    <BoundPOSIXGroup name="scanner" gid="636"/>
+    <BoundPOSIXGroup name="lpadmin" gid="637"/>
+    <BoundPOSIXGroup name="colord" gid="638"/>
+    <BoundPOSIXGroup name="pulse" gid="639"/>
+    <BoundPOSIXGroup name="pulse-access" gid="640"/>
+    <BoundPOSIXGroup name="rtkit" gid="643"/>
+    <BoundPOSIXGroup name="saned" gid="645"/>
+    <BoundPOSIXGroup name="bluetooth" gid="648"/>
+</Group>
+</Bundle>

@@ -1,0 +1,25 @@
+<Rules priority="0">
+<Group name='DMZwww'>
+    <Group name='www-homepages'>
+        <Path type='directory' name="/var/www/www-homepages" mode='755' owner='www-homepages' group='www-homepages'/>
+        <Path type='directory' name="/var/www/www-homepages/.ssh" mode='700' owner='www-homepages' group='www-homepages'/>
+        <Path type='symlink' name='/etc/apache2/mods-enabled/userdir.conf' to='../mods-available/userdir.conf'/>
+        <Path type='symlink' name='/etc/apache2/mods-enabled/userdir.load' to='../mods-available/userdir.load'/>
+    </Group>
+    <Group name='www-homepages' negate='true'>
+        <Path type='nonexistent' name="/var/www/www-homepages" recursive='true'/>
+        <Path type='nonexistent' name='/etc/apache2/mods-enabled/userdir.conf'/>
+        <Path type='nonexistent' name='/etc/apache2/mods-enabled/userdir.load'/>
+    </Group>
+</Group>
+<Group name='nfs'>
+    <Group name='www-homepages'>
+        <Path type='directory' name="/var/log/lsyncd" mode='755' owner='root' group='root'/>
+        <Service name='lsyncd' status='on' type='systemd'/>
+        <Service name='umbrella-pubhtml-watch' status='on' type='systemd'/>
+    </Group>
+    <Group name='www-homepages' negate='true'>
+        <Path type='nonexistent' name="/var/log/lsyncd" recursive='true'/>
+    </Group>
+</Group>
+</Rules>

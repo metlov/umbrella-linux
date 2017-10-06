@@ -1,0 +1,31 @@
+<Bundle name='ossec'>
+<Group name='ubuntu'>
+    <Group name='ossec-client'>
+        <BoundPOSIXUser name="ossec" home="/var/ossec/" shell="/bin/false" gecos="" uid="651" group="ossec"/>
+        <BoundPOSIXGroup name="ossec" gid="651"/>
+        <Group name='ossec-server'>
+            <BoundPOSIXUser name="ossecm" home="/var/ossec/" shell="/bin/false" gecos="" uid="652" group="ossec"/>
+            <BoundPOSIXUser name="ossecr" home="/var/ossec/" shell="/bin/false" gecos="" uid="653" group="ossec"/>
+            <Package name='ossec-hids'/>
+
+            <!-- install local rules and decoders -->
+            <Path name='/var/ossec/etc/local_decoder.xml'/>
+            <Path name='/var/ossec/rules/local_rules.xml'/>
+
+            <!-- fix OSSEC server's timezone -->
+            <Action name='ossec-reconfigure-TZ'/>
+        </Group>
+        <Group name='ossec-server' negate='true'>
+            <Package name='ossec-hids-agent'/>
+        </Group>
+        <Service name='ossec'/>
+        <Path name='/var/ossec/etc/client.keys'/>
+        <Path name='/var/ossec/etc/ossec.conf'/>
+        <!-- fix log rotation -->
+        <Path name='/var/ossec/logs/archives'/>
+        <Path name='/etc/logrotate.d/ossec-hids'/>
+        <!-- fix errors in host-deny script -->
+        <Path name='/var/ossec/active-response/bin/host-deny.sh'/>
+    </Group>
+</Group>
+</Bundle>

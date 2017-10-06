@@ -1,0 +1,15 @@
+<Bundle name='arpwatch'>
+<Group name='ubuntu'>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="arpwatch" home="/var/lib/arpwatch" shell="/bin/sh" gecos="ARP Watcher,,," uid="105" group="arpwatch"/>
+        <BoundPOSIXGroup name="arpwatch" gid="111"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="arpwatch" home="/var/lib/arpwatch" shell="/bin/sh" gecos="ARP Watcher,,," uid="624" group="arpwatch"/>
+        <BoundPOSIXGroup name="arpwatch" gid="624"/>
+        <Path name='/etc/default/arpwatch'/>
+    </Group>
+    <Package name='arpwatch'/>
+    <Service name='arpwatch'/>
+</Group>
+</Bundle>

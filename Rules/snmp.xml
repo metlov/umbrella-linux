@@ -1,0 +1,8 @@
+<Rules priority="0">
+<Group name='ubuntu-xenial'>
+  <Service name='snmpd' status='on' type='systemd'/>
+</Group>
+<Group name='ubuntu-trusty'>
+  <Service name='snmpd' status='on' type='deb'/>
+</Group>
+</Rules>

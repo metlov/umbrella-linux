@@ -1,0 +1,15 @@
+{% python
+from lxml import etree
+execfile(repo+'/Python/40_usbdev.py')
+%}\
+{% if hasblacklist and not (haswhitelist and len(whitelistdevices)==0) %}\
+# whitelist specific devices
+{% for dev in whitelistdevices %}\
+{% python
+devstr = ''
+for attr in dev.iterchildren(etree.Element):
+  devstr+='ATTR{'+str(attr.tag)+'}=="'+str(attr.text)+'", '
+%}\
+ACTION=="add", ${devstr}RUN+="/bin/sh -c 'echo 1 >/sys$$DEVPATH/authorized'"
+{% end %}\
+{% end %}\

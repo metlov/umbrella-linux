@@ -1,0 +1,42 @@
+<Rules priority="0">
+<Service name='bcfg2' status='on' type='deb'/>
+<Group name='www-server-ssl'>
+    <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.conf' to='../mods-available/ssl.conf'/>
+    <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.load' to='../mods-available/ssl.load'/>
+</Group>
+<Group name='config'>
+    <Group name='ubuntu-trusty'>
+        <Service name='bcfg2-server' status='on' type='deb'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Service name='bcfg2-server' status='on' type='systemd'/>
+    </Group>
+    <Path type='directory' name="/var/run/bcfg2-server" mode='755' owner='bcfg2' group='bcfg2'/>
+    <Path type='symlink' name='/etc/apache2/conf-enabled/bcfg2.conf' to='../conf-available/bcfg2.conf'/>
+    <Path type='symlink' name='/etc/apache2/sites-enabled/autoconfig.conf' to='../sites-available/autoconfig'/>
+    <Path type='symlink' name='/etc/apache2/sites-enabled/packages.conf' to='../sites-available/packages'/>
+
+    <!-- actions to compile python files -->
+    <Action timing='post' when='modified' name='compile-DjangoORM' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Reporting/Storage/DjangoORM.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-models' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Reporting/models.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-Core' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-Bundler' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Bundler.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-Cfg-init' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Cfg/__init__.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-Server-helpers' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugin/helpers.py' status='ignore'/>
+</Group>
+<Group name='monitor'>
+    <Path type='symlink' name='/etc/apache2/conf-enabled/bcfg2.conf' to='../conf-available/bcfg2.conf'/>
+    <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.conf' to='../mods-available/ssl.conf'/>
+    <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.load' to='../mods-available/ssl.load'/>
+    <Path type='symlink' name='/etc/apache2/mods-enabled/wsgi.conf' to='../mods-available/wsgi.conf'/>
+    <Path type='symlink' name='/etc/apache2/mods-enabled/wsgi.load' to='../mods-available/wsgi.load'/>
+    <!-- actions to compile python files -->
+    <Action timing='post' when='modified' name='compile-DjangoORM' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Reporting/Storage/DjangoORM.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-settings' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/settings.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-models' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Reporting/models.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-views' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Reporting/views.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-bcfg2_tags' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Reporting/templatetags/bcfg2_tags.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-Core' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py' status='ignore'/>
+    <Path type='symlink' name='/etc/systemd/system/bcfg2-server.service' to='/dev/null'/>
+</Group>
+</Rules>

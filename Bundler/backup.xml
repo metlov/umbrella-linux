@@ -1,0 +1,19 @@
+<Bundle name='backup' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+import socket
+execfile(repo+'/Python/00_baseparams.py')
+Dkeyid=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_keyid')
+Dpass=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_passphrase')
+Dopts=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_extra_options')
+Dtarget=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_target_url')
+duplicity_enabled=Dkeyid is not None and Dpass is not None
+duplicity_enabled=duplicity_enabled and Dopts is not None and Dtarget is not None
+?>
+<Group name='ubuntu'>
+    <py:if test="duplicity_enabled">
+        <Package name='duplicity-backup'/>
+        <Path name='/etc/duplicity-backup.conf'/>
+    </py:if>
+</Group>
+</Bundle>

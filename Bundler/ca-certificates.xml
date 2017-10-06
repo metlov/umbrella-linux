@@ -1,0 +1,5 @@
+<Bundle name='ca-certificates'>
+   <Package name='ca-certificates'/>
+    <Path name='/usr/local/share/ca-certificates/bcfg2ca.crt'/>
+    <Action name='update-ca-certificates'/>
+</Bundle>

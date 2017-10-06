@@ -1,0 +1,124 @@
+folder_sizes -- Version 1.5
+
+Description
+===========
+Shows a the list of folders in the same order (should be!) as the default left
+hand frame. Included are message count, unread count and total message size
+for each folder so you can tell where all your storage has gone.
+
+The details are shown either buy clicking a link that appears under the
+folder list (left frame), or when the 'On Folders page' option is selected,
+they appear after 'Subscribe/Unsubscribe' box on the 'Folders' page.
+
+Optionally (not by default though) shows totals for each sub-folder in a
+mailbox.
+
+Requirements
+============
+This plugin version requires SquirrelMail 1.4.0 or later version. For good
+internationalization support PHP 4.2+ with gettext extension is recommended.
+If gettext extension is not available, use of SquirrelMail 1.5.1+ is 
+recommended.
+
+
+Usage
+=====
+There are four options that are listed on the 'Folder Preferences' page.
+One is to place a link on the left hand frame, under the standard folder
+list, that when clicked displays your folder usage in the right frame. The
+default perference is to show this link.
+
+The next option controls style of "Folder Sizes" text in left_main.php 
+folder listing. It can be link or button.
+
+The third option is to include the folder size list on the 'Folders' page. I
+orignially had the list on the bottom of the 'Folders' page - but then
+realised that if you had a lot of folders, and wanted to add more this would
+be a real pain in the butt if your system was slowed down.
+
+The fourth option determines whether totals for each sub-folder are shown.
+
+If site admin wants to reduce number of options available to end users, 
+individual options can be enforced and removed in forced_prefs plugin.
+
+
+To Do
+=====
+
+1. Suggestions welcome.
+
+Changes
+=======
+
+v0.1     1-Apr-2002     Initial version
+v0.2     2-Apr-2002     Handles hierarchies (folders hold messages or
+                        other folders - not both).
+v0.3     7-Apr-2002	Parent folders are determined better with the
+                        'noinferiours' flag. Uses blank column for
+			indentation and include </TR> and </TD> for
+			browsers that can't understand stuff without them.
+			Added subtotals as an option. Added Unread count.
+v0.4     8-Apr-2002     Correctly shows folders that may contain both children
+                        and messages by using 'noselect' flag to exclude
+			counts, not 'noinferiours' as before.
+v1.0	27-Apr-2002	Fixed missing </TD> in header. As there are several
+			hundred downloads and only this one error reported I
+			think we can call this version 1.0 now.
+v1.1	17-Oct-2002	Works with register_gloabls on or off. Incorporated
+			Frode Nordahl's il8n support.
+v1.2	 9-Feb-2003	Works with Squirrelmail 1.4. Uses unformatted-disp
+			folder names so when all folders are under INBOX
+			things look nicer. Introduced option of having link
+			as a button instead of text.
+v1.3	13-Mar-2003	Solves small problem with config include conflicting
+			with some other plugins by using SM_PATH.
+v1.4	 7-Apr-2003	Works with official 1.4 release. Fetches messages in
+			batches to avoid PHP memory size problems. Also hoped
+			this fixes performance problems on some servers (UW).
+v1.5rc1 2006-05-01
+    - Changes in plugin maintainer. Plugin is maintained by SM-Plugins project
+      developers and copyrights are assigned to The SquirrelMail Project.
+    - Added SquirrelMail 1.5.2 support and optimized data fetching in 1.5.0+.
+      Update by Marc Groot Koerkamp.
+    - Set default depth values in order to fix PHP notices. Hardcoded numbers
+      are used instead of HEAD_BATCH constant (#859669).
+    - Options moved to SquirrelMail option widgets.
+    - Internal plugin functions removed from setup.php.
+    - Added GPL license file.
+    - Added folder_sizes_version function and version file.
+    - Added internationalization support.
+    - Fixed display of utf7-imap folder names and folders with html tags (#857192).
+    - $folder_sizes_link_button option moved from site configuration to user 
+      options. Site configuration file is removed.
+
+v.1.5   2006-05-24
+    - Fixed ANNOTATEMORE issues on Cyrus 2.1.x.
+
+Thanks
+======
+
+Thanks go to Edward Alfert, Gregory Gee, Julian Gomez and Christian Kleitsch
+for their testing efforts.
+
+Plugin was created by Robin Rainton <robin@rainton.com> 
+(http://rainton.com/fun/freeware). From 1.5 version it is stored on SM-Plugins 
+project site and maintained by project developers.
+
+
+Copyright
+=========
+Copyright (C) 2002-2003 Robin Rainton
+Copyright (c) 2006 The SquirrelMail Project Team
+ 
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+A copy of the GNU General Public License can be found on the
+Free Software Foundation website: http://gnu.org/

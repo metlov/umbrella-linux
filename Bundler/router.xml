@@ -1,0 +1,24 @@
+<Bundle name='router'>
+<Group name='ubuntu'>
+    <Package name='iptables'/>
+    <Package name='irqbalance'/>
+    <Service name='irqbalance'/>
+    <Package name='xauth'/> <!-- to enable X11 forwarding -->
+    <Path name='/etc/dhcp/dhclient.conf'/> <!-- override DHCP-supplied DNS -->
+    <Path name='/usr/local/bin/umbrella.sh'/>
+    <Path name='/etc/sysctl.d/90-conntrack.conf'/>
+    <!-- <Path name='/etc/sysctl.d/90-vmnet.conf'/> -->
+    <Path name='/etc/sysctl.d/90-router.conf'/>
+    <Path name='/etc/init.d/firewall'/>
+    <Path name='/etc/network/firewall.4rules'/>
+    <Path name='/etc/network/firewall.6rules'/>
+    <Path name='/etc/network/firewall_vpn.4rules'/>
+    <Path name='/etc/network/firewall_vpn.6rules'/>
+    <Path name='/etc/rc.local'/>
+    <Package name='iftop'/>
+
+    <!-- some utilities for troubleshooting -->
+    <Package name='arping'/>
+    <Package name='tcpdump'/>
+</Group>
+</Bundle>

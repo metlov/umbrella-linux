@@ -1,0 +1,14 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+nagios_pass=metadata.Properties['umbrella_keys.xml'].xdata.find('snmp_nagios_pass').text
+%}\
+; automatic login for check_snmp
+[check_snmp]
+protocol=3
+seclevel=authPriv
+authproto=SHA
+privproto=AES
+secname=nagios
+authpasswd=${nagios_pass}
+privpasswd=${nagios_pass}

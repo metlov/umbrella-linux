@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Umbrella
+Description=Theme for Umbrella Linux
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/umbrella-plymouth
+ScriptFile=/usr/share/plymouth/themes/umbrella/umbrella.script

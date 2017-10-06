@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+update-inetd --comment-chars "#disabled#" --disable poppassd
+update-inetd --group MAIL --add 'poppassd\tstream\ttcp\tnowait\troot\t/usr/sbin/tcpd\t/usr/sbin/kpoppassd'
+
+#DEBHELPER#
+

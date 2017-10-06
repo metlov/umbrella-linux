@@ -1,0 +1,13 @@
+#%PAM-1.0
+
+#@include common-auth
+auth    sufficient pam_krb5.so minimum_uid=1100 defer_pwchange
+auth    required   pam_deny.so
+
+#@include common-account
+account sufficient pam_krb5.so minimum_uid=1100
+account required   pam_deny.so
+
+#@include common-session
+session optional   pam_krb5.so minimum_uid=1100
+session required   pam_permit.so

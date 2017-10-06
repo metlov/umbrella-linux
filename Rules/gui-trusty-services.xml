@@ -1,0 +1,30 @@
+<Rules priority="0">
+<Group name='ubuntu-trusty'>
+<Service name='alsa-restore' status='off' type='upstart'/>
+<Service name='alsa-state' status='off' type='upstart'/>
+<Service name='alsa-store' status='off' type='upstart'/>
+<Service name='anacron' status='ignore' type='upstart'/>
+<Service name='apport' status='on' type='upstart'/>
+<Service name='binfmt-support' status='on' type='upstart'/>
+<Service name='bluetooth' status='ignore' type='upstart'/>
+<Service name='cryptdisks' status='ignore' type='upstart'/>
+<Service name='cryptdisks-udev' status='ignore' type='upstart'/>
+<Service name='cups' status='on' type='upstart'/>
+<Service name='cups-browsed' status='on' type='upstart'/>
+<Service name='ccpd-start' status='ignore' type='upstart'/>
+<Service name='gpu-manager' status='ignore' type='upstart'/>
+<Service name='lightdm' status='on' type='upstart'/>
+<Service name='modemmanager' status='on' type='upstart'/>
+<Service name='network-manager' status='on' type='upstart'/>
+<Service name='pppd-dns' status='ignore' type='deb'/>
+<Service name='pulseaudio' status='off' type='upstart'/>
+<Service name='rfkill-restore' status='off' type='upstart'/>
+<Service name='rfkill-store' status='off' type='upstart'/>
+<Service name='saned' status='on' type='deb'/>
+<Service name='systemd-logind' status='on' type='upstart'/>
+<Service name='usb-modeswitch-upstart' status='off' type='upstart'/>
+<Service name='whoopsie' status='off' type='upstart'/>
+
+<Service name='tor' status='on' type='deb'/>
+</Group>
+</Rules>

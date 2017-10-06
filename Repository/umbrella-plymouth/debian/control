@@ -1,0 +1,18 @@
+Source: umbrella-plymouth
+Section: unknown
+Priority: optional
+Maintainer: Konstantin L. Metlov <metlov@donfti.ru>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: http://www.donfti.ru/umbrella
+Vcs-Git: https://www.donfti.ru/umbrella.git
+
+Package: umbrella-plymouth
+Architecture: all
+Depends: plymouth, plymouth-label, umbrella-logo, ${misc:Depends}
+Description: Umbrella Linux boot logo theme for plymouth
+ Plymouth is an application that runs very early in the boot process (even
+ before the root filesystem is mounted!) that provides a graphical boot
+ animation while the boot process happens in the background.
+ .
+ This package contains the Umbrella Linux theme for Plymouth.

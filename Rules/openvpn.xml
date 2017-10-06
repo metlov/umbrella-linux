@@ -1,0 +1,3 @@
+<Rules priority="0">
+<Service name='openvpn' status='on' type='deb'/>
+</Rules>

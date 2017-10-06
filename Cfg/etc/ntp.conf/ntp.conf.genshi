@@ -1,0 +1,84 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+execfile(repo+'/Python/35_organization.py')
+%}\
+{% if 'ntp-server' in metadata.groups %}\
+driftfile /var/lib/ntp/ntp.drift
+
+statistics loopstats peerstats clockstats
+filegen loopstats file loopstats type day enable
+filegen peerstats file peerstats type day enable
+filegen clockstats file clockstats type day enable
+
+# use local clock as a backup
+server 127.127.1.0
+fudge  127.127.1.0 stratum 10
+
+# NTP servers
+{% if metadata.Properties['umbrella.xml'].xdata.find('ntpserver') is not None %}\
+{% for ntpserver in metadata.Properties['umbrella.xml'].xdata.findall('ntpserver') %}\
+server ${ntpserver.text} {%if ntpserver.get('option') is not None%}\
+${ntpserver.get('option')}{% end %}
+{% end %}\
+{% end %}\
+
+# Ignore all requests by default
+restrict -4 default ignore
+restrict -6 default ignore
+
+# Allow time synchronization from our subnets
+{% python
+networks.pop('extif', None)    # not from external network
+if not auth_in_DMZ:
+    networks.pop('DMZif', None)    # not from DMZ unless auth is enabled there
+%}\
+{% for network in networks.values() %}\
+restrict ${str(network.network())} mask ${network.netmask()} nomodify notrap nopeer
+{% end %}\
+{% for network in netclasses.iterkeys() %}\
+restrict ${str(ipcalc.Network(network).network())} mask ${ipcalc.Network(network).netmask()} nomodify notrap nopeer
+{% end %}\
+
+# Allow full access from localhost
+restrict 127.0.0.1
+{% if metadata.Properties['umbrella.xml'].xdata.find('ntpserver') is not None %}\
+
+# Allow communication with remote servers
+{% for ntpserver in metadata.Properties['umbrella.xml'].xdata.findall('ntpserver') %}\
+restrict ${ntpserver.text} nomodify notrap nopeer noquery
+{% end %}\
+{% end %}\
+{% end %}\
+{% if not 'ntp-server' in metadata.groups %}\
+driftfile /var/lib/ntp/ntp.drift
+
+statistics loopstats peerstats clockstats
+filegen loopstats file loopstats type day enable
+filegen peerstats file peerstats type day enable
+filegen clockstats file clockstats type day enable
+
+# NTP servers
+server ${NTP_server} iburst
+
+# Ignore all requests by default
+restrict -4 default ignore
+restrict -6 default ignore
+
+# Allow query access from localhost
+restrict 127.0.0.1 nomodify notrap nopeer
+
+# Allow communication with local time server
+restrict ${NTP_server} nomodify notrap nopeer noquery
+{% if metadata.hostname in hostfuncs and hostfuncs[metadata.hostname] == 'router' %}\
+
+# Listen on public interface only
+interface ignore wildcard
+interface listen 127.0.0.1
+interface listen ${ifs['pubif']}
+{% end %}\
+{% end %}\

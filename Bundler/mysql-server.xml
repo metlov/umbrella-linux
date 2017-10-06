@@ -1,0 +1,32 @@
+<Bundle name='mysql-server'>
+<Group name='ubuntu'>
+    <Group name='ubuntu-trusty'>
+    <Group name='archive' negate='true'>
+        <BoundPOSIXUser name="mysql" home="/nonexistent" shell="/bin/false" gecos="MySQL Server,,," uid="103" group="mysql"/>
+        <BoundPOSIXGroup name="mysql" gid="108"/>
+    </Group>
+    <Group name='archive'>
+        <BoundPOSIXUser name="mysql" home="/nonexistent" shell="/bin/false" gecos="MySQL Server,,," uid="105" group="mysql"/>
+        <BoundPOSIXGroup name="mysql" gid="106"/>
+    </Group>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="mysql" home="/nonexistent" shell="/bin/false" gecos="MySQL Server,,," uid="605" group="mysql"/>
+        <BoundPOSIXGroup name="mysql" gid="606"/>
+    </Group>
+    <Package name='mysql-server'/>
+    <Path name='/etc/mysql/conf.d/charset.cnf'/>
+    <Group name='ubuntu-xenial'>
+        <Path name='/etc/apparmor.d/local/usr.sbin.mysqld'/>
+    </Group>
+    <Group name='database-server'>
+        <Group name='ubuntu-trusty'>
+            <Path name='/etc/mysql/conf.d/bindaddress.cnf'/>
+        </Group>
+        <Group name='ubuntu-xenial'>
+            <Path name='/etc/mysql/mysql.conf.d/mysqld_bindaddress.cnf' altsrc='/etc/mysql/conf.d/bindaddress.cnf'/>
+        </Group>
+    </Group>
+    <Service name='mysql'/>
+</Group>
+</Bundle>

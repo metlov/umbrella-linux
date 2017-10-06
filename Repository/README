@@ -1,0 +1,15 @@
+This directory contains the sources of some Umbrella-specific packages.
+
+The binary versions of these packages are distributed via the official Umbrella
+Linux repository, while the sources live here. This directory is not part of
+the configuration, just ignore it if you do not plan to contribute to the
+packages. In any case you should not build these packages on a configuration
+server. Just check out this repository to another place, which has all the
+necessary build dependencies.
+
+Just as a reminder a package can be built by executing:
+ dpkg-buildpackage -b -tc -uc
+in its source directory.
+
+Umbrella Linux (c) 2015-2017 Konstantin L. Metlov <metlov@donfti.ru>
+Please see the individual packages for their respective (c) notices.

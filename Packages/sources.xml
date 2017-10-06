@@ -1,0 +1,84 @@
+<Sources xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Group name="ubuntu-trusty">
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="trusty">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="trusty-updates">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://security.ubuntu.com/ubuntu" version="trusty-security">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://deb.torproject.org/torproject.org" version="trusty">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="trusty">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+  </Group>
+  <Group name="ubuntu-xenial">
+    <!-- somewhere between bcfg2 1.3.3 (trusty) and 1.3.5 (xenial) the    -->
+    <!-- order of the Source tags processing was changed. Now the earlier -->
+    <!-- sources have the priority over the later sources (before it was  -->
+    <!-- the oposite). What an wonderful and meaningful change ! ;-)      -->
+    <!-- Currently the trusty tags are ordered in the old way and the     -->
+    <!-- xenial ones in the new way. This mostly works, but needs adjust- -->
+    <!-- ments (depending on which bcfg2 server version is in use) in     -->
+    <!-- mixed environments.                                              -->
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="xenial-updates">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://security.ubuntu.com/ubuntu" version="xenial-security">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="xenial">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://deb.torproject.org/torproject.org" version="xenial">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="xenial">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+  </Group>
+  <xi:include href="local-sources.xml"><xi:fallback/></xi:include>
+  <!-- <xi:include href="../Local/Packages/sources.xml"><xi:fallback/></xi:include> -->
+</Sources>

@@ -1,0 +1,2 @@
+# Maintain bcfg2 hosts and Kerberos keys autimatically
+*/5 * * * * root   /usr/local/bin/mkkeys.sh

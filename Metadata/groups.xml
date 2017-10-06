@@ -1,0 +1,303 @@
+<Groups version='3.0' xmlns:xi="http://www.w3.org/2001/XInclude">
+   <Group profile='true' name='config'>
+      <Group name='pubserver'/>
+      <Group name='kerberos-masterkdc'/>
+      <Group name='ldap-master'/>
+      <Group name='www-server-ssl'/>
+      <Group name='database-server'/>
+      <Bundle name='www-autoconfig'/>
+      <Bundle name='sysadm-scripts'/>
+      <Bundle name='directory'/>
+   </Group>
+   <Group profile='true' name='router'>
+      <Group name='pubserver'/>
+      <Bundle name='router'/>
+      <Bundle name='bind'/>
+      <Bundle name='dhcp-server'/>
+      <Bundle name='psad'/>
+      <Bundle name='arpwatch'/>
+      <Bundle name='openvpn'/>
+   </Group>
+   <Group profile='true' name='DMZsmtp'>
+      <Group name='DMZserver'/>
+      <Bundle name='bind'/>
+      <Bundle name='postfix'/>
+   </Group>
+   <Group profile='true' name='DMZwww'>
+      <Group name='DMZserver'/>
+      <Group name='www-server-ssl'/>
+      <Group name='database'/>
+      <Bundle name='www-homepages'/>
+
+      <!-- This group can be defined in Local/Metadata/groups.xml -->
+      <!-- to install additional bundles to the WWW server (such  -->
+      <!-- as squirrelmail)                                       -->
+      <Group name='local-www-services'/>
+   </Group>
+   <Group profile='true' name='DMZwww-test'>
+      <Group name='DMZwww'/>
+   </Group>
+   <Group profile='true' name='nfs'>
+      <Group name='pubserver'/>
+      <Group name='nfs-server'/>
+      <Bundle name='logo'/>
+      <Bundle name='www-homepages'/>
+   </Group>
+   <Group profile='true' name='archive'>
+      <Group name='secserver'/>
+      <Group name='nfs-server'/>
+      <Group name='encfs'/>
+      <Group name='database'/>
+      <Bundle name='rsnapshot'/>
+      <Bundle name='logo'/>
+   </Group>
+   <Group profile='true' name='mail'>
+      <Group name='pubserver'/>
+      <Bundle name='dkimproxy'/>
+      <Bundle name='dcc'/>
+      <Bundle name='spamassassin'/>
+      <Bundle name='postfix'/>
+      <Bundle name='dovecot'/>
+      <Bundle name='autohome'/>
+   </Group>
+   <Group profile='true' name='proxy'>
+      <Group name='pubserver'/>
+      <Group name='kerberos-slavekdc'/>
+      <Group name='ldap-slave'/>
+      <Bundle name='squid'/>
+      <Bundle name='apt-cacher'/>
+      <Bundle name='ejabberd'/>
+      <Bundle name='labrea'/>
+      <Bundle name='iptables-persistent'/>
+   </Group>
+   <Group profile='true' name='ltsp'>
+      <Group name='workstation'/>
+      <Bundle name='ltsp-server'/>
+      <Bundle name='ossec'/>
+   </Group>
+   <Group profile='true' name='monitor'>
+      <Group name='pubserver'/>
+      <Group name='nagios-server'/>
+      <Group name='www-server-ssl'/>
+      <Group name='database'/>
+   </Group>
+   <Group profile='true' name='accounting'>
+      <Group name='secserver'/>
+   </Group>
+   <Group profile='true' name='sworkstation'>
+      <Group name='workstation'/>
+      <Group name='encfs'/>
+   </Group>
+   <Group profile='true' name='admworkstation'>
+      <Group name='pworkstation'/>
+   </Group>
+   <Group profile='true' name='pworkstation'>
+      <Group name='workstation'/>
+   </Group>
+   <Group profile='true' name='localfssyncpworkstation'>
+      <!-- workstation with local homes, synchronized with Unison -->
+      <Group name='localfspworkstation'/>
+      <Bundle name='unisonsync'/>
+   </Group>
+   <Group profile='true' name='localfspworkstation'>
+      <Group name='local-fs'/>
+      <Group name='pworkstation'/>
+   </Group>
+   <Group name='desktop-text'>
+      <Bundle name='desktop-text'/>
+      <Bundle name='cli'/>
+   </Group>
+   <Group name='desktop-kde'>
+      <Group name='desktop-text'/>
+      <Bundle name='desktop-kde'/>
+   </Group>
+   <Group name='desktop-lxde'>
+      <Group name='desktop-text'/>
+      <Bundle name='desktop-lubuntu'/>
+   </Group>
+   <xi:include href="../Local/Metadata/desktop.xml">
+      <xi:fallback>
+         <xi:include href="desktop.xml"/>
+      </xi:fallback>
+   </xi:include>
+   <Group name='workstation'>
+      <Group name='gui'/>
+      <Group name='auth'/>
+      <Group name='auth-krb5'/>
+      <Group name='textmail'/>
+      <Group name='network-fs'/>
+      <Group name='default-desktop'/>
+      <Bundle name='cryptsetup'/>
+      <Bundle name='zabbix'/>
+      <Bundle name='logo'/>
+   </Group>
+   <Group name='physical'>
+      <Bundle name='smartmontools'/>
+   </Group>
+   <Group profile='true' name='vmhost'>
+      <Group name='pubserver'/>
+      <Bundle name='backup'/>
+      <!-- The choice between LXD and Libvirt-based VM hosting is done via -->
+      <!-- GroupLogic .                                                    -->
+   </Group>
+   <Group name='lxd-containers-host'>
+      <!-- VM host, which is based on LXD -->
+      <Bundle name='lxd'/>
+   </Group>
+   <Group name='libvirt-host'>
+      <!-- VM host, which is based on Libvirt -->
+      <Bundle name='libvirt'/>
+   </Group>
+   <Group name='mdraid'> <!-- used when Linux software raid is detected -->
+      <Bundle name='mdadm'/>
+   </Group>
+   <Group name='kerberos-masterkdc'>
+      <Bundle name='kerberos-kdc'/>
+   </Group>
+   <Group name='kerberos-slavekdc'>
+      <Bundle name='xinetd'/>
+      <Bundle name='kerberos-kdc'/>
+   </Group>
+   <Group name='ldap-master'>
+      <Bundle name='ldap-server'/>
+   </Group>
+   <Group name='ldap-slave'>
+      <Bundle name='ldap-server'/>
+   </Group>
+   <Group name='capt-printer'>
+      <Bundle name='capt-driver'/>
+   </Group>
+   <xi:include href="../Local/Metadata/office.xml">
+      <xi:fallback>
+         <xi:include href="office.xml"/>
+      </xi:fallback>
+   </xi:include>
+   <Group name='gui'>
+      <Group name='office'/>
+      <Bundle name='cups'/>
+      <Bundle name='gui'/>
+      <Bundle name='gui-services'/>
+      <Bundle name='gui-users'/>
+      <Bundle name='fontconfig'/>
+      <Bundle name='recoll'/>
+      <Bundle name='videodriver'/>
+   </Group>
+   <Group name='auth'>
+   </Group>
+   <Group name='vncserver'>
+      <Bundle name='vncserver'/>
+   </Group>
+   <Group name='textmail'>
+      <Bundle name='pine'/>
+   </Group>
+   <Group name='auth-krb5'>
+      <Bundle name='kerberos'/>
+      <Bundle name='ldap-auth'/>
+      <Bundle name='login'/>
+   </Group>
+   <Group name='ntp-server'>
+      <Group name='ntp-client'/>
+   </Group>
+   <Group name='ntp-client'>
+      <Bundle name='ntp'/>
+   </Group>
+   <Group name='network-fs'>
+      <Bundle name='autofs'/>
+      <Bundle name='nfsv4'/>
+   </Group>
+   <Group name='cachefilesd'>
+         <Bundle name='cachefilesd'/>
+   </Group>
+   <Group name='local-fs'>
+      <Bundle name='autofs'/>
+      <Group name='network-fs' negate='true'/>
+   </Group>
+   <Group name='ubuntu-trusty'>
+      <Group name='ubuntu'/>
+      <Group name='base'/>
+   </Group>
+   <Group name='ubuntu-xenial'>
+      <Group name='ubuntu'/>
+      <Group name='base'/>
+   </Group>
+   <Group name='pubserver'>
+      <Bundle name='zabbix'/>
+      <Group name='server'/>
+   </Group>
+   <Group name='secserver'>
+      <Bundle name='zabbix'/>
+      <Group name='server'/>
+   </Group>
+   <Group name='DMZserver'>
+      <Group name='server'/>
+      <Group name='local-fs'/>
+   </Group>
+   <Group name='server'>
+      <Group name='auth'/>
+      <Group name='network-fs'/>
+      <Bundle name='ossec'/>
+   </Group>
+   <Group name='nfs-server'>
+      <Bundle name='autohome'/>
+      <Bundle name='nfsv4-server'/>
+   </Group>
+   <Group name='encfs'>
+      <Bundle name='encfs'/>
+   </Group>
+   <Group name='simple-scan'>
+      <Bundle name='simple-scan'/>
+   </Group>
+   <Group name='mailman-server'>
+      <Bundle name='postfix'/>
+      <Bundle name='mailman'/>
+   </Group>
+   <Group name='ubuntu'>
+      <Bundle name='apt-sources'/>
+      <Bundle name='base'/>
+      <Bundle name='base-users'/>
+      <Bundle name='base-services'/>
+      <Bundle name='acpid'/>
+      <Bundle name='bcfg2'/>
+      <Bundle name='ca-certificates'/>
+      <Bundle name='console'/>
+      <Bundle name='cron'/>
+      <Bundle name='nscd'/>
+      <Bundle name='snmp'/>
+      <Bundle name='ssh'/>
+      <Bundle name='timezone'/>
+      <Bundle name='grub'/>
+      <Bundle name='glpi'/>
+      <Group name='nagios'/>
+   </Group>
+   <Group name='nagios'>
+      <Bundle name='nagios'/>
+   </Group>
+   <Group name='www-server-ssl'>
+      <Group name='www-server'/>
+   </Group>
+   <Group name='www-server'>
+      <Bundle name='apache2'/>
+   </Group>
+   <!-- externally accessible database -->
+   <Group name='database-server'>
+      <Group name='database'/>
+   </Group>
+   <!-- local database -->
+   <Group name='database'>
+      <Bundle name='mysql-server'/>
+   </Group>
+   <!-- watchdog service to reboot in case of hangs -->
+   <Group name='watchdog'>
+      <Bundle name='watchdog'/>
+   </Group>
+   <Group name='nagios-server'>
+     <Bundle name='nagios'/>
+   </Group>
+   <Group profile='true' name='glpi'>
+      <Group name='pubserver'/>
+      <Bundle name='apache2'/>
+      <Bundle name='mysql-server'/>
+      <Bundle name='glpi'/>
+   </Group>
+   <xi:include href="../Local/Metadata/groups.xml"><xi:fallback/></xi:include>
+</Groups>

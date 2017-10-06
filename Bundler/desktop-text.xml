@@ -1,0 +1,7 @@
+<Bundle name='desktop-text'>
+<!-- Various console productivity tools and utilities, which are    -->
+<!-- not absolutely necessary for system functioning, but are needed-->
+<!-- for the user to do his job in text mode. -->
+<Group name='ubuntu'>
+</Group>
+</Bundle>

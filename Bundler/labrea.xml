@@ -1,0 +1,6 @@
+<Bundle name='labrea'>
+<Group name='ubuntu'>
+    <Package name='labrea'/>
+    <Path name='/etc/rc.local'/>
+</Group>
+</Bundle>

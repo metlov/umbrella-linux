@@ -1,0 +1,5 @@
+# no bogons, no promiscuous mode, no E-mail.
+ARGS="-N -p -Q"
+
+# run as 'arpwatch' user
+RUNAS="arpwatch"

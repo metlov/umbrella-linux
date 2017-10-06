@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# compute the initial logo pathname
+prefix="/usr"
+initial_path=${prefix}/share/umbrella-logo
+
+# compute the dynamically updated logo store pathname
+varpath="/var"
+dest_path=${varpath}/lib/umbrella-logo
+
+# copy the initial version of the logo files
+mkdir -p ${dest_path}/
+cp -p ${initial_path}/*.png ${initial_path}/*.svg ${dest_path}/
+
+# run the cronjob to perform the initial logo update
+/etc/cron.hourly/umbrella-logo

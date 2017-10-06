@@ -1,0 +1,5 @@
+<Bundle name='lxde'>
+<Group name='ubuntu'>
+    <Path name='/etc/pam.d/lightdm'/>
+</Group>
+</Bundle>

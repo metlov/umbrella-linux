@@ -1,0 +1,11 @@
+<Bundle name='watchdog'>
+<Group name='ubuntu'>
+    <Group name='ubuntu-xenial'>
+        <Package name='watchdog'/>
+        <!-- fix LP Bug #1448924 (watchdog service does not start at boot) -->
+        <Path name='/lib/systemd/system/watchdog.service'/>
+        <Action name='systemctl-daemon-reload'/>
+        <Service name='watchdog'/>
+    </Group>
+</Group>
+</Bundle>

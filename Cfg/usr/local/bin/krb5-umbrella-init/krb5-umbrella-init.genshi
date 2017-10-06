@@ -1,0 +1,62 @@
+#!/bin/bash
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+# takes three parameters: keytab_path principal1 [principal 2 ...]
+function make_keytab {
+  KEYTAB=$$1
+  shift
+  for PRINCIPAL in "$$@" ; do
+    if (kadmin.local -q "getprinc $$PRINCIPAL" 2>&1 | grep -q "^get_principal: Principal does not exist"); then
+      echo Creating "$$PRINCIPAL" ...
+      kadmin.local -q "add_principal -randkey $$PRINCIPAL"
+    else
+      echo "$$PRINCIPAL" already exists, skipping creation.
+    fi
+    kadmin.local -q "ktadd -k /tmp/.keytab $$PRINCIPAL"
+  done
+  chown bcfg2:bcfg2 /tmp/.keytab
+  mv /tmp/.keytab /var/lib/bcfg2/Cfg$$KEYTAB
+  }
+
+if [ -f /var/lib/krb5kdc/principal ]; then
+  echo There is an existing KRB5 database in /var/lib/krb5kdc/ .
+  echo Please remove it if you want to reinitialize the database.
+  echo
+  echo Recreating initial principals and their keytabs...
+else
+  krb5_newrealm
+
+  echo Copying stash...
+  TSTASH="$$(mktemp)"
+  cp /etc/krb5kdc/stash $$TSTASH
+  chown bcfg2:bcfg2 $$TSTASH
+  chmod 0660 $$TSTASH
+  mv $$TSTASH /var/lib/bcfg2/Cfg/etc/krb5kdc/stash/stash
+  echo
+  echo Creating initial principals and their keytabs...
+fi
+
+make_keytab /etc/gosa/hostmanager.keytab/hostmanager.keytab.H_${funchosts['config']} hostmanager/${funchosts['config']}
+make_keytab /etc/apache2/http.keytab/http.keytab.H_${funchosts['config']} HTTP/${funchosts['config']}
+{% if 'monitor' in funchosts %}\
+make_keytab /etc/apache2/http.keytab/http.keytab.H_${funchosts['monitor']} HTTP/${funchosts['monitor']}
+{% end %}\
+make_keytab /etc/ldap/slapd.keytab/slapd.keytab.H_${funchosts['config']} ldap/${funchosts['config']}
+{% if 'proxy' in funchosts %}\
+make_keytab /etc/ldap/slapd.keytab/slapd.keytab.H_${funchosts['proxy']} ldap/${funchosts['proxy']}
+make_keytab /etc/ejabberd/xmpp.keytab/xmpp.keytab.H_${funchosts['proxy']} xmpp/${funchosts['proxy']}
+{% end %}\
+{% for host in funchosts.itervalues() %}\
+{% python
+principals="host/"+host
+if 'nfs' in funchosts:
+  principals+=" nfs/"+host
+if hostfuncs[host]=="mail":
+  principals+=" imap/"+host
+  principals+=" smtp/"+host
+%}\
+make_keytab /etc/krb5.keytab/krb5.keytab.H_${host} ${principals}
+{% end %}\

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+if [ -e /usr/bin/simple-scan ]; then
+    echo group:simple-scan
+fi
+
+if [ -e /bin/ntfs-3g ]; then
+    echo group:ntfs-3g
+fi
+
+if [ -e /sbin/lvm ]; then
+    echo group:lvm
+fi
+
+if [ -e /sbin/mdadm ]; then
+    echo group:mdraid
+fi
+
+if [ -e /usr/sbin/grub ]; then
+    echo group:grub-legacy
+fi
+
+if ls /boot/vmlinuz-*-generic.efi.signed 1> /dev/null 2>&1; then
+    echo group:kernel-signed
+fi
+
+# detect if lxd containers are defined on this host
+if [ -d "/var/lib/lxd/containers" ]; then
+    CONTCNT=`ls -d1 /var/lib/lxd/containers/*/ 2>/dev/null| wc -l`
+    if [ "$CONTCNT" -gt "0" ]; then
+        echo "group:lxd-containers-defined"
+    fi
+fi

@@ -1,0 +1,15 @@
+<Bundle name='psad'>
+<Group name='ubuntu-trusty'>
+    <!-- PSAD is disabled in xenial and above. For two reasons:       -->
+    <!-- 1. OSSEC can detect port scans too                           -->
+    <!-- 2. PSAD never really integrated well with Umbrella firewall  -->
+    <!-- Also note that fwsnort is actually disabled in Trusty too,   -->
+    <!-- because it is a terrible resource hog impossible to bear for -->
+    <!-- any real network load.                                       -->
+    <Package name='fwsnort'/>
+    <Package name='snort-rules-default'/>
+    <Package name='psad'/>
+    <Path name='/etc/psad/psad.conf'/>
+    <Service name='psad'/>
+</Group>
+</Bundle>

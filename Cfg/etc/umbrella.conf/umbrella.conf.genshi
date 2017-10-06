@@ -1,0 +1,74 @@
+#!/bin/bash
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+
+%}\
+SYSTEM_NAME=${system_name}
+DOMAIN_NAME=${domain_name}
+REALM_NAME=${realm_name}
+DKIM_PUBKEY="${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}"
+
+{% if transparent_proxy %}
+TRANSPARENT_PROXY=true
+
+{% end %}\
+# servers
+{% for name, func in hostfuncs.iteritems() %}\
+HOST_${func.upper()}=$name
+{% end %}\
+{% python
+servers=' '.join(hostfuncs.iterkeys())
+%}\
+SERVERS="${servers}"
+
+# server IP addreses (public interfaces of router and vmhost)
+{% for server in metadata.Properties['umbrella.xml'].xdata.findall('server') %}\
+{% python
+srvname=server.find('name').text
+srvfunc=server.find('function').text
+# determine the interface address from XML
+srvifs={}
+for interface in iftypes:
+  t = server.find(interface)
+  if t is not None:
+    t = t.find('ip')
+    if t is not None and t.text is not None and t.text.strip():
+      srvifs[interface]=ipcalc.IP(t.text.strip())
+if ((srvfunc == 'router') or (srvfunc == 'vmhost')):
+  addr=srvifs['pubif']
+else:
+  addr=srvifs.values()[0]
+%}\
+IP_${srvfunc.upper()}=${str(addr)}
+{% end %}\
+
+# networks
+{% for netname, net in networks.iteritems() %}\
+NET_${netname[:-2].upper()}="${str(net.network())+'/'+str(net.mask)}"
+{% end %}\
+
+# Router interfaces and corresponding devices
+{% for ifname, addr in routerifs.iteritems() %}\
+ROUTER_${ifname[:-2].upper()}="${str(addr)}"
+{% end %}\
+{% for ifname, dev in routerifdevs.iteritems() %}\
+ROUTER_DEV_${ifname[:-2].upper()}="${dev}"
+{% end %}\
+
+{% python
+visiblegroups=metadata.groups.copy()
+if "no-snmp-user-nagios" in visiblegroups:
+  visiblegroups.remove("no-snmp-user-nagios")
+visiblegroups=sorted(visiblegroups)
+%}\
+BCFG2_GROUPS="${' '.join(visiblegroups)}"
+{% if ws_org_users_group is not None %}\
+
+# Group of users, which are local to this workstation
+LOCAL_USER_GROUP="${ws_org_users_group}"
+{%   end %}\

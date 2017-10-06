@@ -1,0 +1,50 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/35_organization.py')
+%}\
+#!/usr/bin/python
+from __future__ import print_function
+import sys
+import ipcalc
+pubnet = ipcalc.Network('${metadata.Properties['umbrella.xml'].xdata.find('pubnet').text}')
+secnet = ipcalc.Network('${metadata.Properties['umbrella.xml'].xdata.find('secnet').text}')
+ipclasses= {\\
+{% for server in metadata.Properties['umbrella.xml'].xdata.findall('server') %}\
+{%   for interface in server.iter(*tuple(networks.iterkeys())) %}\
+{%     if interface.find('ip') is not None %}\
+            '${interface.find('ip').text}':'${server.find('function').text}', \\
+{%     end %}\
+{%   end %}\
+{% end %}\
+            }
+netclasses= {\\
+{% for net, profile in netclasses.iteritems() %}\
+            ipcalc.Network('${str(net)}'):'${profile}', \\
+{% end %}\
+            }
+if len(sys.argv) != 2:
+  print("There must be a single argument, which is an IP address.", file=sys.stderr)
+  sys.exit(9)
+try:
+  ip = ipcalc.IP(sys.argv[1])
+except ValueError:
+  print("Can't parse the IP address:", sys.argv[1], ".", file=sys.stderr)
+  sys.exit(9)
+if str(ip) in ipclasses.keys():
+  print(ipclasses[str(ip)])
+  sys.exit(0)
+if ip in pubnet:
+  print('pworkstation')
+  sys.exit(0)
+if ip in secnet:
+  print('sworkstation')
+  sys.exit(0)
+for netstr, profile in netclasses.iteritems():
+  if ip in ipcalc.Network(netstr):
+    print(profile)
+    sys.exit(0)
+print("The address can't be resolved to a system class:", sys.argv[1], ".", file=sys.stderr)
+sys.exit(9)

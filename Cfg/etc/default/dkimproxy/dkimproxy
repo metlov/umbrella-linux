@@ -1,0 +1,43 @@
+# Default configuration for dkimproxy.
+
+# which daemons whould be run; anything other than '1' will disable a daemon
+# default: 1
+#RUN_DKIMPROXY_OUT=1
+RUN_DKIMPROXY_IN=0
+
+
+
+# The following variables specify configuration to be passed as arguments to
+# the dkimproxy daemons. If a variable is commented out, the default value
+# within the /etc/init.d/dkimproxy script will be used. If a variable is unset
+# or set to an empty value, the corresponding argument will be omitted from
+# the dkimproxy command line, and dkimproxy is free to read a value from its
+# own configuration file or use its own default value.
+
+# configuration file to use for dkimproxy.in
+# default: "/etc/dkimproxy/dkimproxy_in.conf"
+#DKIMRPOXY_IN_CONF="/etc/dkimproxy/dkimproxy_in.conf"
+
+# configuration file to use for dkimproxy.out
+# default: "/etc/dkimproxy/dkimproxy_ount.conf"
+#DKIMRPOXY_OUT_CONF="/etc/dkimproxy/dkimproxy_out.conf"
+
+# user and group of the dkimproxy daemons
+# default: dkimproxy
+#DKIMPROXYUSER=dkimproxy
+#DKIMPROXYGROUP=dkimproxy
+
+# private key to use for signing
+# default: "/var/lib/dkimproxy/private.key"
+DKIMPROXY_OUT_PRIVKEY="/etc/dkimproxy/private.key"
+
+# hostname for verification "Authentication-Results" header
+# Feel free to use hostname -f if that fits you, but then make
+# sure that your DNS dkim key entry is setup accordingly with
+# something like _domainkey.mx.example.com
+# default: `hostname -d`
+DKIM_HOSTNAME=`hostname -d`
+
+# domains to sign for; specify multiple domains separated by commas
+# default: `hostname -d` and domains parsed from /var/lib/dtc/etc/local_domains
+DOMAIN=`hostname -d`

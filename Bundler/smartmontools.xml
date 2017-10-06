@@ -1,0 +1,12 @@
+<Bundle name='smartmontools'>
+<Group name='ubuntu'>
+    <Package name='smartmontools'/>
+    <Group name='ubuntu-trusty'>
+        <Service name='smartmontools'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Service name='smartd'/>
+    </Group>
+    <Path name='/etc/default/smartmontools'/>
+</Group>
+</Bundle>

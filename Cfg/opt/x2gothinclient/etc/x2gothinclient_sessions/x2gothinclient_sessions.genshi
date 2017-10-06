@@ -1,0 +1,43 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+%}\
+[20100623163928371]
+defsndport = false
+useiconv = false
+iconvfrom = ISO8859-15
+width = 1024
+height = 768
+export =
+speed = 4
+fullscreen = true
+quality = 9
+soundtunnel = 1
+rdpoptions =
+soundsystem = pulse
+print = 1
+type = auto
+sndport = 4713
+usekbd = true
+fstunnel = true
+applications = OFFICE, WWWBROWSER, MAILCLIENT, TERMINAL
+host = ${funcifs['ltsp']}
+link = ADSL
+user =
+key =
+startsoundsystem = false
+icon =
+sound = true
+rootless = false
+name = ${realm_name}
+iconvto = UTF-8
+rdpserver =
+useexports = true
+command = umbrella-session
+dpi = 96
+sshport = 22
+setdpi = false
+pack = 16m-jpeg

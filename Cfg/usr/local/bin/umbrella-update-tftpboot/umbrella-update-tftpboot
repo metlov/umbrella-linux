@@ -1,0 +1,35 @@
+#!/bin/bash
+rm -f /var/lib/tftpboot/pxelinux.0
+cp /usr/lib/PXELINUX/pxelinux.0 /var/lib/tftpboot/pxelinux.0
+rm -f /var/lib/tftpboot/ldlinux.c32
+cp /usr/lib/syslinux/modules/bios/ldlinux.c32 /var/lib/tftpboot/ldlinux.c32
+rm -f /var/lib/tftpboot/libcom32.c32
+cp /usr/lib/syslinux/modules/bios/libcom32.c32 /var/lib/tftpboot/libcom32.c32
+rm -f /var/lib/tftpboot/libutil.c32
+cp /usr/lib/syslinux/modules/bios/libutil.c32 /var/lib/tftpboot/libutil.c32
+rm -f /var/lib/tftpboot/vesamenu.c32
+cp /usr/lib/syslinux/modules/bios/vesamenu.c32 /var/lib/tftpboot/vesamenu.c32
+rm -f /var/lib/tftpboot/initrd.img.486
+cp /opt/x2gothinclient/chroot/initrd.img.486 /var/lib/tftpboot/initrd.img.486
+rm -f /var/lib/tftpboot/memtest86+.bin
+cp /opt/x2gothinclient/chroot/boot/memtest86+.bin /var/lib/tftpboot/memtest86+.bin
+rm -f /var/lib/tftpboot/vmlinuz.486
+cp /opt/x2gothinclient/chroot/vmlinuz.486 /var/lib/tftpboot/vmlinuz.486
+rm -f /var/lib/tftpboot/640x480-nw.png
+cp /var/lib/umbrella-logo/640x480-nw.png /var/lib/tftpboot/640x480-nw.png
+rm -f /opt/x2gothinclient/chroot/etc/x2go/x2gothinclient_start
+ln -s x2gothinclient-displaymanager_start /opt/x2gothinclient/chroot/etc/x2go/x2gothinclient_start
+
+# patch the init script to permit the /var/lib/nfs dir initialization
+perl -pi -e \
+    's|\. /etc/x2go/x2gothinclient_init|/etc/x2go/x2gothinclient_init|g' \
+    /opt/x2gothinclient/chroot/etc/init.d/x2gothinclient-chroot
+
+# Make sessreg sgid utmp to be able to self-register users sessions
+# in umbrella-session script. The proper solution will be to have wtmp
+# support in x2go, but this is currently (Aug 2017) is only on a wish list.
+chgrp utmp /usr/bin/sessreg
+chmod g+s /usr/bin/sessreg
+
+# update x2go thin client
+x2gothinclient_update

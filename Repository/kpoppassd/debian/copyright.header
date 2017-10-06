@@ -1,0 +1,10 @@
+This package was downloaded from http://echelon.pl/pubs/poppassd.html and
+debianized by Adam Conrad <adconrad@0c3.net> on Mon, 8 Apr 2002 18:17:05.
+
+Upstream Author: Pawel Krawczyk <kravietz at echelon dot pl>
+
+Should you choose to redistribute this package or source under the terms
+of the GNU GPL (as is permitted by the license), the full text of the GPL
+can be found at /usr/share/common-licenses/GPL on any Debian system.  The
+complete license text for poppassd follows:
+

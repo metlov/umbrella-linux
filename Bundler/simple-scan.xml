@@ -1,0 +1,9 @@
+<Bundle name='simple-scan'>
+<Group name='ubuntu'>
+    <Package name='simple-scan'/>
+    <Package name='sane-utils'/>
+    <Group name='ubuntu-trusty'>
+        <Service name='saned'/>
+    </Group>
+</Group>
+</Bundle>

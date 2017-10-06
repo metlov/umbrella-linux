@@ -1,0 +1,69 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+# The distinguished name of the search base.
+base "${ldap_root}"
+
+# LDAP servers in local domain
+{% if 'proxy' in funchosts %}\
+uri     ldaps://${funchosts['config']} ldaps://${funchosts['proxy']}
+{% end %}\
+{% if not 'proxy' in funchosts %}\
+uri     ldaps://${funchosts['config']}
+{% end %}\
+
+# The LDAP version to use (defaults to 3
+# if supported by client library)
+ldap_version 3
+
+# The search scope.
+scope sub
+
+# Filter to AND with uid=%s
+pam_filter objectclass=posixAccount
+
+# The user ID attribute (defaults to uid)
+pam_login_attribute uid
+pam_member_attribute member
+
+# RFC2307bis naming contexts
+nss_base_passwd ${ldap_root}
+nss_base_group  ${ldap_root}
+sudoers_base ou=SUDOers,${ldap_root}
+
+# nss reconnets to allow logins via SSH
+# nss_reconnect_tries 15
+
+# Added to permit console login during network outages.
+nss_reconnect_tries 2
+nss_reconnect_sleeptime 1
+nss_reconnect_maxsleeptime 1
+nss_reconnect_maxconntries 1
+
+# Reconnect policy: hard (default) will retry connecting to
+# the software with exponential backoff, soft will fail
+# immediately.
+#bind_policy hard
+bind_policy soft
+
+# OpenLDAP SSL mechanism
+# start_tls mechanism uses the normal LDAP port, LDAPS typically 636
+#ssl start_tls
+ssl on
+
+# OpenLDAP SSL options
+# Require and verify server certificate (yes/no)
+# Default is to use libldap's default behavior, which can be configured in
+# /etc/openldap/ldap.conf using the TLS_REQCERT setting.  The default for
+# OpenLDAP 2.0 and earlier is "no", for 2.1 and later is "yes".
+tls_checkpeer yes
+
+# CA certificates for server certificate verification
+# At least one of these are required if tls_checkpeer is "yes"
+tls_cacertfile /etc/ssl/certs/bcfg2ca.pem
+#tls_cacertdir /etc/ssl/certs
+
+# users to ignore
+nss_initgroups_ignoreusers apt-cacher-ng,arpwatch,avahi,avahi-autoipd,backup,bcfg2,bin,bind,boinc,clamav,clickpkg,colord,condor,daemon,debian-sks,debian-spamd,debian-tor,dhcp,dhcpd,dkimproxy,dnsmasq,dodo,dovecot,dovenull,ejabberd,festival,games,gnats,haldaemon,hplip,irc,jabber,kdm,kernoops,klog,libuuid,libvirt-dnsmasq,libvirt-qemu,lightdm,list,local,lp,mail,man,messagebus,mysql,nagios,nbd,news,ntop,ntp,nut,nvidia-persistenced,nx,openldap,ossec,polkituser,postfix,postgrey,proxy,pulse,rabbitmq,radvd,redis,rhea,root,rtkit,saned,sgeadmin,snmp,sshd,statd,stunnel4,sync,syncrepl,sys,syslog,tftp,timidity,usbmux,uucp,vde2-net,whoopsie,www-data,zabbix

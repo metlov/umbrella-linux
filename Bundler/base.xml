@@ -1,0 +1,150 @@
+<Bundle name='base'>
+   <Package name='ubuntu-minimal'/>
+   <Package name='aptitude'/>
+   <Group name='ubuntu-xenial'>
+      <Package name='libfile-fcntllock-perl'/>
+   </Group>
+   <Package name='apparmor'/>
+   <Package name='at'/>
+   <Package name='bc'/>
+   <Package name='bsdmainutils'/>
+   <Package name='dnsutils'/>
+   <Package name='bind9-host'/>
+   <Package name='ed'/>
+   <Package name='gawk'/>
+   <Package name='bash-completion'/>
+   <Package name='mc'/>
+   <Package name='rsync'/>
+   <Package name='nano'/>
+   <Package name='psmisc'/>
+   <Package name='pm-utils'/>
+   <Package name='sysv-rc'/>
+   <Package name='traceroute'/>
+   <Package name='wget'/>
+   <Package name='language-pack-en'/>
+   <Package name='language-pack-ru'/>
+   <Package name='liblog-message-simple-perl'/>
+   <Package name='logrotate'/>
+   <Package name='p7zip-full'/>
+   <Package name='patch'/>
+   <Package name='run-one'/>
+   <Package name='tofrodos'/>
+   <Package name='unzip'/>
+   <Package name='unrar-free'/>
+   <Package name='uuid-runtime'/>
+   <Package name='vim'/>
+   <Package name='ssl-cert'/>
+   <Package name='xml-core'/>
+   <Package name='xz-utils'/>
+   <Package name='zerofree'/>
+   <Path name='/etc/ssl/private'/>
+   <Group name='ubuntu-xenial'>
+      <Package name='systemd'/>
+      <Package name='systemd-sysv'/>
+      <Package name='tcpd'/>
+      <Package name='dbus'/>
+   </Group>
+   <Group name='vm'>
+      <Group name='ubuntu-trusty'>
+         <Package name='linux-image-virtual-lts-vivid'/>
+      </Group>
+      <Group name='ubuntu-xenial'>
+         <Group name='virt-lxc' negate='true'>
+            <Package name='linux-image-virtual'/>
+         </Group>
+      </Group>
+   </Group>
+   <Group name='vm' negate='true'>
+      <Group name='ubuntu-trusty'>
+          <Package name='linux-generic-lts-vivid'/>
+          <Package name='linux-image-generic-lts-vivid'/>
+      </Group>
+      <Group name='ubuntu-xenial'>
+         <Package name='linux-generic'/>
+         <Group name='kernel-signed'>
+             <Package name='linux-signed-generic'/>
+         </Group>
+      </Group>
+      <Package name='at'/>
+      <Package name='crda'/>
+      <Package name='dbus'/>
+      <Package name='friendly-recovery'/>
+      <Package name='busybox-static'/>
+      <Package name='irqbalance'/>
+      <Package name='isc-dhcp-common'/>
+      <Package name='cpu-checker'/>
+      <Package name='dmidecode'/>
+      <Package name='pciutils'/>
+      <Package name='hdparm'/>
+      <Package name='vbetool'/>
+      <Package name='iputils-tracepath'/>
+      <Group name='server'>
+         <Package name='ubuntu-server'/>
+         <Package name='byobu'/>
+         <Package name='python3-newt'/>
+      </Group>
+   </Group>
+
+   <Group name='lvm'>
+      <Package name='lvm2'/>
+   </Group>
+
+   <!-- Umbrella Linux variables -->
+   <Path name='/usr/local/bin/umbrella.sh'/>
+   <Path name='/etc/umbrella.conf'/>
+
+   <Path name='/etc/default/locale'/>
+
+   <Path name='/scratch'/>
+   <Path name='/etc/profile.d/history.sh'/>
+   <Path name='/etc/hosts'/>
+   <Path name='/etc/resolvconf/resolv.conf.d/original'/>
+   <Path name='/root/.ssh/authorized_keys2'/>
+
+   <Path name='/etc/network/interfaces'/>
+
+   <Group name='physworkstation'>
+      <Group name='ubuntu-trusty'>
+         <Path name='/etc/NetworkManager/NetworkManager.conf'/>
+         <Path name='/etc/init/autofs.conf'/>
+         <Path name='/etc/init/lightdm.conf'/>
+      </Group>
+   </Group>
+
+   <!-- nice MOTD -->
+   <Path name='/etc/motd'/>
+   <Path name='/etc/update-motd.d/00-header'/>
+   <Path name='/etc/update-motd.d/10-help-text'/>
+
+   <!-- local mail delivery -->
+   <Group name='DMZserver' negate='true'>
+      <Group name='mail' negate='true'>
+         <Package name='ssmtp'/>
+         <Path name='/etc/ssmtp/ssmtp.conf'/>
+      </Group>
+      <Package name='heirloom-mailx'/>
+      <Path name='/etc/nail.rc'/>
+      <Path name='/usr/local/bin/ldapsanity.sh'/>
+   </Group>
+
+   <!-- hosts (esp. connecting to the outside world) must be prepared -->
+   <!-- to adjust their MTU even if ICMP blackholes are present along -->
+   <!-- the route.                                                    -->
+   <Path name='/etc/sysctl.d/90-mtu-probing.conf'/>
+
+   <Group name='localfspworkstation'>
+      <Path name='/etc/rc.local'/>
+      <Path name='/etc/dhcp/dhclient.conf'/> <!-- undo dhcp nameserver override -->
+   </Group>
+
+   <!-- global apparmor fixes -->
+   <Group name='ubuntu-xenial'>
+      <!-- on xenial we need access to /etc/ldap/ldap.conf too -->
+      <Path name='/etc/apparmor.d/abstractions/ldapclient'/>
+   </Group>
+
+   <!-- remove cloud image motd if installed -->
+   <Group name='virt-lxc'>
+      <Path name='/etc/update-motd.d/51-cloudguest'/>
+   </Group>
+</Bundle>

@@ -1,0 +1,9 @@
+The Debian Package umbrella-skel
+----------------------------
+
+Maintains an updatable "skel" directory with initial settings for new users.
+The directory is located in /var/lib/umbrella-skel/unpacked . An up to date
+archive with the skel files is /var/lib/umbrella-skel/skel.tar.gz , it is
+updated from http://<config_server.domain_name>/custom/skel.tar.gz .
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Thu, 29 Jun 2017 13:01:38 +0300

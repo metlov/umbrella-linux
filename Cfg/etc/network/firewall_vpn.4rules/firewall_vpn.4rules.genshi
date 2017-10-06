@@ -1,0 +1,122 @@
+{% include ../../../../Python/firewall_lib.genshi %}\
+{% if external_vpn is not None %}\
+*filter
+
+###################################################
+# INPUT: Incoming traffic from various interfaces #
+###################################################
+
+# Remote interface, claiming to be local machines, IP spoofing, get lost
+{% if extif_enabled %}\
+${REJECT_INTERNAL_INPUT_ON_IF('VPNINPUT', EXTIF)}\
+{% end %}\
+{% if intif_enabled %}\
+${REJECT_INTERNAL_INPUT_ON_IF('VPNINPUT', INTIF)}\
+{% end %}\
+
+# allow DNS server access from VPN networks
+${ALLOW_ROUTER_DNS_ACCESS_IN('VPNINPUT', IFEXTVPN, IPPUB)}\
+
+# allow communication from SSH clients/servers in VPN
+-A VPNINPUT -p tcp -i ${IFEXTVPN} --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A VPNINPUT -p tcp -i ${IFEXTVPN} --dport 22 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+
+# RETURN
+-A VPNINPUT -j RETURN
+
+####################################################
+# OUTPUT: Outgoing traffic from various interfaces #
+####################################################
+{% if extif_enabled %}\
+${ACCEPT_INTERNAL_OUTPUT_FROM_IP('VPNOUTPUT', EXTIP)}
+{% end %}\
+{% if intif_enabled %}\
+${ACCEPT_INTERNAL_OUTPUT_FROM_IP('VPNOUTPUT', INTIP)}
+{% end %}\
+
+# VPN interfaces, any source going to local net is valid
+{% if external_vpn is not None %}\
+{%   for net in vpn_secnets.itervalues() %}\
+-A VPNOUTPUT -o ${IFEXTVPN} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%   end %}\
+{%     for net in vpn_pubnets.itervalues() %}\
+-A VPNOUTPUT -o ${IFEXTVPN} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%   end %}\
+{% end %}\
+
+# outgoing to local net on remote interface, stuffed routing, deny
+{% if extif_enabled %}\
+${REJECT_STUFFED_ROUTING_ON_IF('VPNOUTPUT', EXTIF)}
+{% end %}\
+{% if intif_enabled %}\
+${REJECT_STUFFED_ROUTING_ON_IF('VPNOUTPUT', INTIF)}
+{% end %}\
+
+# allow established communication to SSH servers in VPN
+-A VPNOUTPUT -p tcp -o ${IFEXTVPN} --dport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A VPNOUTPUT -p tcp -o ${IFEXTVPN} --sport 22 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# allow DNS server access from VPN networks
+${ALLOW_ROUTER_DNS_ACCESS_OUT('VPNOUTPUT', IFEXTVPN, IPPUB)}\
+
+# RETURN
+-A VPNOUTPUT -j RETURN
+
+######################################################
+# FORWARD: Routed traffic between various interfaces #
+######################################################
+{% if external_vpn is not None %}\
+-A VPNFORWARD -i ${IFEXTVPN} -p icmp -d ${UNIVERSE} -j ACCEPT
+{% end %}\
+
+# Accept solicited tcp packets
+{% if extif_enabled %}\
+${ACCEPT_SOLICITED_ON_EXTERNAL_IF('VPNFORWARD', EXTIF)}\
+{% end %}\
+{% if intif_enabled %}\
+${ACCEPT_SOLICITED_ON_EXTERNAL_IF('VPNFORWARD', INTIF)}\
+{% end %}\
+{% python
+all_interfaces=[IFPUB,IFSEC,IFDMZ]
+if external_vpn is not None:
+  all_interfaces.append(IFEXTVPN)
+%}\
+{% for if1 in all_interfaces %}\
+{%   for if2 in all_interfaces %}\
+{%     if if1==IFEXTVPN or if2==IFEXTVPN %}\
+{%       if if1 == if2 %}\
+-A VPNFORWARD -i $if1 -o $if2 -j ACCEPT
+{%       end %}\
+{%       if if1 > if2 %}\
+-A VPNFORWARD -i $if1 -o $if2 -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+-A VPNFORWARD -i $if2 -o $if1 -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+{%       end %}\
+{%     end %}\
+{%   end %}\
+{% end %}\
+
+{% if external_vpn is not None %}\
+${ACCEPT_FORWARDING_FROM_IF('VPNFORWARD', IFEXTVPN)}\
+{% end %}\
+
+
+{% python
+all_interfaces=[IFPUB,IFSEC,IFDMZ]
+all_interfaces.append(IFEXTVPN)
+%}\
+{%   for if1,if2 in itertools.combinations(all_interfaces, 2) %}\
+{%     if if1==IFEXTVPN or if2==IFEXTVPN %}\
+{%       if if1 != IFDMZ %}\
+-A VPNFORWARD -p tcp -i $if1 -o $if2 --dport 22 -j ACCEPT
+{%       end %}\
+{%       if if1 != IFSEC %}\
+-A VPNFORWARD -p tcp -i $if2 -o $if1 --dport 22 -j ACCEPT
+{%       end %}\
+{%     end %}\
+{%   end %}\
+
+# RETURN
+-A VPNFORWARD -j RETURN
+
+COMMIT
+{% end %}\

@@ -1,0 +1,173 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+override_global.
+override_local.
+override_acls.
+%% ACL администратора сервера
+{acl, admin, {user, "itadmin", "${domain_name}"}}.
+%% Имя сервера
+{hosts, ["${domain_name}"]}.
+%% Лог уровень debug
+{loglevel, 3}.
+%%{route_subdomains, s2s}.
+%% Настройки портов
+{listen,
+ [
+  {5222, ejabberd_c2s, [
+                        {access, c2s},
+                        {shaper, c2s_shaper},
+                        {max_stanza_size, 65536},
+                        starttls_required, {certfile, "/etc/ejabberd/ejabberd.pem"}
+                       ]},
+  {5223, ejabberd_c2s, [
+                        {access, c2s},
+                        {shaper, c2s_shaper},
+                        {max_stanza_size, 65536},
+                        starttls_required, {certfile, "/etc/ejabberd/ejabberd.pem"}
+                       ]},
+  {5269, ejabberd_s2s_in, [
+                           {shaper, s2s_shaper},
+                           {max_stanza_size, 131072}
+                          ]},
+  %%Авторизоваться в web у меня так и не получилось.
+  {5280, ejabberd_http, [ http_poll, http_bind, web_admin ]}
+ ]}.
+%% Настройки SSL
+{s2s_use_starttls, true}.
+{s2s_certfile, "/etc/ejabberd/ejabberd.pem"}.
+%% ВАЖНО! Realm вашего kerberos
+{sasl_realm, "${realm_name}"}.
+%% Настройки авторизации в ldap (в данном примере анонимная)
+{host_config, "${domain_name}", [
+        {auth_method, ldap},
+        {ldap_servers, ["ldap1.${domain_name}"]},
+        {ldap_port, 389},
+        {ldap_base, "${ldap_root}"}
+        ]}.
+{auth_method, ldap}.
+{shaper, normal, {maxrate, 1000}}.
+{shaper, fast, {maxrate, 50000}}.
+%% АCL для входа через веб-интерфейс
+{acl, admins, {user, "itadmin", "${domain_name}"}}.
+{host_config, "${domain_name}", [{acl, admins, {user, "itadmin", "${domain_name}"}}]}.
+{access, configure, [{allow, admins}]}.
+{acl, local, {user_regexp, ""}}.
+{access, max_user_sessions, [{10, all}]}.
+{access, local, [{allow, local}]}.
+{access, c2s, [{deny, blocked},
+               {allow, all}]}.
+{access, c2s_shaper, [{none, admin},
+                      {normal, all}]}.
+{access, s2s_shaper, [{fast, all}]}.
+{access, announce, [{allow, admin}]}.
+{access, configure, [{allow, admin}]}.
+{access, muc_admin, [{allow, admin}]}.
+{access, muc, [{allow, all}]}.
+{access, register, [{deny, all}]}.
+{access, pubsub_createnode, [{allow, all}]}.
+{language, "en"}.
+{modules,
+ [
+  {mod_adhoc,    []},
+  {mod_announce, [{access, announce}]}, % requires mod_adhoc
+  {mod_caps,     []},
+  {mod_configure,[]}, % requires mod_adhoc
+  {mod_admin_extra, []},
+  {mod_disco,    []},
+  %%{mod_echo,   [{host, "echo.localhost"}]},
+  {mod_irc,      []},
+  {mod_last,     []},
+  {mod_http_bind, []},
+  {mod_muc,      [
+                  %%{host, "conference.@HOST@"},
+                  {access, muc},
+                  {access_create, muc},
+                  {access_persistent, muc},
+                  {access_admin, muc_admin},
+                  {max_users, 500}
+                 ]},
+  %%{mod_muc_log,[]},
+  {mod_offline,  []},
+  {mod_privacy,  []},
+  {mod_private,  []},
+  {mod_proxy65,  [
+                  {access, local},
+                  {shaper, c2s_shaper}
+                 ]},
+  {mod_pubsub,   [ % requires mod_caps
+                  {access_createnode, pubsub_createnode},
+                  {plugins, ["default", "pep"]}
+                 ]},
+  {mod_register, [
+                  {access, register}
+                 ]},
+  {mod_roster,   []},
+  %%mod_shared_roster
+  {mod_shared_roster_ldap,[
+      {ldap_base, "${ldap_root}"},
+      {ldap_servers, ["ldap1.${domain_name}", "ldap2.${domain_name}"]},
+      {ldap_port, 389},
+      {ldap_uidattr, "uid"},
+      {ldap_uidattr_format, "%u"},
+      {ldap_groupattr,"gidNumber"},
+      {ldap_groupdesc,""},
+      {ldap_rfilter,"(objectClass=inetOrgPerson)"},
+      {ldap_filter,"(ObjectClass=*)"},
+      {ldap_memberattr,"uid"},
+      {ldap_userdesc,"gecos"}
+  ]},
+  %%{mod_service_log,[]},
+  %%{mod_shared_roster,[]},
+  {mod_stats,    []},
+  {mod_time,     []},
+  %%Брать информацию о пользователях из ldap
+  {mod_vcard_ldap, [
+    {ldap_rootdn, ""},
+    {ldap_password, ""},
+    {ldap_servers, ["ldap1.${domain_name}", "ldap2.${domain_name}"]},    % List of LDAP servers
+    {ldap_port, 389},
+    {ldap_base, "${ldap_root}"}, % Search base of LDAP directory
+    {ldap_uidattr, "uid"},
+    {ldap_uidattr_format, "%u"},
+    {ldap_filter, ""},
+    {ldap_vcard_map, [
+        {"NICKNAME", "%u", []}, % just use user's part of JID as his nickname
+        {"FN", "%s", ["cn"]},
+        {"FAMILY", "%s", ["sn"]},
+        {"GIVEN", "%s", ["givenName"]},
+        {"MIDDLE", "%s", ["initials"]},
+        {"ORGNAME", "%s", ["o"]},
+        {"ORGUNIT", "%s", ["ou"]},
+        {"CTRY", "%s", ["c"]},
+        {"LOCALITY", "%s", ["l"]},
+        {"STREET", "%s", ["street"]},
+        {"REGION", "%s", ["st"]},
+        {"PCODE", "%s", ["postalCode"]},
+        {"TITLE", "%s", ["title"]},
+        {"URL", "%s", ["labeleduri"]},
+        {"DESC", "%s", ["description"]},
+        {"TEL", "%s", ["telephoneNumber"]},
+        {"EMAIL", "%s", ["mail"]},
+        {"BDAY", "%s", ["birthDate"]},
+        {"PHOTO", "%s", ["jpegPhoto"]}
+    ]},
+    %% Поиск в ldap
+    {ldap_search_fields, [
+        {"User", "%u"},
+        {"Full Name", "cn"},
+        {"Given Name", "givenName"},
+        {"Middle Name", "initials"},
+        {"Family Name", "sn"},
+        {"Nickname", "%u"},
+        {"Birthday", "birthDate"},
+        {"Country", "c"},
+        {"City", "l"},
+        {"Email", "mail"},
+        {"Organization Name", "o"},
+        {"Organization Unit", "ou"}
+        ]}
+    ]},
+  {mod_version,  []}
+ ]}.

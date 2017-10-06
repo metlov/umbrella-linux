@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=X11vnc server
+GenericName=X11vnc server
+Comment=X11vnc server
+Exec=x11vnc -localhost -forever -loop -noxdamage -repeat
+StartupNotify=false
+Terminal=false
+Type=Application
+Categories=SystemMonitoring;
+Icon=gnome-remote-desktop

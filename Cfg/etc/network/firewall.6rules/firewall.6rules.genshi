@@ -1,0 +1,41 @@
+{% include ../../../../Python/firewall_lib.genshi %}\
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+
+###################################
+### INPUT chain
+###################################
+
+# LOG REJECTED INPUTS
+-A INPUT -j LOG --log-level 4
+
+# Catch-all rule, reject anything else
+-A INPUT -s ${UNIVERSE} -d ${UNIVERSE} -j REJECT
+
+###################################
+### OUTPUT chain
+###################################
+
+# Allow sending of messages to localhost from localhost
+# removes "net.c:577: sendmsg() failed: Operation not permitted" notification
+-A OUTPUT -p udp -s ::1 -d ::1 -j ACCEPT
+
+# LOG REJECTED OUTPUTS
+-A OUTPUT -j LOG --log-level 4
+
+# Catch-all rule, reject anything else
+-A OUTPUT -s ${UNIVERSE6} -d ${UNIVERSE6} -j REJECT
+
+###################################
+### FORWARD chain
+###################################
+
+# LOG REJECTED FORWARDS
+-A FORWARD -j LOG --log-level 4
+
+# Catch-all rule, reject anything else
+-A FORWARD -s ${UNIVERSE6} -d ${UNIVERSE6} -j REJECT
+
+COMMIT

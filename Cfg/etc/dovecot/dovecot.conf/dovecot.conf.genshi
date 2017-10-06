@@ -1,0 +1,109 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+auth_default_realm = ${realm_name}
+auth_mechanisms = plain login gssapi
+auth_realms = ${realm_name}
+auth_username_format = %Ln
+disable_plaintext_auth = yes
+log_timestamp = "%Y-%m-%d %H:%M:%S "
+mail_location = maildir:/var/maildirs/%n/mail
+mail_privileged_group = mail
+namespace {
+  inbox = yes
+  location =
+  prefix = INBOX.
+  type = private
+}
+passdb {
+  driver = pam
+}
+{% if 'ubuntu-trusty' in metadata.groups %}\
+protocols = imap pop3
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+protocols = imap pop3 sieve
+{% end %}\
+service auth {
+  unix_listener /var/spool/postfix/private/dovecot-auth {
+    mode = 0660
+    user = postfix
+  }
+  user = root
+}
+ssl_cert = </etc/ssl/imap.pem
+ssl_key = </etc/ssl/private/imap.key
+ssl = required
+{% if 'ubuntu-trusty' in metadata.groups %}\
+userdb {
+#  args = blocking=yes
+  override_fields = home=/var/maildirs/%n mail=maildir:/var/maildirs/%n/mail
+  driver = passwd
+}
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+userdb {
+  driver = ldap
+  args = /etc/dovecot/dovecot-ldap.conf
+}
+{% end %}\
+
+protocol pop3 {
+  pop3_uidl_format = UID%u-%v
+}
+{% if 'ubuntu-xenial' in metadata.groups %}\
+
+protocol imap {
+  mail_max_userip_connections = 512
+  imap_idle_notify_interval = 24 mins
+  mail_plugins = $$mail_plugins antispam
+}
+
+protocol lda {
+    log_path = syslog
+    mail_plugins = $$mail_plugins sieve
+    mail_fsync = optimized
+}
+
+plugin {
+    sieve = ~/.dovecot.sieve
+    sieve_dir = ~/sieve
+    sieve_global_dir = /etc/sieve/
+    sieve_before = /etc/sieve/default.sieve
+}
+
+plugin {
+    antispam_backend = pipe
+    antispam_signature = X-Spam-Status
+    antispam_signature_missing = move
+
+    antispam_trash = trash;Trash;Deleted Items;Deleted Messages
+    antispam_trash_pattern = trash;Trash;Deleted *
+    antispam_trash_pattern_ignorecase = TRASH
+
+    antispam_spam = Spam;Junk
+    antispam_spam_pattern = spam;Spam;junk;Junk
+    antispam_spam_pattern_ignorecase = SPAM;JUNK
+
+    antispam_pipe_tmpdir = /var/tmp
+    antispam_pipe_program = /usr/bin/spamc
+    antispam_pipe_program_args = --max-size=2750000 --username=%u
+    antispam_pipe_program_spam_arg = --learntype=spam
+    antispam_pipe_program_notspam_arg = --learntype=ham
+
+    #antispam_debug_target = syslog
+    #antispam_verbose_debug = 1
+}
+
+# managesieve configuration
+service managesieve-login {
+  inet_listener sieve {
+    port = 4190
+  }
+}
+service managesieve {
+}
+protocol sieve {
+}
+{% end %}\

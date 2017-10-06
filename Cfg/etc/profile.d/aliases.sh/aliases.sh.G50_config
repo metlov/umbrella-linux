@@ -1,0 +1,2 @@
+alias bcfg2-info='bcfg2-info -C /etc/bcfg2-server.conf'
+alias bcfg2-lint='bcfg2-lint -C /etc/bcfg2-server.conf'

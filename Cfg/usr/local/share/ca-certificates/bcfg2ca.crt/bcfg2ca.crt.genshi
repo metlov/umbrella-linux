@@ -1,0 +1,1 @@
+${metadata.Properties['umbrella_keys.xml'].xdata.find('CA_pub').text}

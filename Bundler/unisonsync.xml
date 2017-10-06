@@ -1,0 +1,11 @@
+<Bundle name='unisonsync'>
+<Group name='ubuntu'>
+    <Package name='unison'/>
+    <Package name='unison-gtk'/>
+    <Path name='/etc/pam.d/common-session'/>
+    <Path name='/etc/pam_session_start.sh'/>
+    <Path name='/etc/pam_session_stop.sh'/>
+    <Path name='/usr/local/bin/autounison.sh'/>
+    <Path name='/etc/xdg/autostart/autounison.desktop'/>
+</Group>
+</Bundle>

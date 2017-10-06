@@ -1,0 +1,8 @@
+<Bundle name='office'>
+    <Package name='libreoffice'/>
+    <Package name='libreoffice-l10n-ru'/>
+    <Package name='libreoffice-style-galaxy'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='libreoffice-style-elementary'/>
+    </Group>
+</Bundle>

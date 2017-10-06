@@ -1,0 +1,13 @@
+<Bundle name='iptables-persistent'>
+<Group name='ubuntu'>
+    <Package name='iptables-persistent'/>
+    <Path name='/etc/iptables/rules.v4'/>
+    <Path name='/etc/iptables/rules.v6'/>
+    <Group name='ubuntu-trusty'>
+        <Service name='iptables-persistent'/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <Service name='netfilter-persistent'/>
+    </Group>
+</Group>
+</Bundle>

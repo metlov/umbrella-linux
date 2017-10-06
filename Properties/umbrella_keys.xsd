@@ -1,0 +1,35 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="root_ssh_key" type="xsd:string" maxOccurs="unbounded" minOccurs="0"/>
+                <xsd:element name="nfs_root_ssh_key" type="xsd:string" maxOccurs="1" minOccurs="0"/>
+                <xsd:element name="DKIMpubkey" type="xsd:string"/>
+                <xsd:element name="DKIMseckey" type="xsd:string"/>
+                <xsd:element name="CA_pub" type="xsd:string"/>
+                <xsd:element name="CA_sec" type="xsd:string"/>
+                <xsd:element name="CA_pass" type="xsd:string"/>
+                <xsd:element name="netinstall_root_pass" type="xsd:string"/>
+                <xsd:element name="snmp_nagios_pass" type="xsd:string"/>
+                <xsd:element name="bcfg2_pass" type="xsd:string"/>
+                <xsd:element name="bcfg2_reports_db_name" type="xsd:string"/>
+                <xsd:element name="bcfg2_reports_db_user" type="xsd:string"/>
+                <xsd:element name="bcfg2_reports_db_pass" type="xsd:string"/>
+                <xsd:element name="SA_db" type="xsd:string"/>
+                <xsd:element name="SA_dbuser" type="xsd:string"/>
+                <xsd:element name="SA_dbpass" type="xsd:string"/>
+                <xsd:element name="MySQLbackuppass" type="xsd:string"/>
+                <xsd:element name="MySQLzabbixpass" type="xsd:string"/>
+                <xsd:element name="KRB5_pass" type="xsd:string"/>
+                <xsd:element name="GOSA_admin_pass" type="xsd:string"/>
+                <xsd:element name="LDAP_config_pass" type="xsd:string"/>
+                <xsd:element name="LDAP_syncrepl_pass" type="xsd:string"/>
+                <xsd:element name="LDAP_pass" type="xsd:string"/>
+                <xsd:element name="DUPLICITY_keyid" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="DUPLICITY_passphrase" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="DUPLICITY_extra_options" type="xsd:string" minOccurs="0"/>
+                <xsd:element name="DUPLICITY_target_url" type="xsd:string" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

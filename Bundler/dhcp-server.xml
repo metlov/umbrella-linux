@@ -1,0 +1,21 @@
+<Bundle name='dhcp-server'>
+    <Package name='isc-dhcp-server'/>
+    <Package name='acl'/> <!-- needed to set /var/lib/dhcpd permissions -->
+    <Package name='isc-dhcp-server-ldap'/>
+    <Group name='ubuntu-trusty'>
+        <BoundPOSIXUser name="dhcpd" home="/var/run" shell="/bin/false" gecos="" uid="104" group="dhcpd"/>
+        <BoundPOSIXGroup name="dhcpd" gid="109"/>
+    </Group>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="dhcpd" home="/var/run" shell="/bin/false" gecos="" uid="625" group="dhcpd"/>
+        <BoundPOSIXGroup name="dhcpd" gid="625"/>
+        <!-- restart dhcpd on failure (when e.g. LDAP is unavailable ) -->
+        <Path name='/lib/systemd/system/isc-dhcp-server.service'/>
+    </Group>
+    <Service name='isc-dhcp-server'/>
+    <Service name='isc-dhcp-server6'/>
+    <Path name='/etc/dhcp/dhcpd.conf'/>
+    <Group name='ubuntu-trusty'>
+        <Path name='/etc/init/isc-dhcp-server.conf'/>
+    </Group>
+</Bundle>

@@ -1,0 +1,5 @@
+# Site-specific additions and overrides for usr.sbin.slapd.
+# For more details, please see /etc/apparmor.d/local/README.
+/usr/local/share/ca-certificates/bcfg2ca.crt r,
+/etc/ssl/ldap.pem r,
+/{,var/}run/saslauthd/mux rw,

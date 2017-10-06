@@ -1,0 +1,31 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+#
+# Config file for sSMTP sendmail
+#
+# The person who gets all mail for userids < 1000
+# Make this empty to disable rewriting.
+root=itadmins@${domain_name}
+
+{% if 'mail' in funchosts %}\
+# The mail goes to the Umbrella mail server
+mailhub=${funchosts['mail']}
+{% end %}\
+{% if not 'mail' in funchosts %}\
+# The mail goes directly to the upstream mail server
+mailhub=${metadata.Properties['umbrella.xml'].xdata.find('SMTP_outbound_relay').text}
+{% end %}\
+
+# Where will the mail seem to come from?
+# rewriteDomain=${domain_name}
+
+# The full hostname
+# hostname=
+
+# Are users allowed to set their own From: address?
+# YES - Allow the user to specify their own From: address
+# NO - Use the system generated From: address
+#FromLineOverride=YES

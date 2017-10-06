@@ -1,0 +1,32 @@
+<Bundle name='kerberos-kdc' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+import socket
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+addr=socket.gethostbyname(metadata.hostname)
+?>
+<Group name='ubuntu'>
+    <Package name='krb5-kdc'/>
+    <Package name='libverto-libevent1'/>
+    <Path name='/etc/krb5.conf'/>
+    <Group name='kerberos-slavekdc'>
+        <Package name='xinetd'/>
+        <Service name='xinetd'/>
+        <Path name='/etc/xinetd.d/krb5_prop'/>
+        <Path name='/etc/krb5kdc/kpropd.acl'/>
+    </Group>
+    <Group name='kerberos-masterkdc'>
+        <Package name='krb5-admin-server'/>
+        <Service name='krb5-admin-server'/>
+        <py:if test="'proxy' in funchosts">
+            <Path name='/etc/cron.hourly/krb5dump'/>
+        </py:if>
+        <Path name='/usr/local/bin/krb5-umbrella-init'/>
+    </Group>
+    <Service name='krb5-kdc'/>
+    <Path name='/etc/krb5kdc/kadm5.acl'/>
+    <Path name='/etc/krb5kdc/kdc.conf'/>
+    <Path name='/etc/krb5kdc/stash'/>
+</Group>
+</Bundle>

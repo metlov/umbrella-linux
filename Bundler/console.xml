@@ -1,0 +1,19 @@
+<Bundle name='console'>
+<Group name='ubuntu'>
+    <!-- Shutdown on ctrl-alt-del instead of reboot -->
+    <Path name='/etc/default/keyboard'/>
+    <Group name='ubuntu-trusty'>
+        <Path name='/etc/init/control-alt-delete.conf'/>
+        <Service name='console'/>
+        <Service name='console-font'/>
+        <Service name='control-alt-delete'/>
+        <Service name='console-setup'/>
+        <Service name='tty1'/>
+        <Service name='tty2'/>
+        <Service name='tty3'/>
+        <Service name='tty4'/>
+        <Service name='tty5'/>
+        <Service name='tty6'/>
+    </Group>
+</Group>
+</Bundle>

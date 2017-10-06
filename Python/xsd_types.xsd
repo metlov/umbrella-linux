@@ -1,0 +1,80 @@
+<!-- This file contains the type definitions, common to all -->
+<!-- umbrella XML schemes.                                  -->
+<!--                                                        -->
+<!-- (c) 2017 Konstantin L. Metlov <metlov@fti.dn.ua>       -->
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+
+    <xsd:simpleType name="IPaddressType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="((1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- valid IP adress or just an empty string, nothing else -->
+    <xsd:simpleType name="IPaddressTypeEmpty">
+    <xsd:union>
+        <xsd:simpleType>
+            <xsd:restriction base='xsd:string'>
+                <xsd:length value="0"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+        <xsd:simpleType>
+            <xsd:restriction base='IPaddressType'/>
+        </xsd:simpleType>
+    </xsd:union>
+    </xsd:simpleType>
+
+    <!-- IP address with a specified port number like 127.0.0.1:80 -->
+    <xsd:simpleType name="IPaddressPortType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="((1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5]):\d{4}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="HostNameType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[A-Za-z0-9_\+\-&amp;:/]+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- valid Hostname or just an empty string, nothing else -->
+    <xsd:simpleType name="HostNameEmptyType">
+    <xsd:union>
+        <xsd:simpleType>
+            <xsd:restriction base='xsd:string'>
+                <xsd:length value="0"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+        <xsd:simpleType>
+            <xsd:restriction base='HostNameType'/>
+        </xsd:simpleType>
+    </xsd:union>
+    </xsd:simpleType>
+
+
+    <xsd:simpleType name="FQDN">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[A-Za-z0-9_\.\+\-&amp;:/]+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <!-- part of the address before the '@' symbol -->
+    <xsd:simpleType name="EMAILlocalpart">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="MACaddressType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="NetworkType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="((1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(1?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])/\d{2}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+</xsd:schema>

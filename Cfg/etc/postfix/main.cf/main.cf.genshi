@@ -1,0 +1,42 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+%}\
+compatibility_level = 2
+smtpd_banner = $$myhostname ESMTP $$mail_name (Ubuntu)
+biff = no
+
+# appending .domain is the MUA's job.
+append_dot_mydomain = no
+
+# Uncomment the next line to generate "delayed mail" warnings
+#delay_warning_time = 4h
+
+readme_directory = no
+
+# TLS parameters
+smtpd_use_tls=no
+
+# See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
+# information on enabling SSL in the smtp client.
+
+mydestination =
+myorigin = ${domain_name}
+alias_maps = hash:/etc/aliases
+local_recipient_maps =  $$alias_maps
+transport_maps = texthash:/etc/postfix/transport
+
+mailbox_size_limit = 0
+mynetworks = 127.0.0.0/8 ${funcifs['mail']}/32 ${funcifs['DMZsmtp']}/32
+
+smtpd_recipient_restrictions = permit_mynetworks reject_unauth_destination
+
+smtpd_client_restrictions = permit_mynetworks,
+    reject
+
+# only accept mail from robot's addresses
+smtpd_sender_restrictions = permit

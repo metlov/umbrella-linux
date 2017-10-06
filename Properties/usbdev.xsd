@@ -1,0 +1,36 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+
+    <xsd:complexType name="deviceType">
+        <xsd:sequence>
+            <xsd:element name="bDeviceClass" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="idVendor" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="idProduct" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="serial" type="xsd:string" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="blacklistType">
+        <xsd:sequence>
+            <xsd:element name="host" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="group" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="device" type="deviceType" maxOccurs="unbounded" minOccurs="0"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="whitelistType">
+      <xsd:sequence>
+          <xsd:element name="host" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="group" type="xsd:string" minOccurs="0"/>
+          <xsd:element name="device" type="deviceType" maxOccurs="unbounded" minOccurs="0"/>
+      </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="blacklist" type="blacklistType" minOccurs="0"/>
+                <xsd:element name="whitelist" type="whitelistType" maxOccurs="unbounded" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+  </xsd:element>
+</xsd:schema>

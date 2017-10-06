@@ -1,0 +1,94 @@
+<GroupLogic xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/25_firewall.py')
+?>
+<py:if test="'server' in metadata.groups">
+    <!-- If mail server is configured and either the host is not in DMZ,  -->
+    <!-- or the host is in DMZ and access to both authentication and mail -->
+    <!-- servers is enabled from within the DMZ.                          -->
+    <py:if test="'mail' in funchosts and ((auth_in_DMZ and mail_in_DMZ) or not 'DMZserver' in metadata.groups)">
+         <Group name='textmail'/>
+    </py:if>
+    <py:if test="'monitor' in funchosts">
+        <py:if test="'monitor' in metadata.groups">
+            <Group name='ossec-server'/>
+        </py:if>
+        <Group name='ossec-client'/>
+    </py:if>
+</py:if>
+<py:if test="vnc_in_gui_sessions and 'workstation' in metadata.groups">
+    <Group name='vncserver'/>
+</py:if>
+<py:if test="'ltsp' in metadata.groups">
+    <!-- terminal server also has ossec enabled (if it is enabled -->
+    <!-- globally, of course. -->
+    <py:if test="'monitor' in funchosts">
+        <Group name='ossec-client'/>
+    </py:if>
+    <py:if test="'ubuntu-xenial' in metadata.groups">
+        <!-- this is needed because x2go thin clients have root on NFS -->
+        <Group name='nfs-server'/>
+    </py:if>
+</py:if>
+<py:if test="'nfs' in metadata.groups">
+    <!-- nfs will initiate the public_html replication -->
+    <py:if test="'DMZwww' in funchosts and www_homes">
+         <Group name='www-homepages'/>
+    </py:if>
+</py:if>
+<py:if test="'DMZwww' in metadata.groups">
+    <!-- DMZwww will receive the public_html replication -->
+    <!-- and serve the homepages                         -->
+    <py:if test="'nfs' in funchosts and www_homes">
+         <Group name='www-homepages'/>
+    </py:if>
+</py:if>
+<py:if test="not 'nfs' in funchosts">
+    <!-- use local filesystem on all hosts when nfs server is not -->
+    <!-- configured                                               -->
+    <Group name='local-fs'/>
+</py:if>
+<py:if test="'vmhost' in metadata.groups">
+    <!-- Having a single LXD container turns vmhost into an LXD host,   -->
+    <!-- othervise it is Libvirt host.                                  -->
+    <!-- This is a convenient feature, since normally the installation  -->
+    <!-- starts by creating the router and config server, by the time   -->
+    <!-- VMhost is configured it already has the VMs of the proper type.-->
+    <!-- There is no need for a configuration option.                   -->
+    <py:if test="'lxd-containers-defined' in metadata.groups">
+        <!-- this is needed because x2go thin clients have root on NFS -->
+        <Group name='lxd-containers-host'/>
+    </py:if>
+    <py:if test="'lxd-containers-defined' not in metadata.groups">
+        <!-- this is needed because x2go thin clients have root on NFS -->
+        <Group name='libvirt-host'/>
+    </py:if>
+    <py:if test="NTP_server_on_vmhost">
+        <Group name='ntp-server'/>
+    </py:if>
+</py:if>
+<py:if test="'config' in metadata.groups and not NTP_server_on_vmhost">
+    <Group name='ntp-server'/>
+</py:if>
+<!-- install watchdog on servers, unless they are lxc containers -->
+<py:if test="'virt-lxc' not in metadata.groups and ('server' in metadata.groups or 'ltsp' in metadata.groups)">
+    <Group name='watchdog'/>
+</py:if>
+<!-- enable network-fs caching on physical hosts -->
+<py:if test="'network-fs' in metadata.groups and 'physical' in metadata.groups">
+    <Group name='cachefilesd'/>
+</py:if>
+<!-- Kerberos 5 authentication is everywhere except the DMZ.  -->
+<!-- But even then, once the access to the authentication is  -->
+<!-- enabled in firewall, the kerberos/LDAP auth is installed -->
+<!-- in DMZ as well.                                          -->
+<py:if test="auth_in_DMZ or not 'DMZserver' in metadata.groups">
+    <Group name='auth-krb5'/>
+    <py:if test="'virt-lxc' not in metadata.groups">
+        <Group name='ntp-client'/>
+    </py:if>
+</py:if>
+</GroupLogic>

@@ -1,0 +1,10 @@
+<Bundle name='pine'>
+<Group name='ubuntu'>
+    <Package name='alpine'/>
+    <Path name='/etc/pine.conf'/>
+    <Path name='/usr/bin/pine'/>
+    <Group name='server' negate='true'>
+        <Path name='/usr/share/man/man1/pine.1.gz'/>
+    </Group>
+</Group>
+</Bundle>
