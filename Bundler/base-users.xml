@@ -50,14 +50,8 @@
     <BoundPOSIXUser name="systemd-resolve" home="/run/systemd/resolve" shell="/bin/false" gecos="systemd Resolver,,," uid="102" group="systemd-resolve"/>
     <BoundPOSIXUser name="systemd-bus-proxy" home="/run/systemd" shell="/bin/false" gecos="systemd Bus Proxy,,," uid="103" group="systemd-bus-proxy"/>
     <BoundPOSIXUser name="_apt" home="/nonexistent" shell="/bin/false" gecos="" uid="105" group="nogroup"/>
-    <Group name='vm'>
-      <BoundPOSIXUser name="messagebus" home="/var/run/dbus" shell="/bin/false" gecos="" uid="106" group="messagebus"/>
-      <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="107" group="nogroup"/>
-    </Group>
-    <Group name='physical'>
-      <BoundPOSIXUser name="messagebus" home="/var/run/dbus" shell="/bin/false" gecos="" uid="107" group="messagebus"/>
-      <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="110" group="nogroup"/>
-    </Group>
+    <BoundPOSIXUser name="messagebus" home="/var/run/dbus" shell="/bin/false" gecos="" uid="106" group="messagebus"/>
+    <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="107" group="nogroup"/>
   </Group>
   <BoundPOSIXGroup name="tty" gid="5"/>
   <BoundPOSIXGroup name="backup" gid="34"/>
@@ -130,14 +124,8 @@
   </Group>
   <Group name="ubuntu-xenial">
     <BoundPOSIXGroup name="input" gid="106"/>
-    <Group name='vm'>
-      <BoundPOSIXGroup name="messagebus" gid="110"/>
-      <BoundPOSIXGroup name="ssh" gid="111"/>
-    </Group>
-    <Group name='physical'>
-      <BoundPOSIXGroup name="messagebus" gid="111"/>
-      <BoundPOSIXGroup name="ssh" gid="114"/>
-    </Group>
+    <BoundPOSIXGroup name="messagebus" gid="110"/>
+    <BoundPOSIXGroup name="ssh" gid="111"/>
     <BoundPOSIXGroup name="ssl-cert" gid="616"/>
     <BoundPOSIXGroup name="uuidd" gid="617"/>
   </Group>

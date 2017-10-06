@@ -1,0 +1,32 @@
+<Properties>
+<!-- It is OK not to have any switch definitions in this file. In this -->
+<!-- case the topology is assumed to be a star and no switch checks are-->
+<!-- generated. -->
+<!-- Also note that to make this file work properly in the current version -->
+<!-- of bcfg2 it is necessary to use a hack, see -->
+<!-- Documentation/hacks/nagios_map -->
+
+<!-- <switch label="sw1"  ping_limit="3"> --> <!-- labels are mandatory for switches -->
+                                              <!-- ping at most 3 (highest priority) hosts  -->
+                                              <!-- to detect if this switch is online.      -->
+                                              <!-- by default all hosts are pinged          -->
+<!--    <host name="host1"/> --> <!-- a host, managed by the Umbrella Linux    -->
+                                 <!-- all host names are specified without the -->
+                                 <!-- domain part (they will be looked up in   -->
+                                 <!-- the primary domain)                      -->
+<!--    <host ip="1.2.3.4"/> --> <!-- an external host, which can be pinged -->
+<!--    <switch label="sw2" ip="1.2.3.5"> --> <!-- a managed switch, which can be pinged -->
+<!--        <host name="host2" priority="60" /> --> <!-- prioritize this host for tests     -->
+                                                    <!-- priorities range from 0 to 99      -->
+                                                    <!-- managed switches have priority =70 -->
+                                                    <!-- default priority is 20             -->
+<!--        <host name="host3"/> -->
+<!--        <switch label="sw3" name="sw"> --> <!-- for switches, registered in DNS -->
+<!--            <host name="monitor"/> -->     <!-- hostname of the monitor-class host in clients.xml -->
+                                               <!-- this is where the Nagios runs and is the center   -->
+                                               <!-- of the view -->
+<!--            <host name="host3"/> -->
+<!--        </switch> -->
+<!--    </switch> -->
+<!-- </switch> -->
+</Properties>

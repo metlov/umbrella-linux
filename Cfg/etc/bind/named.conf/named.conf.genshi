@@ -8,6 +8,3 @@
 
 include "/etc/bind/named.conf.options";
 include "/etc/bind/named.conf.local";
-{% if not 'DMZsmtp' in metadata.groups %}\
-include "/etc/bind/named.conf.default-zones";
-{% end %}\

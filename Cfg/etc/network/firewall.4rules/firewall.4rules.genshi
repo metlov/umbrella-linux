@@ -85,6 +85,47 @@ ${REJECT_INTERNAL_INPUT_ON_IF('INPUT', INTIF)}
 {% end %}\
 
 {% end %}\
+{% if 'DMZpbx' in funchosts %}\
+{%   if extif_enabled %}\
+# External interface, incoming SIP TLS connections to DMZ
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_PBX_IP} -p tcp --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_PBX_IP} -p tcp --sport 5061 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+# External interface, outgoing SIP TLS connections
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_PBX_IP} -p tcp --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_PBX_IP} -p tcp --sport 5061 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{%   if intif_enabled %}\
+# Intranet interface, incoming SIP TLS connections to DMZ
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_PBX_IP} -p tcp --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -p tcp --sport 5061 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+# Intranet interface, outgoing SIP TLS connections to DMZ
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -p tcp --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_PBX_IP} -p tcp --sport 5061 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+# SIP TLS connections from PUB
+-A FORWARD -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_PBX_IP} -p tcp --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${IFPUB} -d ${DMZ_PBX_IP} -p tcp --sport 5061 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+{% end %}\
+{% if 'DMZxmpp' in funchosts %}\
+{% if extif_enabled %}\
+# External interface, incoming XMPP connections to DMZ
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_JAB_IP} -p tcp --dport 5269 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_JAB_IP} -p tcp --sport 5269 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+# External interface, outgoing XMPP connections to DMZ
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_JAB_IP} -p tcp --dport 5269 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_JAB_IP} -p tcp --sport 5269 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+# Intranet interface, incoming XMPP connections to DMZ
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_JAB_IP} -p tcp --dport 5269 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_JAB_IP} -p tcp --sport 5269 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+# Intranet interface, outgoing XMPP connections to DMZ
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_JAB_IP} -p tcp --dport 5269 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_JAB_IP} -p tcp --sport 5269 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+
+{% end %}\
 {% if extif_enabled and not intif_enabled and ('mail' in funchosts)%}\
 # External interface, SMTP traffic to DMZ
 -A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -p tcp --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
@@ -125,6 +166,16 @@ ${REJECT_INTERNAL_INPUT_ON_IF('INPUT', INTIF)}
 -A INPUT -p icmp -i ${IFDMZ} -s ${DMZ_DNS_IP} -j ACCEPT
 {% end %}\
 
+{% if 'DMZxmpp' in funchosts %}\
+# allow communication from Jabber server in DMZ
+-A INPUT -p icmp -i ${IFDMZ} -s ${DMZ_JAB_IP} -j ACCEPT
+
+{% end %}\
+{% if 'DMZpbx' in funchosts %}\
+# allow communication from PBX (telephony) server in DMZ
+-A INPUT -p icmp -i ${IFDMZ} -s ${DMZ_PBX_IP} -j ACCEPT
+
+{% end %}\
 # allow DNS server access from Secure subnet
 ${ALLOW_ROUTER_DNS_ACCESS_IN('INPUT', IFSEC, IPSEC)}
 {% if ('DMZsmtp' in funchosts) or ('DMZsmtp' in funchosts) %}\
@@ -308,7 +359,15 @@ all_interfaces=[IFPUB,IFSEC]
 -A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_TFTP_IP} --dport 9571 -j ACCEPT
 -A FORWARD -p udp -i ${IFSEC} -o ${IFPUB} -d ${PUB_TFTP_IP} --dport 69 -j ACCEPT
 -A FORWARD -p udp -i ${IFPUB} -o ${IFSEC} -s ${PUB_TFTP_IP} --dport 1024 -j ACCEPT
+{% if 'ubuntu-trusty' in metadata.groups %}\
+# access NBD server on ltsp host for thin client rootfs
 -A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_NBD_IP} --dport 10809 -j ACCEPT
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+# access NFSv3 server on ltsp host for thin client rootfs
+-A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_NBD_IP} -j ACCEPT
+-A FORWARD -p udp -i ${IFSEC} -o ${IFPUB} -d ${PUB_NBD_IP} -j ACCEPT
+{% end %}\
 {% end %}\
 {% if 'proxy' in funchosts %}\
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_PRX_IP} --dport 3142 -j ACCEPT
@@ -357,6 +416,7 @@ ${ACCEPT_AUTH_FROM_IF('FORWARD', IFDMZ)}\
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_SMTP_IP} -d ${PUB_SMTP_IP} --dport 10025 -j ACCEPT
 -A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -s ${PUB_SMTP_IP} --dport 25 -j ACCEPT
 {% end %}\
+# allow BCFG2 access for specific hosts in DMZ
 {% if 'DMZwww' in funchosts %}\
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_HTTP_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
 {% end %}\
@@ -365,6 +425,12 @@ ${ACCEPT_AUTH_FROM_IF('FORWARD', IFDMZ)}\
 {% end %}\
 {% if 'DMZsmtp' in funchosts %}\
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_DNS_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
+{% end %}\
+{% if 'DMZxmpp' in funchosts %}\
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_JAB_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
+{% end %}\
+{% if 'DMZpbx' in funchosts %}\
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_PBX_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
 {% end %}\
 
 # allow Zabbix proxy to connect to the main Zabbix server
@@ -377,6 +443,9 @@ ${ACCEPT_AUTH_FROM_IF('FORWARD', IFDMZ)}\
 -A FORWARD -p icmp -i ${IFDMZ} -o ${IFDMZ} -d ${DMZ_DNS_IP} -j ACCEPT
 {% end %}\
 
+{%   if 'DMZxmpp' in funchosts %}\
+${ACCEPT_JABBER_FROM_IF('FORWARD', IFPUB)}\
+{% end %}\
 {%   if 'DMZwww' in funchosts %}\
 # allow access to WWW server from PUB
 -A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_HTTP_IP} --dport 80 -j ACCEPT
@@ -453,6 +522,16 @@ COMMIT
 :POSTROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 
+{% if 'DMZpbx' in funchosts %}\
+#Forward incoming on port 5061 requests to DMZ servers
+{% if intif_enabled and not extif_enabled %}\
+-A PREROUTING -p tcp -d ${INTIP} --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_PBX_IP}:5061
+{% end %}\
+{% if extif_enabled and not intif_enabled %}\
+-A PREROUTING -p tcp -d ${EXTIP} --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_PBX_IP}:5061
+{% end %}\
+
+{% end %}\
 {% if 'DMZwww' in funchosts %}\
 # Forward incoming WWW requests to DMZ servers
 {%   if extif_enabled and not intif_enabled %}\

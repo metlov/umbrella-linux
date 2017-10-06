@@ -1,10 +1,23 @@
 <xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
 
+    <xsd:simpleType name="uint8HexType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-f0-9]{2}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="uint16HexType">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[a-f0-9]{4}"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:complexType name="deviceType">
         <xsd:sequence>
-            <xsd:element name="bDeviceClass" type="xsd:string" minOccurs="0"/>
-            <xsd:element name="idVendor" type="xsd:string" minOccurs="0"/>
-            <xsd:element name="idProduct" type="xsd:string" minOccurs="0"/>
+            <xsd:element name="bDeviceClass" type="uint8HexType" minOccurs="0"/>
+            <xsd:element name="bInterfaceClass" type="uint8HexType" minOccurs="0"/>
+            <xsd:element name="idVendor" type="uint16HexType" minOccurs="0"/>
+            <xsd:element name="idProduct" type="uint16HexType" minOccurs="0"/>
             <xsd:element name="serial" type="xsd:string" minOccurs="0"/>
         </xsd:sequence>
     </xsd:complexType>

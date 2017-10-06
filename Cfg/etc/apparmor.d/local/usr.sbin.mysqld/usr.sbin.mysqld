@@ -2,3 +2,7 @@
   /sys/devices/system/node/ r,
   /sys/devices/system/node/** r,
   owner @{PROC}/@{pid}/{auxv,status} r,
+
+# allow access to SSL certificate and key
+  /etc/mysql/mysql.pem r,
+  /etc/mysql/mysql.key r,

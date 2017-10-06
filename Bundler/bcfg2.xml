@@ -5,7 +5,7 @@
 <Group name='ubuntu-trusty'>
    <Service name='bcfg2'/>
 </Group>
-<Group name='physworkstation'>
+<Group name='workstation'>
    <Path name='/etc/default/bcfg2'/>
 </Group>
 <Group name='config'>
@@ -38,9 +38,19 @@
       <!-- this fixes handling of fallback in xincludes -->
       <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugin/helpers.py'/>
       <Action name='compile-Server-helpers'/>
+      <!-- this is a quick hack to enable local configuration of NagiosGen, -->
+      <!-- which in Bcfg2 1.3.6 has no support for Genshi or Xinclude.      -->
+      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/NagiosGen.py'/>
+      <Action name='compile-NagiosGen'/>
+
 
       <Path name='/usr/sbin/bcfg2-reports'/>
+
    </Group>
+
+   <!-- purge old records from the reports database periodically -->
+   <Path name='/etc/cron.daily/bcfg2-reports-purge'/>
+
    <Package name='git'/>
 
    <!-- iptables can be useful for blocking access to bcfg2 server -->
@@ -56,9 +66,15 @@
    <Path name='/etc/profile.d/aliases.sh'/>
    <Path name='/etc/ssl/www.pem'/>
    <Path name='/etc/ssl/private/www.key'/>
+   <!-- CA definitions-->
    <Path name='/etc/pki/openssl.cnf'/>
    <Path name='/etc/pki/CA/certs/bcfg2ca.crt'/>
    <Path name='/etc/pki/CA/private/bcfg2ca.key'/>
+   <!-- CRL manatement -->
+   <Path name='/usr/local/bin/umbrella-revoke-key'/>
+   <Path name='/var/www/html/root.crl.pem'/>
+   <Path name='/var/www/html/root.crl'/>
+
    <BoundPOSIXUser name="bcfg2" home="/home/bcfg2" shell="/usr/sbin/nologin" gecos="Bcfg2 server user" uid="999" group="bcfg2">
       <MemberOf>ssl-cert</MemberOf>
    </BoundPOSIXUser>

@@ -103,8 +103,14 @@ PUB_NTP_IP=NTP_server        # address of the NTP server in Public net
 if 'nfs' in funchosts:
   PUB_NFS_IP=funcifs['nfs']         # address of the NFS server in Public net
 
-if 'proxy' in funchosts:
+if 'proxy' in funchosts and not 'DMZxmpp' in funchosts:
   PUB_JAB_IP=funcifs['proxy']       # address of the Jabber server in Public net
+
+if 'DMZxmpp' in funchosts:
+  DMZ_JAB_IP=funcifs['DMZxmpp']       # address of the Jabber server in DMZ
+
+if 'DMZpbx' in funchosts:
+  DMZ_PBX_IP=funcifs['DMZpbx']       # address of the PBX (telephony) server in DMZ
 
 if 'monitor' in funchosts:
   PUB_MONITOR_IP=funcifs['monitor'] # address of the monitoring server in Public net
@@ -202,6 +208,26 @@ if 'glpi' in funchosts:
 -A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_LDAPS2_IP} --dport 636 -j ACCEPT
 {%   end %}\
 {% end %}\
+{% def ACCEPT_JABBER_FROM_IF(chain, ifvar) %}\
+{%       if 'proxy' in funchosts and not 'DMZxmpp' in funchosts %}\
+# permitting access to Jabber server in PUB from ${ifvar}
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5269 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5280 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 7777 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5222 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5223 -j ACCEPT
+
+{%       end %}\
+{%       if 'DMZxmpp' in funchosts %}\
+# permitting access to Jabber server in DMZ from ${ifvar}
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_JAB_IP} --dport 5269 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_JAB_IP} --dport 5280 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_JAB_IP} --dport 7777 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_JAB_IP} --dport 5222 -j ACCEPT
+-A ${chain} -p tcp -i ${ifvar} -o ${IFDMZ} -d ${DMZ_JAB_IP} --dport 5223 -j ACCEPT
+
+{%       end %}\
+{% end %}\
 {% def ACCEPT_FORWARDING_FROM_IF(chain, ifvar) %}\
 {%   if 'mail' in funchosts %}\
 -A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_SMTP_IP} --dport 25 -j ACCEPT
@@ -237,12 +263,8 @@ ${ ACCEPT_AUTH_FROM_IF(chain, ifvar) }\
 -A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_NFS_IP} -j ACCEPT
 -A ${chain} -p udp -i ${ifvar} -o ${IFPUB} -d ${PUB_NFS_IP} -j ACCEPT
 {%   end %}\
-{%   if jabber_from_sec and 'proxy' in funchosts %}\
--A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5269 -j ACCEPT
--A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5280 -j ACCEPT
--A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 7777 -j ACCEPT
--A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5222 -j ACCEPT
--A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_JAB_IP} --dport 5223 -j ACCEPT
+{%   if jabber_from_sec %}\
+${ ACCEPT_JABBER_FROM_IF(chain, ifvar) }
 {%   end %}\
 {%   if 'glpi' in funchosts %}\
 -A ${chain} -p tcp -i ${ifvar} -o ${IFPUB} -d ${PUB_GLPI_IP} --dport 80 -j ACCEPT

@@ -73,9 +73,9 @@
     <Package name='lxterminal'/>
     <Package name='mobile-broadband-provider-info'/>
     <Package name='modemmanager'/>
+    <Package name='libqmi-glib1'/> <!-- unaccounted modemmanager dependency -->
     <Package name='mtpaint'/>
     <Package name='network-manager-gnome'/>
-    <Package name='ntp'/>
     <Package name='obconf'/>
     <Group name='ubuntu-xenial'>
         <Package name='pinentry-gtk2'/>

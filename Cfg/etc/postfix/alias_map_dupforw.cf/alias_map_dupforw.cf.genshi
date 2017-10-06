@@ -7,6 +7,7 @@ server_host = ${' '.join(ldap_URIs)}
 search_base = ${ldap_root}
 scope = sub
 bind = no
-query_filter = (&(objectClass=gosaMailAccount)(|${''.join(('(mail=%%s@%s)(gosaMailAlternateAddress=%%s@%s)' % (domain,domain,)) for domain in domain_names )})(gosaMailForwardingAddress=*)(!(gosaMailDeliveryMode=[*I*])))
+domain = ${', '.join(domain_names)}
+query_filter = (&(objectClass=gosaMailAccount)(|${''.join(('(mail=%%u@%s)(gosaMailAlternateAddress=%%u@%s)' % (domain,domain,)) for domain in domain_names )})(gosaMailForwardingAddress=*)(!(gosaMailDeliveryMode=[*I*])))
 # forward to the specified address, but with duplication to the local system
 result_attribute = mail, gosaMailForwardingAddress

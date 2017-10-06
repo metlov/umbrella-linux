@@ -28,6 +28,7 @@
         <Group name='ubuntu-xenial'>
             <Package name='postfix-ldap'/>
             <Path name='/etc/postfix/local_recipients.cf'/>
+            <Path name='/etc/postfix/alias_system'/>
             <Path name='/etc/postfix/alias_map.cf'/>
             <Path name='/etc/postfix/alias_map_forward.cf'/>
             <Path name='/etc/postfix/alias_map_dupforw.cf'/>

@@ -16,33 +16,52 @@
     <!-- Note that default locales on servers is always en_US.UTF-8 for easier log files handling.    -->
     <timezone>Europe/Moscow</timezone>      <!-- system timezone, must form a valid filename when appended to -->
                                             <!-- /usr/share/zoneinfo/ -->
-    <domain_name>umbrella-inc.ru</domain_name>    <!-- domain name of this Umbrella cluster -->
+    <domain>                                <!-- domain of this Umbrella cluster -->
+        <name>umbrella-inc.ru</name>        <!-- must be FQDN                    -->
+        <!-- aliases, which will resolve to the primary IP            -->
+        <alias>mail</alias>                 <!-- mail.umbrella-inc.ru -->
+        <alias>www</alias>                  <!-- www.umbrella-inc.ru -->
+        <!-- slave DNS servers for this domain -->
+        <!-- <slave ip="1.1.1.1">ns2.umbrella-inc.ru</slave> --> <!-- registered in this domain with a specific IP -->
+        <!-- <slave>ns2.secondary.net.ua</slave> -->             <!-- registered in an external domain -->
+        <!-- <subdomain> -->
+        <!--     <name>aux</name>-->
+        <!-- --> <!-- DNS servers for aux.umbrella-inc.ru domain -->
+        <!-- --> <!-- Those with IP specified will have DNS glue records -->
+        <!--     <DNS ip=2.2.2.2>ns.aux.umbrella-inc.ru</DNS>-->
+        <!--     <DNS>ns.secondary.net.ua</DNS>-->
+        <!-- </subdomain> -->
+    </domain>
     <!-- The external ip address can also be associated with an alternative -->
-    <!-- domains. These can be listed below. Doing so enables E-mail        -->
-    <!-- handling for these domains (mailboxes become reachable via either  -->
-    <!-- the primary or any of the alternative domain names).               -->
-<!--<alt_domain_name>acme.com</alt_domain_name> --> <!-- alternative domain name -->
-<!--<alt_domain_name  NS2='secondary.net.ua' revDNS="mail">acme.org</alt_domain_name> --> <!-- alternative domain name -->
-    <!-- The options NS2-NS5 can be used with any domain name (including -->
-    <!-- the primary one) to specify the secondary DNS servers, which mirror -->
-    <!-- the respective domains. -->
-    <!-- The revDNS option can appear only once among all the domain names. -->
+    <!-- domains. These can be listed in additional domain tags below. Doing -->
+    <!-- so enables E-mail handling for these domains (mailboxes become -->
+    <!-- reachable via either the primary or any of the alternative domain names).-->
+    <!-- <domain> -->                  <!-- alternative domain name -->
+    <!--    <name>acme.com</name> -->
+    <!-- --><!-- aliases, which will resolve to the primary IP -->
+    <!--    <alias>www</alias> --> <!-- www.acme.com -->
+    <!--    <alias>mail</alias> --> <!-- mail.acme.com -->
+    <!-- --><!-- Declare that our primary IP is reverse resolved to -->
+    <!-- --><!-- mail.acme.com . -->
+    <!--    <revDNS>mail<revDNS> -->
+    <!-- </domain> -->
+    <!-- The revDNS tag can appear only once among all the domain names. -->
     <!-- It can be used to specify the hostname into which the external  -->
     <!-- address of the system is mapped via the reverse DNS resolution. -->
     <!-- For example, if the reverse DNS lookup on the external address  -->
     <!-- yields mail.acme.org, the revDNS option should be specified as  -->
-    <!-- shown. If it returns just "acme.org", revDNS="" should be       -->
+    <!-- shown. If it returns just "acme.org", <revDNS/> should be       -->
     <!-- specified. If no revDNS is specified, it is assumed that the ip -->
-    <!-- resolves to the DMSsmtp hostname in the primary domain.         -->
+    <!-- resolves to the DMZsmtp hostname in the primary domain.         -->
     <!-- Given the revDNS option, Umbrella maps the DNS and SMTP services-->
     <!-- for all the hosted domains (primary and alternative) to the     -->
     <!-- hostnames with proper forward and reverse DNS resolution.       -->
-    <KRB5_realm>UMBRELLA-INC.RU</KRB5_realm>      <!-- Kerberos realm name -->
-    <LDAP_root>dc=umbrella-inc,dc=ru</LDAP_root>  <!-- root of the local LDAP tree -->
-    <!-- Please note that <domain_name/> <KRB5_realm/> and <LDAP_root/> -->
-    <!-- must correspond to each other. The latter two are the function -->
-    <!-- of the <domain_name/>. Thus <KRB5_realm/> and <LDAP_root/> may -->
-    <!-- be removed in future -->
+    <!-- <domain> -->
+    <!--    <name>acme.org</name> -->
+    <!-- --><!-- we serve this domain as a slave of ns1.acme.org -->
+    <!-- --><!-- for slave domains only the name and master tags are allowed -->
+    <!--    <master>1.1.1.3</master> --> <!-- ip address of the master DNS server for acme.org -->
+    <!-- </domain> -->
 
     <!-- wrapper subnet -->
     <!-- The class B network, which wraps all the internal subnets (pubnet,-->
@@ -139,10 +158,6 @@
             <!-- via NAT and the <ip/> is a LAN-only address.           -->
             <mac>00:16:3e:92:7b:c4</mac>
             <gateway>10.0.2.2</gateway> <!-- default gateway -->
-            <zone>
-                <name>mail</name>
-                <name>www</name>
-            </zone>
         </extif>
         <pubif>                         <!-- interface to public subnet -->
             <dev>eth1</dev>

@@ -11,18 +11,6 @@ timestamp = int(os.path.getmtime(repo+'/Properties/umbrella.xml'))+1000000000
 # addition of 1000000000 at the end is to make the transition from
 # an old timestamp format (starting with year) easy.
 
-# infrastructure for collecting the secondary nameservers from XML
-secondaryNameservers={}
-
-def collectNameservers(DNSnameElement):
-  nameservers=set()
-  for i in range(1,5):
-    attrName='NS%s' % (i)
-    if attrName in DNSnameElement.attrib:
-      nameservers.add(DNSnameElement.attrib[attrName])
-  DNSname=DNSnameElement.text.strip()
-  secondaryNameservers[DNSname]=nameservers
-
 # Here we compute the canonical hostname for this system and collect the
 # secondary nameservers.
 # The canonical hostname is the one that (hopefully) has proper reverse
@@ -33,23 +21,36 @@ def collectNameservers(DNSnameElement):
 CANONICAL_hostname=funchostsshort['DMZsmtp']
 CANONICAL_domain=domain_name
 revDNSseen=False
+secondaryNameservers={}
+hostname_aliases={}
 
-# check the primary domain name's revDNS option
-xml_domain_name=metadata.Properties['umbrella.xml'].xdata.find('domain_name')
-collectNameservers(xml_domain_name)
-if 'revDNS' in xml_domain_name.attrib:
-  CANONICAL_hostname=xml_domain_name.attrib['revDNS']
-  revDNSseen=True
+for domain in metadata.Properties['umbrella.xml'].xdata.findall('domain'):
+  if domain.find('master') is None:         # only if we are master of the domain
+    d_name=domain.find('name').text.strip()
+    # collect hostname aliases for the domain
+    aliases_set=set()
+    for alias in domain.findall('alias'):
+      aliases_set.add(alias.text.strip())
+    hostname_aliases[d_name]=aliases_set
 
-for xml_domain_name in metadata.Properties['umbrella.xml'].xdata.findall('alt_domain_name'):
-  collectNameservers(xml_domain_name)
-  if 'revDNS' in xml_domain_name.attrib:
-    if revDNSseen:
-      raise TemplateError('"revDNS" is specified for multiple domain names, '
-                          'can only be specified for one.')
-    revDNSseen=True
-    CANONICAL_hostname=xml_domain_name.attrib['revDNS']
-    CANONICAL_domain=xml_domain_name.text.strip()
+    # collect slave nameservers for the domain
+    slave_nameservers=set()
+    for slave in domain.findall('slave'):
+      slave_nameservers.add(slave.text.strip())
+    secondaryNameservers[d_name]=slave_nameservers
+
+    # process revDNS and set the canonical hostname
+    revDNS=domain.find('revDNS')
+    if revDNS is not None:
+      if revDNSseen:
+        raise TemplateError('"revDNS" is specified for multiple domain names, '
+                            'can only be specified for one.')
+      revDNSseen=True
+      if revDNS.text is not None:
+        CANONICAL_hostname=revDNS.text.strip()
+      else:
+        CANONICAL_hostname=""
+      CANONICAL_domain=d_name
 
 # compute canonical fully qualified host name for this system
 if CANONICAL_hostname:
@@ -81,19 +82,33 @@ mail._domainkey IN      TXT     "k=rsa; t=s; p=${metadata.Properties['umbrella_k
 {% if ext_domain==CANONICAL_domain and CANONICAL_hostname %}\
 ${CANONICAL_hostname.ljust(15)} IN      A       ${ext_ip}
 {% end %}\
+{%   if hostname_aliases[ext_domain] is not None %}\
+{%     for name in hostname_aliases[ext_domain] %}\
+${name.ljust(15)} IN      A       ${ext_ip}
+{%     end %}\
+{%   end %}\
+{%   for subdomain in metadata.Properties['umbrella.xml'].xdata.findall('domain[name="%s"]/subdomain' % (ext_domain,)) %}\
 {% python
-names=None
-for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
-  if server.find('function').text=='router':
-    extif=server.find('extif')
-    if extif is not None:
-      zone=extif.find('zone')
-      if zone is not None:
-        names=zone.findall('name')
+subdomain_name=subdomain.find('name').text
+subdomain_FQDN=subdomain_name+"."+ext_domain
+glues={}
 %}\
-{%   if names is not None %}\
-{%     for name in names %}\
-${name.text.ljust(15)} IN      A       ${ext_ip}
+; definitions for ${subdomain_FQDN} subdomain
+$$ORIGIN ${subdomain_FQDN}.
+$$TTL 86400      ; 1 day
+{%     for DNS in subdomain.findall('DNS') %}\
+{% python
+dns_name=DNS.text
+if 'ip' in DNS.attrib and dns_name.endswith('.'+subdomain_FQDN):
+  glues[dns_name]=DNS.attrib['ip']
+%}\
+${(subdomain_FQDN+'.').ljust(23)} NS      ${dns_name}.
+{%     end%}\
+{%     if len(glues)>0 %}\
+; glue records
+{%         for glue_dns_name, glue_dns_ip in glues.iteritems() %}\
+${(glue_dns_name+'.').ljust(23)} IN A ${glue_dns_ip}
+{%         end%}\
 {%     end %}\
 {%   end %}\
 {% end %}\

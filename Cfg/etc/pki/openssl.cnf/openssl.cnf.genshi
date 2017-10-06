@@ -54,7 +54,7 @@ certificate	= $$dir/CA/certs/bcfg2ca.crt	# The CA certificate
 serial		= $$dir/CA/serial		# The current serial number
 crlnumber	= $$dir/CA/crlnumber	# the current crl number
 					# must be commented out to leave a V1 CRL
-crl		= $$dir/CA/crl.pem 		# The current CRL
+crl		= $$dir/CA/crl/root.crl.pem 		# The current CRL
 private_key	= $$dir/CA/private/bcfg2ca.key	# The private key
 RANDFILE	= $$dir/CA/private/.rand	# private random number file
 

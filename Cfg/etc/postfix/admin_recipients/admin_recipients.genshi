@@ -1,7 +1,16 @@
 {% python
 from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
+
+# The addresses must match the aliases defined in /etc/postfix/alias_system
 %}\
-root@${domain_name} OK
-itadmins@${domain_name} OK
-postmaster@${domain_name} OK
+# administrative addresses allowed as mail recipients when connecting
+# to the mail server on smtp port 25 without authentication
+{% for domain in domain_names %}\
+
+# addresses in ${domain} domain
+root@${domain} OK
+itadmin@${domain} OK
+itadmins@${domain} OK
+postmaster@${domain} OK
+{% end %}\

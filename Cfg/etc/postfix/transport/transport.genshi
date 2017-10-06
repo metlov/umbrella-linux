@@ -7,11 +7,10 @@ execfile(repo+'/Python/25_firewall.py')
 execfile(repo+'/Python/30_networking.py')
 
 # check if this host has some robots defined
-ipaddr=ipcalc.IP(socket.gethostbyname(metadata.hostname))
 local_robots=[]
-if ipaddr in robot_servers:
+if ip_addr in robot_servers:
     # this host serves robots
-    local_robot_number=robot_servers.index(ipaddr)
+    local_robot_number=robot_servers.index(ip_addr)
     for name, num in robot_addresses.iteritems():
         if num==local_robot_number:
             local_robots.append(name)
@@ -24,7 +23,7 @@ if ipaddr in robot_servers:
 outbound_relay = metadata.Properties['umbrella.xml'].xdata.find('SMTP_outbound_relay')
 if outbound_relay is not None:
     outbound_relay=ipcalc.IP(outbound_relay.text)
-    if ipaddr==outbound_relay:
+    if ip_addr==outbound_relay:
         outbound_relay=None
 
 import os.path

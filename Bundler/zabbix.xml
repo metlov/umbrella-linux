@@ -5,7 +5,6 @@ import socket
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
-addr=socket.gethostbyname(metadata.hostname)
 ?>
 <py:if test="install_zabbix and 'monitor' in funchosts">
 <Group name='ubuntu'>
@@ -40,7 +39,7 @@ addr=socket.gethostbyname(metadata.hostname)
         <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="218" group="zabbix"/>
         <BoundPOSIXGroup name="zabbix" gid="226"/>
     </Group>
-    <py:if test="('router' in metadata.groups or 'vmhost' in metadata.groups) or ((not addr in networks['DMZif']) and (not addr in networks['secif'])) or (addr in networks['secif'] and 'archive' in funchosts)">
+    <py:if test="('router' in metadata.groups or 'vmhost' in metadata.groups) or ((not ip_addr in networks['DMZif']) and (not ip_addr in networks['secif'])) or (ip_addr in networks['secif'] and 'archive' in funchosts)">
         <Package name='zabbix-agent'/>
         <Path name='/etc/zabbix/zabbix_agentd.conf.d/zabbix_agentd.conf'/>
         <Service name='zabbix-agent'/>

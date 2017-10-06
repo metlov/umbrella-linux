@@ -1,0 +1,25 @@
+<Bundle name='pbx'>
+<Group name='ubuntu'>
+    <Package name='asterisk'/>
+    <Package name='liburiparser1'/>
+    <Package name='libjack-jackd2-0'/>
+    <Package name='asterisk-config'/>
+    <Package name='asterisk-core-sounds-en-gsm'/>
+    <Package name='asterisk-core-sounds-ru-gsm'/>
+    <Package name='asterisk-core-sounds-en'/>
+    <Package name='asterisk-core-sounds-ru'/>
+    <Package name='pinentry-curses'/>
+
+    <Path name='/etc/ssl/asterisk.pem'/>
+    <Path name='/etc/ssl/private/asterisk.key'/>
+    <Path name='/etc/asterisk/asterisk.pem' altsrc='/etc/ejabberd/ejabberd.pem'/>
+
+    <BoundPOSIXGroup name="asterisk" gid="661"/>
+    <BoundPOSIXUser name="asterisk" home="/var/lib/asterisk" shell="/bin/false" gecos="Asterisk PBX daemon,,," uid="661" group="asterisk">
+        <MemberOf>dialout</MemberOf>
+        <MemberOf>audio</MemberOf>
+    </BoundPOSIXUser>
+
+    <Service name='asterisk'/>
+</Group>
+</Bundle>

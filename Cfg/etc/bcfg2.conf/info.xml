@@ -1,3 +1,8 @@
 <FileInfo>
+<Group name='config'>
+  <Info owner="root" group="bcfg2" mode="0640" sensitive="true"/>
+</Group>
+<Group name='config' negate='true'>
   <Info owner="root" group="root" mode="0640" sensitive="true"/>
+</Group>
 </FileInfo>

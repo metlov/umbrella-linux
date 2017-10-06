@@ -19,6 +19,7 @@ rm -f /var/lib/tftpboot/640x480-nw.png
 cp /var/lib/umbrella-logo/640x480-nw.png /var/lib/tftpboot/640x480-nw.png
 rm -f /opt/x2gothinclient/chroot/etc/x2go/x2gothinclient_start
 ln -s x2gothinclient-displaymanager_start /opt/x2gothinclient/chroot/etc/x2go/x2gothinclient_start
+mkdir -p /opt/x2gothinclient/chroot/var/lib/alsa
 
 # patch the init script to permit the /var/lib/nfs dir initialization
 perl -pi -e \

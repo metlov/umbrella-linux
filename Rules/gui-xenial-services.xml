@@ -2,6 +2,7 @@
 <Group name='ubuntu-xenial'>
     <Service name='cups' status='ignore' type='systemd'/>
     <Service name='cups-browsed' status='on' type='systemd'/>
+    <Service name='ccpd-start' status='ignore' type='systemd'/>
     <Service name='nbd-server' status='on' type='systemd'/>
     <Service name='stunnel4' status='on' type='systemd'/>
     <Service name='tftpd-hpa' status='on' type='systemd'/>

@@ -23,10 +23,18 @@
       <Bundle name='bind'/>
       <Bundle name='postfix'/>
    </Group>
+   <Group profile='true' name='DMZxmpp'>
+      <Group name='DMZserver'/>
+      <Group name='xmpp-server'/>
+   </Group>
+   <Group profile='true' name='DMZpbx'>
+      <Group name='DMZserver'/>
+      <Bundle name='pbx'/>
+   </Group>
    <Group profile='true' name='DMZwww'>
       <Group name='DMZserver'/>
       <Group name='www-server-ssl'/>
-      <Group name='database'/>
+      <Group name='database-server'/>
       <Bundle name='www-homepages'/>
 
       <!-- This group can be defined in Local/Metadata/groups.xml -->
@@ -37,15 +45,23 @@
    <Group profile='true' name='DMZwww-test'>
       <Group name='DMZwww'/>
    </Group>
+   <Group profile='true' name='DMZlib'>
+      <Group name='DMZserver'/>
+      <Group name='www-server-ssl'/>
+      <Group name='database-server'/>
+      <Bundle name='redis'/>
+<!--      <Bundle name='elasticsearch'/> -->
+      <Bundle name='invenio'/>
+   </Group>
    <Group profile='true' name='nfs'>
       <Group name='pubserver'/>
-      <Group name='nfs-server'/>
+      <Group name='nfs-home-server'/>
       <Bundle name='logo'/>
       <Bundle name='www-homepages'/>
    </Group>
    <Group profile='true' name='archive'>
       <Group name='secserver'/>
-      <Group name='nfs-server'/>
+      <Group name='nfs-home-server'/>
       <Group name='encfs'/>
       <Group name='database'/>
       <Bundle name='rsnapshot'/>
@@ -66,12 +82,12 @@
       <Group name='ldap-slave'/>
       <Bundle name='squid'/>
       <Bundle name='apt-cacher'/>
-      <Bundle name='ejabberd'/>
       <Bundle name='labrea'/>
       <Bundle name='iptables-persistent'/>
    </Group>
    <Group profile='true' name='ltsp'>
       <Group name='workstation'/>
+      <Group name='nagios'/>
       <Bundle name='ltsp-server'/>
       <Bundle name='ossec'/>
    </Group>
@@ -84,24 +100,22 @@
    <Group profile='true' name='accounting'>
       <Group name='secserver'/>
    </Group>
-   <Group profile='true' name='sworkstation'>
-      <Group name='workstation'/>
-      <Group name='encfs'/>
-   </Group>
    <Group profile='true' name='admworkstation'>
-      <Group name='pworkstation'/>
-   </Group>
-   <Group profile='true' name='pworkstation'>
       <Group name='workstation'/>
    </Group>
-   <Group profile='true' name='localfssyncpworkstation'>
+   <Group profile='true' name='archiveworkstation'>
+      <Group name='workstation'/>
+      <Group name='nagios'/>
+      <Bundle name='rsnapshot'/>
+   </Group>
+   <Group profile='true' name='localfssyncworkstation'>
       <!-- workstation with local homes, synchronized with Unison -->
-      <Group name='localfspworkstation'/>
+      <Group name='localfsworkstation'/>
       <Bundle name='unisonsync'/>
    </Group>
-   <Group profile='true' name='localfspworkstation'>
+   <Group profile='true' name='localfsworkstation'>
       <Group name='local-fs'/>
-      <Group name='pworkstation'/>
+      <Group name='workstation'/>
    </Group>
    <Group name='desktop-text'>
       <Bundle name='desktop-text'/>
@@ -120,7 +134,7 @@
          <xi:include href="desktop.xml"/>
       </xi:fallback>
    </xi:include>
-   <Group name='workstation'>
+   <Group profile='true' name='workstation'>
       <Group name='gui'/>
       <Group name='auth'/>
       <Group name='auth-krb5'/>
@@ -235,10 +249,14 @@
    <Group name='server'>
       <Group name='auth'/>
       <Group name='network-fs'/>
+      <Group name='nagios'/>
       <Bundle name='ossec'/>
    </Group>
-   <Group name='nfs-server'>
+   <Group name='nfs-home-server'>
       <Bundle name='autohome'/>
+      <Group name='nfs-server'/>
+   </Group>
+   <Group name='nfs-server'>
       <Bundle name='nfsv4-server'/>
    </Group>
    <Group name='encfs'>
@@ -246,6 +264,9 @@
    </Group>
    <Group name='simple-scan'>
       <Bundle name='simple-scan'/>
+   </Group>
+   <Group name='skype'>
+      <Bundle name='skype'/>
    </Group>
    <Group name='mailman-server'>
       <Bundle name='postfix'/>
@@ -259,6 +280,7 @@
       <Bundle name='acpid'/>
       <Bundle name='bcfg2'/>
       <Bundle name='ca-certificates'/>
+      <Bundle name='ca-certificates-umbrella'/>
       <Bundle name='console'/>
       <Bundle name='cron'/>
       <Bundle name='nscd'/>
@@ -267,7 +289,6 @@
       <Bundle name='timezone'/>
       <Bundle name='grub'/>
       <Bundle name='glpi'/>
-      <Group name='nagios'/>
    </Group>
    <Group name='nagios'>
       <Bundle name='nagios'/>
@@ -292,6 +313,9 @@
    </Group>
    <Group name='nagios-server'>
      <Bundle name='nagios'/>
+   </Group>
+   <Group name='xmpp-server'>
+     <Bundle name='ejabberd'/>
    </Group>
    <Group profile='true' name='glpi'>
       <Group name='pubserver'/>

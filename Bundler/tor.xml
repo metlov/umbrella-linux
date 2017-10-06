@@ -1,6 +1,6 @@
 <Bundle name='tor'>
 <Group name='ubuntu'>
-    <Group name='sworkstation' negate='true'>
+    <Group name='net-pub'>
         <Path name='/etc/apt/sources.list.d/tor.list'/>
         <Path name='/etc/apt/trusted.gpg.d/torproject.gpg'/>
         <Package name='torchat'/>

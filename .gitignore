@@ -12,6 +12,9 @@ Cfg/etc/network/interfaces/interfaces.H_*
 # Ignore host-specific rc.local overrides
 Cfg/etc/rc.local/rc.local.H_*
 
+# Ignore DNS zone revision numbering file
+Cfg/etc/bind/zones/zone/zone.H_dummy.sequence
+
 # Do not store SSH keys
 /SSHbase/*
 
@@ -52,5 +55,8 @@ Cfg/etc/rc.local/rc.local.H_*
 /Repository/*.tar.gz
 !/Repository/*.orig.tar.gz
 
-# ignore python-compiled site configuration
-Documentation/website/*.pyc
+# ignore python-compiled files
+/Documentation/website/**/*.pyc
+
+# permit Local host-specific app defaults
+/Cfg/etc/default/**/*.H_*

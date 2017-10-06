@@ -23,8 +23,17 @@ HOST_${func.upper()}=$name
 {% end %}\
 {% python
 servers=' '.join(hostfuncs.iterkeys())
+if auth_in_DMZ:
+    serversWithKeytab=servers
+else:
+    serversWithKeytabList=[]
+    for name, func in hostfuncs.iteritems():
+        if not func.startswith("DMZ"):
+            serversWithKeytabList.append(name)
+    serversWithKeytab=' '.join(serversWithKeytabList)
 %}\
 SERVERS="${servers}"
+SERVERS_WITH_KEYTAB="${serversWithKeytab}"
 
 # server IP addreses (public interfaces of router and vmhost)
 {% for server in metadata.Properties['umbrella.xml'].xdata.findall('server') %}\
@@ -59,6 +68,9 @@ ROUTER_${ifname[:-2].upper()}="${str(addr)}"
 {% for ifname, dev in routerifdevs.iteritems() %}\
 ROUTER_DEV_${ifname[:-2].upper()}="${dev}"
 {% end %}\
+
+# Jabber server for this Umbrella cluster
+XMPP_SERVER=${XMPP_server}
 
 {% python
 visiblegroups=metadata.groups.copy()

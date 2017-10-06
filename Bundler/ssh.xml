@@ -3,6 +3,7 @@
     <Package name='openssh-server'/>
     <Package name='openssh-client'/>
     <Package name='ncurses-term'/>
+    <Path name='/usr/bin/ssh-agent'/> <!-- ensure permissions via Rules -->
     <Group name='frontserver'>
         <!-- front end server needs xauth (and a good deal of X) -->
         <!-- for X11 forwarding                                  -->

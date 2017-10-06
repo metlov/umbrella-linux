@@ -1,5 +1,0 @@
-{% include ../../../../Python/dnszone_lib.genshi %}\
-{% python
-domain=domain_names_list[1]
-%}\
-${ EXTERNAL_ZONE(int_address, domain)}\

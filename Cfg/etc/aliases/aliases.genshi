@@ -18,6 +18,7 @@ if mail_in_DMZ and 'mailman-server' in metadata.groups:
 # See man 5 aliases for format
 postmaster: ${', '.join(admins)}
 root: ${', '.join(admins)}
+itadmin: ${', '.join(admins)}
 itadmins: ${', '.join(admins)}
 {%   for alias in metadata.Properties['mailaliases.xml'].xdata.findall('mailalias') %}\
 ${alias.find('alias').text}: ${', '.join([user.text for user in alias.findall('user')])}

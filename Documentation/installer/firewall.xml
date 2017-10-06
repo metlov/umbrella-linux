@@ -68,6 +68,16 @@
     <!-- to register their computers. -->
     <slow_down_dynamic_hosts/>
 
+    <!-- Here we list the CAs trusted by this Umbrella installation for -->
+    <!-- verifying the external connections.                            -->
+    <!-- Most common usage is to list here the root certificates of trusted-->
+    <!-- peer Umbrella servers to enable cross-domain Jabber and telephony.-->
+    <!-- <trusted_CA> ... LITERAL CERTIFICATE 1 DATA </trusted_CA> -->
+    <!-- <trusted_CA> ... LITERAL CERTIFICATE 2 DATA </trusted_CA> -->
+    <!--                              ...                          -->
+    <!-- <trusted_CA> ... LITERAL CERTIFICATE n DATA </trusted_CA> -->
+
+
     <!--additional rules to be injected into IPv4 firewall -->
 
     <!-- <input>... an input rule (without -A INPUT prefix)...</input> -->

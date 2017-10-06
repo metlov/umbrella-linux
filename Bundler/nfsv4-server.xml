@@ -4,7 +4,9 @@
     <Path name='/etc/default/nfs-kernel-server'/>
     <Service name='nfs-kernel-server'/>
     <Path name='/etc/exports'/>
-    <Path name='/export'/>
-    <Path name='/export/home'/>
+    <Group name='nfs-home-server'>
+        <Path name='/export'/>
+        <Path name='/export/home'/>
+    </Group>
 </Group>
 </Bundle>

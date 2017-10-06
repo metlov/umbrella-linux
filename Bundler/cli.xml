@@ -18,6 +18,9 @@
     <Group name='ntfs-3g'>
         <Package name='ntfs-3g'/>
     </Group>
+    <Group name='fs-xfs'>
+        <Package name='xfsprogs'/>
+    </Group>
     <Package name='rar'/>
     <Package name='schroot'/>
     <Package name='debootstrap'/>
@@ -36,9 +39,11 @@
         <Package name='links'/>
     </Group>
 
-    <Group name='physworkstation'>
-        <Package name='grub-ipxe'/>
-        <Path name='/etc/initramfs-tools/conf.d/framebuffer'/>
+    <Group name='physical'>
+        <Group name='workstation'>
+            <Package name='grub-ipxe'/>
+            <Path name='/etc/initramfs-tools/conf.d/framebuffer'/>
+        </Group>
     </Group>
 
     <Package name='apparmor'/>
@@ -50,7 +55,7 @@
         <Path name='/etc/cron.d/anacron'/>
     </Group>
 
-    <Group name='localfspworkstation'>
+    <Group name='localfsworkstation'>
         <Path name='/usr/local/bin/prepare-umbrella-image'/>
     </Group>
 

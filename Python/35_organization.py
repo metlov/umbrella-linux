@@ -25,4 +25,4 @@ def fill_netclasses(netclasses, netclasses_obj, element, profile):
 
 netclasses={}
 netclasses_obj={}
-fill_netclasses(netclasses, netclasses_obj, metadata.Properties['organization.xml'].xdata.find('ou'), 'pworkstation')
+fill_netclasses(netclasses, netclasses_obj, metadata.Properties['organization.xml'].xdata.find('ou'), 'workstation')

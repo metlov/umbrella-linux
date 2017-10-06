@@ -84,7 +84,7 @@ d-i user-setup/encrypt-home boolean false
 tasksel tasksel/first multiselect lubuntu-desktop
 
 # Individual additional packages to install
-d-i pkgsel/include string openssh-server bcfg2 wget mc
+d-i pkgsel/include string bcfg2 wget mc
 
 # Language pack selection
 d-i pkgsel/language-packs multiselect en, ru
@@ -141,6 +141,9 @@ in-target update-ca-certificates; \
 {% if 'proxy' in funchosts %}\
 /bin/echo -e "\nAcquire::http::Proxy \"http://${funchosts['proxy']}:3142/\";" >/target/etc/apt/apt.conf.d/31tempproxy; \
 {% end %}\
+in-target apt-get remove --assume-yes uuid-runtime mlocate; \
+in-target deluser uuidd; \
+in-target delgroup mlocate; \
 in-target env DEBIAN_FRONTEND=noninteractive bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -D POSIXUsers -qv; \
 in-target env DEBIAN_FRONTEND=noninteractive bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -b apt-sources -Qv; \
 in-target env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -b ssh:apt-sources:login:kerberos:ldap-auth:bcfg2 -Qvk; \

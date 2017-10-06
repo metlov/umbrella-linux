@@ -1,6 +1,8 @@
 <NagiosGen>
-<Group name="physworkstation">
-  <Option name="notification_period">workhours</Option>
-  <Option name="notification_options">n</Option>
+<Group name="physical">
+  <Group name="workstation">
+    <Option name="notification_period">workhours</Option>
+    <Option name="notification_options">n</Option>
+  </Group>
 </Group>
 </NagiosGen>

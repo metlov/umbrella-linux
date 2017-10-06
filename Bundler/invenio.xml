@@ -1,0 +1,167 @@
+<Bundle name='invenio'>
+<!-- Invenio itself still need to be installed and configured manually. -->
+<!-- Here we try to deal with its dependencies as much as possible, but -->
+<!-- still some necessary python packages are not packaged as DEBs yet. -->
+<!-- Therefore one still needs to do                                    -->
+<!--   sudo -H pip install -r requirements.txt                          -->
+<!-- before configuring Invenio.                                        -->
+<!-- It is also necessary to install the OpenOffice packages manually in-->
+<!-- /opt . Bcfg2 can't do it, since these packages have to be obtained -->
+<!-- from the OpenOffice site as tarballs.                              -->
+<Group name='ubuntu'>
+    <BoundPOSIXUser name="unoconv" home="/opt/invenio/var/tmp/ooffice-tmp-files" shell="/bin/false" gecos="" uid="664" group="nogroup"/>
+
+    <!-- base packages -->
+    <Package name='python-dev'/>
+    <Package name='mysql-client'/>
+    <Package name='libmysqlclient-dev'/>
+    <Package name='libapache2-mod-wsgi'/>
+    <Package name='python-pip'/> <!-- install missing python packages in pip -->
+    <Package name='python-mysqldb'/>
+    <Package name='python-simplejson'/>
+    <Package name='gnuplot'/>
+    <Package name='gnuplot5-nox'/>
+    <Package name='poppler-utils'/>
+    <Package name='poppler-data'/>
+    <Package name='clisp'/>
+    <Package name='gettext'/>
+    <Package name='unzip'/>
+    <Package name='pkg-config'/>
+    <Package name='python-dateutil'/>
+    <Package name='python-rdflib'/>
+    <Package name='python-pyparsing'/>
+    <Package name='python-gnuplot'/>
+    <Package name='liblapack3'/>
+    <Package name='libblas3'/>
+    <Package name='python-magic'/>
+    <Package name='pdftk'/>
+    <Package name='html2text'/>
+    <Package name='libtiff-tools'/>
+    <Package name='imagemagick'/>
+    <Package name='giflib-tools'/>
+    <Package name='libfreetype6-dev'/>
+    <Package name='ttf-bitstream-vera'/>
+    <Package name='libperl4-corelibs-perl'/>
+    <Package name='mediainfo'/>
+    <Package name='pstotext'/>
+    <Package name='djvulibre-bin'/>
+    <Package name='netpbm'/>
+    <Package name='python-pypdf'/>
+    <Package name='python-chardet'/>
+    <Package name='python-lxml'/>
+    <Package name='python-libxml2'/>
+    <Package name='python-libxslt1'/>
+    <Package name='libxml2-dev'/>
+    <Package name='libxslt1-dev'/>
+    <Package name='python-unidecode'/>
+    <Package name='python-redis'/>
+    <Package name='python-xapian'/>
+    <Package name='build-essential'/>
+    <Package name='fakeroot'/>
+
+    <!-- ffmpeg -->
+    <Package name='ffmpeg'/>
+    <Package name='libjack-jackd2-0'/>
+    <Package name='libavcodec-ffmpeg56'/>
+    <Package name='libgl1-mesa-glx'/>
+
+    <!-- extras -->
+    <Package name='sbcl'/>
+    <Package name='pylint'/>
+    <Package name='pychecker'/>
+    <Package name='pyflakes'/>
+    <Package name='python-epydoc'/>
+    <Package name='libapache2-mod-xsendfile'/>
+    <Package name='python-utidylib'/>
+    <Package name='python-beautifulsoup'/>
+    <Package name='libhdf5-dev'/>
+    <Package name='git'/>
+    <Package name='autoconf'/>
+    <Package name='automake'/>
+    <Package name='quilt'/>
+
+    <!-- for solr search -->
+    <Package name='openjdk-8-jdk-headless'/>
+
+    <!-- libreoffice -->
+    <!-- Libreoffice does not work with invenio -->
+    <!-- Need to install OpenOffice manually to /opt before configuring -->
+<!--    <Package name='libreoffice'/>
+    <Package name='libnss3'/>
+    <Package name='libwayland-egl1-mesa'/>
+    <Package name='libgl1-mesa-dri'/>
+    <Package name='libgl1-mesa-glx'/>
+    <Package name='libglapi-mesa'/>
+    <Package name='libreoffice-style-elementary'/>
+    <Package name='libreoffice-style-galaxy'/>
+    <Package name='libreoffice-script-provider-python'/>
+    <Package name='dconf-service'/>
+    <Package name='dconf-gsettings-backend'/>
+    <Package name='ubuntu-mono'/> -->
+    <!-- openoffice -->
+    <Package name='openoffice'/>
+    <Package name='openoffice-base'/>
+    <Package name='openoffice-brand-base'/>
+    <Package name='openoffice-brand-calc'/>
+    <Package name='openoffice-brand-draw'/>
+    <Package name='openoffice-brand-en-us'/>
+    <Package name='openoffice-brand-impress'/>
+    <Package name='openoffice-brand-math'/>
+    <Package name='openoffice-brand-writer'/>
+    <Package name='openoffice-calc'/>
+    <Package name='openoffice-core01'/>
+    <Package name='openoffice-core02'/>
+    <Package name='openoffice-core03'/>
+    <Package name='openoffice-core04'/>
+    <Package name='openoffice-core05'/>
+    <Package name='openoffice-core06'/>
+    <Package name='openoffice-core07'/>
+    <Package name='openoffice-draw'/>
+    <Package name='openoffice-en-us'/>
+    <Package name='openoffice-en-us-base'/>
+    <Package name='openoffice-en-us-calc'/>
+    <Package name='openoffice-en-us-draw'/>
+    <Package name='openoffice-en-us-help'/>
+    <Package name='openoffice-en-us-impress'/>
+    <Package name='openoffice-en-us-math'/>
+    <Package name='openoffice-en-us-res'/>
+    <Package name='openoffice-en-us-writer'/>
+    <Package name='openoffice-gnome-integration'/>
+    <Package name='openoffice-graphicfilter'/>
+    <Package name='openoffice-images'/>
+    <Package name='openoffice-impress'/>
+    <Package name='openoffice-javafilter'/>
+    <Package name='openoffice-math'/>
+    <Package name='openoffice-ogltrans'/>
+    <Package name='openoffice-onlineupdate'/>
+    <Package name='openoffice-ooofonts'/>
+    <Package name='openoffice-ooolinguistic'/>
+    <Package name='openoffice-pyuno'/>
+    <Package name='openoffice-ure'/>
+    <Package name='openoffice-writer'/>
+    <Package name='openoffice-xsltfilter'/>
+
+    <!-- LaTeX -->
+    <Package name='texlive'/>
+    <Package name='texlive-extra-utils'/>
+    <Package name='texlive-font-utils'/>
+    <Package name='texlive-generic-recommended'/>
+    <Package name='texlive-pictures'/>
+    <Package name='texlive-pstricks'/>
+    <Package name='texlive-bibtex-extra'/>
+    <Package name='texlive-generic-extra'/>
+    <Package name='texlive-lang-cyrillic'/>
+    <Package name='texlive-lang-english'/>
+    <Package name='texlive-latex-extra'/>
+    <Package name='texlive-math-extra'/>
+    <Package name='texlive-metapost'/>
+    <Package name='texlive-publishers'/>
+    <Package name='texlive-science'/>
+
+    <!-- enable the site in Apache -->
+    <Path name='/etc/apache2/sites-available/invenio.conf'/>
+    <Path name='/etc/apache2/sites-available/invenio-ssl.conf'/>
+    <Path name='/etc/apache2/sites-enabled/invenio.conf'/>
+    <Path name='/etc/apache2/sites-enabled/invenio-ssl.conf'/>
+</Group>
+</Bundle>

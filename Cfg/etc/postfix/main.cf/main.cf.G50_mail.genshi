@@ -84,7 +84,7 @@ transport_maps = texthash:/etc/postfix/transport
 alias_maps = hash:/etc/aliases
 {% end %}\
 {% if 'ubuntu-xenial' in metadata.groups %}\
-virtual_alias_maps = hash:/etc/aliases,
+virtual_alias_maps = texthash:/etc/postfix/alias_system,
       proxy:ldap:/etc/postfix/alias_map.cf,
       proxy:ldap:/etc/postfix/alias_map_dupforw.cf,
       proxy:ldap:/etc/postfix/alias_map_forward.cf,

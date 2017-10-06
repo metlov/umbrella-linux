@@ -2,40 +2,30 @@
 from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
+
+nfs_server=None
+if not 'local-fs' in metadata.groups:
+    if 'net-pub' in metadata.groups and 'nfs' in funchosts:
+        nfs_server=funchosts['nfs']
+        nfs_sec='krb5'
+        nfs_path='/home'
+        if metadata.hostname in hostfuncs and hostfuncs[metadata.hostname] == 'nfs':
+            nfs_path='/export/home'
+    if 'net-sec' in metadata.groups and 'archive' in funchosts:
+        nfs_server=funchosts['archive']
+        nfs_sec='krb5p'
+        nfs_path='/home'
+        if metadata.hostname in hostfuncs and hostfuncs[metadata.hostname] == 'archive':
+            nfs_path='/export/home'
 %}\
 #!/bin/bash
-{% choose %}\
-{% when 'sworkstation' in metadata.groups %}\
-{%   if 'archive' in funchosts %}\
-if [ "$1" = "${system_name}" ]; then
-    echo "-fstype=nfs4,sec=krb5p,fsc   ${funchosts['archive']}:/home"
-fi
-{%   end %}\
-{% end %}\
-{% when metadata.hostname in hostfuncs and hostfuncs[metadata.hostname] == 'nfs' %}\
-{%   if 'nfs' in funchosts %}\
-if [ "$1" = "${system_name}" ]; then
-    echo "-fstype=nfs4,sec=krb5,fsc   ${funchosts['nfs']}:/export/home"
-fi
-{%   end %}\
-{% end %}\
-{% when metadata.hostname in hostfuncs and hostfuncs[metadata.hostname] == 'archive' %}\
-{%   if 'archive' in funchosts %}\
-if [ "$1" = "${system_name}" ]; then
-    echo "-fstype=nfs4,sec=krb5,fsc   ${funchosts['archive']}:/export/home"
-fi
-{%   end %}\
-{% end %}\
-{% otherwise %}\
-{%   if 'nfs' in funchosts and not 'local-fs' in metadata.groups %}\
-if [ "$1" = "${system_name}" ]; then
-    echo "-fstype=nfs4,sec=krb5,fsc   ${funchosts['nfs']}:/home"
-fi
-{% end %}\
-{% if 'local-fs' in metadata.groups or not 'nfs' in funchosts %}\
+{% if nfs_server is None %}\
 if [ "$1" = "${system_name}" ]; then
     echo "-fstype=bind :/home"
 fi
 {% end %}\
-{%   end %}\
+{% if nfs_server is not None %}\
+if [ "$1" = "${system_name}" ]; then
+    echo "-fstype=nfs4,sec=${nfs_sec},fsc   ${nfs_server}:${nfs_path}"
+fi
 {% end %}\

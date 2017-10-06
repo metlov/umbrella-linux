@@ -138,6 +138,7 @@ lockfile	/var/run/rsnapshot.pid
 # ssh has no args passed by default, but you can specify some here.
 #
 #ssh_args	-p 22
+ssh_args	-i /root/.ssh/id_rsa
 
 # Default arguments for the "du" program (for disk space reporting).
 # The GNU version of "du" is preferred. See the man page for more details.
@@ -189,6 +190,8 @@ exclude		/export/home/*/.unison/backup
 exclude		/export/home/*/.bittorrent
 exclude		/export/home/*/.wine
 exclude		/vm/*.raw
+exclude		/vm/backups/*.raw
+exclude		/vm/tmp
 exclude		/dev
 exclude		/proc
 exclude		/sys
@@ -226,17 +229,25 @@ link_dest	1
 ###############################
 ### BACKUP POINTS / SCRIPTS ###
 ###############################
-backup	root@${funchostsshort['vmhost']}:/	${funchostsshort['vmhost']}/	+rsync_long_args=--exclude=/nfs/
-backup	root@${funchostsshort['config']}:/	${funchostsshort['config']}/	+rsync_long_args=--exclude=/nfs/
-backup	root@${funchostsshort['nfs']}:/	${funchostsshort['nfs']}/	+rsync_long_args=--exclude=/nfs/
-backup	root@${funchostsshort['mail']}:/	${funchostsshort['mail']}/	+rsync_long_args=--exclude=/nfs/
-backup	root@${funchostsshort['ltsp']}:/	${funchostsshort['ltsp']}/	+rsync_long_args=--exclude=/nfs/
-backup	root@${funchostsshort['proxy']}:/	${funchostsshort['proxy']}/	+rsync_long_args=--exclude=/nfs/
-backup	root@${funchostsshort['router']}:/	${funchostsshort['router']}/	+rsync_long_args=--exclude=/nfs/
-backup	/	${funchostsshort['archive']}/	+rsync_long_args=--exclude=/nfs/
+{% for func, funchost in funchostsshort.iteritems() %}\
+{%     if metadata.hostname != funchosts[func] %}\
+backup	root@${funchost}:/	${funchost}/	+rsync_long_args=--exclude=/nfs/
+{%     end %}\
+{%     if metadata.hostname == funchosts[func] %}\
+backup	/	${funchost}/	+rsync_long_args=--exclude=/nfs/
+{%     end %}\
+{% end %}
 
 # Mysql databases on config
 backup_script	/etc/rsnapshot_dump_mysql_config	_databases_${funchostsshort['config']}/
+{% if 'archive' in funchosts %}\
 backup_script	/etc/rsnapshot_dump_mysql_archive	_databases_${funchostsshort['archive']}/
+{% end %}\
+{% if 'DMZwww' in funchosts %}\
+backup_script	/etc/rsnapshot_dump_mysql_DMZwww	_databases_${funchostsshort['DMZwww']}/
+{% end %}\
+{% if 'DMZlib' in funchosts %}\
+backup_script	/etc/rsnapshot_dump_mysql_DMZlib	_databases_${funchostsshort['DMZlib']}/
+{% end %}\
 backup_script	/etc/rsnapshot_dump_LDAP	_LDAP/
 #backup_script	/etc/rsnapshot_dump_svn	_subversion/

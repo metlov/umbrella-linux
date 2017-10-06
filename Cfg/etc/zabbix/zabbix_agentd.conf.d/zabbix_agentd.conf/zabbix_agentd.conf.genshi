@@ -4,13 +4,12 @@ from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
-addr=socket.gethostbyname(metadata.hostname)
 %}\
-{% if addr in networks['pubif'] %}\
+{% if ip_addr in networks['pubif'] %}\
 Server=${funchosts['monitor']}
 ServerActive=${funchosts['monitor']}
 {% end %}\
-{% if addr in networks['secif'] %}\
+{% if ip_addr in networks['secif'] %}\
 Server=${funchosts['archive']}
 ServerActive=${funchosts['archive']}
 {% end %}\
@@ -24,9 +23,9 @@ HostMetadata=pubserver
 {% if 'secserver' in metadata.groups %}\
 HostMetadata=secserver
 {% end %}\
-{% if 'pworkstation' in metadata.groups %}\
+{% if 'net-pub' in metadata.groups %}\
 HostMetadata=pworkstation
 {% end %}\
-{% if 'sworkstation' in metadata.groups %}\
+{% if 'net-sec' in metadata.groups %}\
 HostMetadata=sworkstation
 {% end %}\

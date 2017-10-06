@@ -1,0 +1,6 @@
+[mysqld]
+# optionally (but used by all Umbrella clients) secure remote server access
+# using SSL.
+ssl-ca=/etc/ssl/certs/bcfg2ca.pem
+ssl-cert=/etc/mysql/mysql.pem
+ssl-key=/etc/mysql/mysql.key

@@ -6,7 +6,9 @@ execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/25_firewall.py')
 %}\
 # permit common service addresses
-postmaster@ OK
+{% for domain in domain_names %}\
+postmaster@${domain} OK
+{% end %}\
 {% python
 aliases = metadata.Properties['mailaliases.xml'].xdata.findall('mailalias')
 %}\

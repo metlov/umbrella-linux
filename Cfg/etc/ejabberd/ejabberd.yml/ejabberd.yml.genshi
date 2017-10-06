@@ -117,7 +117,7 @@ listen:
     ## To enforce TLS encryption for client connections,
     ## use this instead of the "starttls" option:
     ##
-    ## starttls_required: true
+    starttls_required: true
     ##
     ## Custom OpenSSL options
     ##
@@ -129,10 +129,16 @@ listen:
     access: c2s
     zlib: true
     resend_on_timeout: if_offline
-  ## - 
-  ##   port: 5269
-  ##   ip: "::"
-  ##   module: ejabberd_s2s_in
+{% if 'DMZxmpp' in metadata.groups %}\
+  - 
+    port: 5269
+    ip: "::"
+    module: ejabberd_s2s_in
+    certfile: "/etc/ejabberd/ejabberd.pem"
+    starttls: true
+    starttls_required: true
+    cafile: "/etc/ssl/certs-umbrella/ca-certificates.crt"
+{% end %}\
   ##
   ## ejabberd_service: Interact with external components (transports, ...)
   ##
@@ -670,7 +676,7 @@ modules:
     ldap_groupattr: "gidNumber"
     ## ldap_gfilter: "(&(objectClass=posixGroup)(cn=%g))"
     ldap_groupdesc: ""
-    ldap_auth_check: "off"
+    ldap_auth_check: false
     ldap_memberattr: "uid"
     ldap_userdesc: "gecos"
     ldap_useruid: "uid"
@@ -681,7 +687,6 @@ modules:
   ##   search: false
   mod_vcard_ldap:
     ldap_uids: {"uid": "%u"}
-    ldap_filter: ""
     matches: infinity
     ldap_vcard_map:
       "NICKNAME": {"%u": []}

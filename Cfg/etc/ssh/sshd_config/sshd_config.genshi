@@ -105,6 +105,6 @@ AllowGroups root itadmins
 AllowGroups root itadmins webmasters ${www_homepages}
 {%   end %}\
 {% end %}\
-{% if 'physworkstation' in metadata.groups %}\
+{% if 'physical' in metadata.groups and 'workstation' in metadata.groups %}\
 AllowGroups root itadmins ${" ".join(ws_org_admin_group)}
 {% end %}\

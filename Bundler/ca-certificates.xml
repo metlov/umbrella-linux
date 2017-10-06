@@ -1,5 +1,6 @@
 <Bundle name='ca-certificates'>
+   <!-- global registry of CA certificates includes the Umbrella CA-->
    <Package name='ca-certificates'/>
-    <Path name='/usr/local/share/ca-certificates/bcfg2ca.crt'/>
-    <Action name='update-ca-certificates'/>
+   <Path name='/usr/local/share/ca-certificates/bcfg2ca.crt'/>
+   <Action name='update-ca-certificates'/>
 </Bundle>

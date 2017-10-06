@@ -8,7 +8,8 @@ search_base = ${ldap_root}
 search_timeout = 30
 scope = sub
 bind = no
-query_filter = (&(objectClass=posixGroup)(objectClass=fdGroupMail)(|${''.join(('(mail=%%s@%s)(gosaMailAlternateAddress=%%s@%s)' % (domain,domain,)) for domain in domain_names )}))
+domain = ${', '.join(domain_names)}
+query_filter = (&(objectClass=posixGroup)(objectClass=fdGroupMail)(|${''.join(('(mail=%%u@%s)(gosaMailAlternateAddress=%%u@%s)' % (domain,domain,)) for domain in domain_names )}))
 exclude_internal = yes
 result_filter = %s
 result_attribute = memberUid, mail

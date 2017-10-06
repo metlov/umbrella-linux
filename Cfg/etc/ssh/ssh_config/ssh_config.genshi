@@ -48,6 +48,6 @@ Host *
     HashKnownHosts yes
     ServerAliveInterval 15
     ServerAliveCountMax 6
-{% if 'sworkstation' in metadata.groups %}\
+{% if 'net-sec' in metadata.groups %}\
     PreferredAuthentications publickey
 {% end %}\

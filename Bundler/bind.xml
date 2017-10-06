@@ -6,7 +6,6 @@ execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/30_networking.py')
-addr=socket.gethostbyname(metadata.hostname)
 ?>
 <Group name='ubuntu'>
     <Package name='bind9'/>
@@ -27,6 +26,15 @@ addr=socket.gethostbyname(metadata.hostname)
             <Package name='liblog-handler-perl'/>
             <Path name='/etc/bind'/> <!-- make writable for bind user -->
             <Path name='/etc/cron.d/ldap2zone'/> <!-- runs as bind user -->
+            <!-- statically define the internal versions of served zones -->
+            <Path name='/etc/bind/zones'/>
+            <py:for each="iface in ['pub','sec','DMZ']">
+                <py:for each="i in range(len(domain_names_list))">
+                    <py:if test="domain_names_list[i]!=domain_name">
+                    <Path name='/etc/bind/zones/${iface}_zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
+                    </py:if>
+                </py:for>
+            </py:for>
         </Group>
     </Group>
     <Service name='bind9'/>
@@ -44,16 +52,10 @@ addr=socket.gethostbyname(metadata.hostname)
     <Path name='/etc/bind/named.conf.local'/>
     <Path name='/etc/bind/named.conf.options'/>
     <Group name='DMZsmtp'>
-        <py:if test="ext_address is not None and ext_address.strip()">
-            <py:for each="i in range(len(domain_names_list))">
-            <Path name='/etc/bind/mydomain${"%02d" % (i,)}-ext'/>
-            </py:for>
-        </py:if>
-        <py:if test="int_address is not None and int_address.strip()">
-            <py:for each="i in range(len(domain_names_list))">
-            <Path name='/etc/bind/mydomain${"%02d" % (i,)}-int'/>
-            </py:for>
-        </py:if>
+        <Path name='/etc/bind/zones'/>
+        <py:for each="i in range(len(domain_names_list))">
+            <Path name='/etc/bind/zones/zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
+        </py:for>
     </Group>
 </Group>
 </Bundle>

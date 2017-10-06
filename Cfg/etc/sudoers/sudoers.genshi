@@ -9,8 +9,13 @@ Defaults	!lecture,tty_tickets,!fqdn
 
 # User privilege specification
 root	ALL=(ALL) ALL
-{% if 'physworkstation' in metadata.groups %}\
+{% if 'physical' in metadata.groups and 'workstation' in metadata.groups %}\
 {%   for adm_group in ws_org_admin_group %}\
 %${adm_group} ALL=(ALL) ALL
 {%   end %}\
+{% end %}\
+{% if 'DMZlib' in metadata.groups %}\
+Defaults umask=0000
+Defaults umask_override
+www-data ALL=(unoconv) NOPASSWD: /opt/invenio/bin/inveniounoconv
 {% end %}\

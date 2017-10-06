@@ -24,7 +24,10 @@ funchostdesc={ \
     'archive': 'Archive server.', \
     'DMZsmtp': 'DNS and SMTP server in DMZ.', \
     'DMZwww' : 'Web server.', \
-    'DMZwww-test' : 'TEST Web server.' \
+    'DMZwww-test' : 'TEST Web server.', \
+    'DMZxmpp': 'Jabber server in DMZ.', \
+    'DMZpbx': 'PBX (telephony) server in DMZ.', \
+    'DMZlib': 'Library (Invenio) server in DMZ.', \
   }
 
 # determine the mail servers
@@ -46,3 +49,9 @@ NTP_server_on_vmhost = 'vmhost' in funchosts and NTP_server_on_vmhost is not Non
 NTP_server=funchosts['config']
 if NTP_server_on_vmhost:
   NTP_server=funchosts['vmhost']
+
+# determine the Jabber server
+if 'DMZxmpp' in funchosts:
+  XMPP_server=funchosts['DMZxmpp']
+else:
+  XMPP_server=funchosts['proxy']

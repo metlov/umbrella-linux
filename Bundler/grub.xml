@@ -14,6 +14,9 @@
             <Path name='/etc/default/grub'/>
         </Group>
     </Group>
+    <Group name='physical'>
+        <Package name='memtest86+'/>
+    </Group>
     <Action name='update-grub'/>
 </Group>
 </Bundle>

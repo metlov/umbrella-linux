@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+
+if [ "$(whoami)" != "bcfg2" ] ; then
+    echo "error: this script must be run under \"bcfg2\" user"
+    exit 1
+fi
+
+if [ "$#" -gt 1 ]; then
+    echo "error: this script may have pem filename as its sole argument."
+    exit 1
+fi
+
+# get the CA certificate passphrase from the bcfg2 server configuration file
+if [ ! -r "/etc/bcfg2-server.conf" ]; then
+    echo "error: file /etc/bcfg2-server.conf must be readable to this script."
+fi
+passphrase=`cat /etc/bcfg2-server.conf | grep passphrase | sed -e 's/passphrase \+= \+//g'`
+if [ -z "$passphrase" ]; then
+    echo "error: no CA certificate passphrase in /etc/bcfg2-server.conf ."
+    exit 1
+fi
+
+# if filename specified we revoke the certificate
+if [ "$#" -eq 1 ]; then
+    certpath=`realpath "$1"`
+    if [ ! -r "$certpath" ]; then
+        echo "error: file $certpath is not readable."
+        exit 1
+    fi
+    echo "Revoking the certificate in $certpath"
+    cd /etc/pki/CA
+    openssl ca -config ../openssl.cnf -revoke $certpath \
+        -passin file:<( echo -n "$passphrase" )
+fi
+
+# we regenerate the CRL in any case (even if no certificate was specified for
+# revocation)
+echo "Regenerating the CRL..."
+cd /etc/pki/CA
+openssl ca -config ../openssl.cnf -gencrl \
+         -passin file:<( echo -n "$passphrase" ) -out crl/root.crl.pem.tmp
+openssl crl -inform PEM -in crl/root.crl.pem.tmp -outform DER -out crl/root.crl.tmp
+mv crl/root.crl.pem.tmp crl/root.crl.pem
+mv crl/root.crl.tmp crl/root.crl
+exit 0

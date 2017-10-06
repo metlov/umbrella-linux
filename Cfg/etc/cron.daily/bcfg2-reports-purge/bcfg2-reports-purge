@@ -1,0 +1,15 @@
+#!/bin/sh
+# ------------------------------------------------------------------
+# Umbrella Linux
+#
+# bcfg2 reports database maintenance: purge expired info and records
+# older than 3 months (90 days).
+#
+# (c) 2018 Andrey V. Polishchuk <polishchuk.av@postdonbass.com>
+#
+# This file is licensed to you on the terms of GNU General Public License
+# version 3. The full text of the licence is in the LICENSE file inside
+# the root directory of the Umbrella Linux configuration repository.
+
+/usr/sbin/bcfg2-admin reports purge --expired > /dev/null 2>&1
+/usr/sbin/bcfg2-admin reports purge --days 90 > /dev/null 2>&1

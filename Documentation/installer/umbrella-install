@@ -3,7 +3,7 @@
 cat << EOF
 Welcome to the Umbrella Linux installer !
 
-                         (c) 2017 Konstantin L. Metlov <metlov@donfti.ru>
+                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
                          as well as others (listed in the AUTHORS file)
                          Umbrella Linux (including this installer) is avaiable
                          under the terms of GNU General Public License v3 or
@@ -16,6 +16,37 @@ configuration in *.xml files, supplied in the current directory.
 You will find last command protocol in /var/log/umbrella-install.log
 
 EOF
+
+GIT_USER=""
+GIT_PASS=""
+# parse the parameters
+while [[ $# -gt 0 ]]
+do
+key=$1
+case $key in
+    -h|--help)
+    echo "This script installs Umbrella Linux system to a set of LXD containers."
+    echo "The configuration of the system is described by a set of XML files in the current"
+    echo "directory."
+    echo "USAGE:"
+    echo "    umbrella-install [-u <git-username>]"
+    echo "When -u option is specified the installer will use the private Umbrella Linux development"
+    echo "git repository and will prompt for the password. The -u option does not prompt for the"
+    echo "password if ~/.netrc file is already present."
+    exit 0
+    ;;
+    -u)
+    GIT_USER=$2
+    shift
+    shift
+    if [ ! -f ~/.netrc ]; then
+      echo -n "GIT repository Password: "
+      read -s GIT_PASS
+      echo
+    fi
+    ;;
+esac
+done
 
 echo -n "Checking that the script is run by the root user..."
 if [[ $EUID -ne 0 ]]; then
@@ -40,14 +71,30 @@ fi
 sleep 2   # to let the disk activity settle down
 
 if grep -q '^uuidd:' /etc/passwd ; then
-  echo -n "and remove some unnecessary packages to free up UIDs/GIDs..."
+  echo -n "and remove some other unnecessary packages to free up UIDs/GIDs..."
   (
   set -e
   set -o xtrace
   apt-get purge --assume-yes uuid-runtime mlocate
   deluser uuidd
-  delgroup mlocate
+  getent group mlocate &>/dev/null && delgroup mlocate
+  if ! grep -q '# Umbrella Installer Bridges Defined' /etc/network/interfaces; then
+    if grep -q '^lxd:' /etc/passwd ; then
+      # we also remove the initially shipped LXD (to install a backported one later)
+      apt-get purge --assume-yes lxd lxd-client lxd-tools
+      getent passwd lxd &>/dev/null && deluser lxd
+      getent group lxd &>/dev/null && delgroup lxd
+    fi
+  fi
+  groupmod -g 110 messagebus
   groupmod -g 111 ssh
+  if [ ! `id -u messagebus` -eq "106" ]; then
+    systemctl stop dbus
+    systemctl kill dbus
+    usermod -u 106 messagebus
+  fi
+  getent passwd sshd &>/dev/null && usermod -u 107 sshd
+  exit 0
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -89,7 +136,55 @@ if [ ! -d /tmp/bcfg2 ]; then
   echo -n "Checking out Umbrella Linux repository to /tmp/bcfg2 ..."
   (
   set -o xtrace
-  git clone https://github.com/metlov/umbrella-linux.git /tmp/bcfg2
+  if [ -z $GIT_USER ]; then
+    # public repository
+    git clone https://github.com/metlov/umbrella-linux.git /tmp/bcfg2
+  else
+    # private repository
+    if [ ! -f ~/.netrc ]; then
+      cat >~/.netrc <<EOF
+machine www.donfti.ru
+login $GIT_USER
+password $GIT_PASS
+EOF
+    fi
+    mkdir -p ~/git-certs/
+    cat >~/git-certs/DonFTI2.pem <<EOF
+-----BEGIN CERTIFICATE-----
+MIIExzCCA6+gAwIBAgIJAJsxb81FtRFvMA0GCSqGSIb3DQEBBQUAMIGdMRIwEAYD
+VQQDEwlEb25GVEkgQ0ExCzAJBgNVBAYTAlVBMRAwDgYDVQQIEwdEb25ldHNrMRAw
+DgYDVQQHEwdEb25ldHNrMTYwNAYDVQQKEy1Eb25ldHNrIEluc3RpdHV0ZSBmb3Ig
+UGh5c2ljcyBhbmQgRW5naW5lZXJpbmcxHjAcBgkqhkiG9w0BCQEWD2FkbWluQGZ0
+aS5kbi51YTAeFw0xNDA0MTAxMzM0MTFaFw0zNDA0MDUxMzM0MTFaMIGdMRIwEAYD
+VQQDEwlEb25GVEkgQ0ExCzAJBgNVBAYTAlVBMRAwDgYDVQQIEwdEb25ldHNrMRAw
+DgYDVQQHEwdEb25ldHNrMTYwNAYDVQQKEy1Eb25ldHNrIEluc3RpdHV0ZSBmb3Ig
+UGh5c2ljcyBhbmQgRW5naW5lZXJpbmcxHjAcBgkqhkiG9w0BCQEWD2FkbWluQGZ0
+aS5kbi51YTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMWptZT4JNpg
+lkKLFgUew1T8QTfv2dW69QhuO+ziYaWSV/u8wwF2tIPQz7ZGiuWVxb2XlVVwNRZB
+evGrqovFM6OqH6RuTJD7rXiclkFVaI1LwvVU5XH+FRFH43vzaPtRVvw7095C8KBu
+KlLBKBvVQw1DIyQk+1tmmqca+fR/XmhlwKSfTBsCSVVTKyyGjyHDzSTj+QTqPKi3
+yGukqb9vkrWff3RT/xiiYKKSVttYTovUeW/SIty/TMj7rNR4kxJ5MaLbV3HDRAYk
+Iw0KZ9UwEu6AbZNDfG34dFkbMmzGrRHOdaLLkZcTdm3yKDmfQpq+PxCG8KRrpdCB
+uNupcq43zQkCAwEAAaOCAQYwggECMB0GA1UdDgQWBBShhA4AWoGO2r0ZChlM2BFp
+O66WXjCB0gYDVR0jBIHKMIHHgBShhA4AWoGO2r0ZChlM2BFpO66WXqGBo6SBoDCB
+nTESMBAGA1UEAxMJRG9uRlRJIENBMQswCQYDVQQGEwJVQTEQMA4GA1UECBMHRG9u
+ZXRzazEQMA4GA1UEBxMHRG9uZXRzazE2MDQGA1UEChMtRG9uZXRzayBJbnN0aXR1
+dGUgZm9yIFBoeXNpY3MgYW5kIEVuZ2luZWVyaW5nMR4wHAYJKoZIhvcNAQkBFg9h
+ZG1pbkBmdGkuZG4udWGCCQCbMW/NRbURbzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3
+DQEBBQUAA4IBAQCCQhZ2DlQL7gnaiAQ776bzaj6WEahY28ZWv6Sh+trMvQCT/HkM
+0W99TrGHltMmYHhnaFsatuTSVL7IW4+nTCnkkzm75xS+c4aZy46L8vlkLkrsnlfs
+luWYD7jikaFCzkOtN/TvvSvokzaoSSjPPZ0ohS4oHaYAuzMsoqezsibsKT+bBnZ4
+ZIEE09FkqwNTc8VnbBhqTpG2tbAmMHGi3H4LISqODBlR0kKF67XQIniH41TYyrOY
++NREzc1R6sK7llmrbFDVPjAOnNJcBxWAdw5vHc2sPckMIDb29kjbiUc4yRrvkJjm
+BP/oWBD3GgLi0gWk+tLczWnzYgqboDmOwDHw
+-----END CERTIFICATE-----
+EOF
+    cat >~/.gitconfig <<EOF
+[http]
+        sslCAInfo = ~/git-certs/DonFTI2.pem
+EOF
+    git clone https://www.donfti.ru/umbrella.git /tmp/bcfg2
+  fi
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -100,7 +195,7 @@ if [ ! -d /tmp/bcfg2 ]; then
 fi
 
 echo -n "Checking that the required XML files are present..."
-xml_req_files="firewall.xml mailaliases.xml organization.xml umbrella.xml usbdev.xml vpn.xml"
+xml_req_files="firewall.xml lan_topology.xml mailaliases.xml organization.xml umbrella.xml usbdev.xml vpn.xml"
 (
 set -o xtrace
 ls $xml_req_files
@@ -142,7 +237,7 @@ else
 fi
 
 # get domain_name and other static parameters from umbrella.xml
-domain_name=`xmllint --xpath '//Properties//domain_name/text()' umbrella.xml`
+domain_name=`xmllint --xpath '(//Properties//domain)[1]/name/text()' umbrella.xml`
 country_code=`xmllint --xpath '//Properties//country_code/text()' umbrella.xml`
 state=`xmllint --xpath '//Properties//state/text()' umbrella.xml`
 location=`xmllint --xpath '//Properties//location/text()' umbrella.xml`
@@ -585,25 +680,29 @@ EOF
   fi
 fi
 
-echo -n "Checking internet connectivity..."
-(
-set -e
-set -o xtrace
-wget -q --tries=10 --timeout=20 --spider http://google.com
-) 2>&1 | cat >/var/log/umbrella-install.log
-if [ ${PIPESTATUS[0]} -eq 0 ]; then
-    echo ok
-else
-    echo fail
-    echo
-    cat <<EOF
+ensure_inet() {
+  echo -n "Checking internet connectivity..."
+  (
+  set -e
+  set -o xtrace
+  wget -q --tries=10 --timeout=20 --spider http://google.com
+  ) 2>&1 | cat >/var/log/umbrella-install.log
+  if [ ${PIPESTATUS[0]} -eq 0 ]; then
+      echo ok
+  else
+      echo fail
+      echo
+      cat <<EOF
 The absence of connectivity here is not fatal. For example Virtualbox requires a hard VM restart
 (that is -- Power Off, Power On) to accomodate to the new network settings.
 
 Try to restart the computer and re-run this Umbrella Linux installation script to continue.
 EOF
-    exit 1
-fi
+      exit 1
+  fi
+}
+
+ensure_inet
 
 normalize_uidgid_in_vm()
 {
@@ -1070,6 +1169,8 @@ fi
 
 normalize_uidgid_in_vm ${config_hostname}
 
+ensure_inet
+
 if lxc exec ${config_hostname} -- /bin/bash -c \
   "[[ ! -x /usr/sbin/bcfg2-server ]]" ; then
   echo -n "Installing bcfg2 on ${config_hostname}..."
@@ -1093,6 +1194,12 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
     lxc exec ${config_hostname} -- /bin/bash -c \
       "usermod -a -G ssl-cert bcfg2"
   fi
+
+  # copy the apt sources (needed to enable multiverse, which is typically present
+  # in "normal" Ubuntu install on host, but not in container)
+  lxc file push /etc/apt/sources.list ${config_hostname}/etc/apt/sources.list
+  lxc exec ${config_hostname} -- /bin/bash -c \
+    "apt-get update"
 
   lxc exec ${config_hostname} -- /bin/bash -c \
     "apt-get install --assume-yes bcfg2-server git mc python-ipcalc python-passlib ssl-cert"
@@ -1222,7 +1329,7 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
     # we take the CA certificate and the key from the supplied umbrella_keys.xml
     # file /etc/pki/CA/private/passkey.txt is not created in this case
     CA_pub=`xmllint --xpath '//Properties//CA_pub/text()' umbrella_keys.xml`
-    CA_sec=`xmllint --xpath '//Properties//CA_pub/text()' umbrella_keys.xml`
+    CA_sec=`xmllint --xpath '//Properties//CA_sec/text()' umbrella_keys.xml`
     echo "${CA_pub}" | lxc exec ${config_hostname} -- /bin/bash -c \
       "cat >${certfile}"
     echo "${CA_sec}" | lxc exec ${config_hostname} -- /bin/bash -c \
@@ -1253,7 +1360,7 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   lxc exec ${config_hostname} -- /bin/bash -c \
     "mkdir -p /etc/pki/CA/crl"
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "touch /etc/pki/CA/crlnumber"
+    "echo 1000 > /etc/pki/CA/crlnumber"
   lxc exec ${config_hostname} -- /bin/bash -c \
     "echo 01 > /etc/pki/CA/serial"
   lxc exec ${config_hostname} -- /bin/bash -c \
@@ -1582,26 +1689,17 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   lxc exec ${config_hostname} -- /bin/bash -c \
     "chown bcfg2:www-data /etc/ssl/private/www.key"
 
-  ) 2>&1 | cat >/var/log/umbrella-install.log
-  if [ ${PIPESTATUS[0]} -eq 0 ]; then
-    echo ok
-  else
-    echo fail
-    exit 1
-  fi
-fi
-
-if ! lxc exec ${config_hostname} -- /bin/bash -c \
-  "pgrep -x \"bcfg2-server\" > /dev/null" ; then
-  echo -n "Starting bcfg2-server on ${config_hostname}..."
-  (
-  set -e
-  set -o xtrace
-
+  # generate the CRL
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "systemctl start bcfg2-server"
+    "cp /var/lib/bcfg2/Cfg/usr/local/bin/umbrella-revoke-key/umbrella-revoke-key /usr/local/bin/"
+  lxc exec ${config_hostname} -- /bin/bash -c \
+    "chmod 755 /usr/local/bin/umbrella-revoke-key"
+  lxc exec ${config_hostname} -- /bin/su -s /bin/bash - bcfg2 -c \
+    "/usr/local/bin/umbrella-revoke-key"
+  # prepare the directory for web-exported CRL
+  lxc exec ${config_hostname} -- /bin/bash -c \
+    "mkdir -p /var/www/html"
 
-  sleep 25
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -1611,15 +1709,46 @@ if ! lxc exec ${config_hostname} -- /bin/bash -c \
   fi
 fi
 
-echo -n "Checking that bcfg2-server on ${config_hostname} is running..."
-if lxc exec ${config_hostname} -- /bin/bash -c \
-  "pgrep -x \"bcfg2-server\" > /dev/null" ; then
-  echo "ok"
-else
-  echo "fail"
-  exit 1
-fi
+# ensure bcfg2 server is running and start it if necessary
+ensure_bcfg2() {
+  if ! lxc exec ${config_hostname} -- /bin/bash -c \
+    "pgrep -x \"bcfg2-server\" > /dev/null" ; then
+    echo -n "Starting bcfg2-server on ${config_hostname}..."
+    (
+    set -e
+    set -o xtrace
 
+    lxc exec ${config_hostname} -- /bin/bash -c \
+      "systemctl start bcfg2-server"
+
+    sleep 25
+
+    lxc exec ${config_hostname} -- /bin/bash -c \
+      "bcfg2 -Qv -s disabled -b bcfg2"
+
+#  lxc exec ${config_hostname} -- /bin/bash -c \
+#    "systemctl restart bcfg2-server"
+##  sleep 25
+    ) 2>&1 | cat >/var/log/umbrella-install.log
+    if [ ${PIPESTATUS[0]} -eq 0 ]; then
+      echo ok
+    else
+      echo fail
+      exit 1
+    fi
+  fi
+
+  echo -n "Checking that bcfg2-server on ${config_hostname} is running..."
+  if lxc exec ${config_hostname} -- /bin/bash -c \
+    "pgrep -x \"bcfg2-server\" > /dev/null" ; then
+    echo "ok"
+  else
+    echo "fail"
+    exit 1
+  fi
+}
+
+ensure_bcfg2
 
 #######################################################################
 #                                                                     #
@@ -1686,6 +1815,9 @@ EOF
     "bcfg2 -qv -r Packages"
   lxc exec $1 -- /bin/bash -c \
     "rm -f /etc/apt/apt.conf.d/99local"
+  if [ -n "$3" ]; then
+    $3 $1
+  fi
   lxc restart $1
   sleep 15
   ) 2>&1 | cat >/var/log/umbrella-install.log
@@ -1726,7 +1858,7 @@ configure_quirks_init_krb5_ldap() {
   fi
 }
 
-# we configure 'config' first
+# quirks for the terminal server
 configure_quirks_x2go() {
   lxc exec $1 -- /bin/bash -c \
     "mkdir -p /var/spool/x2goprint"
@@ -1806,6 +1938,9 @@ EOF
 
 # finish configuring config
 configure_vm ${config_hostname} configure_quirks_init_krb5_ldap
+
+# check for and start bcfg2 server if necessary
+ensure_bcfg2
 
 # proceed with other VMs
 create_vm proxy configure_quirks_init_krb5_ldap
@@ -1914,7 +2049,14 @@ create_vm monitor
 create_vm DMZsmtp
 create_vm DMZwww
 
-configure_vm ${router_hostname}
+# router configuration quirks
+configure_quirks_router() {
+  # we generate the local DNS zone on router immediately (not waiting for cron)
+  lxc exec $1 -- /bin/bash -c \
+    "/usr/sbin/argonaut-ldap2zone --norestart ${domain_name}"
+}
+
+configure_vm ${router_hostname} "" configure_quirks_router
 
 first_admin=`xmllint --xpath "//Properties//admin" umbrella.xml | sed 's|<admin>||g' | sed 's|</admin>|\n|g' | head -n 1`
 

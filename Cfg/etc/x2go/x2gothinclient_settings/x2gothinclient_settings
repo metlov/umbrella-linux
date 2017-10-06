@@ -46,9 +46,7 @@ TC_DEBMIRROR_URL="http://ftp.debian.org/debian"
 #TC_DISTRO_CODENAME="wheezy"
 # or use older Debian squeeze...
 #TC_DISTRO_CODENAME="squeeze"
-
-# KLM: have to use jessie to connect to newer ssh servers
-TC_DISTRO_CODENAME="jessie"
+TC_DISTRO_CODENAME="stretch"
 
 # Retrieve X2Go packages from this URL
 ### FIXME: once we release this project, we have to remove the heuler area from the deburl below!!!! ###

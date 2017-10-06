@@ -9,3 +9,6 @@ execfile(repo+'/Python/30_networking.py')
 {% if 'DMZsmtp' in funchosts %}\
 ${str(funcifs['DMZsmtp'])} OK
 {% end %}\
+{% if 'DMZsmtp' not in funchosts %}\
+${metadata.Properties['umbrella.xml'].xdata.find('SMTP_incoming_relay').text} OK
+{% end %}\

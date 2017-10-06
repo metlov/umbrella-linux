@@ -47,7 +47,12 @@ make_keytab /etc/apache2/http.keytab/http.keytab.H_${funchosts['monitor']} HTTP/
 make_keytab /etc/ldap/slapd.keytab/slapd.keytab.H_${funchosts['config']} ldap/${funchosts['config']}
 {% if 'proxy' in funchosts %}\
 make_keytab /etc/ldap/slapd.keytab/slapd.keytab.H_${funchosts['proxy']} ldap/${funchosts['proxy']}
+{% end %}\
+{% if 'proxy' in funchosts and not 'DMZxmpp' in funchosts %}\
 make_keytab /etc/ejabberd/xmpp.keytab/xmpp.keytab.H_${funchosts['proxy']} xmpp/${funchosts['proxy']}
+{% end %}\
+{% if 'DMZxmpp' in funchosts %}\
+make_keytab /etc/ejabberd/xmpp.keytab/xmpp.keytab.H_${funchosts['DMZxmpp']} xmpp/${funchosts['DMZxmpp']}
 {% end %}\
 {% for host in funchosts.itervalues() %}\
 {% python

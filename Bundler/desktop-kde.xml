@@ -45,6 +45,7 @@
     <Package name='ibus-qt4'/>
     <Package name='im-config'/>
     <Package name='k3b'/>
+    <Package name='dvd+rw-tools'/>
     <Package name='kate'/>
     <Package name='kcalc'/>
     <Package name='kde-config-gtk-style'/>
@@ -107,6 +108,7 @@
     </Group>
     <Package name='python-qt4-dbus'/>
     <Package name='qapt-deb-installer'/>
+    <Package name='apt-xapian-index'/>
     <Package name='qt5-image-formats-plugins'/>
     <Package name='qtdeclarative5-xmllistmodel-plugin'/>
     <Package name='skanlite'/>

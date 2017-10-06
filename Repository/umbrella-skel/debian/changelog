@@ -1,3 +1,17 @@
+umbrella-skel (0.3) unstable; urgency=low
+
+  * Use XMPP server address from /etc/umbrella.conf .
+  * Workarounds for systems not specifying XMPP_SERVER in /etc/umbrella.conf .
+  * Unpack skel.tar.gz and recreate it during the package build phase.
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Sun, 11 Feb 2018 18:49:38 +0300
+
+umbrella-skel (0.2) unstable; urgency=low
+
+  * Introduced skel versioning and voluntary (enabled by default) upgrade mechanism.
+
+ -- Konstantin Metlov <metlov@donfti.ru>  Wed, 24 Jan 2018 15:26:20 +0300
+
 umbrella-skel (0.1) unstable; urgency=low
 
   * Initial Release.

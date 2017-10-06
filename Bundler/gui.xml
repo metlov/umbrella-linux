@@ -10,7 +10,7 @@
     <Package name='cups-bsd'/>
     <Package name='desktop-base'/>
     <Package name='dconf-gsettings-backend'/>
-    <Group name='sworkstation' negate='true'>
+    <Group name='net-pub'>
         <Package name='gstreamer0.10-x'/>
     </Group>
     <Package name='gstreamer1.0-plugins-base'/>
@@ -134,7 +134,7 @@
     <Package name='liblapack3'/>
 
     <!-- Secure worstation do not have the necessary connectivity -->
-    <Group name='sworkstation' negate='true'>
+    <Group name='net-pub'>
         <!-- <Package name='telegram'/> -->
         <Group name='trusty'>
             <Package name='libseccomp2'/>
@@ -167,7 +167,9 @@
         <Package name='libc6-dev'/>
         <Package name='linux-libc-dev'/> -->
     </Group>
-
+    <Group name='net-sec'>
+        <Package name='surf'/>
+    </Group>
     <Group name="i386">
         <Package name='wine1.6'/>
         <Package name='wine-gecko2.21'/>
@@ -228,7 +230,7 @@
 
     <Path name='/etc/xdg/autostart/update-notifier.desktop'/>
 
-    <Group name='sworkstation' negate='true'>
+    <Group name='net-pub'>
         <Package name='pidgin'/>
         <Package name='pidgin-libnotify'/>
         <Package name='pidgin-festival'/>
@@ -253,6 +255,7 @@
     </Group>
     <Group name='ubuntu-xenial'>
         <Path name='/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf'/>
+        <Path name='/etc/lightdm/lightdm.conf.d/60-disable-guest.conf'/>
         <Path name='/var/lib/lightdm'/>
     </Group>
     <Path name='/etc/pam.d/lightdm'/>

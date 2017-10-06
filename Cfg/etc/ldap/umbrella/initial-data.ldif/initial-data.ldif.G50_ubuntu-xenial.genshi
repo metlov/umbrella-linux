@@ -614,6 +614,8 @@ sRVRecord: 0 0 464 ${funchosts[host]}.
 
 ${ CNAME('kdc2', host) }
 ${ CNAME('ldap2', host) }\
+{%   end if 'proxy' %}\
+{%   if (host == 'proxy' and 'DMZxmpp' not in funchosts) or (host == 'DMZxmpp')  %}\
 
 # _jabber._tcp.${domain_name}., ${domain_name}., dns, ${domain_name}
 dn: relativeDomainName=_jabber._tcp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
@@ -630,7 +632,7 @@ relativeDomainName: _xmpp-client._tcp.${domain_name}.
 zoneName: ${domain_name}.
 dNSClass: IN
 sRVRecord: 5 0 5222 ${funchosts[host]}.
-{%   end if 'proxy' %}\
+{%   end if 'proxy' or 'DMZxmpp' %}\
 {%   if host == 'mail' %}\
 
 # ${domain_name}., ${domain_name}., dns, ${domain_name}

@@ -4,7 +4,6 @@ from genshi.template import TemplateError
 import socket
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
-addr=socket.gethostbyname(metadata.hostname)
 ?>
 <Group name='ubuntu'>
     <Package name='krb5-kdc'/>

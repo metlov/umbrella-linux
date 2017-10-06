@@ -2,7 +2,6 @@
 # and for the system as a whole
 
 import ipcalc
-import socket
 from genshi.template import TemplateError
 
 # renders (as a string) /etc/network/interfaces stanza for a given interface
@@ -215,28 +214,26 @@ if entry is not None:
 else:
   # for workstation determine network parameters from
   # organization.xml
-  addr=socket.gethostbyname(metadata.hostname)
-
   ws_org_network=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                 ipcalc.IP(addr), 'network')
+                                 ipcalc.IP(ip_addr), 'network')
   organization_host=ws_org_network[1]
   if ws_org_network[1]:
     ws_org_network=ws_org_network[0][0]
 
   ws_org_gateway=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                 ipcalc.IP(addr), 'gateway')
+                                 ipcalc.IP(ip_addr), 'gateway')
   if ws_org_gateway[1]:
     ws_org_gateway=ws_org_gateway[0][0]
 
   ws_org_users_group=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                     ipcalc.IP(addr), 'users_group')
+                                     ipcalc.IP(ip_addr), 'users_group')
   if ws_org_users_group[1]:
     ws_org_users_group=ws_org_users_group[0][0]
   else:
     ws_org_users_group=None
 
   ws_org_admin_group=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                     ipcalc.IP(addr), 'admin_group')
+                                     ipcalc.IP(ip_addr), 'admin_group')
   if ws_org_admin_group[1]:
     ws_org_admin_group=ws_org_admin_group[0]
   else:

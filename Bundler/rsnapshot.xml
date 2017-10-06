@@ -1,10 +1,24 @@
-<Bundle name='rsnapshot'>
+<Bundle name='rsnapshot' xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+import socket
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+?>
 <Group name='ubuntu'>
     <Package name='rsnapshot'/>
     <Path name='/etc/cron.d/rsnapshot'/>
     <Path name='/etc/rsnapshot.conf'/>
-    <Path name='/etc/rsnapshot_dump_mysql_config'/>
-    <Path name='/etc/rsnapshot_dump_mysql_archive'/>
+    <Path name='/etc/rsnapshot_dump_mysql_config' altsrc='/etc/rsnapshot_dump_mysql_funchost'/>
+    <py:if test="'archive' in funchosts">
+        <Path name='/etc/rsnapshot_dump_mysql_archive' altsrc='/etc/rsnapshot_dump_mysql_funchost'/>
+    </py:if>
+    <py:if test="'DMZwww' in funchosts">
+        <Path name='/etc/rsnapshot_dump_mysql_DMZwww' altsrc='/etc/rsnapshot_dump_mysql_funchost'/>
+    </py:if>
+    <py:if test="'DMZlib' in funchosts">
+        <Path name='/etc/rsnapshot_dump_mysql_DMZlib' altsrc='/etc/rsnapshot_dump_mysql_funchost'/>
+    </py:if>
     <Path name='/etc/rsnapshot_dump_LDAP'/>
     <Path name='/root/.my.cnf'/>           <!-- needed for mysql backups -->
     <Package name='mysql-client'/>         <!-- needed for mysql backups -->

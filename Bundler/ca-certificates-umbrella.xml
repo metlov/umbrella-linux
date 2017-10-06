@@ -1,0 +1,27 @@
+<Bundle name='ca-certificates-umbrella' xmlns:py="http://genshi.edgewall.org/">
+   <!-- Registry of CA certificates trusted by this Umbrella for  -->
+   <!-- external collections.                                     -->
+   <!-- The certificates themselves are specified in firewall.xml -->
+   <!-- as literal strings. This bundle is installed on all machi -->
+   <!-- nes requiring an access to this certificate list. Most    -->
+   <!-- notably in DMZ.                                           -->
+   <Package name='ca-certificates'/>
+   <Path name='/usr/share/ca-certificates-umbrella'/>
+   <!-- the certificates themselves go into the above dir -->
+<py:for each="i in range(len(metadata.Properties['firewall.xml'].xdata.findall('trusted_CA')))">
+   <Path name='/usr/share/ca-certificates-umbrella/cert${str(i)}' altsrc="/usr/share/ca-certificates-umbrella/cert"/>
+</py:for>
+   <Path name='/usr/share/ca-certificates-umbrella/own_cert' altsrc="/usr/local/share/ca-certificates/bcfg2ca.crt"/>
+   <!-- and then are listed in the config file -->
+   <Path name='/etc/ca-certificates-umbrella.conf'/>
+
+   <!-- the next dir should normally contain only bcfg2-managed files, -->
+   <!-- which is verified-->
+   <Path name='/usr/local/share/ca-certificates-umbrella'/>
+
+   <!-- this dir will contain updated and hashed certificates as well as -->
+   <!-- the certificate bundle to be used in various configuration files.-->
+   <Path name='/etc/ssl/certs-umbrella'/>
+
+   <Action name='update-ca-certificates-umbrella'/>
+</Bundle>

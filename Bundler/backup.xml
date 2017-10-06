@@ -12,6 +12,10 @@ duplicity_enabled=duplicity_enabled and Dopts is not None and Dtarget is not Non
 ?>
 <Group name='ubuntu'>
     <py:if test="duplicity_enabled">
+        <!-- VM backup -->
+        <Path name='/usr/local/bin/umbrella-backup-vms'/>
+        <Path name='/etc/cron.d/backup-vms'/>
+
         <Package name='duplicity-backup'/>
         <Path name='/etc/duplicity-backup.conf'/>
     </py:if>

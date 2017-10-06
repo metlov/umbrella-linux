@@ -7,7 +7,7 @@
     <gateway>172.17.128.1</gateway>
     <admin_group>itadmins</admin_group>
     <users_group>crew</users_group>
-    <bcfg2_profile>pworkstation</bcfg2_profile>
+    <bcfg2_profile>workstation</bcfg2_profile>
 <!-- an example of remote branch -->
 <!--<ou>
         <name>Remote branch 01</name>
@@ -25,7 +25,7 @@
                                               <!-- will be permitted to login-->
                                               <!-- on the workstations of    -->
                                               <!-- this branch               -->
-<!--    <bcfg2_profile>localfspworkstation</bcfg2_profile> -->
+<!--    <bcfg2_profile>localfsworkstation</bcfg2_profile> -->
                                               <!-- default bcfg2 profile for -->
                                               <!-- the workstations in this  -->
                                               <!-- branch.                   -->
@@ -51,7 +51,7 @@
             <!-- database will be generated for this entry -->
 <!--        <network_match>10.10.40.0/24</network_match> -->
             <!-- the rest of the remote branch computers are matched here -->
-            <!-- they get assigned localfspworkstation profile -->
+            <!-- they get assigned localfsworkstation profile -->
             <!-- the network is also inherited from the parent node -->
 <!--    </ou> -->
 <!--</ou> -->

@@ -25,6 +25,9 @@
         </Group>
         <Group name='ubuntu-xenial'>
             <Path name='/etc/mysql/mysql.conf.d/mysqld_bindaddress.cnf' altsrc='/etc/mysql/conf.d/bindaddress.cnf'/>
+            <Path name='/etc/mysql/mysql.conf.d/mysqld_ssl.cnf' altsrc='/etc/mysql/conf.d/ssl.cnf'/>
+            <Path name='/etc/mysql/mysql.pem' altsrc='/etc/ssl/mysql.pem'/>
+            <Path name='/etc/mysql/mysql.key' altsrc='/etc/ssl/private/mysql.key'/>
         </Group>
     </Group>
     <Service name='mysql'/>

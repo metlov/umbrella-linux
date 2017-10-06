@@ -30,10 +30,11 @@ unlike QEMU/KVM version the LXD port should be considered much less
 mature, stable and secure (as LXD platform itself).
 The installer had received only a minimal testing and is not mature at all.
 Nevertheless, it opens a relatively
-easy possibility to try the Umbrella Linux in a safe virtual setting.
+easy possibility to try Umbrella Linux in a safe virtual setting.
 It should be possible then (but was not tested yet) to migrate the Umbrella
 Linux virtual machines to KVM one by one to gradually deploy the automatically
 installed LXD version of the system.
 
-To try the Umbrella Linux you can follow the 
-[installation instructions](/umbrella-linux/installation/).
+See the
+[installation instructions](/umbrella-linux/installation/)
+to try Umbrella Linux yourself.

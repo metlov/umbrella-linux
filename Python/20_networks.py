@@ -1,5 +1,9 @@
 # this file defines networks in the system
 import ipcalc
+import socket
+
+# get current host IP address
+ip_addr=socket.gethostbyname(metadata.hostname)
 
 # the whole network from umbrella.xml
 wholenet = ipcalc.Network(metadata.Properties['umbrella.xml'].xdata.find('net').text)

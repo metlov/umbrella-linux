@@ -1,0 +1,43 @@
+<xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+    <xsd:include schemaLocation="../Python/xsd_types.xsd"/>
+
+    <xsd:simpleType name="PriorityType">
+        <xsd:restriction base="xsd:integer">
+            <xsd:minInclusive value="0"/>
+            <xsd:maxInclusive value="99"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="HostType">
+        <xsd:attribute name="ip" type="IPaddressType"/>
+        <xsd:attribute name="name" type="HostNameType"/>
+        <xsd:attribute name="priority" type="PriorityType"/>
+    </xsd:complexType>
+
+    <xsd:simpleType name="PingLimitType">
+        <xsd:restriction base="xsd:integer">
+            <xsd:minInclusive value="0"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="SwitchType">
+        <xsd:complexContent>
+            <xsd:extension base="HostType">
+                <xsd:sequence>
+                    <xsd:element name="host" type="HostType"  minOccurs="0" maxOccurs="unbounded"/>
+                    <xsd:element name="switch" type="SwitchType"  minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:sequence>
+                <xsd:attribute name="label" type="xsd:string"/>
+                <xsd:attribute name="ping_limit" type="PingLimitType"/>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:element name='Properties'>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="switch" type="SwitchType" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

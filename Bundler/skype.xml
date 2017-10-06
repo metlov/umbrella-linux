@@ -1,0 +1,21 @@
+<Bundle name='skype'>
+    <Group name='ubuntu-xenial'>
+        <!-- currently Microsoft distributes only 64-bit version of Skype -->
+        <!-- on Linux -->
+        <Group name='amd64'>
+            <!-- The Skype package can not be distributed by the Umbrella -->
+            <!-- Linux. But it will be recognized once installed manually.-->
+            <!-- It is also possible to add it to the local repository    -->
+            <!-- and add the group "skype" to the local definition of the -->
+            <!-- workstation, in which case Skype will be installed       -->
+            <!-- automatically.                                           -->
+            <Package name='skypeforlinux'/>
+            <!-- Since this package is not managed by the Packages    -->
+            <!-- plugin we need to note some of its dependencies here -->
+            <!-- manually. Most of the unnoted dependencies will be   -->
+            <!-- installed anyway as part of base system.             -->
+            <Package name='apt-transport-https'/>
+            <Package name='gconf-service'/>
+        </Group>
+    </Group>
+</Bundle>

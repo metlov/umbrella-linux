@@ -90,6 +90,7 @@
                 <xsd:element name="vnc_in_gui_sessions" type="VNCInGUIType" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="transparent_proxy" type="TransparentProxyType" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="slow_down_dynamic_hosts" type="SlowDownDynamicHostsType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="trusted_CA" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="input" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="output" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="forward" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>

@@ -10,6 +10,10 @@ DNScache=metadata.Properties['umbrella.xml'].xdata.find('DNScache')
 if DNScache is not None:
   DNScache=DNScache.text
 %}\
+{% if 'DMZsmtp' in metadata.groups %}\
+acl DMZ { ${str(networks['DMZif'].network())+"/"+str(networks['DMZif'].mask)}; 127.0.0.1/8;};
+
+{% end %}\
 options {
         directory "/var/cache/bind";
 {% if DNScache is not None %}\
@@ -32,6 +36,12 @@ for net in netclasses.iterkeys():
 %}\
         listen-on { ${strifaces}127.0.0.1;};
         allow-recursion { ${strnets}127.0.0.0/24;};
+        attach-cache "common-cache";
+{% end %}\
+{% if 'DMZsmtp' in metadata.groups %}\
+        allow-query { any; };
+        allow-recursion { DMZ; };
+        allow-query-cache { DMZ; };
 {% end %}\
         auth-nxdomain no;    # conform to RFC1035
         listen-on-v6 { none; };

@@ -1,4 +1,4 @@
-<Bundle name='nagios' version='2.0'>
+<Bundle name='nagios' xmlns:xi="http://www.w3.org/2001/XInclude">
   <Path name='/etc/nagiosgen.status'/>
   <Group name='ubuntu'>
     <Group name='nagios-server'>
@@ -39,4 +39,5 @@
       <Path name='/etc/apache2/http.keytab'/>
     </Group>
   </Group>
+  <xi:include href="../Local/Bundler/nagios.xml"><xi:fallback/></xi:include>
 </Bundle>

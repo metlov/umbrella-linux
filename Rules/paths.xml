@@ -5,6 +5,10 @@
 <Group name='config' negate='true'>
    <Path type='directory' name="/etc/ssl/private" mode='710' owner='root' group='ssl-cert'/>
 </Group>
+<Group name='config'>
+   <Path type='symlink' name='/var/www/html/root.crl' to='../../../etc/pki/CA/crl/root.crl'/>
+   <Path type='symlink' name='/var/www/html/root.crl.pem' to='../../../etc/pki/CA/crl/root.crl.pem'/>
+</Group>
 <Group name='nfs-server'>
    <Path type='directory' name="/export" mode='755' owner='root' group='root'/>
    <Path type='directory' name="/export/home" mode='755' owner='root' group='root'/>
@@ -22,6 +26,10 @@
 <Path type='symlink' name='/etc/apache2/sites-enabled/packages.conf' to='../sites-available/packages'/>
 <Path type='symlink' name='/etc/apache2/sites-enabled/000-default.conf' to='../sites-available/000-default.conf'/>
 <Path type='symlink' name='/etc/apache2/sites-enabled/default-ssl.conf' to='../sites-available/default-ssl.conf'/>
+<Path type='symlink' name='/etc/apache2/sites-available/invenio.conf' to='../../../opt/invenio/etc/apache/invenio-apache-vhost.conf'/>
+<Path type='symlink' name='/etc/apache2/sites-available/invenio-ssl.conf' to='../../../opt/invenio/etc/apache/invenio-apache-vhost-ssl.conf'/>
+<Path type='symlink' name='/etc/apache2/sites-enabled/invenio.conf' to='../sites-available/invenio.conf'/>
+<Path type='symlink' name='/etc/apache2/sites-enabled/invenio-ssl.conf' to='../sites-available/invenio-ssl.conf'/>
 <Path type='symlink' name='/etc/apache2/conf-enabled/umbrella-logo.conf' to='../conf-available/umbrella-logo.conf'/>
 <Path type='symlink' name='/etc/apache2/conf-enabled/squirrelmail.conf' to='../conf-available/squirrelmail.conf'/>
 <Path type='symlink' name='/etc/apache2/conf-available/squirrelmail.conf' to='../../squirrelmail/apache.conf'/>
@@ -48,4 +56,13 @@
     <Path type='nonexistent' name='/var/lib/bcfg2/Rules/local-rules.xml'/>
 </Group>
 <Path type='directory' name="/var/maildirs" mode='0700' owner='vmail' group='vmail'/>
+
+<!-- guarantee proper user/group of certain files (in case uid/gid changes) -->
+<Path type='permissions' name='/usr/bin/ssh-agent' mode='2755' owner='root' group='ssh'/>
+<Path type='permissions' name='/usr/lib/dbus-1.0/dbus-daemon-launch-helper' mode='4754' owner='root' group='messagebus'/>
+
+<Path type='nonexistent' name='/etc/apt/apt.conf'/>
+
+<!-- auto-pruned zone file directory -->
+<Path type='directory' name='/etc/bind/zones' owner='root' group='root' mode='0755' prune='true'/>
 </Rules>

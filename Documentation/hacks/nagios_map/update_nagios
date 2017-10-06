@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import lxml.etree
+
+# for config parsing
+import os
+import pprint
+import subprocess
+
+lt_schema_filename="/var/lib/bcfg2/Properties/lan_topology.xsd"
+lt_schema = lxml.etree.XMLSchema(lxml.etree.parse(lt_schema_filename))
+lt_filename="/var/lib/bcfg2/Properties/lan_topology.xml"
+lt_xdata = lxml.etree.parse(lt_filename)
+if not lt_schema.validate(lt_xdata):
+    eprint("/var/lib/bcfg2/Properties/lan_topology.xml does not validate against "+
+    "its XML schema, run bcfg2-lint in /var/lib/bcfg2 directory to see the errors.")
+
+umbrella_filename="/var/lib/bcfg2/Properties/umbrella.xml"
+umbrella_xdata = lxml.etree.parse(umbrella_filename)
+
+# emulate bits of 00_baseparams.py
+domain_name=umbrella_xdata.find('domain').find('name').text
+domain_name=domain_name.lower()
+
+# emulate bits of 10_funchosts.py
+funchosts={}
+funchostsshort={}
+hostfuncs={}
+for server in umbrella_xdata.findall('server'):
+    srvnameshort=server.find('name').text
+    srvname=srvnameshort+'.'+domain_name
+    srvfunc=server.find('function').text
+    funchostsshort[srvfunc]=srvnameshort
+    funchosts[srvfunc]=srvname
+    hostfuncs[srvname]=srvfunc
+
+##### the main script #####
+def collectAllInPath(branch_path):
+    excludehosts=set()
+    for subs in lt_xdata.findall(branch_path):
+        if subs.tag.startswith('switch') or subs.tag.startswith('host'):
+            priority=20
+            if subs.tag.startswith('switch'):
+                priority=70
+            if 'priority' in subs.attrib:
+                priority=int(subs.attrib['priority'])
+            identifier=None
+            if 'ip' in subs.attrib:
+                identifier=subs.attrib['ip']
+            if 'name' in subs.attrib:
+                identifier=subs.attrib['name']
+            if identifier is not None:
+                excludehosts.add("%02d_%s" % (priority,identifier))
+    return excludehosts
+
+# find own place in hierarchy
+monitor=lt_xdata.find('//host[@name="'+funchostsshort['monitor']+'"]')
+if monitor is None:
+    monitor=lt_xdata.find('//host[@name="'+funchosts['monitor']+'"]')
+monitor_path=lt_xdata.getpath(monitor)
+
+# build ping configuration for every switch
+switch_pings={}
+for switch in lt_xdata.findall('//switch'):
+    ping_limit=None
+    if 'ping_limit' in switch.attrib:
+        ping_limit=int(switch.attrib['ping_limit'])
+    switch_path = lt_xdata.getpath(switch)
+    if monitor_path.startswith(switch_path):
+        # monitor is under this switch
+        branch=monitor_path[len(switch_path):].split('/')[1]
+        excludehosts=set()
+        if branch.startswith('switch'):
+            branch_path=switch_path[len("/Properties"):]+'/'+branch+'//'
+            excludehosts=collectAllInPath(branch_path)
+        allhosts=collectAllInPath('//')
+        pinghosts=allhosts-excludehosts
+    else:
+        # monitor is near this switch (we just ping what's behind the switch)
+        branch_path=switch_path[len("/Properties"):]+'//'
+        pinghosts=collectAllInPath(branch_path)
+    pinglist=sorted(pinghosts,reverse=True)
+    if ping_limit is not None:
+        pinglist=pinglist[:ping_limit]
+    pinglist = [ping[3:] for ping in pinglist]
+    switch_pings[switch.attrib['label']]=pinglist
+
+def getLabel(element):
+    if element is None:
+        return None
+    if element.tag=='switch':
+        return element.attrib['label']
+    if element.tag=='host':
+        if 'name' in element.attrib:
+            return element.attrib['name']
+    return None
+
+# we also need to compute parents
+parents={}
+for element in lt_xdata.findall('//'):
+    parent=element.getparent()
+    if parent.tag=="Properties":
+        parent=None
+    element_label=getLabel(element)
+    parent_label=getLabel(parent)
+    if element_label is not None and parent_label is not None:
+        parents[element_label]=parent_label
+
+# now we are ready to generate the files.
+# first we create the host definition for switches
+switches_cfg_dir="/var/lib/bcfg2/Local/Cfg/etc/nagios3/conf.d/switches.cfg"
+if not os.path.exists(switches_cfg_dir):
+    os.makedirs(switches_cfg_dir)
+switches_cfg = open(switches_cfg_dir+"/switches.cfg","w")
+for switch, pings in switch_pings.iteritems():
+    print(switch+":"+str(pings))
+    switches_cfg.write("define command {\n")
+    switches_cfg.write("        command_name    check_switch_"+switch+"\n")
+    switches_cfg.write("        command_line    /usr/lib/nagios/plugins/check_host "+" ".join(pings)+"\n")
+    switches_cfg.write("        }\n\n")
+    switches_cfg.write("define host {\n")
+    switches_cfg.write("        host_name   "+switch+"."+domain_name+"\n")
+    switches_cfg.write("        use         generic-host\n")
+    switches_cfg.write("        address     127.0.0.1\n")
+    switches_cfg.write("        check_command  check_switch_"+switch+"\n")
+    if switch in parents:
+        switches_cfg.write("        parents     "+parents[switch]+"."+domain_name+"\n")
+    switches_cfg.write("        }\n\n")
+switches_cfg.close()
+
+# now we create the config.xml for NagiosGen, which assigns hosts to switches
+config_xml = open("/var/lib/bcfg2/Local/NagiosGen/config.xml","w")
+config_xml.write("<NagiosGen>\n")
+for host in parents:
+    if os.path.isfile("/var/lib/bcfg2/NagiosGen/"+host+"."+domain_name+"-host.cfg"):
+        # file exists -- host is monitored, we link it to parent
+        config_xml.write("    <Client name=\""+host+"."+domain_name+"\">\n")
+        config_xml.write("        <Option name=\"parents\">"+parents[host]+"."+domain_name+"</Option>\n")
+        config_xml.write("    </Client>\n\n")
+config_xml.write("</NagiosGen>\n")

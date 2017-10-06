@@ -1,0 +1,17 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+%}\
+# This file is used instead of /etc/aliases to map the static addresses for
+# virtual alias domains.
+{% for domain in domain_names %}\
+
+# Aliases for ${domain}
+postmaster@${domain} ${', '.join(admins)}
+root@${domain}       ${', '.join(admins)}
+itadmin@${domain}    ${', '.join(admins)}
+itadmins@${domain}   ${', '.join(admins)}
+{%   for alias in metadata.Properties['mailaliases.xml'].xdata.findall('mailalias') %}\
+${alias.find('alias').text}@${domain}  ${', '.join([user.text for user in alias.findall('user')])}
+{%   end %}\
+{% end %}\

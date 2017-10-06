@@ -7,5 +7,6 @@ server_host = ${' '.join(ldap_URIs)}
 search_base = ${ldap_root}
 scope = sub
 bind = no
-query_filter = (&(objectClass=gosaMailAccount)(|${''.join(('(gosaMailAlternateAddress=%%s@%s)' % (domain,)) for domain in domain_names )})(!(gosaMailDeliveryMode=[*I*]))(!(gosaMailForwardingAddress=*)))
+domain = ${', '.join(domain_names)}
+query_filter = (&(objectClass=gosaMailAccount)(|${''.join(('(gosaMailAlternateAddress=%%u@%s)' % (domain,)) for domain in domain_names )})(!(gosaMailDeliveryMode=[*I*]))(!(gosaMailForwardingAddress=*)))
 result_attribute = mail

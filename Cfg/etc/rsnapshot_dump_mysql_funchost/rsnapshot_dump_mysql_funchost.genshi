@@ -1,0 +1,58 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+
+if not name.startswith('/etc/rsnapshot_dump_mysql_'):
+    raise TemplateError('ERROR: Database dumper template should be instantiated at /etc/rsnapshot_dump_mysql_CLASS .')
+
+func=name[26:]
+
+if not func in funchostsshort:
+    raise TemplateError('ERROR: Database dumper filename suffix must end in valid server class.')
+
+db_hostname=funchostsshort[func]
+if funchosts[func]==metadata.hostname:
+    # if we run on the same host there is no need to connect
+    db_hostname_connect='localhost'
+else:
+    # we run at a different host
+    db_hostname_connect=funchostsshort[func]
+%}\
+#!/bin/bash -e
+###########################################################
+# Back up MySQL databases
+###########################################################
+
+. /usr/local/bin/umbrella.sh        # source Umbrella Linux variables
+
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+PATH="$$PATH:/usr/local/mysql/bin"
+
+# My config
+BACKUP_DIR="."
+
+# Do not backup these databases
+IGNORE="information_schema performance_schema"
+
+# Get list of all databases
+DB_LIST=`mysql -h ${db_hostname_connect} -Bse 'show databases'`
+
+for db in $$DB_LIST; do
+
+        # set skip variable
+        skip=0
+
+        if [ "$$IGNORE" != "" ]; then
+                for i in $$IGNORE; do
+                        [ "$$db" == "$$i" ] && skip=1 || :
+                done
+        fi
+
+        if [ "$$skip" == "0" ]; then
+                mysqldump --skip-lock-tables --events -h ${db_hostname_connect} $$db | gzip -9 > $$BACKUP_DIR/${db_hostname}_$$db.sql.gz
+        fi
+
+done
+
+exit 0

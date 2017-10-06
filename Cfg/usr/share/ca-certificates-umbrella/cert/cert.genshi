@@ -1,0 +1,9 @@
+{% python
+cert_index=int(name[len(name.rstrip('0123456789')):])
+certs=iter(metadata.Properties['firewall.xml'].xdata.findall('trusted_CA'))
+while (cert_index>0):
+  next(certs)
+  cert_index-=1
+cert=next(certs).text
+%}\
+${cert}

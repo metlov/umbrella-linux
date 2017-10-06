@@ -5,6 +5,7 @@
   <Service name='arpwatch' status='on' type='systemd'/>
   <Service name='autofs' status='on' type='systemd'/>
   <Service name='acpid' status='on' type='systemd'/>
+  <Service name='asterisk' status='on' type='systemd'/>
   <Service name='bind9' status='on' type='systemd'/>
   <Service name='cachefilesd' status='on' type='systemd'/>
   <Service name='cron' status='on' type='systemd'/>

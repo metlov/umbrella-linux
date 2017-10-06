@@ -5,6 +5,19 @@ execfile(repo+'/Python/40_usbdev.py')
 {% if not (haswhitelist and len(whitelistdevices)==0) %}\
 {% if hasblacklist %}\
 {%if len(blacklistdevices)==0 %}
+{% if 'ubuntu-xenial' in metadata.groups %}\
+{% if hasblacklist and not (haswhitelist and len(whitelistdevices)==0) %}\
+# whitelist specific devices
+{% for dev in whitelistdevices %}\
+{% python
+devstr = ''
+for attr in dev.iterchildren(etree.Element):
+  devstr+='ATTR{'+str(attr.tag)+'}=="'+str(attr.text)+'", '
+%}\
+SUBSYSTEMS=="usb", ACTION=="add", ${devstr}GOTO="blacklist_end"
+{% end %}\
+{% end %}\
+{% end %}\
 # blacklist all devices
 SUBSYSTEM=="usb", ATTR{authorized_default}="0"
 SUBSYSTEM=="usb", ATTR{authorized}="0"
@@ -22,4 +35,7 @@ SUBSYSTEM=="usb", ${devstr}ATTR{authorized}="0"
 {% end %}\
 {% end %}\
 {% end %}\
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups and len(whitelistdevices)>0 %}\
+LABEL="blacklist_end"
 {% end %}\

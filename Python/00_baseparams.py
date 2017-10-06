@@ -66,15 +66,23 @@ else:
   timezone=timezone.text
 
 # the main domain name
-domain_name=metadata.Properties['umbrella.xml'].xdata.find('domain_name').text
+domain_name=metadata.Properties['umbrella.xml'].xdata.find('domain').find('name').text
+domain_name=domain_name.lower()
 # set of all the domain names for this Umbrella instance
 domain_names=set()
-domain_names.add(domain_name)
-for alt_domain in metadata.Properties['umbrella.xml'].xdata.findall('alt_domain_name'):
-  domain_names.add(alt_domain.text)
+domain_notifies={}
+for domain in metadata.Properties['umbrella.xml'].xdata.findall('domain'):
+  if domain.find('master') is None:     # only if we are master of the domain
+    d_name=domain.find('name').text
+    domain_names.add(d_name)
+    notifies=set()
+    for notify in domain.findall('notify'):
+      notifies.add(notify.text.strip())
+    if len(notifies)>0:
+      domain_notifies[d_name]=notifies
 domain_names_list=list(domain_names)
-realm_name=metadata.Properties['umbrella.xml'].xdata.find('KRB5_realm').text
-ldap_root=metadata.Properties['umbrella.xml'].xdata.find('LDAP_root').text
+realm_name=domain_name.upper()
+ldap_root=','.join([ 'dc='+dc for dc in domain_name.split('.') ])
 install_zabbix = metadata.Properties['umbrella.xml'].xdata.find('install_zabbix') is not None
 upstream_proxy=metadata.Properties['umbrella.xml'].xdata.find('upstream_proxy')
 if upstream_proxy is not None:

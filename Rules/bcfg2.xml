@@ -21,6 +21,7 @@
     <Action timing='post' when='modified' name='compile-models' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Reporting/models.py' status='ignore'/>
     <Action timing='post' when='modified' name='compile-Core' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py' status='ignore'/>
     <Action timing='post' when='modified' name='compile-Bundler' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Bundler.py' status='ignore'/>
+    <Action timing='post' when='modified' name='compile-NagiosGen' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/NagiosGen.py' status='ignore'/>
     <Action timing='post' when='modified' name='compile-Cfg-init' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Cfg/__init__.py' status='ignore'/>
     <Action timing='post' when='modified' name='compile-Server-helpers' command='python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugin/helpers.py' status='ignore'/>
 </Group>

@@ -83,7 +83,7 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
     KEYS=`${PLS} ${KEYTABPATH}* | ${PSED} -e "s|${KEYTABPATH}||g"`
 
     #Keytab sanity check
-    RES=`${PCOMM} -23 <(${PECHO} -e $ALL_SERVERS | ${PSED} -e 's/ /\n/g' | ${PSORT} | ${PUNIQ}) <(${PECHO} -e $KEYS | ${PSED} -e 's/ /\n/g' | ${PSORT} | ${PUNIQ}) | ${PHEAD} -1`
+    RES=`${PCOMM} -23 <(${PECHO} -e $ALL_SERVERS_WITH_KEYTAB | ${PSED} -e 's/ /\n/g' | ${PSORT} | ${PUNIQ}) <(${PECHO} -e $KEYS | ${PSED} -e 's/ /\n/g' | ${PSORT} | ${PUNIQ}) | ${PHEAD} -1`
     if [ ! -z ${CHECK_KEYTABS+x} ]; then
         if [ ! -z "$RES" -a "$RES" != " " ]; then
             echo "Keytabs sanity check failure. The servers must always have their keytabs present."
@@ -126,6 +126,17 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
         #${PLS} -la ${CLIENTSTMP}
         ${PMV} ${CLIENTSTMP} ${CLIENTSPATH}
         ${PRM} -f ${CLIENTSTMP}
+
+        ${PECHO} "Revoking and deleting SSL and SSH keys of bcfg2 hosts: " ${EXTRABCFG2HOSTS}
+        for bcfg2_host in ${EXTRABCFG2HOSTS}; do
+            echo "Revoking SSL keys of ${bcfg2_host}"
+            find /var/lib/bcfg2/SSLCA/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 -n 1 su -s /bin/bash bcfg2 /usr/local/bin/umbrella-revoke-key
+            echo "Deleting SSL keys of ${bcfg2_host}"
+            find /var/lib/bcfg2/SSLCA/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 rm
+            find /var/lib/bcfg2/SSLCA/ -name "*.key.H_${bcfg2_host}" -print0 | xargs -0 rm
+            echo "Deleting SSH keys of ${bcfg2_host}"
+            find /var/lib/bcfg2/SSHbase/ -name "*.H_${bcfg2_host}" -print0 | xargs -0 rm
+        done
     fi
 
     if [ ! -z "$EXTRAKEYS" -a "$EXTRAKEYS" != " " ]; then
@@ -164,7 +175,7 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
             echo -n $KEY $IP
             CLASS=`${IPCLASS} ${IP}`
             if [ ! -z "$CLASS" -a "$CLASS" != " " ]; then
-                ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"$CLASS\" name=\"$KEY\" version=\"1.3.3\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
+                ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"$CLASS\" name=\"$KEY\" version=\"1.3.5\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
             else
                 echo "The class of workstation $KEY ($IP) can't be determined."
                 echo "Please fix the IP address or add to the clients.xml manually."

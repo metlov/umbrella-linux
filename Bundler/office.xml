@@ -4,5 +4,6 @@
     <Package name='libreoffice-style-galaxy'/>
     <Group name='ubuntu-xenial'>
         <Package name='libreoffice-style-elementary'/>
+        <Package name='libreoffice-sdbc-hsqldb'/>
     </Group>
 </Bundle>

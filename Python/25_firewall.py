@@ -29,14 +29,15 @@ slow_down_dynamic_hosts = metadata.Properties['firewall.xml'].xdata.find('slow_d
 
 # here we map the email addresses in the mail_in_DMZ tag to the robot servers,
 # specified there.
-
+robot_servers=[]
+robot_addresses={}
 if mail_in_DMZ:
   robots=metadata.Properties['firewall.xml'].xdata.find('mail_in_DMZ').findall('robot')
 
   # numbering of robots
   num=0
-  address_numbering={}
   robot_addrs={}
+  address_numbering={}
 
   # function to add the address to the numbering
   def noteaddr(name,addr):

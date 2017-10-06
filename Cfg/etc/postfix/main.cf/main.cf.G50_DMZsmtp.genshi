@@ -45,6 +45,12 @@ transport_maps = texthash:/etc/postfix/transport
 mailbox_size_limit = 0
 mynetworks = ${funcifs['mail']}/32
 
+# produce warnings if mail delivery is delayed
+delay_warning_time = 1h
+
+# maximum message size is 40 Mb
+message_size_limit = 40971520
+
 smtpd_recipient_restrictions = permit_mynetworks reject_unauth_destination
 
 smtpd_client_restrictions = permit_mynetworks,

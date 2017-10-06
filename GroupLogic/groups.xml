@@ -3,8 +3,22 @@
 from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/25_firewall.py')
 ?>
+<py:if test="ip_addr in networks['pubif']">
+    <Group name='net-pub'/>
+</py:if>
+<py:if test="ip_addr in networks['secif']">
+    <Group name='net-sec'/>
+    <!-- workstations in sec subnet get encfs configured -->
+    <py:if test="'workstation' in metadata.groups">
+        <Group name='encfs'/>
+    </py:if>
+</py:if>
+<py:if test="ip_addr in networks['DMZif']">
+    <Group name='net-DMZ'/>
+</py:if>
 <py:if test="'server' in metadata.groups">
     <!-- If mail server is configured and either the host is not in DMZ,  -->
     <!-- or the host is in DMZ and access to both authentication and mail -->
@@ -44,6 +58,13 @@ execfile(repo+'/Python/25_firewall.py')
     <!-- and serve the homepages                         -->
     <py:if test="'nfs' in funchosts and www_homes">
          <Group name='www-homepages'/>
+    </py:if>
+</py:if>
+<py:if test="'proxy' in metadata.groups">
+    <!-- Jabber will be installed on proxy server, unless a dedicated Jabber -->
+    <!-- server is created in DMZ. -->
+    <py:if test="'DMZxmpp' not in funchosts">
+         <Group name='xmpp-server'/>
     </py:if>
 </py:if>
 <py:if test="not 'nfs' in funchosts">

@@ -18,3 +18,4 @@ embed_newline()
 . /etc/umbrella.conf
 
 ALL_SERVERS=$( embed_newline $SERVERS )
+ALL_SERVERS_WITH_KEYTAB=$( embed_newline $SERVERS_WITH_KEYTAB )

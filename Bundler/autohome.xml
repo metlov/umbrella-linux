@@ -10,12 +10,8 @@
     <!-- on xenial these scripts are not installed on mail server becuse -->
     <!-- mailboxes are now created automatically by dovecot. -->
         <Group name='mail' negate='true'>
-            <!-- they are also not installed on the terminal server, since -->
-            <!-- it uses NFS to serve x2go thin client root fs only.       -->
-            <Group name='ltsp' negate='true'>
-                <Path name='/etc/cron.d/mkhomes'/>
-                 <Path name='/usr/local/bin/mkhomes.sh'/>
-            </Group>
+            <Path name='/etc/cron.d/mkhomes'/>
+            <Path name='/usr/local/bin/mkhomes.sh'/>
         </Group>
     </Group>
 </Group>

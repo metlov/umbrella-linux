@@ -80,3 +80,20 @@
   <regex offset="after_prematch">^(\S+):(\.*)#012Traceback</regex>
   <order>url,extra_data</order>
 </decoder>
+
+<!-- decode krb5kdc messages -->
+<decoder name="krb5kdc">
+  <program_name>^krb5kdc</program_name>
+</decoder>
+<decoder name="krb5kdc-preauth-generic-failure">
+  <parent>krb5kdc</parent>
+  <prematch offset="after_parent">^preauth \(encrypted_timestamp\) verify failure: Decrypt integrity check failed</prematch>
+  <regex offset="after_prematch">^(\S+)</regex>
+  <order>extra_data</order>
+</decoder>
+<decoder name="krb5kdc-preauth-auth-failure">
+  <parent>krb5kdc</parent>
+  <prematch offset="after_parent">^AS_REQ \(\d+ etypes {\.+}\) \d+.\d+.\d+.\d+: PREAUTH_FAILED: \w+@\S+ for krbtgt/\S+ Decrypt integrity check failed</prematch>
+  <regex offset="after_parent">^AS_REQ \(\d+ etypes {\.+}\) (\d+.\d+.\d+.\d+): PREAUTH_FAILED: (\w+)@\S+</regex>
+  <order>srcip, user</order>
+</decoder>

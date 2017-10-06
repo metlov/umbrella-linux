@@ -1,3 +1,8 @@
 <Rules priority="0">
 <Action name='update-ca-certificates' timing='post' when='modified' command='update-ca-certificates' status='ignore'/>
+
+<Path type='directory' name='/usr/share/ca-certificates-umbrella' owner='root' group='root' mode='0755' prune='true'/>
+<Path type='directory' name='/usr/local/share/ca-certificates-umbrella' owner='root' group='root' mode='0755' prune='true'/>
+<Path type='directory' name='/etc/ssl/certs-umbrella'  owner='root' group='root' mode='0755'/>
+<Action name='update-ca-certificates-umbrella' timing='post' when='modified' command='update-ca-certificates --certsconf /etc/ca-certificates-umbrella.conf --certsdir /usr/share/ca-certificates-umbrella --localcertsdir /usr/local/share/ca-certificates-umbrella --etccertsdir /etc/ssl/certs-umbrella --hooksdir /dev/null' status='ignore'/>
 </Rules>

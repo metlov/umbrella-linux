@@ -19,15 +19,15 @@ else:
     # check that indeed a single interface is declared
     if not len(ifs) ==1:
       raise TemplateError('Too many interfaces are declared in umbrella.xml for '+metadata.hostname+' .')
-    interface, addr = ifs.popitem()
+    interface, ip_addr = ifs.popitem()
     interface, netdev = ifdevs.popitem()
     # determine the subnet
     subnet=networks[interface]
     if subnet is None:
       raise TemplateError('No defined subnet for '+str(interface))
     # check if the address indeed belongs to the subnet
-    if not addr in subnet:
-      raise TemplateError('The address for '+metadata.hostname+' ('+str(addr)+')is not in subnet '+str(subnet)+' .')
+    if not ip_addr in subnet:
+      raise TemplateError('The address for '+metadata.hostname+' ('+str(ip_addr)+')is not in subnet '+str(subnet)+' .')
   else:
     if organization_host:
       # a workstation in a subnet, defined in the organization.xml file
@@ -38,11 +38,11 @@ else:
       # find the subnet
       subnet=None
       for iface, net in networks.iteritems():
-        if addr in net:
+        if ip_addr in net:
           subnet=net
           interface=iface
       if subnet is None:
-        raise TemplateError('The address '+addr+' for '+metadata.hostname+' belongs to unknown subnet.')
+        raise TemplateError('The address '+ip_addr+' for '+metadata.hostname+' belongs to unknown subnet.')
   if interface is not None and not interface in routerifs:
     raise TemplateError('No route is defined for the subnet '+str(subnet)+' .')
   type='singleif'
@@ -56,12 +56,17 @@ iface lo inet loopback
 
 auto ${netdev}
 iface ${netdev} inet static
-    address ${addr}
+    address ${ip_addr}
     netmask ${subnet.netmask()}
     network ${subnet.network()}
 {% if organization_host %}\
     gateway ${ws_org_gateway}
+{% if 'net-pub' in metadata.groups %}\
     dns-nameservers ${routerifs['pubif']}
+{% end %}\
+{% if 'net-sec' in metadata.groups %}\
+    dns-nameservers ${routerifs['secif']}
+{% end %}\
 {% end %}\
 {% if not organization_host %}\
     gateway ${routerifs[interface]}
@@ -90,6 +95,8 @@ for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
 DNScache=metadata.Properties['umbrella.xml'].xdata.find('DNScache')
 if DNScache is not None:
   DNScache=DNScache.text
+else:
+  DNScache=routerifs['DMZif']
 %}\
     dns-nameservers ${DNScache}
 {%     end %}\

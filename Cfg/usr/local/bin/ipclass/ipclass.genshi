@@ -36,11 +36,8 @@ except ValueError:
 if str(ip) in ipclasses.keys():
   print(ipclasses[str(ip)])
   sys.exit(0)
-if ip in pubnet:
-  print('pworkstation')
-  sys.exit(0)
-if ip in secnet:
-  print('sworkstation')
+if ip in pubnet or ip in secnet:
+  print('workstation')
   sys.exit(0)
 for netstr, profile in netclasses.iteritems():
   if ip in ipcalc.Network(netstr):

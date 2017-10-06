@@ -43,6 +43,8 @@
       <Package name='systemd-sysv'/>
       <Package name='tcpd'/>
       <Package name='dbus'/>
+      <!-- ensure permissions via rules -->
+      <Path name='/usr/lib/dbus-1.0/dbus-daemon-launch-helper'/>
    </Group>
    <Group name='vm'>
       <Group name='ubuntu-trusty'>
@@ -103,11 +105,13 @@
 
    <Path name='/etc/network/interfaces'/>
 
-   <Group name='physworkstation'>
-      <Group name='ubuntu-trusty'>
-         <Path name='/etc/NetworkManager/NetworkManager.conf'/>
-         <Path name='/etc/init/autofs.conf'/>
-         <Path name='/etc/init/lightdm.conf'/>
+   <Group name='ubuntu-trusty'>
+      <Group name='physical'>
+         <Group name='workstation'>
+            <Path name='/etc/NetworkManager/NetworkManager.conf'/>
+            <Path name='/etc/init/autofs.conf'/>
+            <Path name='/etc/init/lightdm.conf'/>
+         </Group>
       </Group>
    </Group>
 
@@ -132,7 +136,7 @@
    <!-- the route.                                                    -->
    <Path name='/etc/sysctl.d/90-mtu-probing.conf'/>
 
-   <Group name='localfspworkstation'>
+   <Group name='localfsworkstation'>
       <Path name='/etc/rc.local'/>
       <Path name='/etc/dhcp/dhclient.conf'/> <!-- undo dhcp nameserver override -->
    </Group>

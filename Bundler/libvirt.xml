@@ -19,6 +19,10 @@
         <Package name='cgroup-lite'/>
         <Service name='cgroup-lite'/>
     </Group>
+    <Group name='ubuntu-xenial'>
+        <!-- on xenial we need to resolve a variant libvirt dependence -->
+        <Package name='cgmanager'/>
+    </Group>
     <Package name='libvirt-bin'/>
     <Package name='python-libvirt'/>
     <Package name='qemu-kvm'/>
@@ -39,9 +43,5 @@
 
     <!-- enable read access to Umbrella VM images -->
     <Path name='/etc/apparmor.d/usr.lib.libvirt.virt-aa-helper'/>
-
-    <!-- VM backup -->
-    <Path name='/usr/local/bin/umbrella-backup-vms'/>
-    <Path name='/etc/cron.d/backup-vms'/>
 </Group>
 </Bundle>

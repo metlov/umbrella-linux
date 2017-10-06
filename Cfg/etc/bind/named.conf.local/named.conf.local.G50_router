@@ -1,3 +1,0 @@
-// include locally hosted zones
-//include "/etc/bind/zonesmaster.conf";
-include "/etc/bind/named.conf.ldap2zone";
