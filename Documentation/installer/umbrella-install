@@ -89,7 +89,7 @@ if [ ! -d /tmp/bcfg2 ]; then
   echo -n "Checking out Umbrella Linux repository to /tmp/bcfg2 ..."
   (
   set -o xtrace
-  git clone --recursive https://github.com/metlov/umbrella-linux.git /tmp/bcfg2
+  git clone https://github.com/metlov/umbrella-linux.git /tmp/bcfg2
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
