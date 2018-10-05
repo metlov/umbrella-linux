@@ -44,6 +44,11 @@
     <!-- xenial ones in the new way. This mostly works, but needs adjust- -->
     <!-- ments (depending on which bcfg2 server version is in use) in     -->
     <!-- mixed environments.                                              -->
+    <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="xenial">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
     <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="xenial-updates">
       <Component>main</Component>
       <Component>multiverse</Component>
@@ -69,11 +74,6 @@
       <Arch>amd64</Arch>
     </Source>
     <Source type="apt" debsrc="true" url="http://deb.torproject.org/torproject.org" version="xenial">
-      <Component>main</Component>
-      <Arch>i386</Arch>
-      <Arch>amd64</Arch>
-    </Source>
-    <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="xenial">
       <Component>main</Component>
       <Arch>i386</Arch>
       <Arch>amd64</Arch>

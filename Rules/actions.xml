@@ -1,5 +1,5 @@
 <Rules priority="0">
-   <Action name='reconfigure-TZ' timing='post' when='modified' command='timedatectl set-timezone `cat /etc/timezone`' status='ignore'/>
+   <Action name='reconfigure-TZ' timing='post' when='modified' shell='true' command='timedatectl set-timezone `cat /etc/timezone`' status='ignore'/>
    <Action name='systemctl-daemon-reload' timing='post' when='modified' command='systemctl daemon-reload' status='ignore'/>
    <Action name='ossec-reconfigure-TZ' timing='post' when='modified' command='cp /etc/localtime /var/ossec/etc/' status='ignore'/>
    <Action name='sieve-recompile-default' timing='post' when='modified' command='sievec /etc/sieve/default.sieve' status='check'/>

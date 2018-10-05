@@ -1,0 +1,53 @@
+{% python
+# This template can be instantiated using altsrc under the names in the form
+# [<net>_]zone<num> where <net> is the network name and num is the external
+# domain name. The <net>_ part is optional. For example, instantiating it
+# under /etc/bind/zones/pub_zone0 will produce zone file for the 0th
+# domain served to a pub subnet.
+
+from genshi.template import TemplateError
+import os
+import datetime
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+execfile(repo+'/Python/32_zone_timestamp.py')
+
+ip_address=routerifs['pubif']
+ext_domain=domain_name
+c1width=35
+splitnet=str(wholenet).split('.')
+zonename=str(splitnet[1])+'.'+str(splitnet[0])+'.in-addr.arpa'
+%}\
+;-------------------------------------------------------------------------
+;
+; Umbrella Linux
+;
+;                (c) 2015-2018 by Konstantin L. Metlov <metlov@fti.dn.ua>
+;                                 and other listed contributors
+;
+;
+; This is the header file for the primary domain's reverse zone file
+; of this. Umbrella Linux installation. It gets supplemented (every
+; 5 minutes) by a live list of workstations from LDAP with a help of
+; a cron job, running the umbrella-ldap2zone script. The resulting
+; completed zone file is then (re)loaded into the local bind.
+
+$$ORIGIN ${zonename}.
+$$TTL 500
+@  500  IN  SOA ${funchosts['router']}. itadmins.${domain_name}. (
+                                          ${timestamp} ; serial
+                                          2400       ; refresh
+                                          1800       ; retry
+                                          720000     ; expire
+                                          6400       ; minimum TTL
+                                          )
+${"".ljust(c1width)}    NS  ${funchosts['router']}.
+{% for host in funchosts %}\
+{% python
+splitip=str(funcifs[host]).split('.')
+srvlasttwo=str(splitip[3])+'.'+str(splitip[2])
+%}\
+${srvlasttwo.ljust(c1width)} IN PTR ${funchosts[host]}.
+{% end %}\

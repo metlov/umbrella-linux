@@ -1,0 +1,301 @@
+#!/bin/bash
+cat 1>&2 << EOF
+Welcome to the Umbrella Linux installer generator !
+
+                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
+                         as well as others (listed in the AUTHORS file)
+                         Umbrella Linux (including this installer) is avaiable
+                         under the terms of GNU General Public License v3 or
+                         later. NO WARRANTY OF ANY KIND IS PROVIDED !!!
+
+EOF
+
+
+# installation preparation script goes here
+source /etc/umbrella.conf
+if [ $# -ne 1 ]; then
+    cat 1>&2 <<EOF
+This script generates an installation script for a specified roaming workstation
+to convert a fresh Ubuntu Linux install into a fully-configured Umbrella Linux.
+
+Usage:
+    $0 workstation_name >install_script
+where workstation_name should be specified without the domain part (primary
+Umbrella Linux domain is assumed). The installation script is dumped to stdout.
+Do not forget to chmod+x the script.
+EOF
+    exit 9
+fi
+
+TARGET=$1
+TARGET_FQDN=$1.${DOMAIN_NAME}
+
+if [ "$(id -u)" == "0" ]; then
+   echo "This script must not be run as root" 1>&2
+   exit 1
+fi
+
+if [ -z "${HOST_DMZVPN}" ]; then
+   echo "DMZvpn host must be defined in umbrella.xml for roaming workstations" 1>&2
+   echo "to work." 1>&2
+   exit 1
+fi
+
+if [ -z "${NET_VPN}" ]; then
+   echo "The network for VPN hosts <vpnet/> must be defined in umbrella.xml." 1>&2
+   exit 1
+fi
+
+if ! grep -q "profile=\"roamingworkstation\".*name=\"$TARGET_FQDN\"" \
+   /var/lib/bcfg2/Metadata/clients.xml; then
+cat 1>&2 <<EOF
+$TARGET must be registered in /var/lib/bcfg2/Metadata/clients.xml
+with a roamingworkstation profile. This can be done by
+1) registering it at https://gosa.${DOMAIN_NAME}/ as an ordinary
+   workstation (specifying its MAC and allocating an IP address on LAN
+   for it).
+2) waiting until the /var/lib/bcfg2/Metadata/clients.xml is updated.
+3) changing the line for the newly registered workstation into
+<Client profile="roamingworkstation" name="$TARGET_FQDN" uuid="$TARGET_FQDN" floating="true" auth="cert" version="1.3.5"/>
+EOF
+    exit 9
+fi
+
+# this function fetches the specified file from host configuration to stdout
+# for example "fetch_file /etc/hosts"
+function fetch_file {
+  script -q -c \
+    'bcfg2-info -Q /var/lib/bcfg2 -C /etc/bcfg2-server.conf 2>/dev/null' /dev/null <<EOC |
+buildfile $1 ${TARGET_FQDN}
+quit
+EOC
+  sed -e '1,5 d' | sed -e '$ d' | xmllint --xpath '/Path/text()' -
+}
+
+function escape_for_sed {
+  sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\$/\\$/g'
+}
+
+SUB_HOSTS=$( fetch_file /etc/hosts | escape_for_sed )
+SUB_OPENVPN_CONF=$( fetch_file /etc/openvpn/office.conf | escape_for_sed )
+SUB_CA_CERT=$( cat /usr/local/share/ca-certificates/bcfg2ca.crt | escape_for_sed )
+SUB_TA_KEY=$( fetch_file /etc/openvpn/ta.key | escape_for_sed )
+SUB_CRL_PEM=$( fetch_file /etc/ssl/crl.pem | escape_for_sed )
+SUB_VPN_PEM=$( fetch_file /etc/ssl/vpn.pem | escape_for_sed )
+SUB_VPN_KEY=$( fetch_file /etc/ssl/private/vpn.key | escape_for_sed )
+SUB_BCFG2_CONF=$( fetch_file /etc/bcfg2.conf | escape_for_sed )
+
+
+sed \
+  -e '/^#!\/bin\/bash$/,/^# ---- INSTALLATION SCRIPT$/ {/^#!\/bin\/bash$/n; d}' \
+  -e 's|\[ORG_DESCRIPTION\]|'"${ORG_DESCRIPTION}"'|g' \
+  -e 's|\[VPN_HOST\]|'"${HOST_DMZVPN}"'|g' \
+  -e 's|\[TARGET\]|'"${TARGET}"'|g' \
+  -e 's|\[TARGET_FQDN\]|'"${TARGET_FQDN}"'|g' \
+  -e 's|\[HOSTS\]|'"${SUB_HOSTS}"'|g' \
+  -e 's|\[OPENVPN_CONF\]|'"${SUB_OPENVPN_CONF}"'|g' \
+  -e 's|\[CA_CERT\]|'"${SUB_CA_CERT}"'|g' \
+  -e 's|\[TA_KEY\]|'"${SUB_TA_KEY}"'|g' \
+  -e 's|\[CRL_PEM\]|'"${SUB_CRL_PEM}"'|g' \
+  -e 's|\[VPN_PEM\]|'"${SUB_VPN_PEM}"'|g' \
+  -e 's|\[VPN_KEY\]|'"${SUB_VPN_KEY}"'|g' \
+  -e 's|\[BCFG2_CONF\]|'"${SUB_BCFG2_CONF}"'|g' \
+  $0
+exit 0
+# ---- INSTALLATION SCRIPT
+cat <<EOF
+Welcome to the Umbrella Linux installer !
+
+                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
+                         as well as others (listed in the AUTHORS file)
+                         Umbrella Linux (including this installer) is avaiable
+                         under the terms of GNU General Public License v3 or
+                         later. NO WARRANTY OF ANY KIND IS PROVIDED !!!
+
+This script configures this freshly installed Ubuntu Workstation to run under
+Umbrella Linux on behalf of [ORG_DESCRIPTION].
+
+Please note, that user accounts will not be migrated. After the install you
+will be able to log in under your corporate account and your home directory
+on this computer will be created anew.
+
+Also, it is strongly advised not to configure the home directory encryption.
+It simply can not work very well in Kerberos environment, where you can change
+your password on a different computer (leaving your home directory key
+passphrase out of sync). Use the whole disk encryption instead !
+
+EOF
+
+echo -n "Checking that the script is run by the root user..."
+if [[ $EUID -ne 0 ]]; then
+   echo "fail"
+   exit 1
+fi
+echo "ok"
+
+echo -n "Update the system to the MAX..."
+(
+    set -e
+    set -o xtrace
+    echo "ssmtp ssmtp/hostname select \"[TARGET_FQDN]\"" | debconf-set-selections
+    apt-get update
+    env DEBIAN_FRONTEND=noninteractive apt-get upgrade --assume-yes
+) 2>&1 | cat >./umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+else
+    echo fail
+    exit 1
+fi
+sleep 2   # to let the disk activity settle down
+
+echo -n "Installing the [ORG_DESCRIPTION] certificate..."
+(
+    set -e
+    set -o xtrace
+    cat >/usr/local/share/ca-certificates/bcfg2ca.crt <<EOF
+[CA_CERT]
+EOF
+    update-ca-certificates
+) 2>&1 | cat >./umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+else
+    echo fail
+    exit 1
+fi
+
+echo -n "Installing and configuring openvpn..."
+(
+    set -e
+    set -o xtrace
+    rm -f /etc/openvpn/office.conf
+    env DEBIAN_FRONTEND=noninteractive apt-get install -y openvpn
+    groupadd -g 667 openvpn
+    useradd -d /var/lib/openvpn -g openvpn -G ssl-cert -m -s /bin/false -u 667 openvpn
+    cat >/etc/openvpn/ta.key <<EOF
+[TA_KEY]
+EOF
+    chgrp openvpn /etc/openvpn/ta.key
+    cat >/etc/ssl/crl.pem <<EOF
+[CRL_PEM]
+EOF
+    chmod o+r /etc/ssl/crl.pem
+    cat >/etc/ssl/vpn.pem <<EOF
+[VPN_PEM]
+EOF
+    chgrp openvpn /etc/ssl/vpn.pem
+    cat >/etc/ssl/private/vpn.key <<EOF
+[VPN_KEY]
+EOF
+    chgrp openvpn /etc/ssl/private/vpn.key
+    cat >/etc/hostname <<EOF
+[TARGET]
+EOF
+    cat >/etc/hosts <<EOF
+[HOSTS]
+EOF
+    cat >/etc/openvpn/office.conf <<EOF
+[OPENVPN_CONF]
+EOF
+    cat >/etc/default/openvpn <<EOF
+AUTOSTART="office"
+EOF
+) 2>&1 | cat >./umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+else
+    echo fail
+    exit 1
+fi
+
+echo -n "Connecting to [ORG_DESCRIPTION] ..."
+(
+    set -e
+    set -o xtrace
+    openvpn --daemon openvpn --config /etc/openvpn/office.conf
+    sleep 10
+    ping -q -c5 [VPN_HOST] > /dev/null
+) 2>&1 | cat >./umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+else
+    echo fail
+    exit 1
+fi
+
+echo -n "Normalizing uid/gid ..."
+(
+    set -e
+    set -o xtrace
+    apt-get purge --assume-yes lxd lxd-client uuid-runtime mlocate
+    deluser uuidd || true
+    delgroup mlocate || true
+    deluser lxd || true
+    delgroup lxd || true
+    groupmod -g 111 ssh
+    chgrp ssh /usr/bin/ssh-agent
+    chmod g+s /usr/bin/ssh-agent
+    apt-get purge -y lightdm colord
+    sleep 5
+    # softly, then forcefully get rid of lightdm and colord processes
+    killall -u lightdm | true
+    killall -u colord  | true
+    sleep 5
+    killall -u lightdm | true
+    killall -u colord  | true
+    sleep 5
+    killall -9 -u lightdm | true
+    killall -9 -u colord  | true
+) 2>&1 | cat >./umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+else
+    echo fail
+    exit 1
+fi
+
+echo -n "Configuring the system ..."
+(
+    set -e
+    set -o xtrace
+    apt-get install -y bcfg2 mc ssl-cert
+    cat >/etc/bcfg2.conf <<EOF
+[BCFG2_CONF]
+EOF
+    bcfg2 -Qv -b apt-sources
+    apt-get update
+    apt-get purge -y ntp || true
+    bcfg2 -D POSIXUsers -Qv -b ntp
+    bcfg2 -Qv -b ntp
+    bcfg2 -D POSIXUsers -Qv -b base-users:base:base-services
+    bcfg2 -Qv -b base-users:base:base-services
+    bcfg2 -Qv -b ldap-auth
+    env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login
+    bcfg2 -Qv -b ssh
+    bcfg2 -D POSIXUsers -qv
+    bcfg2 -qvk -r Packages
+    bcfg2 -qvk -r Packages
+    # delete leftover group
+    delgroup sambashare || true
+    # sync the user/group lists
+    /etc/cron.hourly/nssupdate
+) 2>&1 | cat >./umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+else
+    echo fail
+    exit 1
+fi
+
+cat <<EOF
+-------------------------------------------------------------------------------
+-------------------------- INSTALLATION COMPLETE ------------------------------
+ You may want to set the root password NOW ! As this can be your only way into
+ the system. Use the 'passwd' command for this. Then prey and reboot.
+
+ After you successfully tested your new system, it is also a good idea to
+ delete this script from this directory and from any other media. The keys in
+ this script, if they fall into a wrong hands, may allow an attacker to
+ impersonate your workstation.
+EOF

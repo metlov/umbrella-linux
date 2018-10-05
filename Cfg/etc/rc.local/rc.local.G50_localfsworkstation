@@ -7,7 +7,7 @@ export LANG=en_US.UTF-8
 
 if grep -Fxqe "iface eth0 inet dhcp" /etc/network/interfaces; then
   MAC=`ifconfig | grep eth0 | sed 's/  */#/g' | cut -d# -f 5`
-  IP=`ldapsearch -x -s sub "(&(objectClass=dhcpHost)(dhcpHWAddress=ethernet ${MAC}))" dhcpStatements | grep 'fixed-address' | sed 's/dhcpStatements: fixed-address //g'`
+  IP=`ldapsearch -x -LLL "(macAddress=${MAC})" ipHostNumber | grep ipHostNumber | sed -e 's/ipHostNumber: //g`
   if [ -n $IP ]; then
     MASK=`ifconfig | grep eth0 -A 1 | grep -v eth0 | sed 's/  */:/g' | cut -d: -f 8`
     GW=`route | grep default | sed -e 's/ \+/ /g' | cut -d ' ' -f 2`

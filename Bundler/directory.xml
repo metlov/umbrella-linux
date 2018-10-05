@@ -34,8 +34,8 @@
     <Group name='ubuntu-xenial'>
         <Package name='fusiondirectory'/>
         <Package name='fusiondirectory-plugin-systems'/>
-        <Package name='fusiondirectory-plugin-dhcp'/>
-        <Package name='fusiondirectory-plugin-dns'/>
+<!--        <Package name='fusiondirectory-plugin-dhcp'/> -->
+<!--        <Package name='fusiondirectory-plugin-dns'/> -->
         <Package name='fusiondirectory-plugin-sudo'/>
         <Package name='fusiondirectory-plugin-mail'/>
         <Package name='fusiondirectory-plugin-alias'/>
@@ -61,6 +61,12 @@
         <!-- principal for automatic users/hosts manipulation -->
         <Path name='/etc/fusiondirectory/hostmanager.keytab' altsrc='/etc/gosa/hostmanager.keytab'/>
         <Path name='/etc/fusiondirectory/hooks/change_pass'/>
+
+        <!-- IP address space review utility (useful for address allocation) -->
+        <Path name='/usr/local/bin/umbrella-hosts'/>
+
+        <!-- command line host creation utility -->
+        <Path name='/usr/local/bin/umbrella-addworkstation'/>
 
         <!-- fix PHP warning at line 2538 of functions.inc -->
         <Action name='fix_fusion_warning_2538'/>

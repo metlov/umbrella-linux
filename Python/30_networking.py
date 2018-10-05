@@ -5,7 +5,9 @@ import ipcalc
 from genshi.template import TemplateError
 
 # renders (as a string) /etc/network/interfaces stanza for a given interface
-def interface_stanza( interface, networks, domain_name ):
+# TODO: this function gets uglier and uglier with each iteration
+#       interface generation needs to be done better
+def interface_stanza( interface, networks, domain_name, metadata, routerifs, funcifs ):
   netnames = {
     'extif':'External network (accesible from Internet directly)',
     'intif':"Legacy organization's intranet",
@@ -42,11 +44,18 @@ def interface_stanza( interface, networks, domain_name ):
     gateway=interface.find('gateway')
     if gateway is not None:
       r+= '    gateway '+gateway.text+'\n'
+    nameserver=None
     if gateway is not None and interface.tag != 'extif' and interface.tag != 'intif':
-      r+='    dns-nameservers '+gateway.text+'\n'
+      nameserver=gateway.text
     else:
-      r+='    dns-nameservers 127.0.0.1\n'
-    r+='    dns-search '+domain_name+'\n'
+      if 'backdoor' in metadata.groups:
+        if interface.tag != 'extif' and interface.tag != 'intif':
+          nameserver=str(routerifs['pubif'])
+      else:
+        nameserver='127.0.0.1'
+    if nameserver is not None:
+      r+='    dns-nameservers '+nameserver+'\n'
+      r+='    dns-search '+domain_name+'\n'
     r+='    post-up /sbin/ifconfig '+dev+' txqueuelen 4'+'\n'
     for option in interface.findall('option'):
       r+= '    ' +option.text+'\n'
@@ -61,6 +70,11 @@ def interface_stanza( interface, networks, domain_name ):
   if vlandev is not None:
     vlandev=vlandev.text
     r+= '    vlan-raw-device ' +vlandev+'\n'
+  if ('router' in metadata.groups) and (interface.tag == 'DMZif') and \
+         ('DMZvpn' in funcifs) and ('vpnif' in networks):
+    vpnet_str=str(networks['vpnif'].network())+'/'+str(networks['vpnif'].mask)
+    r+= '    up ip route add '+vpnet_str+' via '+str(funcifs['DMZvpn'])+' || true \n'
+    r+= '    down ip route delete '+vpnet_str+' via '+str(funcifs['DMZvpn'])+' || true \n'
   return r
 
 def accumulate_tags(element, ip, name):
@@ -175,22 +189,34 @@ else:
 
 # fetch main funchosts interfaces from xml
 funcifs={}       # ip addresses of the main interfaces of function hosts
+funcmacs={}      # MAC addresses of the main interfaces of function hosts
 for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
   srvname=server.find('name').text
   srvfunc=server.find('function').text
   # determine the interface address from XML
   srvifs={}
+  srvmacs={}
   for interface in iftypes:
-    t = server.find(interface)
+    tif = server.find(interface)
+    t = tif
     if t is not None:
       t = t.find('ip')
     if t is not None and t.text is not None and t.text.strip():
       srvifs[interface]=ipcalc.IP(t.text.strip())
-  if ((srvfunc == 'router') or (srvfunc == 'vmhost')):
+    t = tif
+    if t is not None:
+      t = t.find('mac')
+    if t is not None and t.text is not None and t.text.strip():
+      srvmacs[interface]=t.text.strip()
+
+  if ((srvfunc == 'router') or (srvfunc == 'vmhost') or (srvfunc == 'backdoor')):
     ifaddr=srvifs['pubif']
+    ifmac=srvmacs['pubif']
   else:
     ifaddr=srvifs.values()[0]
+    ifmac=srvmacs.values()[0]
   funcifs[srvfunc]=ifaddr
+  funcmacs[srvfunc]=ifmac
 
 # fetch host interfaces from xml
 if entry is not None:
@@ -239,8 +265,57 @@ else:
   else:
     ws_org_admin_group=[]
 
-  print 'Networking setup for '+metadata.hostname+' .'
-  print '    network :'+str(ws_org_network)
-  print '    gateway :'+str(ws_org_gateway)
-  print '    users group :'+str(ws_org_users_group)
-  print '    admin groups :'+str(ws_org_admin_group)
+# Here we compute the canonical hostname for this system and collect the
+# secondary nameservers.
+# The canonical hostname is the one that (hopefully) has proper reverse
+# DNS resolution.
+# By default the canonical hostname is the smtp hostname at primary domain.
+# However, using the revDNS attribute in on domain names in umbrella.xml
+# it is possible to set another hostname as canonical.
+if 'DMZsmtp' in funchostsshort:
+  CANONICAL_hostname=funchostsshort['DMZsmtp']
+else:
+  CANONICAL_hostname=""
+CANONICAL_domain=domain_name
+revDNSseen=False
+secondaryNameservers={}
+hostname_aliases={}
+
+for domain in metadata.Properties['umbrella.xml'].xdata.findall('domain'):
+  if domain.find('master') is None:         # only if we are master of the domain
+    d_name=domain.find('name').text.strip()
+    # collect hostname aliases for the domain
+    aliases_set=set()
+    for alias in domain.findall('alias'):
+      aliases_set.add(alias.text.strip())
+    # remove aliases, which can be in conflict to those, defined automatically
+    if 'DMZwww' in funchosts:
+      aliases_set.discard(funchostsshort['DMZwww'])
+    if 'mail' in funchosts:
+      aliases_set.discard(funchostsshort['mail'])
+    hostname_aliases[d_name]=aliases_set
+
+    # collect slave nameservers for the domain
+    slave_nameservers=set()
+    for slave in domain.findall('slave'):
+      slave_nameservers.add(slave.text.strip())
+    secondaryNameservers[d_name]=slave_nameservers
+
+    # process revDNS and set the canonical hostname
+    revDNS=domain.find('revDNS')
+    if revDNS is not None:
+      if revDNSseen:
+        raise TemplateError('"revDNS" is specified for multiple domain names, '
+                            'can only be specified for one.')
+      revDNSseen=True
+      if revDNS.text is not None:
+        CANONICAL_hostname=revDNS.text.strip()
+      else:
+        CANONICAL_hostname=""
+      CANONICAL_domain=d_name
+
+# compute canonical fully qualified host name for this system
+if CANONICAL_hostname:
+  CANONICAL_FQHN = '%s.%s' % (CANONICAL_hostname, CANONICAL_domain)
+else:
+  CANONICAL_FQHN = CANONICAL_domain

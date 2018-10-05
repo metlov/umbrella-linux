@@ -1,0 +1,161 @@
+#!/usr/bin/env python
+
+#
+# This script prints the current address space usage in Umbrella Linux
+# and also a couple of free IP addresses for every organizational unit defined.
+#
+# Umbrella Linux (c) 2015-2018 by Konstantin L. Metlov and other contributors.
+
+from __future__ import print_function
+import sys
+import lxml.etree
+import subprocess
+import ipcalc
+
+def load_organization():
+    o_schema_filename="/var/lib/bcfg2/Properties/organization.xsd"
+    o_schema = lxml.etree.XMLSchema(lxml.etree.parse(o_schema_filename))
+    o_filename="/var/lib/bcfg2/Properties/organization.xml"
+    o_xdata = lxml.etree.parse(o_filename)
+    return o_xdata
+
+# get all the IP addresses, defined in LDAP
+def load_all_IPs():
+    global ip_addresses
+    ip_addresses=set()
+
+    # load addresses from umbrella.xml
+    u_schema_filename="/var/lib/bcfg2/Properties/umbrella.xsd"
+    u_schema = lxml.etree.XMLSchema(lxml.etree.parse(u_schema_filename))
+    u_filename="/var/lib/bcfg2/Properties/umbrella.xml"
+    u_xdata = lxml.etree.parse(u_filename)
+    u_ipdata=u_xdata.xpath("//Properties/server/*[substring-after(name(), 'if') = '']/ip")
+    for ip in u_ipdata:
+        ip_addresses.add(ipcalc.IP(ip.text))
+
+    # load addresses from LDAP
+    ip_addresses_str = subprocess.check_output("ldapsearch -x -LLL '(ipHostNumber=*)' ipHostNumber | grep ipHostNumber: | sed -e 's/ipHostNumber: //g'", shell=True)
+    for ip_address_str in ip_addresses_str.splitlines():
+        ip_addresses.add(ipcalc.IP(ip_address_str))
+
+def count_free_IPs(network):
+    cnt=0
+    for ip_address in ip_addresses:
+        if ip_address in network:
+            cnt+=1
+    return cnt
+
+def get_free_IPs(network, cnt):
+    global ip_addresses
+    freeIPs=[]
+    for ip_address in network:
+        if ip_address not in ip_addresses:
+            freeIPs.append(ip_address)
+        if (len(freeIPs)>=cnt):
+            break
+    return freeIPs
+
+def get_curr_network(xdata):
+    network=xdata.find('network_match')
+    if network is None:
+        network=xdata.find('network')
+    elif network.text is None or not network.text.strip():
+        network=None
+    return network
+
+def print_tree(xdata,level):
+    name=xdata.find('name')
+    if name is not None:
+        print("".ljust(level*2),name.text.ljust(20), end='')
+        # determine the current network
+        network=get_curr_network(xdata)
+        if network is not None:
+            network=ipcalc.Network(network.text)
+            count=count_free_IPs(network)
+            total=network.size()
+            print(' ['+str(count)+'/'+str(total)+',', end='')
+            print(str(count*100/total)+'%]', end='')
+            # find some free IPs
+            freeIPs=get_free_IPs(network,2)
+            for freeIP in freeIPs:
+                print(', '+str(freeIP), end='')
+            if len(freeIPs)==0:
+                print('NETWORK IS FULL ! No free addresses remain.')
+        print()
+    for node in xdata.findall("ou"):
+        print_tree(node, level+1)
+
+def get_network_by_path(xdata,path):
+    path=path.split('/')
+    if len(path)==0:
+        return None
+    if path[0]=="":
+        del path[0]
+    xpath="/"
+    for ou in path:
+        xpath=xpath+"/ou[name=\""+ou+"\"]"
+    ou_elem=xdata.xpath(xpath)
+    if len(ou_elem)==1:
+        ou_elem=ou_elem[0]
+    else:
+        return None
+    network=get_curr_network(ou_elem)
+    return network
+
+if __name__ == '__main__':
+    if len(sys.argv)==1:
+        o_xdata=load_organization()
+        load_all_IPs()
+        print_tree(o_xdata,0)
+    elif ((len(sys.argv)==2) and (sys.argv[1] != "--help")) or (len(sys.argv)==3):
+        # find a free IP for an organization unit, identified by path
+        # or check that an ip belongs to a subnet of an organizational unit
+        o_xdata=load_organization()
+        network_elem=get_network_by_path(o_xdata, sys.argv[1])
+        if network_elem is None:
+            print("Can't determine the network for the specified "+
+                  "organization path, check it against your "+
+                  "organization.xml.",file=sys.stderr)
+            sys.exit(9)
+        network=ipcalc.Network(network_elem.text)
+        load_all_IPs()
+        if len(sys.argv)==2:
+            # find a free IP
+            freeIPs=get_free_IPs(network,1)
+            if len(freeIPs)==0:
+                print("There are no free IP addresses in the specified "+
+                      "organizational unit.",file=sys.stderr)
+                sys.exit(10)
+            print(freeIPs[0])
+            sys.exit(0)
+        else:
+            # check that an IP is free and in this network
+            IP=ipcalc.IP(sys.argv[2])
+            # check that IP is in subnet
+            if not IP in network:
+                print("The address "+str(IP)+" does not belong to "+
+                       str(network)+", corresponding to '"+sys.argv[1]+"'.",
+                       file=sys.stderr)
+                sys.exit(1)
+            if IP in ip_addresses:
+                print("The address "+str(IP)+" is taken.", file=sys.stderr)
+                sys.exit(2)
+            sys.exit(0)
+    else:
+        help_text='''\
+
+An utility to review/assign/check free IP addresses in this Umbrella Linux
+installation.
+
+Usage:
+    umbrella-hosts     # prints the IP address allocations for all the 
+                       # Organizatonal Units (OUs)
+    umbrella-hosts '/OU1/OU2/OU3'  # prints a single free IP address in an
+                                   # Organizational Unit, specified by path
+                                   # in the OU tree
+    umbrella-hosts '/OU1/OU2' 111.222.333.444  # checks that the specified IP
+                                               # address is free and indeed 
+                                               # belongs to the specified OU
+                                               # Exits with status 0 if it is.
+'''
+        print(help_text)

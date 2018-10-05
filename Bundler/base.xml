@@ -103,7 +103,9 @@
    <Path name='/etc/resolvconf/resolv.conf.d/original'/>
    <Path name='/root/.ssh/authorized_keys2'/>
 
-   <Path name='/etc/network/interfaces'/>
+   <Group name='roaming' negate='true'>
+      <Path name='/etc/network/interfaces'/>
+   </Group>
 
    <Group name='ubuntu-trusty'>
       <Group name='physical'>

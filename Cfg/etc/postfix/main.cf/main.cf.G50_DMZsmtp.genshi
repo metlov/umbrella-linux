@@ -33,7 +33,7 @@ smtpd_use_tls=no
 # See /usr/share/doc/postfix/TLS_README.gz in the postfix-doc package for
 # information on enabling SSL in the smtp client.
 
-myhostname = ${funchosts['DMZsmtp']}
+myhostname = ${CANONICAL_FQHN}
 myorigin = ${domain_name}
 proxy_interfaces = ${ext_address}
 mydestination =

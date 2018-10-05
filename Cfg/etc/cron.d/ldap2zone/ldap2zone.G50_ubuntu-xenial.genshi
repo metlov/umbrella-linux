@@ -1,7 +1,0 @@
-{% python
-from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-%}\
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-
-*/5 * * * *   bind  /usr/sbin/argonaut-ldap2zone ${domain_name} | /bin/grep -v "^server reload successful$"

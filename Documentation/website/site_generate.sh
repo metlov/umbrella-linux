@@ -2,7 +2,7 @@
 
 autoindex() {
   # usage: autoindex [dir]
-  INDEX=`ls -1 $1 | grep -v '^index.html$' | sed "s/^.*/      <li\>\<a\ href=\"&\"\>&\<\\/a\>\<\\/li\>/"`
+  INDEX=`ls -p1 $1 | grep -v '^index.html$' | sed "s/^.*/      <li\>\<a\ href=\"&\"\>&\<\\/a\>\<\\/li\>/"`
   cat << EOF
 <html>
   <head><title>Index of $1</title></head>

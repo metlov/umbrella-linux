@@ -5,12 +5,9 @@ execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/30_networking.py')
-if (entry is not None) and (entry.find('function').text == 'router'):
-  # router requires special treatment (it has several interfaces)
-  gateway=metadata.Properties['umbrella.xml'].xdata.find('gateway')
-  if gateway is not None:
-    gateway=ipcalc.IP(gateway.text)
-  type='router'
+if (entry is not None) and \
+     (entry.find('function').text in ['router','vmhost','backdoor']):
+  type='multiif'
 else:
   netdev='eth0'
   # either a workstation or a single-interface server
@@ -46,9 +43,6 @@ else:
   if interface is not None and not interface in routerifs:
     raise TemplateError('No route is defined for the subnet '+str(subnet)+' .')
   type='singleif'
-  # vmhost has single interface declared but in fact has several interfaces
-  if (entry is not None) and (entry.find('function').text == 'vmhost'):
-    type='vmhost'
 %}\
 {% if type == 'singleif' %}\
 auto lo
@@ -90,15 +84,12 @@ for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
     dns-nameservers ${dmzip}
 {%         end %}\
 {%     end %}\
-{%     if not 'DMZsmtp' in funchosts %}\
+{%     if 'DMZsmtp' in funchosts %}\
 {% python
-DNScache=metadata.Properties['umbrella.xml'].xdata.find('DNScache')
-if DNScache is not None:
-  DNScache=DNScache.text
-else:
-  DNScache=routerifs['DMZif']
+if DNScache is None:
+  DNScache= [ str(routerifs['DMZif']) ]
 %}\
-    dns-nameservers ${DNScache}
+    dns-nameservers ${' '.join(DNScache)}
 {%     end %}\
 {% end %}\
     dns-search ${domain_name}
@@ -106,13 +97,13 @@ else:
     post-up /sbin/ifconfig ${netdev} txqueuelen 4
 {%     end %}\
 {% end %}\
-{% if (type == 'router') or (type == 'vmhost') %}\
+{% if type == 'multiif' %}\
 auto lo
 iface lo inet loopback
 
 {%   for interface in iftypes %}\
 {%     if entry.find(interface) is not None %}\
-${interface_stanza( entry.find(interface), networks, domain_name )}
+${interface_stanza( entry.find(interface), networks, domain_name, metadata, routerifs, funcifs )}
 {%     end %}\
 {%   end %}\
 {% end %}\

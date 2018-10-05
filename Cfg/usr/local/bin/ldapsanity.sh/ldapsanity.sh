@@ -11,7 +11,8 @@ PUNIQ="/usr/bin/uniq"
 
 . /usr/local/bin/umbrella.sh        # source Umbrella Linux variables
 
-HOSTS=`${PLDAPSEARCH} -x '(|(objectClass=gotoWorkstation)(objectClass=goServer))' cn | ${PGREP} cn: | ${PSED} -e 's/cn: //g'`
+LDAP_CLASS='(|(&(objectClass=gotoWorkstation)(gotoMode=active))(objectClass=goServer))'
+HOSTS=`${PLDAPSEARCH} -x "$LDAP_CLASS" cn | ${PGREP} cn: | ${PSED} -e 's/cn: //g'`
 # append domain name if necessary
 for HOST in ${HOSTS} ; do
     if [[ ! $i == *.* ]] ; then

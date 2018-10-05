@@ -126,14 +126,45 @@ ${REJECT_INTERNAL_INPUT_ON_IF('INPUT', INTIF)}
 {% end %}\
 
 {% end %}\
-{% if extif_enabled and not intif_enabled and ('mail' in funchosts)%}\
-# External interface, SMTP traffic to DMZ
--A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -p tcp --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+{% if 'DMZvpn' in funchosts %}\
+{% if extif_enabled %}\
+# External interface, allow incoming VPN connections to DMZ
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_VPN_IP} -p udp --dport 1194 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_VPN_IP} -p udp --sport 1194 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+# Intranet interface, allow incoming VPN connections to DMZ
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_VPN_IP} -p udp --dport 1194 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_VPN_IP} -p udp --sport 1194 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
 
 {% end %}\
-{% if intif_enabled and not extif_enabled and ('mail' in funchosts)%}\
+{# The next block must match a similar block (below) of NAT rules #}\
+{% if ('mail' in funchosts) %}\
+{%     if ('DMZsmtp' in funchosts) %}\
+{%         if extif_enabled and not intif_enabled %}\
+# External interface, SMTP traffic to DMZ
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -p tcp --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_SMTP_IP} -p tcp --sport 25 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{%         end %}\
+{%         if intif_enabled and not extif_enabled %}\
+# Intranet interface, SMTP traffic to DMZ
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -p tcp --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_SMTP_IP} -p tcp --sport 25 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{%         end %}\
+{%     end %}\
+{%     if ('DMZsmtp' not in funchosts) %}\
+{%         if extif_enabled and not intif_enabled %}\
+# Forward SMTP traffic from the external interface to the mail server in PUB
+# This is definitely a bad idea ! Consider enabling DMZsmtp server or
+# disabling mail altogether.
+-A FORWARD -i ${EXTIF} -o ${IFPUB} -d ${PUB_SMTP_IP} -p tcp --dport 10025 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+{%         end %}\
+{%         if intif_enabled and not extif_enabled %}\
 # Intranet interface, SMTP traffic to the mail server
 -A FORWARD -i ${INTIF} -o ${IFPUB} -d ${PUB_SMTP_IP} -p tcp --dport 10025 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+{%         end %}\
+{%     end %}\
 
 {% end %}\
 {% if extif_enabled and intif_enabled and ('mail' in funchosts)%}\
@@ -147,17 +178,15 @@ ${REJECT_INTERNAL_INPUT_ON_IF('INPUT', INTIF)}
 -A FORWARD -p tcp -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
 -A FORWARD -p udp -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -j ACCEPT
 -A FORWARD -p icmp -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} -j ACCEPT
+
 {%   end %}\
 {%   if intif_enabled %}\
 # Intranet interface, DNS traffic to DMZ
 -A FORWARD -p tcp -i ${INTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
 -A FORWARD -p udp -i ${INTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} --dport 53 -j ACCEPT
--A FORWARD -p udp -i ${IFDMZ} -o ${INTIF} -s ${DMZ_DNS_IP} --sport 53 -j ACCEPT
--A FORWARD -p tcp -i ${IFDMZ} -o ${INTIF} -s ${DMZ_DNS_IP} --sport 53 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
 -A FORWARD -p icmp -i ${INTIF} -o ${IFDMZ} -d ${DMZ_DNS_IP} -j ACCEPT
 
 {%   end %}\
-
 {% end %}\
 {% if 'DMZsmtp' in funchosts %}\
 # allow communication from DNS server in DMZ
@@ -207,8 +236,7 @@ ${ALLOW_ROUTER_DNS_ACCESS_IN('INPUT', IFSEC, IPSEC)}
 {%   end %}\
 
 {% end %}\
-# LOG REJECTED INPUTS
--A INPUT -j LOG --log-level 4
+${LOG_PACKET('INPUT')}\
 
 # Catch-all rule, reject anything else
 -A INPUT -s ${UNIVERSE} -d ${UNIVERSE} -j REJECT
@@ -265,6 +293,11 @@ ${REJECT_STUFFED_ROUTING_ON_IF('OUTPUT', INTIF)}
 # allow DNS server access from Secure subnet
 ${ALLOW_ROUTER_DNS_ACCESS_OUT('OUTPUT', IFSEC, IPSEC)}\
 
+{% if 'vpnif' in networks %}\
+# allow ICMP from router to VPN
+-A OUTPUT -p icmp -o ${IFDMZ} -s ${IPDMZ} -d ${NETVPN} -j ACCEPT
+
+{% end %}\
 {% if external_vpn is not None %}\
 # process the output chain for the VPN interface
 -A OUTPUT -j VPNOUTPUT
@@ -277,8 +310,7 @@ ${ALLOW_ROUTER_DNS_ACCESS_OUT('OUTPUT', IFSEC, IPSEC)}\
 {%   end %}\
 
 {% end %}\
-# LOG REJECTED OUTPUTS
--A OUTPUT -j LOG --log-level 4
+${LOG_PACKET('OUTPUT')}\
 
 # Catch all rule, all other outgoing is denied and logged. 
 -A OUTPUT -s ${UNIVERSE} -d ${UNIVERSE} -j REJECT
@@ -293,8 +325,7 @@ ${ALLOW_ROUTER_DNS_ACCESS_OUT('OUTPUT', IFSEC, IPSEC)}\
 -A FORWARD -i ${EXTIF} -o ${IFPUB} -m iprange --dst-range=${pub_dhcp[0]}-${pub_dhcp[1]} -m statistic --mode random --probability 0.11 -j DROP
 
 {% end %}\
-# forward icmp packets to anywhere
--A FORWARD -i ${IFDMZ} -p icmp -d ${UNIVERSE} -j ACCEPT
+# forward icmp packets from pub to anywhere
 -A FORWARD -i ${IFPUB} -p icmp -d ${UNIVERSE} -j ACCEPT
 
 {%   if 'DMZsmtp' in funchosts %}\
@@ -391,6 +422,12 @@ ${ACCEPT_AUTH_FROM_IF('FORWARD', IFDMZ)}\
 # which are accessible via http at the configuration server.
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_BCFG2_IP} --dport 80 -j ACCEPT
 {% end %}\
+{% if admin_from_VPN and 'vpnif' in networks %}\
+# from VPN: access to gosa (fusion directory)
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${NETVPN} -d ${PUB_BCFG2_IP} --dport 443 -j ACCEPT
+# from VPN: ssh access to pub
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${NETVPN} -d ${NETPUB} --dport 22 -j ACCEPT
+{% end %}\
 # Enable NTP access from DMZ
 -A FORWARD -p udp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_NTP_IP} --dport 123 -j ACCEPT
 {% if 'mail' in funchosts %}\
@@ -416,22 +453,8 @@ ${ACCEPT_AUTH_FROM_IF('FORWARD', IFDMZ)}\
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_SMTP_IP} -d ${PUB_SMTP_IP} --dport 10025 -j ACCEPT
 -A FORWARD -p tcp -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_SMTP_IP} -s ${PUB_SMTP_IP} --dport 25 -j ACCEPT
 {% end %}\
-# allow BCFG2 access for specific hosts in DMZ
-{% if 'DMZwww' in funchosts %}\
--A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_HTTP_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
-{% end %}\
-{% if 'DMZwww-test' in funchosts %}\
--A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_HTTP_TEST_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
-{% end %}\
-{% if 'DMZsmtp' in funchosts %}\
--A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_DNS_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
-{% end %}\
-{% if 'DMZxmpp' in funchosts %}\
--A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_JAB_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
-{% end %}\
-{% if 'DMZpbx' in funchosts %}\
--A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_PBX_IP} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
-{% end %}\
+# allow BCFG2 access from DMZ
+-A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_BCFG2_IP} --dport 6789 -j ACCEPT
 
 # allow Zabbix proxy to connect to the main Zabbix server
 -A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_BCFG2_IP} --dport 10051 -j ACCEPT
@@ -458,18 +481,26 @@ ${ACCEPT_JABBER_FROM_IF('FORWARD', IFPUB)}\
 {%   end %}\
 
 # Reject ALL PORT 25 outgoing connections, except for legal ones
-{% if intif_enabled and 'mail' in funchosts %}\
--A FORWARD -p tcp -i ${IFPUB} -s ${PUB_SMTP_IP} --dport 25 -j ACCEPT
+{% if intif_enabled %}\
+{%   if 'DMZsmtp' in funchosts and str(smtp_outbound_relay)==str(DMZ_SMTP_IP) %}\
+# mail server sends mail via DMZsmtp, which makes outbound port 25 connections
+-A FORWARD -p tcp -i ${IFDMZ} -o ${INTIF} -s ${DMZ_SMTP_IP} --dport 25 -j ACCEPT
+{%   end %}\
+{%   if 'DMZsmtp' in funchosts and str(smtp_outbound_relay)!=str(DMZ_SMTP_IP) %}\
+{%     if 'mail' in funchosts %}\
+# mail server sends mail via smtp_outbound_relay
+-A FORWARD -p tcp -i ${IFPUB} -o ${INTIF} -s ${PUB_SMTP_IP} -d ${smtp_outbound_relay} --dport 25 -j ACCEPT
+{%     end %}\
+# DMZsmtp sends mail (mainly internally-generated bounces) via smtp_outbound_relay
+-A FORWARD -p tcp -i ${IFDMZ} -o ${INTIF} -s ${DMZ_SMTP_IP} -d ${smtp_outbound_relay} --dport 25 -j ACCEPT
+{%   end %}\
 {% end %}\
 {% if extif_enabled %}\
-{%   if 'DMZsmtp' in funchosts %}
--A FORWARD -p tcp -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_SMTP_IP} --sport 25 -j ACCEPT
-{%   end %}\
-{%   if 'DMZsmtp' in funchosts and smtp_outbound_relay==DMZ_SMTP_IP %}\
+{%   if 'DMZsmtp' in funchosts and str(smtp_outbound_relay)==str(DMZ_SMTP_IP) %}\
 # mail server sends mail via DMZsmtp, which makes outbound port 25 connections
 -A FORWARD -p tcp -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_SMTP_IP} --dport 25 -j ACCEPT
 {%   end %}\
-{%   if 'DMZsmtp' in funchosts and smtp_outbound_relay!=DMZ_SMTP_IP %}\
+{%   if 'DMZsmtp' in funchosts and str(smtp_outbound_relay)!=str(DMZ_SMTP_IP) %}\
 # mail server sends mail via smtp_outbound_relay
 -A FORWARD -p tcp -i ${IFPUB} -o ${EXTIF} -s ${PUB_SMTP_IP} -d ${smtp_outbound_relay} --dport 25 -j ACCEPT
 # DMZsmtp sends mail (mainly internally-generated bounces) via smtp_outbound_relay
@@ -477,11 +508,11 @@ ${ACCEPT_JABBER_FROM_IF('FORWARD', IFPUB)}\
 {%   end %}\
 {% end %}\
 {% if extif_enabled %}\
--A FORWARD -p tcp -o ${EXTIF} --dport 25 -j LOG --log-level 4
+${LOG_SMTP_PACKET('OUTPUT',EXTIF)}
 -A FORWARD -p tcp -o ${EXTIF} --dport 25 -j REJECT
 {% end %}\
 {% if intif_enabled %}\
--A FORWARD -p tcp -o ${INTIF} --dport 25 -j LOG --log-level 4
+${LOG_SMTP_PACKET('OUTPUT',INTIF)}\
 -A FORWARD -p tcp -o ${INTIF} --dport 25 -j REJECT
 {% end %}\
 
@@ -505,8 +536,7 @@ ${ACCEPT_JABBER_FROM_IF('FORWARD', IFPUB)}\
 {%   end %}\
 
 {% end %}\
-# LOG REJECTED FORWARDS
--A FORWARD -j LOG --log-level 4
+${LOG_PACKET('FORWARD')}
 
 # Catch-all REJECT rule
 -A FORWARD -j REJECT
@@ -522,6 +552,16 @@ COMMIT
 :POSTROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 
+{% if 'DMZxmpp' in funchosts %}\
+#Forward incoming s2s on port 5269 requests to DMZxmpp
+{% if intif_enabled and not extif_enabled %}\
+-A PREROUTING -p tcp -d ${INTIP} --dport 5269 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_JAB_IP}:5269
+{% end %}\
+{% if extif_enabled and not intif_enabled %}\
+-A PREROUTING -p tcp -d ${EXTIP} --dport 5269 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_JAB_IP}:5269
+{% end %}\
+
+{% end %}\
 {% if 'DMZpbx' in funchosts %}\
 #Forward incoming on port 5061 requests to DMZ servers
 {% if intif_enabled and not extif_enabled %}\
@@ -529,6 +569,16 @@ COMMIT
 {% end %}\
 {% if extif_enabled and not intif_enabled %}\
 -A PREROUTING -p tcp -d ${EXTIP} --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_PBX_IP}:5061
+{% end %}\
+
+{% end %}\
+{% if 'DMZvpn' in funchosts %}\
+#Forward incoming on port 1194 requests to the DMZvpn server
+{% if intif_enabled and not extif_enabled %}\
+-A PREROUTING -p udp -d ${INTIP} --dport 1194 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VPN_IP}:1194
+{% end %}\
+{% if extif_enabled and not intif_enabled %}\
+-A PREROUTING -p udp -d ${EXTIP} --dport 1194 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VPN_IP}:1194
 {% end %}\
 
 {% end %}\
@@ -548,19 +598,32 @@ COMMIT
 {%   end %}\
 
 {% end %}\
-{% if extif_enabled and not intif_enabled and ('mail' in funchosts) and ('DMZsmtp' in funchosts) %}\
+{# The next block must match a similar block (above) of FORWARD rules #}\
+{% if ('mail' in funchosts) %}\
+{%     if ('DMZsmtp' in funchosts) %}\
+{%         if extif_enabled and not intif_enabled %}\
 # NAT SMTP traffic from the external interface to DMZ
 -A PREROUTING -p tcp -d ${EXTIP} --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_SMTP_IP}:25
-{% end %}\
-{% if intif_enabled and not extif_enabled and ('mail' in funchosts)%}\
+{%         end %}\
+{%         if intif_enabled and not extif_enabled %}\
+# NAT SMTP traffic from the intranet interface to DMZ
+-A PREROUTING -p tcp -d ${INTIP} --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_SMTP_IP}:25
+{%         end %}\
+{%     end %}\
+{%     if ('DMZsmtp' not in funchosts) %}\
+{%         if extif_enabled and not intif_enabled %}\
+# NAT SMTP traffic from the external interface to the mail server in PUB
+# This is definitely a bad idea ! Consider enabling DMZsmtp server or
+# disabling mail altogether.
+-A PREROUTING -p tcp -d ${EXTIP} --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_SMTP_IP}:10025
+{%         end %}\
+{%         if intif_enabled and not extif_enabled %}\
 # NAT SMTP traffic from the intranet interface to the mail server in PUB
 -A PREROUTING -p tcp -d ${INTIP} --dport 25 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_SMTP_IP}:10025
-{% end %}\
-{% if extif_enabled and intif_enabled and ('mail' in funchosts)%}\
-# TODO: implement forwarding of SMTP when both internal and external
-#       interfaces are enabled.
-{% end %}\
+{%         end %}\
+{%     end %}\
 
+{% end %}\
 {% if 'DMZsmtp' in funchosts %}\
 {%   if extif_enabled %}\
 # NAT external DNS requests to DMZ

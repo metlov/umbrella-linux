@@ -1,0 +1,286 @@
+<Properties>
+    <system_name>aux1</system_name>         <!-- lowercase organization name-->
+    <system_name_local>офис1</system_name_local> <!-- localized version of the system name, can be omitted -->
+    <long_name>Umbrella inc.</long_name>        <!-- long version of the organization name -->
+    <long_name_local>корпорация Амбрелла</long_name_local> <!-- localized version of the long name, can be omitted -->
+    <dept_name>Office 1</dept_name>         <!-- optional department name for department-local install -->
+    <location>Donetsk</location>            <!-- city -->
+    <location_local>Донецк</location_local> <!-- localized version of the city name, can be omitted -->
+    <state>Donetsk People's Republic</state><!-- province -->
+    <state_local>Донецкая Народная Республика</state_local> <!-- localized version of the province name, can be omitted -->
+    <country>Russia</country>               <!-- country -->
+    <country_local>Россия</country_local>   <!-- localized version of the country name, can be omitted -->
+    <country_code>RU</country_code>         <!-- two-letter country code -->
+    <language>ru_RU</language>              <!-- default language on workstations and public services -->
+    <!-- We always use UTF-8 encoding, so that ru_RU.UTF-8 must be a valid locale in this example.    -->
+    <!-- Note that default locales on servers is always en_US.UTF-8 for easier log files handling.    -->
+    <timezone>Europe/Moscow</timezone>      <!-- system timezone, must form a valid filename when appended to -->
+                                            <!-- /usr/share/zoneinfo/ -->
+    <domain>                                <!-- domain of this Umbrella cluster -->
+        <name>aux1.umbrella-inc.ru</name>        <!-- must be FQDN                    -->
+        <!-- aliases, which will resolve to the primary IP            -->
+        <!-- slave DNS servers for this domain -->
+        <!-- <slave ip="1.1.1.1">ns2.umbrella-inc.ru</slave> --> <!-- registered in this domain with a specific IP -->
+        <!-- <slave>ns2.secondary.net.ua</slave> -->             <!-- registered in an external domain -->
+        <slave>smtp.umbrella-inc.ru</slave>
+        <!-- <subdomain> -->
+        <!--     <name>aux</name>-->
+        <!-- --> <!-- DNS servers for aux.umbrella-inc.ru domain -->
+        <!-- --> <!-- Those with IP specified will have DNS glue records -->
+        <!--     <DNS ip=2.2.2.2>ns.aux.umbrella-inc.ru</DNS>-->
+        <!--     <DNS>ns.secondary.net.ua</DNS>-->
+        <!-- </subdomain> -->
+    </domain>
+    <!-- The external ip address can also be associated with an alternative -->
+    <!-- domains. These can be listed in additional domain tags below. Doing -->
+    <!-- so enables E-mail handling for these domains (mailboxes become -->
+    <!-- reachable via either the primary or any of the alternative domain names).-->
+    <!-- <domain> -->                  <!-- alternative domain name -->
+    <!--    <name>acme.com</name> -->
+    <!-- --><!-- aliases, which will resolve to the primary IP -->
+    <!--    <alias>www</alias> --> <!-- www.acme.com -->
+    <!--    <alias>mail</alias> --> <!-- mail.acme.com -->
+    <!-- --><!-- Declare that our primary IP is reverse resolved to -->
+    <!-- --><!-- mail.acme.com . -->
+    <!--    <revDNS>mail<revDNS> -->
+    <!-- </domain> -->
+    <!-- The revDNS tag can appear only once among all the domain names. -->
+    <!-- It can be used to specify the hostname into which the external  -->
+    <!-- address of the system is mapped via the reverse DNS resolution. -->
+    <!-- For example, if the reverse DNS lookup on the external address  -->
+    <!-- yields mail.acme.org, the revDNS option should be specified as  -->
+    <!-- shown. If it returns just "acme.org", <revDNS/> should be       -->
+    <!-- specified. If no revDNS is specified, it is assumed that the ip -->
+    <!-- resolves to the DMZsmtp hostname in the primary domain.         -->
+    <!-- Given the revDNS option, Umbrella maps the DNS and SMTP services-->
+    <!-- for all the hosted domains (primary and alternative) to the     -->
+    <!-- hostnames with proper forward and reverse DNS resolution.       -->
+    <!-- <domain> -->
+    <!--    <name>acme.org</name> -->
+    <!-- --><!-- we serve this domain as a slave of ns1.acme.org -->
+    <!-- --><!-- for slave domains only the name and master tags are allowed -->
+    <!--    <master>1.1.1.3</master> --> <!-- ip address of the master DNS server for acme.org -->
+    <!-- </domain> -->
+    <domain>
+        <name>umbrella-inc.ru</name>
+        <master>192.168.15.10</master>
+    </domain>
+
+    <!-- wrapper subnet -->
+    <!-- The class B network, which wraps all the internal subnets (pubnet,-->
+    <!-- secnet, DMZnet, winnet, but not extnet), defined below. It is an  -->
+    <!-- error if the internal subnets are not contained within this network.-->
+    <!-- It is used in reverse DNS zone generation and some other places. -->
+    <net>172.17.0.0/16</net>
+
+    <!-- subnet definitions -->
+    <!-- <extnet>192.168.0.0/17</extnet> -->    <!-- external network (outside world), if present -->
+    <extnet>192.168.15.0/24</extnet>       <!-- KLM: umbrella-lxd in virtualbox -->
+    <!-- <intnet>172.19.14.0/24</intnet> -->     <!-- legacy intranet (the rest of the organization's network), if present -->
+    <pubnet>172.17.128.0/21</pubnet>   <!-- public network (Linux workstations and servers with Internet access) -->
+    <secnet>172.17.4.0/26</secnet>     <!-- secure network (Linux workstations and servers without Internet access) -->
+    <DMZnet>172.17.3.0/26</DMZnet>     <!-- DMZ -->
+    <!-- <vpnet>172.18.16.0/24</vpnet> -->      <!-- subnet for VPN clients, if enabled -->
+
+    <!-- DHCP service in the pub subnet -->
+    <pub_dhcp>
+        <start>172.17.129.193</start>
+        <end>172.17.129.253</end>
+    </pub_dhcp>
+
+    <!-- DNS cache server -->
+    <!-- if omitted the DNS server on the router will perform its own lookups -->
+    <!-- several DNS cache servers can be specified -->
+    <!-- <DNScache>8.8.8.8</DNScache> -->
+    <!-- <DNScache>8.8.4.4</DNScache> -->
+
+    <!-- NTP servers to synchronize the time with -->
+    <!-- if none are specified the local clock on config server will be used -->
+    <!-- <ntpserver option="iburst">ntp.ubuntu.com</ntpserver> -->
+    <ntpserver>193.11.166.20</ntpserver> <!-- ntp2.sp.se -->
+    <ntpserver>81.17.128.182</ntpserver> <!-- ntp.metrology.kharkov.ua -->
+    <ntpserver>64.113.32.5</ntpserver> <!-- time.nist.gov -->
+    <ntpserver>195.43.74.123</ntpserver> <!-- ntp.amnic.net -->
+    <ntpserver>89.109.251.22</ntpserver> <!-- ntp2.vniiftri.ru -->
+    <ntpserver>130.149.17.21</ntpserver> <!-- ntps1-0.eecsit.tu-berlin.de -->
+
+    <!-- Defines the upstream proxy server to which all proxy requests   -->
+    <!-- are redirected. If undefined the proxy will access the Internet -->
+    <!-- directly -->
+    <!-- <upstream_proxy>10.0.2.22:3128</upstream_proxy> -->
+
+    <!-- Here the start pages for the browsers on user's workstations   -->
+    <!-- can be defined in relation to the workstation groups. If group -->
+    <!-- is not defined the start_page tag works as a wildcard.         -->
+    <!-- <start_pages>
+        <start_page>
+            <url>http://www.google.com/</url>
+        </start_page>
+        <start_page>
+            <group>workstations2</group>
+            <url>http://www.yandex.ru/</url>
+        </start_page>
+    </start_pages> -->
+
+    <!-- List of administrative users, which get additional privileges -->
+    <!-- Such as ssh access to servers and the membership in the bcfg2 -->
+    <!-- group on config server to be able to edit the configuration   -->
+    <admin>medvedev</admin>
+
+    <!-- the address of SMTP host from which the incoming mail comes  -->
+    <!-- from. This can be either the address of an external relay or -->
+    <!-- the IP address of the DMZ SMTP server.                       -->
+    <SMTP_incoming_relay>172.17.3.2</SMTP_incoming_relay>
+
+    <!-- the address of SMTP host to relay outgoing mail through -->
+    <!-- This can be either the address of an external relay or -->
+    <!-- the IP address of the DMZ SMTP server.                 -->
+    <SMTP_outbound_relay>172.17.3.2</SMTP_outbound_relay>
+
+    <!-- whether to install zabbix on monitor -->
+    <!-- <install_zabbix/> -->
+
+    <!-- normally the NTP server is on config server, but some setups -->
+    <!-- (most notably the one, based on LXD) can't set the system    -->
+    <!-- time from within the container. This option allows to move   -->
+    <!-- the NTP server from config server to the VM host, which is   -->
+    <!-- able (presumably) to set its own time. Please note that such -->
+    <!-- setup is marginally less secure, compared to having the NTP  -->
+    <!-- server on config, since it opens an attack vector vs VM host.-->
+    <!-- This additional risk, however, is negligible in most setups. -->
+    <NTP_server_on_vmhost/>
+
+    <!-- server definitions -->
+    <server>
+        <function>router</function>     <!-- this is main router -->
+        <name>router</name>
+        <extif>                         <!-- external interface -->
+            <dev>enp0s3</dev>
+            <ip>192.168.15.11</ip>
+            <!-- <nat_ip>192.168.193.28</nat_ip> -->
+            <!-- This allows to specify the real external IP address of -->
+            <!-- this Umbrella Linux system in case it gets its packets -->
+            <!-- via NAT and the <ip/> is a LAN-only address.           -->
+            <mac>00:16:3e:df:0c:12</mac>
+            <gateway>192.168.15.1</gateway> <!-- default gateway -->
+        </extif>
+        <pubif>                         <!-- interface to public subnet -->
+            <dev>eth1</dev>
+            <ip>172.17.128.1</ip>
+            <mac>00:16:3e:df:0c:93</mac>
+        </pubif>
+        <secif>                         <!-- interface to secure subnet -->
+            <dev>eth3</dev>
+            <ip>172.17.4.1</ip>
+            <mac>00:16:3e:0d:4d:74</mac>
+        </secif>
+        <DMZif>                         <!-- interface to DMZ -->
+            <dev>eth2</dev>
+            <ip>172.17.3.1</ip>
+            <mac>00:16:3e:0b:2f:22</mac>
+        </DMZif>
+        <!-- <winif></winif> -->        <!-- interface to windows (reserved) -->
+    </server>
+    <server>
+        <function>config</function>     <!-- this is configuration server -->
+        <name>config</name>
+        <pubif>
+            <dev>eth0</dev>
+            <ip>172.17.128.2</ip>
+            <mac>00:16:3e:15:05:70</mac>
+        </pubif>
+    </server>
+    <!-- this is virtual machines host -->
+    <server>
+        <function>vmhost</function>
+        <name>mumu</name>
+        <extif>
+            <dev>br0</dev>
+            <mac>08:00:27:84:26:29</mac>
+            <bridged>enp0s3</bridged>
+        </extif>
+        <pubif>
+            <dev>pub</dev>
+            <ip>172.17.128.9</ip>
+            <mac>08:00:27:db:dd:fa</mac>
+            <gateway>172.17.128.1</gateway>
+            <bridged>enp0s8</bridged>
+        </pubif>
+        <secif>
+            <dev>sec</dev>
+            <mac>08:00:27:50:af:9b</mac>
+            <bridged>enp0s9</bridged>
+        </secif>
+        <DMZif>
+            <dev>dmz</dev>
+            <mac>fe:bc:0d:36:74:6e</mac>
+            <bridged>none</bridged>
+        </DMZif>
+    </server>
+   <!-- this is proxy server -->
+   <server>
+        <function>proxy</function>     
+        <name>cache</name>
+        <pubif>
+            <dev>eth0</dev>
+            <ip>172.17.128.4</ip>
+            <mac>00:16:3e:f9:82:c3</mac>
+        </pubif>
+    </server>
+    <!-- this is NFS server -->
+    <server>
+        <function>nfs</function>     
+        <name>nfs</name>
+        <pubif>
+            <dev>eth0</dev>
+            <ip>172.17.128.5</ip>
+            <mac>00:16:3e:71:d5:ee</mac>
+        </pubif>
+    </server>
+    <server>
+        <function>mail</function>     <!-- this is mail server -->
+        <name>mail</name>
+        <pubif>
+            <dev>eth0</dev>
+            <ip>172.17.128.6</ip>
+            <mac>00:16:3e:f2:f9:42</mac>
+        </pubif>
+    </server>
+    <server>
+        <function>ltsp</function>        <!-- this is LTSP server -->
+        <name>ltsp</name>
+        <pubif>
+            <dev>eth0</dev>
+            <ip>172.17.128.7</ip>
+            <mac>00:16:3e:f2:00:a9</mac>
+        </pubif>
+    </server>
+    <!-- this is system monitoring server -->
+    <server>
+        <function>monitor</function>
+        <name>monitor</name>
+        <pubif>
+            <dev>eth0</dev>
+            <ip>172.17.128.8</ip>
+            <mac>00:16:3e:63:b0:84</mac>
+        </pubif>
+    </server>
+    <server>
+        <function>DMZsmtp</function>     <!-- this is DMZ SMTP and DNS server -->
+        <name>smtp</name>
+        <DMZif>
+            <dev>eth0</dev>
+            <ip>172.17.3.2</ip>
+            <mac>00:16:3e:72:eb:eb</mac>
+        </DMZif>
+    </server>
+    <server>
+        <function>DMZxmpp</function>     <!-- this is DMZ Jabber server -->
+        <name>xmpp</name>
+        <DMZif>
+            <dev>eth0</dev>
+            <ip>172.17.3.3</ip>
+            <mac>00:16:3e:72:ec:ec</mac>
+        </DMZif>
+    </server>
+</Properties>

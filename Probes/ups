@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if grep -q '^P: \+Vendor=0d9f \+ProdID=0004' /sys/kernel/debug/usb/devices &>/dev/null; then
+echo group:ups-master
+echo group:ups-detected
+echo group:ups-powercom
+elif [ -f /etc/nut/ups.conf ]; then
+echo group:ups-master
+fi

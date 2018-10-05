@@ -12,8 +12,6 @@ execfile(repo+'/Python/30_networking.py')
 description=long_name
 if dept_name is not None:
   description=dept_name
-splitnet=str(wholenet).split('.')
-zonename=str(splitnet[1])+'.'+str(splitnet[0])+'.in-addr.arpa.'
 gosa_admin_cn="System Administrator-admin"
 gosa_admin="cn="+gosa_admin_cn+",ou=People,"+ldap_root
 # generate salt
@@ -29,12 +27,11 @@ have_router='router' in funchosts
 
 # collect ip addresses and macs of servers
 srvips={}
-srvlasttwo={}
 srvmacs={}
 for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
   srvname=server.find('name').text
   srvfunc=server.find('function').text
-  if srvfunc == 'router' or srvfunc == 'vmhost':
+  if srvfunc == 'router' or srvfunc == 'vmhost' or srvfunc == 'backdoor':
     iface = server.find('pubif')
   else:
     iface=None
@@ -52,8 +49,6 @@ for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
   if t is None:
     raise TemplateError('IP address must be defined for '+iface.tag+' on '+srvfunc+' in umbrella.xml.')
   srvips[srvfunc]=t.text
-  splitip=str(t.text).split('.')
-  srvlasttwo[srvfunc]=str(splitip[3])+'.'+str(splitip[2])
   srvmacs[srvfunc]=iface.find('mac').text
 %}\
 # ${domain_name}
@@ -135,12 +130,9 @@ fdMailAttribute: uid
 fdCyrusUseSlashes: FALSE
 fdCyrusDeleteMailbox: FALSE
 fdAliasRDN: ou=alias
-fdDnsRDN: ou=dns
-fdDNSFinalDot: TRUE
 fdOGroupRDN: ou=groups
 fdForceSaslPasswordAsk: TRUE
 fdTabHook: user|postmodify|/etc/fusiondirectory/hooks/change_pass %dn% %passwordClear%
-fdDhcpRDN: ou=dhcp
 fdDashboardNumberOfDigit: 3
 fdDashboardPrefix: PC
 fdDashboardExpiredAccountsDays: 15
@@ -163,9 +155,7 @@ fdEncodings: cp850=CP850 (Europe)
 objectClass: fusionDirectoryConf
 objectClass: fdMailPluginConf
 objectClass: fdAliasPluginConf
-objectClass: fdDnsPluginConf
 objectClass: fusionDirectoryPluginsConf
-objectClass: fdDhcpPluginConf
 objectClass: fdDashboardPluginConf
 objectClass: fdSudoPluginConf
 objectClass: fdSystemsPluginConf
@@ -361,152 +351,18 @@ dn: ou=servers,ou=systems,${ldap_root}
 objectClass: organizationalUnit
 ou: servers
 
-# dhcp, ${domain_name}
-dn: ou=dhcp,${ldap_root}
-objectClass: organizationalUnit
-ou: dhcp
-
-# dns, ${domain_name}
-dn: ou=dns,${ldap_root}
-objectClass: organizationalUnit
-ou: dns
 {% if have_router %}\
-
-# ${domain_name}., dns, ${domain_name}
-dn: zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-zoneName: ${domain_name}.
-relativeDomainName: @
-dNSClass: IN
-sOARecord: ${funchosts['router']}. itadmins.${domain_name}. 2017032803 2400 1800 720000 6400
-{%   if 'mail' in funchosts %}\
-mXRecord: 10 ${funchosts['mail']}.
-{%   end %}\
-nSRecord: ${funchosts['router']}.
-
-# ${zonename}, ${domain_name}., dns, ${domain_name}
-dn: zoneName=${zonename},zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-zoneName: ${zonename}
-relativeDomainName: @
-dNSClass: IN
-sOARecord: ${funchosts['router']}. itadmins.${domain_name}. 2017032803 2400 1800 720000 6400
-nSRecord: ${funchosts['router']}.
-
 # ${funchostsshort['router']}, servers, systems, ${domain_name}
 dn: cn=${funchostsshort['router']},ou=servers,ou=systems,${ldap_root}
 gotoMode: active
 ipHostNumber: ${routerifs['pubif']}
 macAddress: ${routerifmacs['pubif']}
 description: main router
-fdDNSZoneDn: zoneName=${domain_name}.,ou=dns,${ldap_root}
-dhcpServiceDN: cn=routerDHCP,ou=dhcp,${ldap_root}
-argonautLdap2zoneBindDir: /etc/bind
-argonautLdap2zoneBindCacheDir: /var/cache/bind
-argonautLdap2zoneNoReverse: FALSE
-argonautLdap2zoneAllowNotify: FALSE
-argonautLdap2zoneTTL: 500
-argonautLdap2zoneRndc: /usr/sbin/rndc
 cn: ${funchostsshort['router']}
 objectClass: top
 objectClass: goServer
 objectClass: GOhard
-objectClass: dhcpServer
-objectClass: fdDNSHost
-objectClass: argonautDNSConfig
-
-# routerDHCP, dhcp, ${domain_name}
-dn: cn=routerDHCP,ou=dhcp,${ldap_root}
-objectClass: dhcpService
-cn: routerDHCP
-dhcpStatements: default-lease-time 21600
-dhcpStatements: max-lease-time 21600
-dhcpStatements: authoritative
-dhcpStatements: ddns-update-style none
-{% if 'ltsp' in srvips %}\
-dhcpStatements: filename "/pxelinux.0"
-dhcpStatements: next-server ${srvips['ltsp']}
-{% end %}\
-dhcpStatements: use-host-decl-names on
-dhcpStatements: allow booting
-dhcpStatements: allow bootp
-dhcpPrimaryDN: cn=${funchostsshort['router']},ou=servers,ou=systems,${ldap_root}
-
-# Public network
-# ${networks['pubif'].network()}, routerDHCP, dhcp, ${domain_name}
-dn: cn=${networks['pubif'].network()},cn=routerDHCP,ou=dhcp,${ldap_root}
-objectClass: dhcpSubnet
-cn: ${networks['pubif'].network()}
-dhcpOption: routers ${routerifs['pubif']}
-dhcpOption: domain-name "${domain_name}"
-dhcpOption: subnet-mask ${networks['pubif'].netmask()}
-dhcpOption: broadcast-address ${networks['pubif'].broadcast()}
-dhcpOption: domain-name-servers ${routerifs['pubif']}
-dhcpNetMask: ${networks['pubif'].mask}
-{% if pub_dhcp is not None %}\
-dhcpRange: ${pub_dhcp[0]} ${pub_dhcp[1]}
-{% end %}\
-
-# Secure network
-# ${networks['secif'].network()}, routerDHCP, dhcp, ${domain_name}
-dn: cn=${networks['secif'].network()},cn=routerDHCP,ou=dhcp,${ldap_root}
-objectClass: dhcpSubnet
-cn: ${networks['secif'].network()}
-dhcpOption: routers ${routerifs['secif']}
-dhcpOption: domain-name "${domain_name}"
-dhcpOption: subnet-mask ${networks['secif'].netmask()}
-dhcpOption: broadcast-address ${networks['secif'].broadcast()}
-dhcpOption: domain-name-servers ${routerifs['secif']}
-dhcpNetMask: ${networks['secif'].mask}
-
-# DMZ
-# ${networks['DMZif'].network()}, routerDHCP, dhcp, ${domain_name}
-dn: cn=${networks['DMZif'].network()},cn=routerDHCP,ou=dhcp,${ldap_root}
-objectClass: dhcpSubnet
-cn: ${networks['DMZif'].network()}
-dhcpOption: routers ${routerifs['DMZif']}
-dhcpOption: domain-name "${domain_name}"
-dhcpOption: subnet-mask ${networks['DMZif'].netmask()}
-dhcpOption: broadcast-address ${networks['DMZif'].broadcast()}
-dhcpOption: domain-name-servers ${routerifs['DMZif']}
-dhcpNetMask: ${networks['DMZif'].mask}
-
-{% def DNSandDHCP(func) %}\
-# ${funchostsshort[func]}, routerDHCP, dhcp, ${domain_name}
-dn: cn=${funchostsshort[func]},cn=routerDHCP,ou=dhcp,${ldap_root}
-objectClass: dhcpHost
-cn: ${funchostsshort[func]}
-dhcpHWAddress: ethernet ${srvmacs[func]}
-dhcpStatements: fixed-address ${srvips[func]}
-
-# ${funchostsshort[func]}, ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=${funchostsshort[func]},zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: ${funchostsshort[func]}
-zoneName: ${domain_name}.
-dNSClass: IN
-aRecord: ${srvips[func]}
-
-# ${srvlasttwo[func]}, 168.192.in-addr.arpa., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=${srvlasttwo[func]},zoneName=${zonename},zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-zoneName: ${zonename}
-dNSClass: IN
-pTRRecord: ${funchosts[func]}.
-relativeDomainName: ${srvlasttwo[func]}
-{% end def DNSandDHCP %}\
-{% def CNAME(cname, func) %}\
-# ${cname}, ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=${cname},zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: ${cname}
-zoneName: ${domain_name}.
-dNSClass: IN
-cNAMERecord: ${funchosts[func]}.
-{% end def CNAME %}\
-${ DNSandDHCP('router') }\
 {% end if have_router %}\
-
 {% python
   remaining_hosts=funchosts.copy();
   # pop the router (it is already defined)
@@ -523,7 +379,6 @@ description: ${funchostdesc[host]}
 gotoMode: active
 ipHostNumber: ${srvips[host]}
 macAddress: ${srvmacs[host]}
-fdDNSZoneDn: zoneName=${domain_name}.,ou=dns,${ldap_root}
 cn: ${funchostsshort[host]}
 {% if host == 'config' or host == 'proxy' %}\
 goLdapBase: dc=${ldap_root}
@@ -542,114 +397,8 @@ objectClass: goLdapServer
 objectClass: top
 objectClass: goServer
 objectClass: GOhard
-objectClass: fdDNSHost
 {%     if host == 'mail' %}\
 objectClass: fdImapServer
 {% end if 'mail' %}\
-{% if have_router %}\
 
-${ DNSandDHCP(host) }\
-{%   if host == 'config' %}\
-
-${ CNAME('autoconfig', 'config') }
-${ CNAME('packages', 'config') }
-${ CNAME('gosa', 'config') }
-${ CNAME('dir', 'config') }
-${ CNAME('wpad', 'config') }
-# _wpad._tcp, ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_wpad._tcp,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _wpad._tcp
-zoneName: ${domain_name}.
-dNSClass: IN
-sRVRecord: 0 0 80 ${funchosts[host]}.
-
-${ CNAME('kdc1', 'config') }
-${ CNAME('ldap1', 'config') }\
-
-# _kerberos.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_kerberos.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _kerberos.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-tXTRecord: ${realm_name}
-
-# _kerberos._udp.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_kerberos._udp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _kerberos._udp.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-sRVRecord: 0 0 88 ${funchosts[host]}.
-{%     if 'proxy' in funchosts %}\
-sRVRecord: 0 0 88 ${funchosts['proxy']}.
-{%     end if there is 'proxy' %}\
-
-# _kerberos-master._udp.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_kerberos-master._udp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _kerberos-master._udp.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-sRVRecord: 0 0 88 ${funchosts[host]}.
-
-# _kerberos-adm._tcp.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_kerberos-adm._tcp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _kerberos-adm._tcp.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-sRVRecord: 0 0 749 ${funchosts[host]}.
-
-# _kpasswd._udp.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_kpasswd._udp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _kpasswd._udp.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-sRVRecord: 0 0 464 ${funchosts[host]}.
-{%   end if 'config' %}\
-{%   if host == 'proxy' %}\
-
-${ CNAME('kdc2', host) }
-${ CNAME('ldap2', host) }\
-{%   end if 'proxy' %}\
-{%   if (host == 'proxy' and 'DMZxmpp' not in funchosts) or (host == 'DMZxmpp')  %}\
-
-# _jabber._tcp.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_jabber._tcp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _jabber._tcp.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-sRVRecord: 5 0 5269 ${funchosts[host]}.
-
-# _xmpp-client._tcp.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=_xmpp-client._tcp.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: _xmpp-client._tcp.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-sRVRecord: 5 0 5222 ${funchosts[host]}.
-{%   end if 'proxy' or 'DMZxmpp' %}\
-{%   if host == 'mail' %}\
-
-# ${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: ${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-tXTRecord: v=spf1 a mx ~all
-
-# mail._domainkey.${domain_name}., ${domain_name}., dns, ${domain_name}
-dn: relativeDomainName=mail._domainkey.${domain_name}.,zoneName=${domain_name}.,ou=dns,${ldap_root}
-objectClass: dNSZone
-relativeDomainName: mail._domainkey.${domain_name}.
-zoneName: ${domain_name}.
-dNSClass: IN
-tXTRecord: v=DKIM1; k=rsa; s=email; p=${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}
-{%   end if 'mail' %}\
-{% end if have_router %}\
 {% end for host in remaining_hosts %}\

@@ -97,3 +97,14 @@
   <regex offset="after_parent">^AS_REQ \(\d+ etypes {\.+}\) (\d+.\d+.\d+.\d+): PREAUTH_FAILED: (\w+)@\S+</regex>
   <order>srcip, user</order>
 </decoder>
+
+<!-- decode systemd messages -->
+<decoder name="systemd">
+  <program_name>^systemd</program_name>
+</decoder>
+<decoder name="systemd-failed-to-reset-devices-list">
+  <parent>systemd</parent>
+  <prematch offset="after_parent">^Failed to reset devices.list on </prematch>
+  <regex offset="after_prematch">^(\S+): </regex>
+  <order>extra_data</order>
+</decoder>

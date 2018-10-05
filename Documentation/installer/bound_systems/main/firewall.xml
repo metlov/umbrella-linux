@@ -1,0 +1,128 @@
+<Properties>
+    <!-- Firewall configuration on router.   -->
+    <!-- mostly the firewall is defined by the standard Umbrella rules -->
+    <!-- as altered by the actual servers and paramaters defined in    -->
+    <!-- umbrella.xml. This file allows to amend those rules.          -->
+    <ssh_from_ext/>    <!-- permit ssh connections from extnet to router -->
+    <ssh_from_int/>    <!-- permit ssh connections from intnet to router -->
+    <forward_ssh_to_ltsp/> <!-- ssh is served by the LTSP server -->
+                      <!-- while the former two tags represent a       -->
+                      <!-- global SSH on/off switch. The "forward" tag -->
+                      <!-- allows to forward all the incoming SSH con- -->
+                      <!-- nections to the LTSP server if it is        -->
+                      <!-- configured. In case of no LTSP server defi- -->
+                      <!-- ned in umbrella.xml, the incoming SSH con-  -->
+                      <!-- nections, if enabled, will still be served  -->
+                      <!-- by the router despite the "forward" tag.    -->
+                      <!-- Also, in case of SSH connections served by  -->
+                      <!-- the router, only itadmins will be able to   -->
+                      <!-- log in, but, if SSH is served by the LTSP   -->
+                      <!-- server, everybody with POSIX account will   -->
+                      <!-- be able to do so.                           -->
+    <!-- <auth_in_DMZ> --> <!-- enables access to LDAP and Kerberos from    -->
+                           <!-- within DMZ. May be useful if the WEB server -->
+                           <!-- needs to authenticate users.                -->
+        <!-- additionally, the www-homes flag allows to export the        -->
+        <!-- ~/public_html directories of users as their WWW homepages at -->
+        <!-- http//www.<domain>/~<username> -->
+        <!-- <www_homes/> -->
+    <!-- </auth_in_DMZ> -->
+    <auth_in_DMZ/>
+    <mail_in_DMZ>
+    <!-- just having this tag by itself (even empty) enables authenticated -->
+    <!-- mail from within DMZ (useful for installing a Webmail frontend).  -->
+
+    <!-- Additionally it is possible to permit a number of unauthenticated -->
+    <!-- robots to send/receive mail at a specific IP address (such as     -->
+    <!-- mailing lists server in DMZ).                                     -->
+
+    <!-- Note that only the name portion of E-mail (before the '@' symbol) -->
+    <!-- is specified for each robot here. The domain part comes from the  -->
+    <!-- Umbrella Linux configuration.                                     -->
+    <!-- <robot><name>robot-responder</name><ip>172.17.3.5</ip></robot> -->
+    
+    <!-- There is also a shorthand notation to specify all the addresses of-->
+    <!-- a mailing list, such as mailman-confirm, mailman-join, etc.       -->
+    <!--   <robot><list_name>mailman</list_name><ip>172.17.3.5</ip></robot> -->
+    </mail_in_DMZ>
+    <admin_from_VPN/>
+    <DNS_SMTP_lists>
+        <whitelist>list.dnswl.org</whitelist>
+        <blacklist>b.barracudacentral.org</blacklist>
+        <blacklist>zen.spamhaus.org</blacklist>
+        <blacklist>cbl.abuseat.org</blacklist>
+        <blacklist>bl.spamcop.net</blacklist>
+        <blacklist>zen.spamhaus.org</blacklist>
+        <blacklist>dnsbl-1.uceprotect.net</blacklist>
+        <blacklist>dnsbl.sorbs.net</blacklist>
+    </DNS_SMTP_lists>
+
+    <ssh_to_sec/>      <!-- permit ssh connections from pub to sec -->
+    <!-- <pub_nfs_from_sec/> --> <!-- permit access to PUB nfs server from SEC -->
+    <!-- <jabber_from_sec/> --> <!-- permit jabber access from SEC -->
+    <!-- <mail_from_sec/> -->  <!-- permit access to the mail server from sec -->
+    <!-- <transparent_proxy/> --> <!-- enable transparent proxying -->
+
+    <!-- slow down internet access for unregistered hosts with dynamic    -->
+    <!-- IP addresses. All registered hosts in Umbrella-managed LAN have  -->
+    <!-- static IP addresses. This option can be used to slow down the    -->
+    <!-- internet connection for unregistered users to "softly" force them-->
+    <!-- to register their computers. -->
+    <slow_down_dynamic_hosts/>
+
+    <!-- Here we list the CAs trusted by this Umbrella installation for -->
+    <!-- verifying the external connections.                            -->
+    <!-- Most common usage is to list here the root certificates of trusted-->
+    <!-- peer Umbrella servers to enable cross-domain Jabber and telephony.-->
+    <!-- <trusted_CA> ... LITERAL CERTIFICATE 1 DATA </trusted_CA> -->
+    <!-- <trusted_CA> ... LITERAL CERTIFICATE 2 DATA </trusted_CA> -->
+    <!--                              ...                          -->
+    <!-- <trusted_CA> ... LITERAL CERTIFICATE n DATA </trusted_CA> -->
+    <trusted_CA>-----BEGIN CERTIFICATE-----
+MIIEVzCCAz+gAwIBAgIJAKxh5GRTU3rSMA0GCSqGSIb3DQEBCwUAMIHBMQswCQYD
+VQQGEwJSVTEiMCAGA1UECAwZRG9uZXRzayBQZW9wbGUncyBSZXB1YmxpYzEQMA4G
+A1UEBwwHRG9uZXRzazEWMBQGA1UECgwNVW1icmVsbGEgaW5jLjERMA8GA1UECwwI
+T2ZmaWNlIDExKzApBgkqhkiG9w0BCQEWHGl0YWRtaW5AYXV4MS51bWJyZWxsYS1p
+bmMucnUxJDAiBgNVBAMMG2NvbmZpZy5hdXgxLnVtYnJlbGxhLWluYy5ydTAeFw0x
+ODA1MTYxMDA2MzhaFw0yODA1MTMxMDA2MzhaMIHBMQswCQYDVQQGEwJSVTEiMCAG
+A1UECAwZRG9uZXRzayBQZW9wbGUncyBSZXB1YmxpYzEQMA4GA1UEBwwHRG9uZXRz
+azEWMBQGA1UECgwNVW1icmVsbGEgaW5jLjERMA8GA1UECwwIT2ZmaWNlIDExKzAp
+BgkqhkiG9w0BCQEWHGl0YWRtaW5AYXV4MS51bWJyZWxsYS1pbmMucnUxJDAiBgNV
+BAMMG2NvbmZpZy5hdXgxLnVtYnJlbGxhLWluYy5ydTCCASIwDQYJKoZIhvcNAQEB
+BQADggEPADCCAQoCggEBALhqsX0BQz7u9GLjDbsdnbBaGcElhzKKgRWbAZsP/SFI
+UBACKG5g+B/vpfE185eF+ucojxrsShWWuxqkgFpoF7M3egHxFb5BoqB51p4b6cqR
+/rLrfyxBozbee3i8RCh/gNZ7GoRraxCjnRJ0JDTYi0QSaEWGQFJK+sKQZFR3mxK0
+qlHxuMtHUh9pEyaRP/tf9ohMv9NsMbULb/+lDnmbCey6ya+wgA3UthO05lQU49R9
+sO3L+Orf7YexruMZORHCTfTMyneh5VPrAxBjsinedfEm+kRy+2BHX8/VYW8y/1Mu
+yBkeMXUsPRnzbGz/A+/Te9s9RWPThNa3JV3Uj5MKfAcCAwEAAaNQME4wHQYDVR0O
+BBYEFIXTKzfjqSqFNt+oQGV6y/PsENFMMB8GA1UdIwQYMBaAFIXTKzfjqSqFNt+o
+QGV6y/PsENFMMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAFxErCe+
+iSByxyMo3E8uc5pHTMIZLGjbZPNcv4tKMD0vtMXQsIAIStxQAII2ZNG/BwT7yK32
+aMXzdNGHty4AL3cGKU/ZOYN03+4cSS4eD4oslWQSgL65J8TCWzY17VzbzFG7cU2K
+6tX4nH0tFhUCtrRNDPizVeSeA1AZ5b6d0AnhYwHEECx01+N+fi7QxNGyNKKbMVeZ
+NhWJjDfglR8DOkS43CvWDbLMyc5hKTZjAmZsO/4Vquqpf419tkrHfH52tSg8MvwQ
+V3CoRpX14DoKYTwXPvQbfLOQiThxJOCrBpFbwwgei2XHyoj3fI+h8DM3yhsg37Jf
+ACc+7fI2T+3nOvw=
+-----END CERTIFICATE-----</trusted_CA>
+
+    <!--additional rules to be injected into IPv4 firewall -->
+
+    <!-- <input>... an input rule (without -A INPUT prefix)...</input> -->
+    <!-- <input>...another input rule...</input> -->
+    <!-- <output>... an output rule ...</output> -->
+    <!-- <forward>... a forward rule ...</forward> -->
+    <!-- <forward>... another forward rule ...</forward> -->
+
+    <!-- Open access to wordpress-related sites for updating the www server.-->
+    <!-- This is only needed when updating wordpress and should be disabled -->
+    <!-- in production.                                                     -->
+    <!-- https://core.svn.wordpress.org/ -->
+    <!-- <forward>-p tcp -i ens6 -o ens3 -s 172.17.3.5 -d 66.155.40.247 &#x002d;&#x002d;dport 443 -j ACCEPT</forward> -->
+    <!-- http://plugins.svn.wordpress.org/ -->
+    <!-- <forward>-p tcp -i ens6 -o ens3 -s 172.17.3.5 -d 66.155.40.242 &#x002d;&#x002d;dport 80 -j ACCEPT</forward> -->
+    <!-- https://downloads.wordpress.org/ -->
+    <!-- <forward>-p tcp -i ens6 -o ens3 -s 172.17.3.5 -d 66.155.40.189 &#x002d;&#x002d;dport 443 -j ACCEPT</forward> -->
+
+    <!-- additional IPv4 NAT rules for incoming connections -->
+    <!-- <prerouting>... a NAT rule (without -A PREROUTING prefix)...</prerouting> -->
+</Properties>

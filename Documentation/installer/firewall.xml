@@ -44,6 +44,9 @@
     <!-- a mailing list, such as mailman-confirm, mailman-join, etc.       -->
     <!--   <robot><list_name>mailman</list_name><ip>172.17.3.5</ip></robot> -->
     <!-- </mail_in_DMZ> -->
+    <!-- <admin_from_VPN/> --> <!-- Enables access to the system management -->
+                               <!-- features from VPN. Most notably to the  -->
+                               <!-- directory service and ssh ports in pub. -->
     <DNS_SMTP_lists>
         <whitelist>list.dnswl.org</whitelist>
         <blacklist>b.barracudacentral.org</blacklist>

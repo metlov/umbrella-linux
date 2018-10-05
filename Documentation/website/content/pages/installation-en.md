@@ -40,9 +40,11 @@ not selecting any tasks via tasksel).
 Create some temporary user with a simple password.
 
 4. After the installation is finished, log in as a temporary user you have
-created. Use the `sudo -i` command to become root and download (using `wget`)
+created. Use the `sudo -i` command to become root and download
 all the files from [this web directory](/umbrella-linux/installer/) to your
-root's home. These are all simple text files and `./umbrella-install`
+root's home ( e.g. with
+`wget -e robots=off -R 'index.html*' -r -np -nd -nc -l 1 https://metlov.github.io/umbrella-linux/installer/` ).
+These are all simple text files and `./umbrella-install`
 is a bash script, please `chmod +x ./umbrella-install` after downloading.
 If you wish to generate unique passwords and certificates for your system
 (which is, basically, any time if you change the system name or location

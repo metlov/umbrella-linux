@@ -54,3 +54,11 @@ if pub_dhcp is not None:
   pub_dhcp = [ ipcalc.IP(pub_dhcp.find('start').text), ipcalc.IP(pub_dhcp.find('end').text)]
   if long(pub_dhcp[0])>long(pub_dhcp[1]):
     raise TemplateError('The start DHCP address must be smaller or equal to the end DHCP address in <pub_dhcp> section of umbrella.xml.')
+
+# retrieve DNS cache servers
+DNScache=None
+if metadata.Properties['umbrella.xml'].xdata.find('DNScache') is not None:
+  DNScache=[cache.text for cache in metadata.Properties['umbrella.xml'].xdata.findall('DNScache')]
+# transition code for the case when DMZsmtp was specified as DNS cache
+DNScache=[ ip for ip in DNScache if ipcalc.IP(ip) not in wholenet ]
+if len(DNScache)==0: DNScache=None

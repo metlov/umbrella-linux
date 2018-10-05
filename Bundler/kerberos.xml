@@ -4,7 +4,9 @@
   <Package name='krb5-locales'/>
   <Package name='kstart'/>
   <Path name='/etc/krb5.conf'/>
-  <Path name='/etc/krb5.keytab'/>
+  <Group name='roaming' negate='true'> <!-- no keytab on roaming hosts -->
+    <Path name='/etc/krb5.keytab'/>
+  </Group>
   <Package name='libpam-krb5'/>
 </Group>
 </Bundle>

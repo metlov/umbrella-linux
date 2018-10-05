@@ -9,9 +9,16 @@ Defaults	!lecture,tty_tickets,!fqdn
 
 # User privilege specification
 root	ALL=(ALL) ALL
-{% if 'physical' in metadata.groups and 'workstation' in metadata.groups %}\
+{% if 'workstation' in metadata.groups and 'ltsp' not in metadata.groups %}\
+
+# System administrator groups on this workstation
 {%   for adm_group in ws_org_admin_group %}\
-%${adm_group} ALL=(ALL) ALL
+%${adm_group} ALL=(ALL:ALL) ALL
+{%   end %}\
+{%   if 'local-fs' in metadata.groups %}\
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
 {%   end %}\
 {% end %}\
 {% if 'DMZlib' in metadata.groups %}\

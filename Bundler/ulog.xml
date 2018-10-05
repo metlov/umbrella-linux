@@ -1,0 +1,8 @@
+<Bundle name='ulog'>
+<Group name='ubuntu'>
+    <BoundPOSIXUser name="ulog" home="/var/log/ulog" shell="/bin/false" gecos="" uid="665" group="ulog"/>
+    <BoundPOSIXGroup name="ulog" gid="665"/>
+    <Package name='ulogd2'/>
+    <Service name='ulogd2'/>
+</Group>
+</Bundle>

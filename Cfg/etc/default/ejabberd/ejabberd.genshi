@@ -1,0 +1,8 @@
+{% if 'ubuntu-trusty' in metadata.groups %}\
+export KRB5_KTNAME="/etc/ejabberd/xmpp.keytab"
+{% end %}\
+{% if 'ubuntu-xenial' in metadata.groups %}\
+KRB5_KTNAME=/etc/ejabberd/xmpp.keytab
+EJABBERD_PID_PATH=/run/ejabberd/ejabberd.pid
+ERLANG_NODE=ejabberd@${metadata.hostname.split('.')[0]}
+{% end %}\

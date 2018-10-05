@@ -37,7 +37,6 @@
         <Package name='gecko-mediaplayer'/>
     </Group>
     <Package name='gnome-accessibility-themes'/>
-    <Package name='gnome-disk-utility'/>
     <Package name='gnome-icon-theme-symbolic'/>
     <Package name='gnome-keyring'/>
     <Package name='gnome-mplayer'/>
@@ -47,8 +46,6 @@
     <Package name='gpicview'/>
     <Package name='gucharmap'/>
     <Package name='guvcview'/>
-    <Package name='gvfs-backends'/>
-    <Package name='gvfs-fuse'/>
     <Package name='hardinfo'/>
     <Package name='ibus'/>
     <Package name='indicator-application-gtk2'/>
@@ -92,7 +89,17 @@
     <Package name='software-properties-gtk'/>
     <Package name='synaptic'/>
     <Package name='system-config-printer-gnome'/>
-    <Package name='usb-creator-gtk'/>
+    <Group name='virt-lxc' negate='true'>
+        <Package name='gnome-disk-utility'/>
+        <Package name='gvfs-backends'/>
+        <Package name='gvfs-fuse'/>
+        <Package name='usb-creator-gtk'/>
+    </Group>
+    <Group name='virt-lxc'>
+        <!-- without usb creator we need to install these separately -->
+        <!-- for PXE boot to work -->
+        <Package name='syslinux-common'/>
+    </Group>
     <Package name='usb-modeswitch'/>
     <Package name='wvdial'/>
     <Package name='x11-utils'/>

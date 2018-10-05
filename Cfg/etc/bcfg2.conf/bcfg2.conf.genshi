@@ -17,13 +17,23 @@ protocol = xmlrpc/ssl
 {% if metadata.uuid is not None %}\
 user = ${metadata.uuid}
 {% end %}\
-{% if metadata.password is not None %}\
-password = ${metadata.password}
+{% if 'roaming' in metadata.groups %}\
+password = dummy
 {% end %}\
-{% if metadata.password is None %}\
+{% if 'roaming' not in metadata.groups %}\
+{%     if metadata.password is not None %}\
+password = ${metadata.password}
+{%     end %}\
+{%     if metadata.password is None %}\
 password = ${metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_pass').text}
+{%     end %}\
 {% end %}\
 ca = /etc/ssl/certs/bcfg2ca.pem
+{% if 'roaming' in metadata.groups %}\
+certificate = /etc/ssl/vpn.pem
+key = /etc/ssl/private/vpn.key
+serverCommonNames = ${funchosts['config']}
+{% end %}\
 
 [components]
 bcfg2 = https://${funchosts['config']}:6789

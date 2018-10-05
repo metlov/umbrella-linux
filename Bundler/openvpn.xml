@@ -1,16 +1,37 @@
-<Bundle name='openvpn' xmlns:py="http://genshi.edgewall.org/">
-<?python
-from genshi.template import TemplateError
-external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
-?>
+<Bundle name='openvpn'>
 <Group name='ubuntu'>
-    <py:if test="'router' in metadata.groups and external_vpn is not None">
-        <Package name='openvpn'/>
-        <Path name='/etc/openvpn/client.conf'/>
+    <Package name='openvpn'/>
+    <Service name='openvpn'/>
+    <Group name='router' negate='true'>
+        <!-- common to both DMZvpn server and client, but not -->
+        <!-- to external VPN client  -->
+        <BoundPOSIXUser name="openvpn" home="/var/lib/openvpn" shell="/bin/false" gecos="" uid="667" group="openvpn">
+            <MemberOf>ssl-cert</MemberOf>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="openvpn" gid="667"/>
+        <Path name='/etc/ssl/vpn.pem'/>
+        <Path name='/etc/ssl/private/vpn.key'/>
+        <Path name='/etc/openvpn/ta.key'/>
+        <Path name='/etc/ssl/crl.pem'/>
+        <Path name='/var/lib/openvpn'/>
+    </Group>
+    <Group name='openvpn-client'>
+        <Group name='router'>
+            <!-- when the router is a client of an external VPN -->
+            <Path name='/etc/openvpn/client.conf'/>
+            <Path name='/etc/network/if-up.d/000vpnchains'/>
+            <Path name='/etc/init.d/firewall_vpn'/>
+        </Group>
+        <Group name='router' negate='true'>
+            <!-- roaming client of the DMZvpn server -->
+            <Path name='/etc/openvpn/office.conf'/>
+        </Group>
         <Path name='/etc/default/openvpn'/>
-        <Path name='/etc/network/if-up.d/000vpnchains'/>
-        <Path name='/etc/init.d/firewall_vpn'/>
-        <Service name='openvpn'/>
-    </py:if>
+    </Group>
+    <Group name='openvpn-server'>
+        <Path name='/etc/openvpn/server.conf'/>
+        <Path name='/etc/sysctl.d/90-router.conf'/>
+        <Action name='generateDHparams'/>
+    </Group>
 </Group>
 </Bundle>

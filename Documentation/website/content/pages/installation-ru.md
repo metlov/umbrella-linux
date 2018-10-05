@@ -42,7 +42,8 @@ Lang: ru
 
 4. После окончания установки Ubuntu Linux, войдите в него под временным
 пользователем и, при помощи команды `sudo -i`, станьте root-ом. Потом скачайте
-(командой `wget`) все файлы из [этого каталога](/umbrella-linux/installer/).
+(командой `wget`) все файлы из [этого каталога](/umbrella-linux/installer/) 
+(например, при помощи `wget -e robots=off -R 'index.html*' -r -np -nd -nc -l 1 https://metlov.github.io/umbrella-linux/installer/` ).
 Эти файлы -- простой текст. В том числе и bash скрипт `./umbrella-install`,
 которому после скачивания нужно дать права для исполнения командой
 `chmod +x ./umbrella-install`. Если Вы хотите сгенерировать

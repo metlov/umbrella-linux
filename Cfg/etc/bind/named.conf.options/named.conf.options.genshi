@@ -6,9 +6,6 @@ execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/30_networking.py')
 execfile(repo+'/Python/35_organization.py')
-DNScache=metadata.Properties['umbrella.xml'].xdata.find('DNScache')
-if DNScache is not None:
-  DNScache=DNScache.text
 %}\
 {% if 'DMZsmtp' in metadata.groups %}\
 acl DMZ { ${str(networks['DMZif'].network())+"/"+str(networks['DMZif'].mask)}; 127.0.0.1/8;};
@@ -16,8 +13,13 @@ acl DMZ { ${str(networks['DMZif'].network())+"/"+str(networks['DMZif'].mask)}; 1
 {% end %}\
 options {
         directory "/var/cache/bind";
-{% if DNScache is not None %}\
-        forwarders { ${DNScache}; };
+{% if 'DMZsmtp' not in metadata.groups and 'DMZsmtp' in funchosts %}\
+        forwarders { ${funcifs['DMZsmtp']}; };
+{% end %}\
+{% if 'DMZsmtp' in metadata.groups or 'DMZsmtp' not in funchosts %}\
+{%   if DNScache is not None %}\
+        forwarders { ${'; '.join(DNScache)}; };
+{%   end %}\
 {% end %}\
 {% if not 'DMZsmtp' in metadata.groups %}\
 {% python
@@ -27,15 +29,15 @@ networks.pop('extif', None)
 strifaces=''
 for interface in ifs.values():
   strifaces += str(interface) + '; '
-strnets=''
+strnets=set()
 for network in networks.values():
-  strnets += str(network.network()) + '/' + str(network.mask) + '; '
-# add networks from organization.xml
+  strnets.add(str(network.network()) + '/' + str(network.mask))
 for net in netclasses.iterkeys():
-  strnets += net + '; '
+  strnets.add(net)
+strnets='; '.join(strnets)
 %}\
         listen-on { ${strifaces}127.0.0.1;};
-        allow-recursion { ${strnets}127.0.0.0/24;};
+        allow-recursion { ${strnets}; 127.0.0.0/24;};
         attach-cache "common-cache";
 {% end %}\
 {% if 'DMZsmtp' in metadata.groups %}\

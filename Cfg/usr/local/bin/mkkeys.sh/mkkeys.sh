@@ -59,7 +59,9 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
         exit 1
     fi
 
-    HOSTS=`${PLDAPSEARCH} -x '(|(objectClass=gotoWorkstation)(objectClass=goServer))' cn | ${PGREP} cn: | ${PSED} -e 's/cn: //g'`
+    LDAP_CLASS_WORKSTATION='(&(objectClass=gotoWorkstation)(gotoMode=active))'
+    LDAP_CLASS="(|${LDAP_CLASS_WORKSTATION}(objectClass=goServer))"
+    HOSTS=`${PLDAPSEARCH} -x "$LDAP_CLASS" cn | ${PGREP} cn: | ${PSED} -e 's/cn: //g'`
     # append domain name if necessary
     for HOST in ${HOSTS} ; do
         if [[ ! $HOST == *.* ]] ; then
@@ -116,8 +118,13 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
 
     BCFG2GREP=`${PECHO} ${EXTRABCFG2HOSTS} | sed -e 's/ /\\\|/g' | sed -e 's/\./\\\./g'`
     #echo ${BCFG2GREP}
+
     if [ ! -z "$BCFG2GREP" -a "$BCFG2GREP" != " " ]; then
         ${PECHO} "Deleting bcfg2 hosts: " ${EXTRABCFG2HOSTS}
+        if echo "${EXTRABCFG2HOSTS}" | grep -q "${HOST_CONFIG}"; then
+            echo "Refusing to delete ${HOST_CONFIG} ."
+            exit 9
+        fi
         CLIENTSTMP=`${PMKTEMP}`
         ${PGREP} -v "${BCFG2GREP}" ${CLIENTSPATH} >$CLIENTSTMP
         ${PCHOWN} bcfg2:bcfg2 ${CLIENTSTMP}
@@ -132,15 +139,19 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
             echo "Revoking SSL keys of ${bcfg2_host}"
             find /var/lib/bcfg2/SSLCA/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 -n 1 su -s /bin/bash bcfg2 /usr/local/bin/umbrella-revoke-key
             echo "Deleting SSL keys of ${bcfg2_host}"
-            find /var/lib/bcfg2/SSLCA/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 rm
-            find /var/lib/bcfg2/SSLCA/ -name "*.key.H_${bcfg2_host}" -print0 | xargs -0 rm
+            find /var/lib/bcfg2/SSLCA/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 -r rm
+            find /var/lib/bcfg2/SSLCA/ -name "*.key.H_${bcfg2_host}" -print0 | xargs -0 -r rm
             echo "Deleting SSH keys of ${bcfg2_host}"
-            find /var/lib/bcfg2/SSHbase/ -name "*.H_${bcfg2_host}" -print0 | xargs -0 rm
+            find /var/lib/bcfg2/SSHbase/ -name "*.H_${bcfg2_host}" -print0 | xargs -0 -r rm
         done
     fi
 
     if [ ! -z "$EXTRAKEYS" -a "$EXTRAKEYS" != " " ]; then
         ${PECHO} "Deleting extra Kerberos keys: " ${EXTRAKEYS}
+        if echo "${EXTRAKEYS}" | grep -q "${HOST_CONFIG}"; then
+            echo "Refusing to delete ${HOST_CONFIG} ."
+            exit 9
+        fi
         for KEY in ${EXTRAKEYS}; do
             ${PRM} -f ${KEYTABPATH}${KEY}
             # now delete the host and nfs principals
@@ -167,18 +178,25 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
     if [ ! -z "$NOBCFG2HOSTS" -a "$NOBCFG2HOSTS" != " " ]; then
         ${PECHO} "Adding new bcfg2 clients: " ${NOBCFG2HOSTS}
         for KEY in ${NOBCFG2HOSTS}; do
-            IP=`${PLDAPSEARCH} -x "(&(objectClass=dhcpHost)(cn=$KEY))" dhcpStatements | ${PGREP} '^dhcpStatements: fixed-address' | ${PSED} -e 's/^.*fixed-address //g'`
-            if [ -z "$IP" ]; then
-                # try with a short name (without the domain part)
-                IP=`${PLDAPSEARCH} -x "(&(objectClass=dhcpHost)(cn=${KEY%%.${DOMAIN_NAME}}))" dhcpStatements | ${PGREP} '^dhcpStatements: fixed-address' | ${PSED} -e 's/^.*fixed-address //g'`
-            fi
-            echo -n $KEY $IP
-            CLASS=`${IPCLASS} ${IP}`
-            if [ ! -z "$CLASS" -a "$CLASS" != " " ]; then
-                ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"$CLASS\" name=\"$KEY\" version=\"1.3.5\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
+            LOCATION=`${PLDAPSEARCH} -x -LLL "(&$LDAP_CLASS_WORKSTATION(cn=${KEY%%.${DOMAIN_NAME}}))" l | ${PGREP} '^l: ' | ${PSED} -e 's/^l: //g'`
+            if [ "$LOCATION" == "roaming" ]; then
+                # roaming workstation
+                ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"roamingworkstation\" name=\"$KEY\" uuid=\"$KEY\" floating=\"true\" auth=\"cert\" version=\"1.3.5\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
             else
-                echo "The class of workstation $KEY ($IP) can't be determined."
-                echo "Please fix the IP address or add to the clients.xml manually."
+                # locally-connected workstation or server
+                IP=`${PLDAPSEARCH} -x -LLL "(&$LDAP_CLASS(cn=$KEY))" ipHostNumber | ${PGREP} ipHostNumber | ${PSED} -e 's/ipHostNumber: //g'`
+                if [ -z "$IP" ]; then
+                    # try with a short name (without the domain part)
+                    IP=`${PLDAPSEARCH} -x -LLL "(&$LDAP_CLASS(cn=${KEY%%.${DOMAIN_NAME}}))" ipHostNumber | ${PGREP} ipHostNumber | ${PSED} -e 's/ipHostNumber: //g'`
+                fi
+                echo -n $KEY $IP
+                CLASS=`${IPCLASS} ${IP}`
+                if [ ! -z "$CLASS" -a "$CLASS" != " " ]; then
+                    ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"$CLASS\" name=\"$KEY\" version=\"1.3.5\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
+                else
+                    echo "The class of workstation $KEY ($IP) can't be determined."
+                    echo "Please fix the IP address or add to the clients.xml manually."
+                fi
             fi
         done
     fi

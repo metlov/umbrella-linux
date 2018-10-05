@@ -8,8 +8,7 @@
 ### INPUT chain
 ###################################
 
-# LOG REJECTED INPUTS
--A INPUT -j LOG --log-level 4
+${LOG_PACKET('INPUT')}\
 
 # Catch-all rule, reject anything else
 -A INPUT -s ${UNIVERSE} -d ${UNIVERSE} -j REJECT
@@ -22,8 +21,7 @@
 # removes "net.c:577: sendmsg() failed: Operation not permitted" notification
 -A OUTPUT -p udp -s ::1 -d ::1 -j ACCEPT
 
-# LOG REJECTED OUTPUTS
--A OUTPUT -j LOG --log-level 4
+${LOG_PACKET('OUTPUT')}\
 
 # Catch-all rule, reject anything else
 -A OUTPUT -s ${UNIVERSE6} -d ${UNIVERSE6} -j REJECT
@@ -32,8 +30,7 @@
 ### FORWARD chain
 ###################################
 
-# LOG REJECTED FORWARDS
--A FORWARD -j LOG --log-level 4
+${LOG_PACKET('FORWARD')}\
 
 # Catch-all rule, reject anything else
 -A FORWARD -s ${UNIVERSE6} -d ${UNIVERSE6} -j REJECT

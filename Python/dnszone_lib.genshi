@@ -77,7 +77,7 @@ ${ext_domain}.      IN SOA  ${CANONICAL_FQHN}. itadmins.${domain_name}. (
 {% end %}\
                         A       ${ext_ip}
                         MX      5 ${CANONICAL_FQHN}.
-                IN      TXT     "v=spfl a mx ~all"
+                IN      TXT     "v=spf1 a mx ~all"
 mail._domainkey IN      TXT     "k=rsa; t=s; p=${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}"
 {% if ext_domain==CANONICAL_domain and CANONICAL_hostname %}\
 ${CANONICAL_hostname.ljust(15)} IN      A       ${ext_ip}

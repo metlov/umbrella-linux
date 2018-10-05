@@ -57,6 +57,8 @@ IFDMZ=routerifdevs['DMZif']
 IPDMZ=str(routerifs['DMZif'])+'/32'
 NETDMZ=str(networks['DMZif'].network())+'/'+str(networks['DMZif'].mask)
 
+if 'vpnif' in networks:
+    NETVPN=str(networks['vpnif'].network())+'/'+str(networks['vpnif'].mask)
 
 if external_vpn is not None:
   IFEXTVPN=ext_vpn_dev            # network device for accessing the external
@@ -112,12 +114,32 @@ if 'DMZxmpp' in funchosts:
 if 'DMZpbx' in funchosts:
   DMZ_PBX_IP=funcifs['DMZpbx']       # address of the PBX (telephony) server in DMZ
 
+if 'DMZvpn' in funchosts:
+  DMZ_VPN_IP=funcifs['DMZvpn']       # address of the VPN server in DMZ
+
 if 'monitor' in funchosts:
   PUB_MONITOR_IP=funcifs['monitor'] # address of the monitoring server in Public net
 
 if 'glpi' in funchosts:
   PUB_GLPI_IP=funcifs['glpi']       # address of the GLPI server in Public net
 %}\
+{% def LOG_PACKET(chain) %}\
+# LOG REJECTED ${chain}S
+{%   if 'ulog' not in metadata.groups %}\
+-A ${chain} -j LOG --log-level 4
+{%   end %}\
+{%   if 'ulog' in metadata.groups %}\
+-A ${chain} -j NFLOG
+{%   end %}\
+{% end %}\
+{% def LOG_SMTP_PACKET(chain, ifvar) %}\
+{%   if 'ulog' not in metadata.groups %}\
+-A ${chain} -p tcp -o ${ifvar} --dport 25 -j LOG --log-level 4
+{%   end %}\
+{%   if 'ulog' in metadata.groups %}\
+-A ${chain} -p tcp -o ${ifvar} --dport 25 -j NFLOG
+{%   end %}\
+{% end %}\
 {% def REJECT_INTERNAL_INPUT_ON_IF(chain, ifvar) %}\
 {%   if chain=='INPUT' %}\
 -A ${chain} -i ${ifvar} -s ${NETPUB} -d ${UNIVERSE} -j REJECT

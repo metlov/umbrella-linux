@@ -22,11 +22,13 @@ funchostdesc={ \
     'ltsp'   : 'Terminal server.', \
     'vmhost' : 'VM host.', \
     'archive': 'Archive server.', \
+    'backdoor': 'Backdoor server.', \
     'DMZsmtp': 'DNS and SMTP server in DMZ.', \
     'DMZwww' : 'Web server.', \
     'DMZwww-test' : 'TEST Web server.', \
     'DMZxmpp': 'Jabber server in DMZ.', \
     'DMZpbx': 'PBX (telephony) server in DMZ.', \
+    'DMZvpn': 'VPN server in DMZ.', \
     'DMZlib': 'Library (Invenio) server in DMZ.', \
   }
 

@@ -2,8 +2,10 @@
 <!-- structure of the organization -->
 <ou>
     <name>Central Office</name>
-    <network_match/>
-    <network>172.17.128.0/17</network>
+<!--       The following empty <network_match/> tag is needed if we have -->
+<!--       <network_match/> tags inside of children <ou> elements. -->
+<!--    <network_match/> -->
+    <network>172.17.128.0/21</network>
     <gateway>172.17.128.1</gateway>
     <admin_group>itadmins</admin_group>
     <users_group>crew</users_group>

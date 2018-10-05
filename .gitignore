@@ -15,6 +15,13 @@ Cfg/etc/rc.local/rc.local.H_*
 # Ignore DNS zone revision numbering file
 Cfg/etc/bind/zones/zone/zone.H_dummy.sequence
 
+# Ignore generated and stored UPS passwords
+Cfg/etc/nut/upsd.users/upsd.users.H_master.dummy.pass
+Cfg/etc/nut/upsd.users/upsd.users.H_slave.dummy.pass
+
+# Ignore ta.key storage file
+Cfg/etc/openvpn/ta.key/ta.key.H_dummy.host
+
 # Do not store SSH keys
 /SSHbase/*
 

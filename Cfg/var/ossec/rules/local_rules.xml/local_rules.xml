@@ -169,3 +169,14 @@
     <group>authentication_failed,</group>
   </rule>
 </group> <!-- SYSLOG, KRB5KDC -->
+
+<!-- SYSTEMD ignorable failures, mostly LXD related -->
+<group name="systemd,">
+  <rule id="100015" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>systemd</decoded_as>
+    <match>^Failed to reset devices.list on</match>
+    <description>Suppress email about failure to reset devices.list</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSTEMD -->

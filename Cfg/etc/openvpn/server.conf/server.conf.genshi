@@ -1,0 +1,47 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+%}\
+# incoming connections
+port 1194
+proto udp
+dev tun
+tls-auth /etc/openvpn/ta.key 0
+comp-lzo
+
+# SSL parameters
+ca /etc/ssl/certs/bcfg2ca.pem
+cert /etc/ssl/vpn.pem
+key /etc/ssl/private/vpn.key
+dh /etc/ssl/dh2048.pem
+crl-verify /etc/ssl/crl.pem
+
+# VPN clients network
+topology subnet
+server ${networks['vpnif'].network()} ${networks['vpnif'].netmask()}  # vpn network
+ifconfig-pool-persist /var/lib/openvpn/ipp.txt
+push "route ${networks['DMZif'].network()} ${networks['DMZif'].netmask()}"  # DMZ network
+push "route ${networks['pubif'].network()} ${networks['pubif'].netmask()}"  # pub network
+keepalive 10 120
+
+# Daemon options
+user openvpn
+group openvpn
+persist-key
+persist-tun
+status /var/lib/openvpn/status.log
+
+# log verbosity.
+#
+# 0 is silent, except for fatal errors
+# 4 is reasonable for general usage
+# 5 and 6 can help to debug connection problems
+# 9 is extremely verbose
+verb 3
+
+# Silence repeating messages.  At most 20
+# sequential messages of the same message
+# category will be output to the log.
+;mute 20

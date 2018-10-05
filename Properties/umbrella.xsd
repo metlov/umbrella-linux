@@ -139,7 +139,7 @@
                 <xsd:element name="vpnet" type="NetworkType" minOccurs="0"/>
                 <xsd:element name="winnet" type="NetworkType" minOccurs="0"/>
                 <xsd:element name="pub_dhcp" type="DHCPRangeType" minOccurs="0"/>
-                <xsd:element name="DNScache" type="IPaddressType" minOccurs="0"/>
+                <xsd:element name="DNScache" type="IPaddressType" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="ntpserver" type="NTPServerType" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="upstream_proxy" type="IPaddressPortType" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="start_pages" type="startPagesType" minOccurs="0" maxOccurs="1"/>

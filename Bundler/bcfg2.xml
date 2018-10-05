@@ -8,6 +8,9 @@
 <Group name='workstation'>
    <Path name='/etc/default/bcfg2'/>
 </Group>
+<Group name='backdoor'>
+   <Path name='/etc/default/bcfg2'/>
+</Group>
 <Group name='config'>
    <Package name='python-ipcalc'/>
    <Package name='python-passlib'/>

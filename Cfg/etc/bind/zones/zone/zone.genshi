@@ -12,6 +12,7 @@ execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/30_networking.py')
+execfile(repo+'/Python/32_zone_timestamp.py')
 
 ext_domain_index=int(name[len(name.rstrip('0123456789')):])
 ext_domain=domain_names_list[ext_domain_index]
@@ -32,96 +33,12 @@ else:
   if ext_address is not None and ext_address.strip():
     ip_address=ext_address
 
-
-timestamp=int(os.path.getmtime(repo+'/Properties/umbrella.xml'))
-timestamp_days=datetime.datetime.fromtimestamp(timestamp).strftime("%Y%m%d")
-seq_fname=repo+'/Cfg/etc/bind/zones/zone/zone.H_dummy.sequence'
-seq_number=0
-if os.path.isfile(seq_fname):
-  seq_timestamp=int(os.path.getmtime(seq_fname))
-  try:
-    with open(seq_fname) as f:
-      seq_number = int(f.readline())
-  except Exception:
-    pass
-else:
-  seq_timestamp=timestamp-1
-if timestamp>seq_timestamp:
-  # the umbrella.xml file was modified since the last zone generation
-  seq_timestamp_days=datetime.datetime.fromtimestamp(seq_timestamp).strftime("%Y%m%d")
-  if timestamp_days==seq_timestamp_days:
-    seq_number = seq_number + 1
-  else:
-    seq_number=0
-  seq_number = seq_number % 100
-  try:
-    # write the current sequence number to a file
-    with open(seq_fname, 'w') as f:
-      f.write('%d' % seq_number)
-    # remember the umbrella.xml modification time
-    os.utime(seq_fname,(timestamp, timestamp))
-  except Exception:
-    pass
-
-timestamp= (timestamp_days+'{0:02d}').format(seq_number)
-
-# Here we compute the canonical hostname for this system and collect the
-# secondary nameservers.
-# The canonical hostname is the one that (hopefully) has proper reverse
-# DNS resolution.
-# By default the canonical hostname is the smtp hostname at primary domain.
-# However, using the revDNS attribute in on domain names in umbrella.xml
-# it is possible to set another hostname as canonical.
-CANONICAL_hostname=funchostsshort['DMZsmtp']
-CANONICAL_domain=domain_name
-revDNSseen=False
-secondaryNameservers={}
-hostname_aliases={}
-
-for domain in metadata.Properties['umbrella.xml'].xdata.findall('domain'):
-  if domain.find('master') is None:         # only if we are master of the domain
-    d_name=domain.find('name').text.strip()
-    # collect hostname aliases for the domain
-    aliases_set=set()
-    for alias in domain.findall('alias'):
-      aliases_set.add(alias.text.strip())
-    # remove aliases, which can be in conflict to those, defined automatically
-    if 'DMZwww' in funchosts:
-      aliases_set.discard(funchostsshort['DMZwww'])
-    if 'mail' in funchosts:
-      aliases_set.discard(funchostsshort['mail'])
-    hostname_aliases[d_name]=aliases_set
-
-    # collect slave nameservers for the domain
-    slave_nameservers=set()
-    for slave in domain.findall('slave'):
-      slave_nameservers.add(slave.text.strip())
-    secondaryNameservers[d_name]=slave_nameservers
-
-    # process revDNS and set the canonical hostname
-    revDNS=domain.find('revDNS')
-    if revDNS is not None:
-      if revDNSseen:
-        raise TemplateError('"revDNS" is specified for multiple domain names, '
-                            'can only be specified for one.')
-      revDNSseen=True
-      if revDNS.text is not None:
-        CANONICAL_hostname=revDNS.text.strip()
-      else:
-        CANONICAL_hostname=""
-      CANONICAL_domain=d_name
-
 # for internal rendering of a domain we ignore rev DNS and make the
 # router to be its master server
 if internal_domain:
   CANONICAL_hostname=funchostsshort['router']
   CANONICAL_domain=ext_domain
-
-# compute canonical fully qualified host name for this system
-if CANONICAL_hostname:
   CANONICAL_FQHN = '%s.%s' % (CANONICAL_hostname, CANONICAL_domain)
-else:
-  CANONICAL_FQHN = CANONICAL_domain
 %}\
 ; the external (Internet or inter-corporate net) zone view for
 ; ${ext_domain} ( note that mail is still handled by the primary
@@ -148,7 +65,7 @@ ${ext_domain}.      IN SOA  ${CANONICAL_FQHN}. itadmins.${domain_name}. (
 {% if internal_domain and 'mail' in funchosts %}\
                         MX      5 ${funchosts['mail']}.
 {% end %}\
-                IN      TXT     "v=spfl a mx ~all"
+                IN      TXT     "v=spf1 a mx ~all"
 mail._domainkey IN      TXT     "k=rsa; t=s; p=${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}"
 {% if ext_domain==CANONICAL_domain and CANONICAL_hostname %}\
 ${CANONICAL_hostname.ljust(15)} IN      A       ${ip_address}
@@ -159,6 +76,14 @@ ${funchostsshort['DMZwww'].ljust(15)} IN      CNAME   ${funchosts['DMZwww']}.
 {%   end %}\
 {%   if not internal_domain %}\
 ${funchostsshort['DMZwww'].ljust(15)} IN      A       ${ip_address}
+{%   end %}\
+{% end %}\
+{% if 'DMZvpn' in funchosts %}\
+{%   if internal_domain %}\
+${funchostsshort['DMZvpn'].ljust(15)} IN      CNAME   ${funchosts['DMZvpn']}.
+{%   end %}\
+{%   if not internal_domain %}\
+${funchostsshort['DMZvpn'].ljust(15)} IN      A       ${ip_address}
 {%   end %}\
 {% end %}\
 {% if hostname_aliases[ext_domain] is not None %}\

@@ -7,15 +7,19 @@ splitnet=str(wholenet).split('.')
 %}\
 zone "${splitnet[1]}.${splitnet[0]}.in-addr.arpa." {
 	type master;
-	
+{% if 'ubuntu-trusty' in metadata.groups %}\
 	file "/var/cache/bind/${splitnet[1]}.${splitnet[0]}.in-addr.arpa.";
-	
-	
+{% end %}\
+{% if 'ubuntu-trusty' not in metadata.groups %}\
+	file "/var/cache/bind/mainzone.rev";
+{% end %}\
 };
 zone "${domain_name}." {
 	type master;
-	
+{% if 'ubuntu-trusty' in metadata.groups %}\
 	file "/var/cache/bind/${domain_name}.";
-	
-	
+{% end %}\
+{% if 'ubuntu-trusty' not in metadata.groups %}\
+	file "/var/cache/bind/mainzone";
+{% end %}\
 };

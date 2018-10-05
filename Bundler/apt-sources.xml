@@ -1,7 +1,9 @@
 <Bundle name='apt-sources' xmlns:xi="http://www.w3.org/2001/XInclude">
    <Package name='apt-transport-https'/>
    <Path name='/etc/apt/apt.conf'/>
-   <Path name='/etc/apt/apt.conf.d/99proxy'/>
+   <Group name='roaming' negate='true'>  <!-- VPN hosts get packages directly-->
+       <Path name='/etc/apt/apt.conf.d/99proxy'/>
+   </Group>
    <Path name='/etc/apt/apt.conf.d/90norecommends'/>
    <Path name='/etc/apt/sources.list'/>
    <Path name='/etc/apt/sources.list.d/multiverse.list'/>

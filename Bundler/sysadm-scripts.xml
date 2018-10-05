@@ -1,2 +1,8 @@
 <Bundle name='sysadm-scripts'>
+   <!-- Umbrella SSL certificates expiry -->
+   <Path name='/etc/cron.d/expire-ssl-certs'/>
+   <Path name='/usr/local/bin/umbrella-expire-ssl-certs'/>
+
+   <!-- roaming workstations installer generator -->
+   <Path name='/usr/local/bin/umbrella-mkinstall'/>
 </Bundle>

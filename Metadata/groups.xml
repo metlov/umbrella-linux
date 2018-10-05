@@ -11,12 +11,17 @@
    </Group>
    <Group profile='true' name='router'>
       <Group name='pubserver'/>
+      <Group name='ulog'/>
       <Bundle name='router'/>
       <Bundle name='bind'/>
       <Bundle name='dhcp-server'/>
       <Bundle name='psad'/>
       <Bundle name='arpwatch'/>
-      <Bundle name='openvpn'/>
+   </Group>
+   <Group profile='true' name='backdoor'>
+      <Group name='pubserver'/>
+      <Group name='local-fs'/>
+      <Bundle name='ufw'/>
    </Group>
    <Group profile='true' name='DMZsmtp'>
       <Group name='DMZserver'/>
@@ -30,6 +35,10 @@
    <Group profile='true' name='DMZpbx'>
       <Group name='DMZserver'/>
       <Bundle name='pbx'/>
+   </Group>
+   <Group profile='true' name='DMZvpn'>
+      <Group name='DMZserver'/>
+      <Group name='openvpn-server'/>
    </Group>
    <Group profile='true' name='DMZwww'>
       <Group name='DMZserver'/>
@@ -117,6 +126,11 @@
       <Group name='local-fs'/>
       <Group name='workstation'/>
    </Group>
+   <Group profile='true' name='roamingworkstation'>
+      <Group name='roaming'/>
+      <Group name='local-fs'/>
+      <Group name='workstation'/>
+   </Group>
    <Group name='desktop-text'>
       <Bundle name='desktop-text'/>
       <Bundle name='cli'/>
@@ -164,6 +178,15 @@
    </Group>
    <Group name='mdraid'> <!-- used when Linux software raid is detected -->
       <Bundle name='mdadm'/>
+   </Group>
+   <Group name='roaming'>
+      <Group name='openvpn-client'/>
+   </Group>
+   <Group name='openvpn-client'>
+      <Bundle name='openvpn'/>
+   </Group>
+   <Group name='openvpn-server'>
+      <Bundle name='openvpn'/>
    </Group>
    <Group name='kerberos-masterkdc'>
       <Bundle name='kerberos-kdc'/>
@@ -310,6 +333,19 @@
    <!-- watchdog service to reboot in case of hangs -->
    <Group name='watchdog'>
       <Bundle name='watchdog'/>
+   </Group>
+   <!-- network UPS tools -->
+   <Group name='ups-master'>
+      <Group name='nut'/>
+   </Group>
+   <Group name='ups-slave'>
+      <Group name='nut'/>
+   </Group>
+   <Group name='nut'>
+      <Bundle name='nut'/>
+   </Group>
+   <Group name='ulog'>
+      <Bundle name='ulog'/>
    </Group>
    <Group name='nagios-server'>
      <Bundle name='nagios'/>

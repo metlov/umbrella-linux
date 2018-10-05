@@ -1,0 +1,42 @@
+{% python
+from genshi.template import TemplateError
+import lxml
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+
+if int_address is not None and int_address.strip():
+  ip_address=int_address
+if ext_address is not None and ext_address.strip():
+  ip_address=ext_address
+%}\
+client
+dev tun
+proto udp
+nobind
+remote ${ip_address} 1194
+resolv-retry infinite
+tls-auth /etc/openvpn/ta.key 1
+comp-lzo
+
+# SSL parameters
+ca /etc/ssl/certs/bcfg2ca.pem
+cert /etc/ssl/vpn.pem
+key /etc/ssl/private/vpn.key
+crl-verify /etc/ssl/crl.pem
+verify-x509-name ${funchosts['DMZvpn']} name
+
+# Daemon options
+user openvpn
+group openvpn
+persist-key
+persist-tun
+
+# log verbosity.
+verb 3
+
+# Silence repeating messages.  At most 20
+# sequential messages of the same message
+# category will be output to the log.
+;mute 20

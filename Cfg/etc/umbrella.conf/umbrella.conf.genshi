@@ -7,10 +7,15 @@ execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/25_firewall.py')
 execfile(repo+'/Python/30_networking.py')
 
+description=long_name
+if dept_name is not None:
+  description=dept_name
 %}\
 SYSTEM_NAME=${system_name}
 DOMAIN_NAME=${domain_name}
 REALM_NAME=${realm_name}
+LDAP_ROOT="${ldap_root}"
+ORG_DESCRIPTION="${description}"
 DKIM_PUBKEY="${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}"
 
 {% if transparent_proxy %}

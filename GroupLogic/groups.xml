@@ -5,6 +5,7 @@ execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/25_firewall.py')
+external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 ?>
 <py:if test="ip_addr in networks['pubif']">
     <Group name='net-pub'/>
@@ -99,7 +100,7 @@ execfile(repo+'/Python/25_firewall.py')
     <Group name='watchdog'/>
 </py:if>
 <!-- enable network-fs caching on physical hosts -->
-<py:if test="'network-fs' in metadata.groups and 'physical' in metadata.groups">
+<py:if test="'network-fs' in metadata.groups and 'physical' in metadata.groups and not 'vmhost' in metadata.groups">
     <Group name='cachefilesd'/>
 </py:if>
 <!-- Kerberos 5 authentication is everywhere except the DMZ.  -->
@@ -110,6 +111,19 @@ execfile(repo+'/Python/25_firewall.py')
     <Group name='auth-krb5'/>
     <py:if test="'virt-lxc' not in metadata.groups">
         <Group name='ntp-client'/>
+    </py:if>
+</py:if>
+<py:if test="'router' in metadata.groups and external_vpn is not None">
+    <Group name='openvpn-client'/>
+</py:if>
+<!-- propagate UPS detection from vmhost to VM servers and other hosts -->
+<py:if test="'vmhost' in funchosts and funchosts['vmhost'] in metadata.query.all_clients()">
+    <py:if test="'ups-master' in metadata.query.by_name(funchosts['vmhost']).groups">
+        <!-- we have vmhost in umbrella.xml, it is known to bcfg2 and -->
+        <!-- has supported UPS attached                               -->
+        <py:if test="'vmhost' in metadata.groups">
+            <Group name='ups-slave'/>
+        </py:if>
     </py:if>
 </py:if>
 </GroupLogic>

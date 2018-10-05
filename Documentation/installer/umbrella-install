@@ -1,22 +1,5 @@
 #!/bin/bash
 
-cat << EOF
-Welcome to the Umbrella Linux installer !
-
-                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
-                         as well as others (listed in the AUTHORS file)
-                         Umbrella Linux (including this installer) is avaiable
-                         under the terms of GNU General Public License v3 or
-                         later. NO WARRANTY OF ANY KIND IS PROVIDED !!!
-
-After the instaler successfully completes, this fresh mini-Ubuntu system
-will become an LXD host with Umbrella Linux containers defined as per
-configuration in *.xml files, supplied in the current directory.
-
-You will find last command protocol in /var/log/umbrella-install.log
-
-EOF
-
 GIT_USER=""
 GIT_PASS=""
 # parse the parameters
@@ -25,14 +8,28 @@ do
 key=$1
 case $key in
     -h|--help)
-    echo "This script installs Umbrella Linux system to a set of LXD containers."
-    echo "The configuration of the system is described by a set of XML files in the current"
-    echo "directory."
-    echo "USAGE:"
-    echo "    umbrella-install [-u <git-username>]"
-    echo "When -u option is specified the installer will use the private Umbrella Linux development"
-    echo "git repository and will prompt for the password. The -u option does not prompt for the"
-    echo "password if ~/.netrc file is already present."
+    cat <<EOF
+This script installs Umbrella Linux system to a set of LXD containers.
+It can also be used to maintain such a system by (re)creating missing
+containers, defined in the umbrella.xml
+
+To install the system, place the set of XML files, describing its configuration
+into the current directory. And run
+    umbrella-install [-u <git-username>]
+The -u option allows to use the private Umbrella Linux development git
+repository and will prompt for the repository password. It does not prompt
+for the password if ~/.netrc file is already present. By default public
+Umbrella Linux repository is used.
+
+To maintain the system the script can be run under the root user on the
+VM host of the running Umbrella Linux installation. It will copy the
+umbrella.xml (and other files, including the installer itself) from
+the configuration server of the system and use this information to
+create missing non-core containers. Currently, the core servers are
+the router (router), configuration server (config) and proxy server (proxy).
+All other servers can be recreated by this script.
+
+EOF
     exit 0
     ;;
     -u)
@@ -48,6 +45,519 @@ case $key in
 esac
 done
 
+###############################################################################
+###############################################################################
+###############################################################################
+#                                                                             #
+# Function definitions, which are common in the installer and the maintenance #
+# mode.                                                                       #
+#                                                                             #
+pull_domain_name_and_other_static_from_umbrella_xml()
+{
+# get domain_name and other static parameters from umbrella.xml
+domain_name=`xmllint --xpath '(//Properties//domain)[1]/name/text()' ${UMBRELLA_XML}`
+ldap_root=`echo "dc=$domain_name" | sed -e 's/\./,dc=/g'`
+country_code=`xmllint --xpath '//Properties//country_code/text()' ${UMBRELLA_XML}`
+state=`xmllint --xpath '//Properties//state/text()' ${UMBRELLA_XML}`
+location=`xmllint --xpath '//Properties//location/text()' ${UMBRELLA_XML}`
+long_name=`xmllint --xpath '//Properties//long_name/text()' ${UMBRELLA_XML}`
+dept_name=`xmllint --xpath '//Properties//dept_name/text()' ${UMBRELLA_XML} 2>/dev/null`
+}
+
+cdr2mask ()
+{
+   # Number of args to shift, 255..255, first non-255 byte, zeroes
+   set -- $(( 5 - ($1 / 8) )) 255 255 255 255 $(( (255 << (8 - ($1 % 8))) & 255 )) 0 0 0
+   [ $1 -gt 1 ] && shift $1 || shift
+   echo ${1-0}.${2-0}.${3-0}.${4-0}
+}
+
+pull_networks_data_from_umbrella_xml()
+{
+# get bridge names from umbrella.xml
+ext_br=`xmllint --xpath '//Properties//server[function="vmhost"]/extif/dev/text()' ${UMBRELLA_XML}`
+pub_br=`xmllint --xpath '//Properties//server[function="vmhost"]/pubif/dev/text()' ${UMBRELLA_XML}`
+sec_br=`xmllint --xpath '//Properties//server[function="vmhost"]/secif/dev/text()' ${UMBRELLA_XML}`
+DMZ_br=`xmllint --xpath '//Properties//server[function="vmhost"]/DMZif/dev/text()' ${UMBRELLA_XML}`
+
+# get networks and compute netmasks
+ext_xml=`xmllint --xpath '//Properties//extnet/text()' ${UMBRELLA_XML}`
+ext_network=`dirname $ext_xml`
+ext_cidr=`basename $ext_xml`
+ext_netmask=`cdr2mask $ext_cidr`
+pub_xml=`xmllint --xpath '//Properties//pubnet/text()' ${UMBRELLA_XML}`
+pub_network=`dirname $pub_xml`
+pub_cidr=`basename $pub_xml`
+pub_netmask=`cdr2mask $pub_cidr`
+sec_xml=`xmllint --xpath '//Properties//secnet/text()' ${UMBRELLA_XML}`
+sec_network=`dirname $sec_xml`
+sec_cidr=`basename $sec_xml`
+sec_netmask=`cdr2mask $sec_cidr`
+DMZ_xml=`xmllint --xpath '//Properties//DMZnet/text()' ${UMBRELLA_XML}`
+DMZ_network=`dirname $DMZ_xml`
+DMZ_cidr=`basename $DMZ_xml`
+DMZ_netmask=`cdr2mask $DMZ_cidr`
+}
+
+pull_router_ip_addresses_from_umbrella_xml()
+{
+router_hostname=`xmllint --xpath '//Properties//server[function="router"]/name/text()' ${UMBRELLA_XML}`
+
+# get IP addresses of the router interfaces
+router_ext_ip=`xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' ${UMBRELLA_XML}`
+router_pub_ip=`xmllint --xpath '//Properties//server[function="router"]/pubif/ip/text()' ${UMBRELLA_XML}`
+router_sec_ip=`xmllint --xpath '//Properties//server[function="router"]/secif/ip/text()' ${UMBRELLA_XML}`
+router_DMZ_ip=`xmllint --xpath '//Properties//server[function="router"]/DMZif/ip/text()' ${UMBRELLA_XML}`
+}
+
+pull_server_names_and_IPs_from_umbrella_xml()
+{
+# retrieve the host names and ip addresses from umbrella.xml if defined
+config_hostname=`xmllint --xpath '//Properties//server[function="config"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+config_pub_ip=`xmllint --xpath '//Properties//server[function="config"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+vmhost_hostname=`xmllint --xpath '//Properties//server[function="vmhost"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+vmhost_pub_ip=`xmllint --xpath '//Properties//server[function="vmhost"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+proxy_hostname=`xmllint --xpath '//Properties//server[function="proxy"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+proxy_pub_ip=`xmllint --xpath '//Properties//server[function="proxy"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+nfs_hostname=`xmllint --xpath '//Properties//server[function="nfs"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+nfs_pub_ip=`xmllint --xpath '//Properties//server[function="nfs"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+mail_hostname=`xmllint --xpath '//Properties//server[function="mail"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+mail_pub_ip=`xmllint --xpath '//Properties//server[function="mail"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+ltsp_hostname=`xmllint --xpath '//Properties//server[function="ltsp"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+ltsp_pub_ip=`xmllint --xpath '//Properties//server[function="ltsp"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+monitor_hostname=`xmllint --xpath '//Properties//server[function="monitor"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+monitor_pub_ip=`xmllint --xpath '//Properties//server[function="monitor"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+backdoor_hostname=`xmllint --xpath '//Properties//server[function="backdoor"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+backdoor_pub_ip=`xmllint --xpath '//Properties//server[function="backdoor"]/pubif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+smtp_hostname=`xmllint --xpath '//Properties//server[function="DMZsmtp"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+smtp_DMZ_ip=`xmllint --xpath '//Properties//server[function="DMZsmtp"]/DMZif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+www_hostname=`xmllint --xpath '//Properties//server[function="DMZwww"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+www_DMZ_ip=`xmllint --xpath '//Properties//server[function="DMZwww"]/DMZif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+xmpp_hostname=`xmllint --xpath '//Properties//server[function="DMZxmpp"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+xmpp_DMZ_ip=`xmllint --xpath '//Properties//server[function="DMZxmpp"]/DMZif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+vpn_hostname=`xmllint --xpath '//Properties//server[function="DMZvpn"]/name/text()' ${UMBRELLA_XML} 2>/dev/null`
+vpn_DMZ_ip=`xmllint --xpath '//Properties//server[function="DMZvpn"]/DMZif/ip/text()' ${UMBRELLA_XML} 2>/dev/null`
+}
+
+pull_umbrella_keys_data() {
+# pull the data from umbrella_keys.xml
+CA_pass=`xmllint --xpath '//Properties//CA_pass/text()' ${UMBRELLA_KEYS_XML}`
+bcfg2_pass=`xmllint --xpath '//Properties//bcfg2_pass/text()' ${UMBRELLA_KEYS_XML}`
+KRB5_pass=`xmllint --xpath '//Properties//KRB5_pass/text()' ${UMBRELLA_KEYS_XML}`
+LDAP_pass=`xmllint --xpath '//Properties//LDAP_pass/text()' ${UMBRELLA_KEYS_XML}`
+mysql_root_pass=`xmllint --xpath '//Properties//MySQLbackuppass/text()' ${UMBRELLA_KEYS_XML}`
+bcfg2_db_name=`xmllint --xpath '//Properties//bcfg2_reports_db_name/text()' ${UMBRELLA_KEYS_XML}`
+bcfg2_db_user=`xmllint --xpath '//Properties//bcfg2_reports_db_user/text()' ${UMBRELLA_KEYS_XML}`
+bcfg2_db_pass=`xmllint --xpath '//Properties//bcfg2_reports_db_pass/text()' ${UMBRELLA_KEYS_XML}`
+SA_db_name=`xmllint --xpath '//Properties//SA_db/text()' ${UMBRELLA_KEYS_XML}`
+SA_db_user=`xmllint --xpath '//Properties//SA_dbuser/text()' ${UMBRELLA_KEYS_XML}`
+SA_db_pass=`xmllint --xpath '//Properties//SA_dbpass/text()' ${UMBRELLA_KEYS_XML}`
+}
+
+normalize_uidgid_in_vm()
+{
+  if lxc exec $1 -- /bin/bash -c \
+      "grep -q '^lxd:' /etc/passwd" ; then
+    echo -n "Normalize UIDs/GIDs inside the $1..."
+    (
+    set -e
+    set -o xtrace
+    lxc exec $1 -- /bin/bash -c \
+      "apt-get purge --assume-yes lxd lxd-client uuid-runtime mlocate"
+    lxc exec $1 -- /bin/bash -c \
+      "deluser uuidd"
+    lxc exec $1 -- /bin/bash -c \
+      "delgroup mlocate"
+    lxc exec $1 -- /bin/bash -c \
+      "deluser lxd"
+    lxc exec $1 -- /bin/bash -c \
+      "delgroup lxd"
+    lxc exec $1 -- /bin/bash -c \
+      "delgroup admin"
+    lxc exec $1 -- /bin/bash -c \
+      "groupmod -g 110 messagebus"
+    lxc exec $1 -- /bin/bash -c \
+      "perl -pi -e 's/messagebus:x:107:110:/messagebus:x:106:110:/g' /etc/passwd"
+    lxc exec $1 -- /bin/bash -c \
+      "chgrp messagebus /usr/lib/dbus-1.0/dbus-daemon-launch-helper"
+    lxc exec $1 -- /bin/bash -c \
+      "chmod u+s /usr/lib/dbus-1.0/dbus-daemon-launch-helper"
+    lxc exec $1 -- /bin/bash -c \
+      "groupmod -g 111 ssh"
+    lxc exec $1 -- /bin/bash -c \
+      "chgrp ssh /usr/bin/ssh-agent"
+    lxc exec $1 -- /bin/bash -c \
+      "chmod g+s /usr/bin/ssh-agent"
+    lxc exec $1 -- /bin/bash -c \
+      "usermod -u 107 sshd"
+
+    # we also push the umbrella package sources here
+    if [ "$INSTALLER_MODE" == "y" ]; then
+        # we get the sources from the temporary repository
+        lxc file push \
+          /tmp/bcfg2/Cfg/etc/apt/sources.list/sources.list.G50_ubuntu-xenial \
+          $1/etc/apt/sources.list
+        lxc file push \
+          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/multiverse.list/multiverse.list.G50_ubuntu-xenial \
+          $1/etc/apt/sources.list.d/multiverse.list
+        lxc file push \
+          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/umbrella.list/umbrella.list.G50_ubuntu-xenial \
+          $1/etc/apt/sources.list.d/umbrella.list
+        lxc file push \
+          /tmp/bcfg2/Cfg/etc/apt/trusted.gpg.d/umbrella.gpg/umbrella.gpg \
+          $1//etc/apt/trusted.gpg.d/umbrella.gpg
+    fi
+    if [ "$MAINTENANCE_MODE" == "y" ]; then
+        # we get the sources directly from vmhost ( which is assumed to be
+        # fully configured )
+        lxc file push \
+          /etc/apt/sources.list \
+          $1/etc/apt/sources.list
+        lxc file push \
+          /etc/apt/sources.list.d/multiverse.list \
+          $1/etc/apt/sources.list.d/multiverse.list
+        lxc file push \
+          /etc/apt/sources.list.d/umbrella.list \
+          $1/etc/apt/sources.list.d/umbrella.list
+        lxc file push \
+          /etc/apt/trusted.gpg.d/umbrella.gpg \
+          $1/etc/apt/trusted.gpg.d/umbrella.gpg
+    fi
+
+    # update package lists and upgrade everything
+    lxc exec $1 -- /bin/bash -c \
+      "apt-get update"
+    lxc exec $1 -- /bin/bash -c \
+      "apt-get upgrade --assume-yes"
+
+    # before reboot
+    lxc restart $1
+    sleep 25
+    ) 2>&1 | cat >/var/log/umbrella-install.log
+    if [ ${PIPESTATUS[0]} -eq 0 ]; then
+      echo ok
+    else
+      echo fail
+      exit 1
+    fi
+  fi
+}
+
+# boot priorities for LXD containers with specific function
+declare -A priorities
+priorities[router]=10
+priorities[config]=9
+priorities[proxy]=8
+priorities[nfs]=7
+priorities[mail]=6
+priorities[ltsp]=5
+priorities[monitor]=4
+priorities[backdoor]=1
+priorities[DMZsmtp]=3
+priorities[DMZwww]=2
+priorities[DMZxmpp]=2
+priorities[DMZpbx]=2
+priorities[DMZvpn]=2
+
+# create_vm has two arguments: umbrella_function config_quirks_function_name
+create_vm() {
+  vm_hostname=`xmllint --xpath "//Properties//server[function=\"$1\"]/name/text()" ${UMBRELLA_XML} 2>/dev/null`
+  if [[ -n "${vm_hostname}" && ! $(lxc list) =~ "${vm_hostname}" ]]; then
+    # determine the class
+    subnet=""
+    xmllint --xpath "//Properties//server[function=\"$1\"]/pubif" ${UMBRELLA_XML} &>/dev/null && subnet="pub"
+    xmllint --xpath "//Properties//server[function=\"$1\"]/secif" ${UMBRELLA_XML} &>/dev/null && subnet="sec"
+    xmllint --xpath "//Properties//server[function=\"$1\"]/DMZif" ${UMBRELLA_XML} &>/dev/null && subnet="DMZ"
+    [ -z "${subnet}" ] && exit 1
+
+    echo -n "Creating and starting \"${vm_hostname}\"..."
+    (
+    set -e
+    set -o xtrace
+    lxc init ubuntu:16.04 -p ${subnet}srv ${vm_hostname}
+    ip=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/ip/text()" ${UMBRELLA_XML}`
+    dev=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/dev/text()" ${UMBRELLA_XML}`
+    mac=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/mac/text()" ${UMBRELLA_XML}`
+
+    # set interface names and MAC addresses
+    lxc config set ${vm_hostname} volatile.eth0.name "${dev}"
+    lxc config set ${vm_hostname} volatile.eth0.hwaddr "${mac}"
+
+    if [ "$1" == "backdoor" ]; then
+        # for the backdoor server we need to add another interface
+        lxc config device add ${vm_hostname} eth1 nic name=eth1 nictype=bridged parent=${ext_br}
+
+        e_ip=`xmllint --xpath "//Properties//server[function=\"$1\"]/extif/ip/text()" ${UMBRELLA_XML}`
+        e_dev=`xmllint --xpath "//Properties//server[function=\"$1\"]/extif/dev/text()" ${UMBRELLA_XML}`
+        e_mac=`xmllint --xpath "//Properties//server[function=\"$1\"]/extif/mac/text()" ${UMBRELLA_XML}`
+
+        lxc config set ${vm_hostname} volatile.eth1.name "${e_dev}"
+        lxc config set ${vm_hostname} volatile.eth1.hwaddr "${e_mac}"
+    fi
+
+    lxc config set ${vm_hostname} boot.autostart 1
+    lxc config set ${vm_hostname} boot.autostart.delay 30
+    lxc config set ${vm_hostname} boot.autostart.priority ${priorities[$1]}
+
+    # push /etc/network/interfaces
+    eval netmask=\$${subnet}_netmask
+    eval router=\$router_${subnet}_ip
+    dns_server=${router}
+    if [ "${subnet}" == "DMZ" ]; then
+        if [ "$1" == "DMZsmtp" ]; then
+            # we use Google DNS, since it is allowed through firewall on DMZsmtp
+            dns_server="8.8.8.8"
+        else
+            # we use DMZsmtp for name resolution
+            dns_server="${smtp_DMZ_ip}"
+        fi
+    fi
+    cat >/tmp/${vm_hostname}_interfaces <<EOF
+auto lo
+iface lo inet loopback
+
+# Network for public workstations with Internet access
+auto ${dev}
+iface ${dev} inet static
+    address ${ip}
+    netmask ${netmask}
+    gateway ${router}
+    dns-nameservers ${dns_server}
+    dns-search ${domain_name}
+EOF
+    chown root:root /tmp/${vm_hostname}_interfaces
+    lxc file push /tmp/${vm_hostname}_interfaces ${vm_hostname}/etc/network/interfaces
+
+if [ "${subnet}" == "DMZ" ]; then
+    # DMZ has no internet access, we rely both on hosts and DMZsmtp to
+    # resolve hostnames. The hosts file is necessary to resolve the internal
+    # servers, which might not have any public DNS names.
+    lxc file push - ${vm_hostname}/etc/hosts <<EOF
+# minimal hosts file, just to survive before the real one is installed by bcfg2
+127.0.0.1	 localhost localhost.${domain_name}
+127.0.0.1 localhost
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+${router_DMZ_ip}	${router_hostname}.${domain_name} ${router_hostname} ns1.${domain_name} ns1
+${config_pub_ip}	${config_hostname}.${domain_name} ${config_hostname} kdc1.${domain_name} kdc1 ldap1.${domain_name} ldap1 autoconfig.${domain_name} autoconfig gosa.${domain_name} gosa wpad.${domain_name} wpad
+${proxy_pub_ip}		${proxy_hostname}.${domain_name} ${proxy_hostname} kdc2.${domain_name} kdc2 ldap2.${domain_name} ldap2
+EOF
+   # it is also crucial that we use the proxy server in DMZ, otherwise
+   # no packages can be downloaded. We also address proxy by IP here
+   # to avoid DNS lookups by APT at this stage
+   lxc file push - ${vm_hostname}/etc/apt/apt.conf.d/99proxy <<EOF
+Acquire::http { Proxy "http://${proxy_pub_ip}:3142"; };
+EOF
+fi
+
+    if [ "$MAINTENANCE_MODE" == "y" ]; then
+        # in maintenance mode we need to check if the server is registered
+        # in LDAP and clients xml
+
+        # check if the server is registered in LDAP
+        count=`lxc exec config -- /bin/bash -c "ldapsearch -x -LLL \"(&(objectClass=GOhard)(cn=$vm_hostname))\" cn | grep '^cn: ' | wc -l"`
+        if [ "$count" -eq 0 ]; then
+            # create LDAP entry
+            lxc exec ${config_hostname} -- /bin/bash -c \
+                "ldapadd -x -h localhost -D \"cn=admin,${ldap_root}\" \"-w$LDAP_pass\"" <<EOF
+dn: cn=${vm_hostname},ou=servers,ou=systems,${ldap_root}
+cn: ${vm_hostname}
+description: $1 server.
+ipHostNumber: ${ip}
+macAddress: ${mac}
+gotoMode: active
+objectClass: top
+objectClass: goServer
+objectClass: GOhard
+EOF
+            # regenerate DNS
+            lxc exec ${router_hostname} -- /bin/su -s /bin/bash - bind -c \
+                "/usr/local/bin/umbrella-ldap2zone"
+            sleep 10
+            # update ipclass script
+            lxc exec ${config_hostname} -- /bin/bash -c \
+                "bcfg2 -qQv -b directory"
+            sleep 10
+            # call mkkeys.sh to do its stuff (with locking)
+            lxc exec ${config_hostname} -- /bin/bash -c \
+                "/usr/local/bin/mkkeys.sh"
+        fi
+    fi
+
+    lxc start ${vm_hostname}
+    ) 2>&1 | cat >/var/log/umbrella-install.log
+    if [ ${PIPESTATUS[0]} -eq 0 ]; then
+      echo ok
+    else
+      echo fail
+      exit 1
+    fi
+
+    normalize_uidgid_in_vm ${vm_hostname}
+
+    configure_vm ${vm_hostname} "$2" "$3"
+  fi
+}
+
+
+# $1 is the vm name, $2 is quirks function to be called in the middle
+# of configuration (this function gets the vm name as an argument), $3 is
+# the quirks function called before reboot
+configure_vm() {
+  echo -n "Configuring $1..."
+  (
+  set -e
+  set -o xtrace
+  if [ "$1" != ${config_hostname} ]; then
+    lxc file pull ${config_hostname}/etc/pki/CA/certs/bcfg2ca.crt - | \
+      lxc file push - $1/usr/local/share/ca-certificates/bcfg2ca.crt
+    lxc exec $1 -- /bin/bash -c \
+      "chmod 644 /usr/local/share/ca-certificates/bcfg2ca.crt"
+    lxc exec $1 -- /bin/bash -c \
+      "update-ca-certificates"
+    lxc exec $1 -- /bin/bash -c \
+      "apt-get install -y bcfg2 mc ssl-cert"
+    lxc file pull ${config_hostname}/etc/bcfg2.conf - | \
+      lxc file push - $1/etc/bcfg2.conf
+  fi
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -Qv -b apt-sources"
+  if [ "$1" == ${config_hostname} -o "$1" == ${proxy_hostname} ]; then
+  lxc exec $1 -- /bin/bash -c \
+    "rm /etc/apt/apt.conf.d/99proxy"
+  fi
+  lxc exec $1 -- /bin/bash -c \
+    "apt-get update"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -D POSIXUsers -Qv -b ntp"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -Qv -b ntp"
+  if [ -n "$2" ]; then
+    $2 $1
+  fi
+  lxc exec $1 -- /bin/bash -c \
+    "cat >/etc/apt/apt.conf.d/99local" <<EOF
+Dpkg::Options {
+   "--force-confdef";
+   "--force-confold";
+}
+EOF
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -D POSIXUsers -Qv -b base-users:base:base-services"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -Qv -b base-users:base:base-services"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -Qv -b ldap-auth"
+  lxc exec $1 -- /bin/bash -c \
+    "env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -Qv -b ssh"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -D POSIXUsers -qv"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -qv -r Packages"
+  lxc exec $1 -- /bin/bash -c \
+    "rm -f /etc/apt/apt.conf.d/99local"
+  if [ -n "$3" ]; then
+    $3 $1
+  fi
+  lxc restart $1
+  sleep 15
+  ) 2>&1 | cat >/var/log/umbrella-install.log
+  if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+  else
+    echo fail
+    exit 1
+  fi
+}
+
+# quirks to initialize kerberos and ldap
+configure_quirks_init_krb5_ldap() {
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -Qv -b kerberos-kdc"
+  if [ "$1" == ${config_hostname} ]; then
+  # we only init kerberos on config
+    if ! lxc exec $1 -- /bin/bash -c \
+      "[[ -e /var/lib/bcfg2/Cfg/etc/krb5kdc/stash/stash ]]"; then
+      lxc exec $1 -- /bin/bash -c \
+        "echo -e \"${KRB5_pass}\\n${KRB5_pass}\" | krb5-umbrella-init"
+    fi
+  fi
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -D POSIXUsers -Qv -b ldap-server"
+  lxc exec $1 -- /bin/bash -c \
+    "bcfg2 -Qv -b ldap-server"
+  if ! lxc exec $1 -- /bin/bash -c \
+    "[[ -e /etc/ldap/schema/fusiondirectory/core-fd.ldif ]]"; then
+    lxc exec $1 -- /bin/bash -c \
+      "systemctl stop slapd"
+    lxc exec $1 -- /bin/bash -c \
+      "rm -rf /var/lib/ldap/*"
+    lxc exec $1 -- /bin/bash -c \
+      "yes | ldap-umbrella-init"
+    lxc exec $1 -- /bin/bash -c \
+      "systemctl start slapd"
+  fi
+}
+
+# quirks for the terminal server
+configure_quirks_x2go() {
+  lxc exec $1 -- /bin/bash -c \
+    "mkdir -p /var/spool/x2goprint"
+}
+
+# quirks for the terminal server
+configure_quirks_ejabberd() {
+  # this will delete mnesia database to be recreated after reboot
+  # with proper erlang node name.
+  lxc exec $1 -- /bin/bash -c \
+    "systemctl stop ejabberd-gssapi"
+  lxc exec $1 -- /bin/bash -c \
+    "find /var/lib/ejabberd -maxdepth 1 -type f -delete"
+}
+
+
+#                                                                             #
+# end of installer/maintenance mode common functions                          #
+###############################################################################
+###############################################################################
+
+cat << EOF
+Welcome to the Umbrella Linux installer !
+
+                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
+                         as well as others (listed in the AUTHORS file)
+                         Umbrella Linux (including this installer) is avaiable
+                         under the terms of GNU General Public License v3 or
+                         later. NO WARRANTY OF ANY KIND IS PROVIDED !!!
+
+EOF
+
+if [ ! -f /etc/umbrella.conf ]; then
+##############################################################################
+# Here comes the installer, which runs if we are not on the Umbrella Linux   #
+# system yet.                                                                #
+#                                                                            #
+# Installer creates bridges, router and the configuration server             #
+INSTALLER_MODE='y'
+cat << EOF
+After the instaler successfully completes, this fresh mini-Ubuntu system
+will become an LXD host with Umbrella Linux containers defined as per
+configuration in *.xml files, supplied in the current directory.
+
+You will find last command protocol in /var/log/umbrella-install.log
+
+EOF
+
+# XML file paths
+UMBRELLA_XML="./umbrella.xml"
+UMBRELLA_KEYS_XML="./umbrella_keys.xml"
+
 echo -n "Checking that the script is run by the root user..."
 if [[ $EUID -ne 0 ]]; then
    echo "fail"
@@ -60,7 +570,7 @@ echo -n "First we update the system to the MAX..."
 set -e
 set -o xtrace
 apt-get update
-apt-get upgrade --assume-yes
+env DEBIAN_FRONTEND=noninteractive apt-get upgrade --assume-yes
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -149,39 +659,48 @@ password $GIT_PASS
 EOF
     fi
     mkdir -p ~/git-certs/
-    cat >~/git-certs/DonFTI2.pem <<EOF
+    cat >~/git-certs/DonFTI.pem <<EOF
 -----BEGIN CERTIFICATE-----
-MIIExzCCA6+gAwIBAgIJAJsxb81FtRFvMA0GCSqGSIb3DQEBBQUAMIGdMRIwEAYD
-VQQDEwlEb25GVEkgQ0ExCzAJBgNVBAYTAlVBMRAwDgYDVQQIEwdEb25ldHNrMRAw
-DgYDVQQHEwdEb25ldHNrMTYwNAYDVQQKEy1Eb25ldHNrIEluc3RpdHV0ZSBmb3Ig
-UGh5c2ljcyBhbmQgRW5naW5lZXJpbmcxHjAcBgkqhkiG9w0BCQEWD2FkbWluQGZ0
-aS5kbi51YTAeFw0xNDA0MTAxMzM0MTFaFw0zNDA0MDUxMzM0MTFaMIGdMRIwEAYD
-VQQDEwlEb25GVEkgQ0ExCzAJBgNVBAYTAlVBMRAwDgYDVQQIEwdEb25ldHNrMRAw
-DgYDVQQHEwdEb25ldHNrMTYwNAYDVQQKEy1Eb25ldHNrIEluc3RpdHV0ZSBmb3Ig
-UGh5c2ljcyBhbmQgRW5naW5lZXJpbmcxHjAcBgkqhkiG9w0BCQEWD2FkbWluQGZ0
-aS5kbi51YTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMWptZT4JNpg
-lkKLFgUew1T8QTfv2dW69QhuO+ziYaWSV/u8wwF2tIPQz7ZGiuWVxb2XlVVwNRZB
-evGrqovFM6OqH6RuTJD7rXiclkFVaI1LwvVU5XH+FRFH43vzaPtRVvw7095C8KBu
-KlLBKBvVQw1DIyQk+1tmmqca+fR/XmhlwKSfTBsCSVVTKyyGjyHDzSTj+QTqPKi3
-yGukqb9vkrWff3RT/xiiYKKSVttYTovUeW/SIty/TMj7rNR4kxJ5MaLbV3HDRAYk
-Iw0KZ9UwEu6AbZNDfG34dFkbMmzGrRHOdaLLkZcTdm3yKDmfQpq+PxCG8KRrpdCB
-uNupcq43zQkCAwEAAaOCAQYwggECMB0GA1UdDgQWBBShhA4AWoGO2r0ZChlM2BFp
-O66WXjCB0gYDVR0jBIHKMIHHgBShhA4AWoGO2r0ZChlM2BFpO66WXqGBo6SBoDCB
-nTESMBAGA1UEAxMJRG9uRlRJIENBMQswCQYDVQQGEwJVQTEQMA4GA1UECBMHRG9u
-ZXRzazEQMA4GA1UEBxMHRG9uZXRzazE2MDQGA1UEChMtRG9uZXRzayBJbnN0aXR1
-dGUgZm9yIFBoeXNpY3MgYW5kIEVuZ2luZWVyaW5nMR4wHAYJKoZIhvcNAQkBFg9h
-ZG1pbkBmdGkuZG4udWGCCQCbMW/NRbURbzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3
-DQEBBQUAA4IBAQCCQhZ2DlQL7gnaiAQ776bzaj6WEahY28ZWv6Sh+trMvQCT/HkM
-0W99TrGHltMmYHhnaFsatuTSVL7IW4+nTCnkkzm75xS+c4aZy46L8vlkLkrsnlfs
-luWYD7jikaFCzkOtN/TvvSvokzaoSSjPPZ0ohS4oHaYAuzMsoqezsibsKT+bBnZ4
-ZIEE09FkqwNTc8VnbBhqTpG2tbAmMHGi3H4LISqODBlR0kKF67XQIniH41TYyrOY
-+NREzc1R6sK7llmrbFDVPjAOnNJcBxWAdw5vHc2sPckMIDb29kjbiUc4yRrvkJjm
-BP/oWBD3GgLi0gWk+tLczWnzYgqboDmOwDHw
+MIIGczCCBFugAwIBAgIJAIP2QmZguKTDMA0GCSqGSIb3DQEBCwUAMIHPMQswCQYD
+VQQGEwJSVTEiMCAGA1UECAwZRG9uZXRzayBQZW9wbGUncyBSZXB1YmxpYzEQMA4G
+A1UEBwwHRG9uZXRzazE1MDMGA1UECgwsRG9uZXRzayBJbnN0aXR1dGUgZm9yIFBo
+eXNpY3MgYW5kIFRlY2hub2xvZ3kxFjAUBgNVBAsMDUlUIGRlcGFydG1lbnQxGTAX
+BgNVBAMMEGNvbmZpZy5kb25mdGkucnUxIDAeBgkqhkiG9w0BCQEWEWl0YWRtaW5A
+ZG9uZnRpLnJ1MB4XDTE3MDEyNDEzMTgyNloXDTM3MDExOTEzMTgyNlowgc8xCzAJ
+BgNVBAYTAlJVMSIwIAYDVQQIDBlEb25ldHNrIFBlb3BsZSdzIFJlcHVibGljMRAw
+DgYDVQQHDAdEb25ldHNrMTUwMwYDVQQKDCxEb25ldHNrIEluc3RpdHV0ZSBmb3Ig
+UGh5c2ljcyBhbmQgVGVjaG5vbG9neTEWMBQGA1UECwwNSVQgZGVwYXJ0bWVudDEZ
+MBcGA1UEAwwQY29uZmlnLmRvbmZ0aS5ydTEgMB4GCSqGSIb3DQEJARYRaXRhZG1p
+bkBkb25mdGkucnUwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC1tFdx
+v3DmuK6jkrBxy/P7kYqDdC4cjCnowhr0aZCRWvdQDBx0jquAZVu8tJOdP8/4yYbg
+GTqr7ALe364U2rauMQxrwtTTIHmjuf7XSE++QmGro3CFFO+Mts6PEORnSiomwPSK
+hvmloUy+DZpS8bys0dtuyXztuKL34r9gvkT2pG3G83sfmrv/RHbHRaWBxlD7myCm
+y6bPMJ71T0SjzlAgoAv8ZlIrpxAhssn3H1r0GJuVJYn6CC9JfVJpomZF49v2B8IN
+nImV/I5R/66d+AfwdHf4tv3XQlIPwy1Vq1J8lRVqDWsGDl2phqhXbE3hFotV4QVi
+Xrp6vMP80WZgVCuiNfYEUktg/9F02ezmC5sFTmNfZnV10ZGBfgJCZUt9UY6LktDD
+KOtI0q+I4puVrl79x3Dn6nwDMDeD+pSDXo3vntEjqsTMrWnhkG0MLEymB6qyfugh
+5KEU0ObYu9ZQAts1yCoVSLGrLGsnVUHYdnmW2lIoaBPyLzBvVXzkkvitpkWVZaKw
+iiX/MdTc2y654i9zgBoC4zafEZKu+TOdg2jpA0q3SL5Gvtph/A1wC5XOLZoihygn
+AMDE6GR1UzYkYrm3nTvgDtDys2UBpCV2hsghA3o0EaDeeZwox+xripQcDJwN4NMd
+obvPGY3xCivR2tHTaquKvSCTDlEpT+/9fILVPQIDAQABo1AwTjAdBgNVHQ4EFgQU
++MC+fpgwaZ4l+vJ2OVOFhl9b5BQwHwYDVR0jBBgwFoAU+MC+fpgwaZ4l+vJ2OVOF
+hl9b5BQwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAgEAWIGZf5foOMFG
+YqhO6LDfQeFlLVgutSF93TR7YMiAc898dlSqDoJTkkfaq19/OR095AK0E5uqrtQO
+JtUCFKL+fsM2JqXY8rzb9sCUDxQ3sCpttH2tNhneWK4jmGKyGRaOLZahcjf2tLIf
+2VgfvPbbhrOjN3szjvG4YVmub6acTin9VtYEgj6/GOxt83uz/cCc1vxTeiWGaCk1
+WqgsIn8fQfjqPuEbUHQfFWDtxpOwLHgZLBCw4Qonn0+hlK8DPkJ+pl6goXeebZGh
+3JzeAllNvZiuplvSIGFap7DpbIVgkDaSy14fmIgqSm0PRp8+aTy9/hCU5xPRbGtB
+IydZc8am2dVLzsaPK2Lr3qAgyu5Twz2o1qCmDWW7rB9Zg9i/c+k8RtXVJkBJsTIm
+MfPj41e83PmIbo+60CggY2//fMsoXR5IvP6c46e7K5YKgzvP9NcHzAqYrq0KSmoT
+4NgWOUCYMOMeHLEQFSa0qTFfxT8jtOUgoH4oJE5ICVeYo6u18fNpD1dcS8IVsCTM
+JP3KOOjiTPJhEuD4+3tfO/AI4fnZjXxJKWttBVrHojq9oVxXTW5UPSSYQIeqZQA9
+D8z34POjikft0/MEGz5TmZgK+HmEo0tZGm8VX4gcVYfnxyLWPJn2Tt0Jz/kCofHI
+eGRmR5ZvAvrjEhQiLXhUBF6bI5xbTwc=
 -----END CERTIFICATE-----
 EOF
     cat >~/.gitconfig <<EOF
 [http]
-        sslCAInfo = ~/git-certs/DonFTI2.pem
+        sslCAInfo = ~/git-certs/DonFTI.pem
 EOF
     git clone https://www.donfti.ru/umbrella.git /tmp/bcfg2
   fi
@@ -236,22 +755,16 @@ else
     exit 1
 fi
 
-# get domain_name and other static parameters from umbrella.xml
-domain_name=`xmllint --xpath '(//Properties//domain)[1]/name/text()' umbrella.xml`
-country_code=`xmllint --xpath '//Properties//country_code/text()' umbrella.xml`
-state=`xmllint --xpath '//Properties//state/text()' umbrella.xml`
-location=`xmllint --xpath '//Properties//location/text()' umbrella.xml`
-long_name=`xmllint --xpath '//Properties//long_name/text()' umbrella.xml`
-dept_name=`xmllint --xpath '//Properties//dept_name/text()' umbrella.xml 2>/dev/null`
+pull_domain_name_and_other_static_from_umbrella_xml
 
 echo -n "Checking that all the bridges are defined in vmhost definition..."
 (
 set -e
 set -o xtrace
-xmllint --xpath '//Properties//server[function="vmhost"]/extif/dev/text()' umbrella.xml
-xmllint --xpath '//Properties//server[function="vmhost"]/pubif/dev/text()' umbrella.xml
-xmllint --xpath '//Properties//server[function="vmhost"]/secif/dev/text()' umbrella.xml
-xmllint --xpath '//Properties//server[function="vmhost"]/DMZif/dev/text()' umbrella.xml
+xmllint --xpath '//Properties//server[function="vmhost"]/extif/dev/text()' ${UMBRELLA_XML}
+xmllint --xpath '//Properties//server[function="vmhost"]/pubif/dev/text()' ${UMBRELLA_XML}
+xmllint --xpath '//Properties//server[function="vmhost"]/secif/dev/text()' ${UMBRELLA_XML}
+xmllint --xpath '//Properties//server[function="vmhost"]/DMZif/dev/text()' ${UMBRELLA_XML}
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -260,49 +773,19 @@ else
     exit 1
 fi
 
-# get bridge names from umbrella.xml
-ext_br=`xmllint --xpath '//Properties//server[function="vmhost"]/extif/dev/text()' umbrella.xml`
-pub_br=`xmllint --xpath '//Properties//server[function="vmhost"]/pubif/dev/text()' umbrella.xml`
-sec_br=`xmllint --xpath '//Properties//server[function="vmhost"]/secif/dev/text()' umbrella.xml`
-DMZ_br=`xmllint --xpath '//Properties//server[function="vmhost"]/DMZif/dev/text()' umbrella.xml`
-
-cdr2mask ()
-{
-   # Number of args to shift, 255..255, first non-255 byte, zeroes
-   set -- $(( 5 - ($1 / 8) )) 255 255 255 255 $(( (255 << (8 - ($1 % 8))) & 255 )) 0 0 0
-   [ $1 -gt 1 ] && shift $1 || shift
-   echo ${1-0}.${2-0}.${3-0}.${4-0}
-}
-
-# get networks and compute netmasks
-ext_xml=`xmllint --xpath '//Properties//extnet/text()' umbrella.xml`
-ext_network=`dirname $ext_xml`
-ext_cidr=`basename $ext_xml`
-ext_netmask=`cdr2mask $ext_cidr`
-pub_xml=`xmllint --xpath '//Properties//pubnet/text()' umbrella.xml`
-pub_network=`dirname $pub_xml`
-pub_cidr=`basename $pub_xml`
-pub_netmask=`cdr2mask $pub_cidr`
-sec_xml=`xmllint --xpath '//Properties//secnet/text()' umbrella.xml`
-sec_network=`dirname $sec_xml`
-sec_cidr=`basename $sec_xml`
-sec_netmask=`cdr2mask $sec_cidr`
-DMZ_xml=`xmllint --xpath '//Properties//DMZnet/text()' umbrella.xml`
-DMZ_network=`dirname $DMZ_xml`
-DMZ_cidr=`basename $DMZ_xml`
-DMZ_netmask=`cdr2mask $DMZ_cidr`
+pull_networks_data_from_umbrella_xml
 
 # determine the external gateway
-ext_gateway=`xmllint --xpath '//Properties//server[function="router"]/extif/gateway/text()' umbrella.xml`
+ext_gateway=`xmllint --xpath '//Properties//server[function="router"]/extif/gateway/text()' ${UMBRELLA_XML}`
 
 # determine the public ip of the VM host
-vmhost_pub_ip=`xmllint --xpath '//Properties//server[function="vmhost"]/pubif/ip/text()' umbrella.xml`
+vmhost_pub_ip=`xmllint --xpath '//Properties//server[function="vmhost"]/pubif/ip/text()' ${UMBRELLA_XML}`
 
 if grep -q '# Umbrella Installer Bridges Defined' /etc/network/interfaces; then
    echo "Umbrella Installer have already created bridges on this system."
    # the external bridge already defined, only set the variables
-   ext_addr=`xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' umbrella.xml`
-   ext_if=`xmllint --xpath '//Properties//server[function="router"]/extif/dev/text()' umbrella.xml`
+   ext_addr=`xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' ${UMBRELLA_XML}`
+   ext_if=`xmllint --xpath '//Properties//server[function="router"]/extif/dev/text()' ${UMBRELLA_XML}`
 else
   # determine the external address
   ext_addr=`ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'`
@@ -310,7 +793,7 @@ else
   (
   set -e
   set -o xtrace
-  ext_addr_xml=`xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' umbrella.xml`
+  ext_addr_xml=`xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' ${UMBRELLA_XML}`
   [ "$ext_addr" == "$ext_addr_xml" ]
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -326,7 +809,7 @@ else
   (
   set -e
   set -o xtrace
-  ext_if_xml=`xmllint --xpath '//Properties//server[function="router"]/extif/dev/text()' umbrella.xml`
+  ext_if_xml=`xmllint --xpath '//Properties//server[function="router"]/extif/dev/text()' ${UMBRELLA_XML}`
   [ "$ext_if" == "$ext_if_xml" ]
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -484,10 +967,10 @@ chmod +x /etc/rc.local
   fi
 fi
 
-router_ext_dev=`xmllint --xpath '//Properties//server[function="router"]/extif/dev/text()' umbrella.xml`
-router_pub_dev=`xmllint --xpath '//Properties//server[function="router"]/pubif/dev/text()' umbrella.xml`
-router_sec_dev=`xmllint --xpath '//Properties//server[function="router"]/secif/dev/text()' umbrella.xml`
-router_DMZ_dev=`xmllint --xpath '//Properties//server[function="router"]/DMZif/dev/text()' umbrella.xml`
+router_ext_dev=`xmllint --xpath '//Properties//server[function="router"]/extif/dev/text()' ${UMBRELLA_XML}`
+router_pub_dev=`xmllint --xpath '//Properties//server[function="router"]/pubif/dev/text()' ${UMBRELLA_XML}`
+router_sec_dev=`xmllint --xpath '//Properties//server[function="router"]/secif/dev/text()' ${UMBRELLA_XML}`
+router_DMZ_dev=`xmllint --xpath '//Properties//server[function="router"]/DMZif/dev/text()' ${UMBRELLA_XML}`
 if [[ ! $(lxc profile list) =~ "router" ]]; then
   echo -n "Creating router lxc profile..."
   (
@@ -499,7 +982,7 @@ if [[ ! $(lxc profile list) =~ "router" ]]; then
   lxc network attach-profile ${pub_br} router ${router_pub_dev}
   lxc network attach-profile ${sec_br} router ${router_sec_dev}
   lxc network attach-profile ${DMZ_br} router ${router_DMZ_dev}
-  lxc profile set router raw.lxc lxc.aa_profile=lxc-container-default-with-mounting
+  lxc profile set router raw.lxc lxc.apparmor.profile=lxc-container-default-with-mounting
   lxc profile set router security.privileged true
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -510,16 +993,14 @@ if [[ ! $(lxc profile list) =~ "router" ]]; then
   fi
 fi
 
-router_hostname=`xmllint --xpath '//Properties//server[function="router"]/name/text()' umbrella.xml`
-
 echo -n "Checking that all the router interfaces have IPs defined..."
 (
 set -e
 set -o xtrace
-xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' umbrella.xml
-xmllint --xpath '//Properties//server[function="router"]/pubif/ip/text()' umbrella.xml
-xmllint --xpath '//Properties//server[function="router"]/secif/ip/text()' umbrella.xml
-xmllint --xpath '//Properties//server[function="router"]/DMZif/ip/text()' umbrella.xml
+xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' ${UMBRELLA_XML}
+xmllint --xpath '//Properties//server[function="router"]/pubif/ip/text()' ${UMBRELLA_XML}
+xmllint --xpath '//Properties//server[function="router"]/secif/ip/text()' ${UMBRELLA_XML}
+xmllint --xpath '//Properties//server[function="router"]/DMZif/ip/text()' ${UMBRELLA_XML}
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -528,11 +1009,7 @@ else
     exit 1
 fi
 
-# get IP addresses of the router interfaces
-router_ext_ip=`xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' umbrella.xml`
-router_pub_ip=`xmllint --xpath '//Properties//server[function="router"]/pubif/ip/text()' umbrella.xml`
-router_sec_ip=`xmllint --xpath '//Properties//server[function="router"]/secif/ip/text()' umbrella.xml`
-router_DMZ_ip=`xmllint --xpath '//Properties//server[function="router"]/DMZif/ip/text()' umbrella.xml`
+pull_router_ip_addresses_from_umbrella_xml
 
 if [[ ! $(lxc list) =~ "${router_hostname}" ]]; then
   echo -n "Creating router ..."
@@ -540,10 +1017,10 @@ if [[ ! $(lxc list) =~ "${router_hostname}" ]]; then
   set -e
   set -o xtrace
   lxc init ubuntu:16.04 -p router ${router_hostname}
-  router_ext_mac=`xmllint --xpath '//Properties//server[function="router"]/extif/mac/text()' umbrella.xml`
-  router_pub_mac=`xmllint --xpath '//Properties//server[function="router"]/pubif/mac/text()' umbrella.xml`
-  router_sec_mac=`xmllint --xpath '//Properties//server[function="router"]/secif/mac/text()' umbrella.xml`
-  router_DMZ_mac=`xmllint --xpath '//Properties//server[function="router"]/DMZif/mac/text()' umbrella.xml`
+  router_ext_mac=`xmllint --xpath '//Properties//server[function="router"]/extif/mac/text()' ${UMBRELLA_XML}`
+  router_pub_mac=`xmllint --xpath '//Properties//server[function="router"]/pubif/mac/text()' ${UMBRELLA_XML}`
+  router_sec_mac=`xmllint --xpath '//Properties//server[function="router"]/secif/mac/text()' ${UMBRELLA_XML}`
+  router_DMZ_mac=`xmllint --xpath '//Properties//server[function="router"]/DMZif/mac/text()' ${UMBRELLA_XML}`
 
   # set interface names and MAC addresses
   lxc config set ${router_hostname} volatile.${router_ext_dev}.name "${router_ext_dev}"
@@ -681,7 +1158,7 @@ EOF
 fi
 
 ensure_inet() {
-  echo -n "Checking internet connectivity..."
+  echo -n "Checking Internet connectivity..."
   (
   set -e
   set -o xtrace
@@ -704,96 +1181,10 @@ EOF
 
 ensure_inet
 
-normalize_uidgid_in_vm()
-{
-  if lxc exec $1 -- /bin/bash -c \
-      "grep -q '^lxd:' /etc/passwd" ; then
-    echo -n "Normalize UIDs/GIDs inside the $1..."
-    (
-    set -e
-    set -o xtrace
-    lxc exec $1 -- /bin/bash -c \
-      "apt-get purge --assume-yes lxd lxd-client uuid-runtime mlocate"
-    lxc exec $1 -- /bin/bash -c \
-      "deluser uuidd"
-    lxc exec $1 -- /bin/bash -c \
-      "delgroup mlocate"
-    lxc exec $1 -- /bin/bash -c \
-      "deluser lxd"
-    lxc exec $1 -- /bin/bash -c \
-      "delgroup lxd"
-    lxc exec $1 -- /bin/bash -c \
-      "delgroup admin"
-    lxc exec $1 -- /bin/bash -c \
-      "groupmod -g 110 messagebus"
-    lxc exec $1 -- /bin/bash -c \
-      "perl -pi -e 's/messagebus:x:107:110:/messagebus:x:106:110:/g' /etc/passwd"
-    lxc exec $1 -- /bin/bash -c \
-      "chgrp messagebus /usr/lib/dbus-1.0/dbus-daemon-launch-helper"
-    lxc exec $1 -- /bin/bash -c \
-      "chmod u+s /usr/lib/dbus-1.0/dbus-daemon-launch-helper"
-    lxc exec $1 -- /bin/bash -c \
-      "groupmod -g 111 ssh"
-    lxc exec $1 -- /bin/bash -c \
-      "chgrp ssh /usr/bin/ssh-agent"
-    lxc exec $1 -- /bin/bash -c \
-      "chmod g+s /usr/bin/ssh-agent"
-    lxc exec $1 -- /bin/bash -c \
-      "usermod -u 107 sshd"
-
-    # we also push the umbrella package sources here
-    lxc file push \
-          /tmp/bcfg2/Cfg/etc/apt/sources.list/sources.list.G50_ubuntu-xenial \
-          $1/etc/apt/sources.list
-    lxc file push \
-          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/multiverse.list/multiverse.list.G50_ubuntu-xenial \
-          $1/etc/apt/sources.list.d/multiverse.list
-    lxc file push \
-          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/umbrella.list/umbrella.list.G50_ubuntu-xenial \
-          $1/etc/apt/sources.list.d/umbrella.list
-    lxc file push \
-          /tmp/bcfg2/Cfg/etc/apt/trusted.gpg.d/umbrella.gpg/umbrella.gpg \
-          $1//etc/apt/trusted.gpg.d/umbrella.gpg
-
-    # update package lists and upgrade everything
-    lxc exec $1 -- /bin/bash -c \
-      "apt-get update"
-    lxc exec $1 -- /bin/bash -c \
-      "apt-get upgrade --assume-yes"
-
-    # before reboot
-    lxc restart $1
-    sleep 25
-    ) 2>&1 | cat >/var/log/umbrella-install.log
-    if [ ${PIPESTATUS[0]} -eq 0 ]; then
-      echo ok
-    else
-      echo fail
-      exit 1
-    fi
-  fi
-}
 normalize_uidgid_in_vm ${router_hostname}
 
-# retrieve the host names and ip addresses from umbrella.xml if defined
-config_hostname=`xmllint --xpath '//Properties//server[function="config"]/name/text()' umbrella.xml 2>/dev/null`
-config_pub_ip=`xmllint --xpath '//Properties//server[function="config"]/pubif/ip/text()' umbrella.xml 2>/dev/null`
-vmhost_hostname=`xmllint --xpath '//Properties//server[function="vmhost"]/name/text()' umbrella.xml 2>/dev/null`
-vmhost_pub_ip=`xmllint --xpath '//Properties//server[function="vmhost"]/pubif/ip/text()' umbrella.xml 2>/dev/null`
-proxy_hostname=`xmllint --xpath '//Properties//server[function="proxy"]/name/text()' umbrella.xml 2>/dev/null`
-proxy_pub_ip=`xmllint --xpath '//Properties//server[function="proxy"]/pubif/ip/text()' umbrella.xml 2>/dev/null`
-nfs_hostname=`xmllint --xpath '//Properties//server[function="nfs"]/name/text()' umbrella.xml 2>/dev/null`
-nfs_pub_ip=`xmllint --xpath '//Properties//server[function="nfs"]/pubif/ip/text()' umbrella.xml 2>/dev/null`
-mail_hostname=`xmllint --xpath '//Properties//server[function="mail"]/name/text()' umbrella.xml 2>/dev/null`
-mail_pub_ip=`xmllint --xpath '//Properties//server[function="mail"]/pubif/ip/text()' umbrella.xml 2>/dev/null`
-ltsp_hostname=`xmllint --xpath '//Properties//server[function="ltsp"]/name/text()' umbrella.xml 2>/dev/null`
-ltsp_pub_ip=`xmllint --xpath '//Properties//server[function="ltsp"]/pubif/ip/text()' umbrella.xml 2>/dev/null`
-monitor_hostname=`xmllint --xpath '//Properties//server[function="monitor"]/name/text()' umbrella.xml 2>/dev/null`
-monitor_pub_ip=`xmllint --xpath '//Properties//server[function="monitor"]/pubif/ip/text()' umbrella.xml 2>/dev/null`
-smtp_hostname=`xmllint --xpath '//Properties//server[function="DMZsmtp"]/name/text()' umbrella.xml 2>/dev/null`
-smtp_DMZ_ip=`xmllint --xpath '//Properties//server[function="DMZsmtp"]/DMZif/ip/text()' umbrella.xml 2>/dev/null`
-www_hostname=`xmllint --xpath '//Properties//server[function="DMZwww"]/name/text()' umbrella.xml 2>/dev/null`
-www_DMZ_ip=`xmllint --xpath '//Properties//server[function="DMZwww"]/DMZif/ip/text()' umbrella.xml 2>/dev/null`
+pull_server_names_and_IPs_from_umbrella_xml
+
 
 if lxc exec ${router_hostname} -- /bin/bash -c \
   "[[ ! -x /usr/sbin/named ]]" ; then
@@ -917,6 +1308,14 @@ EOF
 ${monitor_pub_ip##*.}             PTR     ${monitor_hostname}.${domain_name}.
 EOF
   fi
+  if [[ ! -z "${backdoor_hostname}" ]]; then
+    cat >>/tmp/tmpzone <<EOF
+${backdoor_hostname}              A         ${backdoor_pub_ip}
+EOF
+    cat >>/tmp/tmpzone.rev <<EOF
+${backdoor_pub_ip##*.}             PTR     ${backdoor_hostname}.${domain_name}.
+EOF
+  fi
   IFS=. read D1 D2 D3 D4 <<< "$DMZ_network"
   cat >>/tmp/tmpzone.rev <<EOF
 \$ORIGIN ${D3}.${D2}.${D1}.in-addr.arpa.
@@ -935,6 +1334,14 @@ ${www_hostname}              A         ${www_DMZ_ip}
 EOF
     cat >>/tmp/tmpzone.rev <<EOF
 ${www_DMZ_ip##*.}             PTR     ${www_hostname}.${domain_name}.
+EOF
+  fi
+  if [[ ! -z "${xmpp_hostname}" ]]; then
+    cat >>/tmp/tmpzone <<EOF
+${xmpp_hostname}              A         ${xmpp_DMZ_ip}
+EOF
+    cat >>/tmp/tmpzone.rev <<EOF
+${xmpp_DMZ_ip##*.}             PTR     ${xmpp_hostname}.${domain_name}.
 EOF
   fi
   cat >/tmp/named.conf.local <<EOF
@@ -1087,7 +1494,7 @@ create_profile() {
     lxc profile create ${subnet}srv
     lxc profile device add ${subnet}srv root disk path=/ pool=default
     lxc network attach-profile ${bridge} ${subnet}srv eth0
-    lxc profile set ${subnet}srv raw.lxc lxc.aa_profile=lxc-container-default-with-mounting
+    lxc profile set ${subnet}srv raw.lxc lxc.apparmor.profile=lxc-container-default-with-mounting
     lxc profile set ${subnet}srv security.privileged true
     ) 2>&1 | cat >/var/log/umbrella-install.log
     if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -1111,7 +1518,7 @@ if [[ ! $(lxc profile list) =~ "secsrv" ]]; then
   lxc profile create pubsrv
   lxc profile device add pubsrv root disk path=/ pool=default
   lxc network attach-profile ${pub_br} pubsrv eth0
-  lxc profile set pubsrv raw.lxc lxc.aa_profile=lxc-container-default-with-mounting
+  lxc profile set pubsrv raw.lxc lxc.apparmor.profile=lxc-container-default-with-mounting
   lxc profile set pubsrv security.privileged true
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -1129,8 +1536,8 @@ if [[ ! $(lxc list) =~ "${config_hostname}" ]]; then
   set -e
   set -o xtrace
   lxc init ubuntu:16.04 -p pubsrv ${config_hostname}
-  config_pub_dev=`xmllint --xpath '//Properties//server[function="config"]/pubif/dev/text()' umbrella.xml`
-  config_pub_mac=`xmllint --xpath '//Properties//server[function="config"]/pubif/mac/text()' umbrella.xml`
+  config_pub_dev=`xmllint --xpath '//Properties//server[function="config"]/pubif/dev/text()' ${UMBRELLA_XML}`
+  config_pub_mac=`xmllint --xpath '//Properties//server[function="config"]/pubif/mac/text()' ${UMBRELLA_XML}`
 
   # set interface names and MAC addresses
   lxc config set ${config_hostname} volatile.eth0.name "${config_pub_dev}"
@@ -1245,14 +1652,14 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   fi
 fi
 
-if [ -e umbrella_keys.xml ]; then
+if [ -e ${UMBRELLA_KEYS_XML} ]; then
   echo -n "Validating the supplied umbrella_keys.xml..."
   (
   set -e
   set -o xtrace
-  xml_file="umbrella_keys.xml"
+  xml_file="${UMBRELLA_KEYS_XML}"
   xmllint --noout --schema /tmp/bcfg2/Properties/${xml_file%.*}.xsd ./$xml_file
-  CA_pub=`xmllint --xpath '//Properties//CA_pub/text()' umbrella_keys.xml`
+  CA_pub=`xmllint --xpath '//Properties//CA_pub/text()' ${UMBRELLA_KEYS_XML}`
   CA_subj=`echo "${CA_pub}" | openssl x509 -noout -subject | sed 's|subject= /||'| sed 's|/|"\n|g' | sed 's|=|="|g' | sed "s|'|\\\'|g" | sed '$s/$/\"/'`
   eval $CA_subj
   [ "$C" == "$country_code" ]
@@ -1325,11 +1732,11 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
 
   certfile=/etc/pki/CA/certs/bcfg2ca.crt
   keyfile=/etc/pki/CA/private/bcfg2ca.key
-  if [ -e umbrella_keys.xml ]; then
+  if [ -e ${UMBRELLA_KEYS_XML} ]; then
     # we take the CA certificate and the key from the supplied umbrella_keys.xml
     # file /etc/pki/CA/private/passkey.txt is not created in this case
-    CA_pub=`xmllint --xpath '//Properties//CA_pub/text()' umbrella_keys.xml`
-    CA_sec=`xmllint --xpath '//Properties//CA_sec/text()' umbrella_keys.xml`
+    CA_pub=`xmllint --xpath '//Properties//CA_pub/text()' ${UMBRELLA_KEYS_XML}`
+    CA_sec=`xmllint --xpath '//Properties//CA_sec/text()' ${UMBRELLA_KEYS_XML}`
     echo "${CA_pub}" | lxc exec ${config_hostname} -- /bin/bash -c \
       "cat >${certfile}"
     echo "${CA_sec}" | lxc exec ${config_hostname} -- /bin/bash -c \
@@ -1382,7 +1789,7 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   fi
 fi
 
-if [ ! -e umbrella_keys.xml ]; then
+if [ ! -e ${UMBRELLA_KEYS_XML} ]; then
   echo -n "Creating the umbrella_keys.xml..."
   (
   set -e
@@ -1393,7 +1800,7 @@ if [ ! -e umbrella_keys.xml ]; then
   DKIM_sec=`openssl genrsa 1024`
   DKIM_pub=`echo "${DKIM_sec}" | openssl rsa -pubout -outform PEM`
   DKIM_pub=`echo "${DKIM_pub}" | head -n -1 | tail -n +2 | tr -d '\n'`
-  cat >umbrella_keys.xml <<EOF
+  cat >${UMBRELLA_KEYS_XML} <<EOF
 <Properties>
     <!-- *** Generated initially by the Umbrella Linux installer. *** -->
 
@@ -1485,19 +1892,9 @@ EOF
     exit 1
   fi
 fi
-lxc file push umbrella_keys.xml ${config_hostname}/var/lib/bcfg2/Properties/
+lxc file push ${UMBRELLA_KEYS_XML} ${config_hostname}/var/lib/bcfg2/Properties/
 
-# pull the data from umbrella_keys.xml
-CA_pass=`xmllint --xpath '//Properties//CA_pass/text()' umbrella_keys.xml`
-bcfg2_pass=`xmllint --xpath '//Properties//bcfg2_pass/text()' umbrella_keys.xml`
-KRB5_pass=`xmllint --xpath '//Properties//KRB5_pass/text()' umbrella_keys.xml`
-mysql_root_pass=`xmllint --xpath '//Properties//MySQLbackuppass/text()' umbrella_keys.xml`
-bcfg2_db_name=`xmllint --xpath '//Properties//bcfg2_reports_db_name/text()' umbrella_keys.xml`
-bcfg2_db_user=`xmllint --xpath '//Properties//bcfg2_reports_db_user/text()' umbrella_keys.xml`
-bcfg2_db_pass=`xmllint --xpath '//Properties//bcfg2_reports_db_pass/text()' umbrella_keys.xml`
-SA_db_name=`xmllint --xpath '//Properties//SA_db/text()' umbrella_keys.xml`
-SA_db_user=`xmllint --xpath '//Properties//SA_dbuser/text()' umbrella_keys.xml`
-SA_db_pass=`xmllint --xpath '//Properties//SA_dbpass/text()' umbrella_keys.xml`
+pull_umbrella_keys_data
 
 if lxc exec ${config_hostname} -- /bin/bash -c \
   "[[ ! -x /usr/sbin/mysqld ]]" ; then
@@ -1527,6 +1924,10 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   (echo "CREATE DATABASE ${bcfg2_db_name} DEFAULT CHARSET utf8 DEFAULT COLLATE utf8_general_ci;";
    echo "CREATE USER ${bcfg2_db_user}@localhost IDENTIFIED BY '${bcfg2_db_pass}';";
    echo "GRANT ALL ON ${bcfg2_db_name}.* TO ${bcfg2_db_user}@localhost;";
+   if [[ ! -z "${monitor_hostname}" ]]; then
+     echo "CREATE USER ${bcfg2_db_user}@\`${monitor_hostname}.${domain_name}\` IDENTIFIED BY '${bcfg2_db_pass}';";
+     echo "GRANT ALL ON ${bcfg2_db_name}.* TO ${bcfg2_db_user}@\`${monitor_hostname}.${domain_name}\`;";
+   fi;
    echo "FLUSH PRIVILEGES;") | \
     lxc exec ${config_hostname} -- /bin/bash -c \
       "mysql -u root -p${mysql_root_pass}"
@@ -1605,6 +2006,11 @@ if [[ ! -z "${monitor_hostname}" ]]; then
   <Client profile="monitor" name="${monitor_hostname}.${domain_name}" version="1.3.5"/>
 EOF
 fi
+if [[ ! -z "${backdoor_hostname}" ]]; then
+  cat >>/tmp/clients.xml <<EOF
+  <Client profile="backdoor" name="${backdoor_hostname}.${domain_name}" version="1.3.5"/>
+EOF
+fi
 if [[ ! -z "${nfs_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
   <Client profile="nfs" name="nfs.${domain_name}" version="1.3.5"/>
@@ -1625,6 +2031,16 @@ if [[ ! -z "${www_hostname}" ]]; then
   <Client profile="DMZwww" name="${www_hostname}.${domain_name}" version="1.3.5"/>
 EOF
 fi
+if [[ ! -z "${xmpp_hostname}" ]]; then
+  cat >>/tmp/clients.xml <<EOF
+  <Client profile="DMZxmpp" name="${xmpp_hostname}.${domain_name}" version="1.3.5"><Alias name="${domain_name}"/></Client>
+EOF
+fi
+if [[ ! -z "${vpn_hostname}" ]]; then
+  cat >>/tmp/clients.xml <<EOF
+  <Client profile="DMZvpn" name="${vpn_hostname}.${domain_name}" version="1.3.5"></Client>
+EOF
+fi
 cat >>/tmp/clients.xml <<EOF
   <!--PLACEHOLDER-->
 </Clients>
@@ -1634,10 +2050,12 @@ EOF
   # generate bcfg2.conf (nano-Genshi ;-)
   cat /tmp/bcfg2/Cfg/etc/bcfg2.conf/bcfg2.conf.genshi | \
   sed '/{% python/,/%}/d' | \
-  sed '/{% if metadata.uuid is not None %}/,/{% end %}/d' | \
-  sed '/{% if metadata.password is not None %}/,/{% end %}/d' | \
-  sed $'/{% if \'ubuntu-xenial\' in metadata.groups %}/,/{% end %}/ { /{% if \'ubuntu-xenial\' in metadata.groups %}/d; /{% end %}/d }' | \
-  sed '/{% if metadata.password is None %}/,/{% end %}/ { /{% if metadata.password is None %}/d; /{% end %}/d }' | \
+  sed "/{% if 'roaming' in metadata.groups %}/,/{% end %}/d" | \
+  sed '/{% *if metadata.uuid is not None %}/,/{% *end %}/d' | \
+  sed '/{% *if metadata.password is not None %}/,/{% *end %}/d' | \
+  sed "/{% if 'ubuntu-xenial' in metadata.groups %}/,/{% end %}/ { /{% if 'ubuntu-xenial' in metadata.groups %}/d; /{% end %}/d }" | \
+  sed '/{% *if metadata.password is None %}/,/{% *end %}/ { /{% *if metadata.password is None %}/d; /{% *end %}/d }' | \
+  sed "/{% *if 'roaming' not in metadata.groups %}/,/{% *end %}/ { /{% *if 'roaming' not in metadata.groups %}/d; /{% *end %}/d }" | \
   sed "s/\${metadata[^}]*bcfg2_pass[^}]*}/${bcfg2_pass}/g" | \
   sed "s/\${funchosts[^}]*config[^}]*}/${config_hostname}.${domain_name}/g" | \
   lxc exec ${config_hostname} -- /bin/bash -c \
@@ -1757,190 +2175,78 @@ ensure_bcfg2
 # configuring the hosts.                                              #
 #                                                                     #
 #######################################################################
-
-# $1 is the vm name, $2 is quirks function to be called in the middle
-# of configuration (this function gets the vm name as an argument)
-configure_vm() {
-  echo -n "Configuring $1..."
-  (
-  set -e
-  set -o xtrace
-  if [ "$1" != ${config_hostname} ]; then
-    lxc file pull ${config_hostname}/etc/pki/CA/certs/bcfg2ca.crt - | \
-      lxc file push - $1/usr/local/share/ca-certificates/bcfg2ca.crt
-    lxc exec $1 -- /bin/bash -c \
-      "chmod 644 /usr/local/share/ca-certificates/bcfg2ca.crt"
-    lxc exec $1 -- /bin/bash -c \
-      "update-ca-certificates"
-    lxc exec $1 -- /bin/bash -c \
-      "apt-get install -y bcfg2 mc ssl-cert"
-    lxc file pull ${config_hostname}/etc/bcfg2.conf - | \
-      lxc file push - $1/etc/bcfg2.conf
-  fi
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b apt-sources"
-  if [ "$1" == ${config_hostname} -o "$1" == ${proxy_hostname} ]; then
-  lxc exec $1 -- /bin/bash -c \
-    "rm /etc/apt/apt.conf.d/99proxy"
-  fi
-  lxc exec $1 -- /bin/bash -c \
-    "apt-get update"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qv -b ntp"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ntp"
-  if [ -n "$2" ]; then
-    $2 $1
-  fi
-  lxc exec $1 -- /bin/bash -c \
-    "cat >/etc/apt/apt.conf.d/99local" <<EOF
-Dpkg::Options {
-   "--force-confdef";
-   "--force-confold";
-}
-EOF
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qv -b base-users:base:base-services"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b base-users:base:base-services"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ldap-auth"
-  lxc exec $1 -- /bin/bash -c \
-    "env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ssh"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -qv"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -qv -r Packages"
-  lxc exec $1 -- /bin/bash -c \
-    "rm -f /etc/apt/apt.conf.d/99local"
-  if [ -n "$3" ]; then
-    $3 $1
-  fi
-  lxc restart $1
-  sleep 15
-  ) 2>&1 | cat >/var/log/umbrella-install.log
-  if [ ${PIPESTATUS[0]} -eq 0 ]; then
-    echo ok
-  else
-    echo fail
-    exit 1
-  fi
-}
-
-# we configure 'config' first
-configure_quirks_init_krb5_ldap() {
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b kerberos-kdc"
-  if [ "$1" == ${config_hostname} ]; then
-  # we only init kerberos on config
-    if ! lxc exec $1 -- /bin/bash -c \
-      "[[ -e /var/lib/bcfg2/Cfg/etc/krb5kdc/stash/stash ]]"; then
-      lxc exec $1 -- /bin/bash -c \
-        "echo -e \"${KRB5_pass}\\n${KRB5_pass}\" | krb5-umbrella-init"
-    fi
-  fi
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qv -b ldap-server"
-  lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ldap-server"
-  if ! lxc exec $1 -- /bin/bash -c \
-    "[[ -e /etc/ldap/schema/fusiondirectory/core-fd.ldif ]]"; then
-    lxc exec $1 -- /bin/bash -c \
-      "systemctl stop slapd"
-    lxc exec $1 -- /bin/bash -c \
-      "rm -rf /var/lib/ldap/*"
-    lxc exec $1 -- /bin/bash -c \
-      "yes | ldap-umbrella-init"
-    lxc exec $1 -- /bin/bash -c \
-      "systemctl start slapd"
-  fi
-}
-
-# quirks for the terminal server
-configure_quirks_x2go() {
-  lxc exec $1 -- /bin/bash -c \
-    "mkdir -p /var/spool/x2goprint"
-}
-
-# it has two arguments: umbrella_function config_quirks_function_name
-declare -A priorities
-priorities[router]=10
-priorities[config]=9
-priorities[proxy]=8
-priorities[nfs]=7
-priorities[mail]=6
-priorities[ltsp]=5
-priorities[monitor]=4
-priorities[DMZsmtp]=3
-priorities[DMZwww]=2
-create_vm() {
-  vm_hostname=`xmllint --xpath "//Properties//server[function=\"$1\"]/name/text()" umbrella.xml 2>/dev/null`
-  if [[ -n "${vm_hostname}" && ! $(lxc list) =~ "${vm_hostname}" ]]; then
-    # determine the class
-    subnet=""
-    xmllint --xpath "//Properties//server[function=\"$1\"]/pubif" umbrella.xml &>/dev/null && subnet="pub"
-    xmllint --xpath "//Properties//server[function=\"$1\"]/secif" umbrella.xml &>/dev/null && subnet="sec"
-    xmllint --xpath "//Properties//server[function=\"$1\"]/DMZif" umbrella.xml &>/dev/null && subnet="DMZ"
-    [ -z "${subnet}" ] && exit 1
-
-    echo -n "Creating and starting \"${vm_hostname}\"..."
-    (
-    set -e
-    set -o xtrace
-    lxc init ubuntu:16.04 -p ${subnet}srv ${vm_hostname}
-    ip=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/ip/text()" umbrella.xml`
-    dev=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/dev/text()" umbrella.xml`
-    mac=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/mac/text()" umbrella.xml`
-
-    # set interface names and MAC addresses
-    lxc config set ${vm_hostname} volatile.eth0.name "${dev}"
-    lxc config set ${vm_hostname} volatile.eth0.hwaddr "${mac}"
-
-    lxc config set ${vm_hostname} boot.autostart 1
-    lxc config set ${vm_hostname} boot.autostart.delay 30
-    lxc config set ${vm_hostname} boot.autostart.priority ${priorities[$1]}
-
-    # push /etc/network/interfaces
-    eval netmask=\$${subnet}_netmask
-    eval router=\$router_${subnet}_ip
-    cat >/tmp/${vm_hostname}_interfaces <<EOF
-auto lo
-iface lo inet loopback
-
-# Network for public workstations with Internet access
-auto ${dev}
-iface ${dev} inet static
-    address ${ip}
-    netmask ${netmask}
-    gateway ${router}
-    dns-nameservers ${router}
-    dns-search ${domain_name}
-EOF
-    chown root:root /tmp/${vm_hostname}_interfaces
-    lxc file push /tmp/${vm_hostname}_interfaces ${vm_hostname}/etc/network/interfaces
-
-    lxc start ${vm_hostname}
-    ) 2>&1 | cat >/var/log/umbrella-install.log
-    if [ ${PIPESTATUS[0]} -eq 0 ]; then
-      echo ok
-    else
-      echo fail
-      exit 1
-    fi
-
-    normalize_uidgid_in_vm ${vm_hostname}
-
-    configure_vm ${vm_hostname} $2
-  fi
-}
-
 # finish configuring config
 configure_vm ${config_hostname} configure_quirks_init_krb5_ldap
 
 # check for and start bcfg2 server if necessary
 ensure_bcfg2
+
+# end of installer chunk                                                     #
+##############################################################################
+else
+##############################################################################
+# Here we initialize the maintenance mode                                    #
+#                                                                            #
+MAINTENANCE_MODE='y'
+cat << EOF
+This is the maintenance mode of the installer. It assumes that you have fully
+functional and fully upgraded Umbrella Linux system, which possibly misses
+some of the non-core LXD containers. The missing containers will be created
+and initialized by the installer. It also assumes that the system was installed
+onto LXD containers using the installation mode of this script and various
+profiles (for machines and networks) are already created in LXD.
+
+Unlike the installation mode the configuration XML files are pulled from the
+configuration server directly (and stored in /tmp). Any XML files in the
+current directory will be ignored.
+
+Be warned that broken assumptions may result in a broken system.
+
+You will find last command protocol in /var/log/umbrella-install.log
+
+EOF
+
+source /etc/umbrella.conf
+
+# maintenance temporary directory
+MAINT_DIR='/tmp/umbrella-maintenance'
+mkdir -p "${MAINT_DIR}"
+
+# XML file paths
+UMBRELLA_XML="${MAINT_DIR}/umbrella.xml"
+UMBRELLA_KEYS_XML="${MAINT_DIR}/umbrella_keys.xml"
+
+echo -n "Pulling the XML configuration files from the configuration server..."
+(
+  set -e
+  set -o xtrace
+
+  config_hostname=`echo "${HOST_CONFIG}" | cut -d"." -f1`
+  lxc file pull ${config_hostname}/var/lib/bcfg2/Properties/umbrella.xml ${UMBRELLA_XML}
+  lxc file pull ${config_hostname}/var/lib/bcfg2/Properties/umbrella_keys.xml ${UMBRELLA_KEYS_XML}
+
+) 2>&1 | cat >/var/log/umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+  echo ok
+else
+  echo fail
+  exit 1
+fi
+
+# define the necessary environment variables from these xml files
+pull_domain_name_and_other_static_from_umbrella_xml
+pull_networks_data_from_umbrella_xml
+pull_router_ip_addresses_from_umbrella_xml
+pull_server_names_and_IPs_from_umbrella_xml
+pull_umbrella_keys_data
+
+# Now we can, basically, proceed with the VM-creation part of the installer
+# exactly as during the installation time. The actions will be skipped if they
+# have already been performed.
+
+# end of maintenance mode chunk                                              #
+##############################################################################
+fi
 
 # proceed with other VMs
 create_vm proxy configure_quirks_init_krb5_ldap
@@ -1971,8 +2277,8 @@ if [ -n ${mail_hostname} ]; then
       ${config_hostname}/tmp/
 
     (echo "CREATE DATABASE ${SA_db_name} DEFAULT CHARSET utf8 DEFAULT COLLATE utf8_general_ci;";
-     echo "CREATE USER ${SA_db_user}@localhost IDENTIFIED BY '${SA_db_pass}';";
-     echo "GRANT ALL ON ${SA_db_name}.* TO ${SA_db_user}@localhost;";
+     echo "CREATE USER ${SA_db_user}@\`${mail_hostname}.${domain_name}\` IDENTIFIED BY '${SA_db_pass}';";
+     echo "GRANT ALL ON ${SA_db_name}.* TO ${SA_db_user}@\`${mail_hostname}.${domain_name}\`;";
      echo "FLUSH PRIVILEGES;") | \
       lxc exec ${config_hostname} -- /bin/bash -c \
         "mysql -u root -p${mysql_root_pass}"
@@ -2046,19 +2352,31 @@ if lxc exec ${ltsp_hostname} -- /bin/bash -c \
 fi
 
 create_vm monitor
+create_vm backdoor
 create_vm DMZsmtp
 create_vm DMZwww
+create_vm DMZxmpp "" configure_quirks_ejabberd
+create_vm DMZpbx
+create_vm DMZvpn
+
+if [ ! -f /etc/umbrella.conf ]; then
+##############################################################################
+# Here we continue running as installer                                      #
+#                                                                            #
 
 # router configuration quirks
 configure_quirks_router() {
   # we generate the local DNS zone on router immediately (not waiting for cron)
+  lxc exec $1 -- /bin/su -s /bin/bash - bind -c \
+    "/usr/local/bin/umbrella-ldap2zone"
+  # also do the same for the DHCP server configuration
   lxc exec $1 -- /bin/bash -c \
-    "/usr/sbin/argonaut-ldap2zone --norestart ${domain_name}"
+    "/usr/local/bin/umbrella-ldap2dhcp"
 }
 
 configure_vm ${router_hostname} "" configure_quirks_router
 
-first_admin=`xmllint --xpath "//Properties//admin" umbrella.xml | sed 's|<admin>||g' | sed 's|</admin>|\n|g' | head -n 1`
+first_admin=`xmllint --xpath "(//Properties//admin/text())[1]" ${UMBRELLA_XML}`
 
 echo -n "Configuring Virtual Machine host..."
 (
@@ -2081,10 +2399,10 @@ env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login
 bcfg2 -Qv -b ssh
 bcfg2 -D POSIXUsers -qv
 bcfg2 -qv -r Packages
-deluser lxc-dnsmasq
-deluser dnsmasq
-delgroup sambashare
-delgroup lpadmin
+getent passwd lxc-dnsmasq &>/dev/null && deluser lxc-dnsmasq
+getent passwd dnsmasq &>/dev/null && deluser dnsmasq
+getent group sambashare &>/dev/null && delgroup sambashare
+getent group lpadmin &>/dev/null && delgroup lpadmin
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
   echo ok
@@ -2121,4 +2439,27 @@ echo
 echo
 echo "Installation complete. Prey and reboot the system. ;-)"
 echo
+echo "After reboot (and waiting until the system us fully up) you can try to"
+echo "log in as \"${first_admin}\" and ssh to your configuration server"
+echo "${first_admin}@${vmhost_hostname}:~\$ ssh ${config_hostname}        # should be passwordless"
+echo "then become root"
+echo "${first_admin}@${config_hostname}:~\$ sudo -i    # will ask for the password"
+echo "then add the workstation using the umbrella-addworkstation script, like e.g."
+echo "root@${config_hostname}:~# umbrella-addworkstation \"/Central Office/pub1\" 00:00:00:00:00:00"
+echo "to register the pub1 workstation with MAC address 00:00:00:00:00:00"
+
+# end of installer chunk                                                     #
+##############################################################################
+else
+##############################################################################
+# Here we continue running in maintenance mode                               #
+#                                                                            #
+
+rm -rf "${MAINT_DIR}"
+echo "Maintenance complete. Prey and reboot the system if there were changes. ;-)"
+
+# end of maintenance mode chunk                                              #
+##############################################################################
+fi
+
 exit 0

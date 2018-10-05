@@ -1,0 +1,42 @@
+#!/bin/bash
+
+DAYS=7   # days before the expiration to delete the certificate
+
+if [ $# -eq 0 ] ; then
+    hostlist=`find /var/lib/bcfg2/SSLCA -name '*.pem.H_*' -print0 | xargs -0 -n 1 $0`
+    hostlist=`echo "${hostlist}" | sort -u`
+    if [ -n "$hostlist" ]; then
+        echo "The certificates for the following hosts were deleted:" 1>&2
+        echo "$hostlist"
+        echo "Please update their configuration during the next $DAYS days " 1>&2
+        echo "to have their certificates seamlessly regenerated." 1>&2
+    fi
+    exit 0
+elif [ $# -eq 1 ] ; then
+    # calculate the expiry date (in seconds since 1970-01-01 00:00:00 UTC)
+    expires=$(openssl x509 -enddate -noout -in $1 \
+            | grep '^notAfter=' \
+            | sed -e 's/^notAfter=//g')
+    expires=$(date -d "$expires" '+%s')
+    inDAYSdays=$(($(date +%s) + (86400*$DAYS)))
+    if [ $inDAYSdays -gt $expires ]; then
+        # the certificate is about to expire
+        fname=$(basename $1)
+        cert_name=${fname%%.H_*}
+        host_name=${fname#${cert_name}.H_}
+        dircert=$(dirname $1)
+        keypath=`xmllint --xpath 'string(//CertInfo/Cert[1]/@key)' ${dircert}/cert.xml`
+        keypath="/var/lib/bcfg2/SSLCA${keypath}"
+        key_name=$(basename ${keypath})
+        keyfilename=${keypath}/${key_name}.H_${host_name}
+        echo "deleting $1" 1>&2
+        rm -f "$1"
+        echo "deleting ${keyfilename}" 1>&2
+        rm -f "${keyfilename}"
+        echo ${host_name}
+    fi
+    exit 0
+else
+    echo "Wrong number of arguments to $0" 1>&2
+    exit 1
+fi

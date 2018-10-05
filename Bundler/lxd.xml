@@ -5,11 +5,13 @@
 
     <Package name='lxd'/>
     <Package name='lxd-client'/>
-    <Package name='lxd-tools'/>
     <Package name='ebtables'/>
     <Package name='xdelta3'/>
     <Package name='bridge-utils'/>
     <Package name='ufw'/>
+
+    <Package name='libxml2-utils'/>        <!-- for the maintenance mode  -->
+                                           <!-- of the Umbrella Installer -->
 
     <Path name='/etc/rc.local'/>            <!-- bufferbloat fix -->
 </Group>

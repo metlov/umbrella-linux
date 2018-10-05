@@ -19,13 +19,19 @@ execfile(repo+'/Python/30_networking.py')
             <Path name='/etc/bind/named.conf.ldap2zone'/>
         </Group>
         <Group name='ubuntu-xenial'>
-            <Package name='argonaut-ldap2zone'/>
-            <Path name='/etc/argonaut/argonaut.conf'/>
+<!--            <Package name='argonaut-ldap2zone'/>
+            <Path name='/etc/argonaut/argonaut.conf'/> -->
             <Package name='libapp-daemon-perl'/>
             <Package name='libhttp-daemon-perl'/>
             <Package name='liblog-handler-perl'/>
             <Path name='/etc/bind'/> <!-- make writable for bind user -->
+            <Path name="/var/cache/bind"/>
             <Path name='/etc/cron.d/ldap2zone'/> <!-- runs as bind user -->
+            <Path name='/etc/bind/named.conf.ldap2zone'/>
+            <Path name='/usr/local/bin/umbrella-ldap2zone'/>
+            <!-- headers for the main forward and reverse zones -->
+            <Path name='/etc/bind/zones/mainzone'/>
+            <Path name='/etc/bind/zones/mainzone.rev'/>
             <!-- statically define the internal versions of served zones -->
             <Path name='/etc/bind/zones'/>
             <py:for each="iface in ['pub','sec','DMZ']">

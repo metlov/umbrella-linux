@@ -1,0 +1,32 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/12_passfiles.py')
+%}\
+RUN_AS_USER nut
+{% if 'ups-master' in metadata.groups %}\
+{% python
+master_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_master.dummy.pass', 12)
+%}\
+MONITOR UPS@localhost 1 master ${master_pass} master
+{% end %}\
+{% if 'ups-master' not in metadata.groups and 'ups-slave' in metadata.groups %}\
+{% python
+slave_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_slave.dummy.pass', 12)
+%}\
+MONITOR UPS@localhost 1 slave ${slave_pass} slave
+{% end %}\
+MINSUPPLIES 1
+SHUTDOWNCMD "/sbin/shutdown -h +0"
+POLLFREQ 5
+POLLFREQALERT 5
+HOSTSYNC 15
+DEADTIME 15
+POWERDOWNFLAG /etc/killpower
+RBWARNTIME 43200
+NOCOMMWARNTIME 300
+FINALDELAY 5
+#CERTPATH /etc/ssl/certs-umbrella
+#CERTVERIFY 1
+#FORCESSL 1

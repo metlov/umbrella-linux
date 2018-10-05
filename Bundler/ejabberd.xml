@@ -16,6 +16,8 @@
         <BoundPOSIXGroup name="epmd" gid="630"/>
         <Path name='/etc/default/ejabberd-gssapi' altsrc='/etc/default/ejabberd'/>
         <Path name='/etc/ejabberd/ejabberd.yml'/>
+        <Path name='/etc/apparmor.d/local/usr.sbin.ejabberdctl'/>
+        <Package name='fonts-dejavu-core'/>
         <Service name='ejabberd-gssapi'/>
     </Group>
     <Path name='/etc/ssl/ejabberd.pem'/>

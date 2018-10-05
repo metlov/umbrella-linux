@@ -1,0 +1,30 @@
+<Bundle name='nut'>
+<Group name='ubuntu'>
+    <BoundPOSIXGroup name="nut" gid="668"/>
+    <BoundPOSIXUser name="nut" home="/var/lib/nut" shell="/bin/false" gecos="" uid="668" group="nut">
+        <MemberOf>dialout</MemberOf>
+        <MemberOf>ssl-cert</MemberOf>
+    </BoundPOSIXUser>
+    <Group name='ups-master'>
+        <Package name='nut-server'/>
+        <Service name='nut-server'/>
+        <!-- KLM: SSL support does not work in current Ubuntu NUT due to -->
+        <!-- license issues.                                             -->
+<!--        <Path name='/etc/ssl/private/nut.key'/>
+        <Path name='/etc/ssl/nut.pem'/>
+        <Path name='/etc/nut/nut.pem'/> -->
+        <Path name='/etc/nut/upsd.conf'/>
+        <Path name='/etc/nut/nut.conf'/>
+        <Path name='/etc/nut/upsd.users'/>
+        <Path name='/usr/lib/systemd/system-shutdown/nutshutdown'/>
+    </Group>
+    <Group name='ups-detected'>
+        <Path name='/etc/nut/ups.conf'/>
+    </Group>
+    <Group name='ups-slave'>
+        <Path name='/etc/nut/upsmon.conf'/>
+    </Group>
+    <Package name='nut-client'/>
+    <Service name='nut-client'/>
+</Group>
+</Bundle>

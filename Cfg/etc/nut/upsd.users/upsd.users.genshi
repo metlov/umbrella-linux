@@ -1,0 +1,16 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/12_passfiles.py')
+
+master_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_master.dummy.pass', 12)
+slave_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_slave.dummy.pass', 12)
+%}\
+[master]
+    password  = ${master_pass}
+    upsmon master
+
+[slave]
+    password  = ${slave_pass}
+    upsmon slave

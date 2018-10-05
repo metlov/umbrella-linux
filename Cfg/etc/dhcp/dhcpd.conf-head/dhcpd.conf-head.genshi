@@ -1,0 +1,53 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+%}\
+default-lease-time 21600;
+max-lease-time 21600;
+log-facility local0;
+authoritative;
+ddns-update-style none;
+{% if 'ltsp' in funcifs %}\
+filename "/pxelinux.0";
+next-server ${funcifs['ltsp']};
+{% end %}\
+use-host-decl-names on;
+allow booting;
+allow bootp;
+
+# Public network
+subnet ${networks['pubif'].network()} netmask ${networks['pubif'].netmask()} {
+    option routers ${routerifs['pubif']};
+    option domain-name "${domain_name}";
+    option subnet-mask ${networks['pubif'].netmask()};
+    option broadcast-address ${networks['pubif'].broadcast()};
+    option domain-name-servers ${routerifs['pubif']};
+{% if pub_dhcp is not None %}\
+    range ${pub_dhcp[0]} ${pub_dhcp[1]};
+{% end %}\
+}
+
+# Secure network
+subnet ${networks['secif'].network()} netmask ${networks['secif'].netmask()} {
+    option routers ${routerifs['secif']};
+    option domain-name "${domain_name}";
+    option subnet-mask ${networks['secif'].netmask()};
+    option broadcast-address ${networks['secif'].broadcast()};
+    option domain-name-servers ${routerifs['secif']};
+}
+
+# DMZ
+subnet ${networks['DMZif'].network()} netmask ${networks['DMZif'].netmask()} {
+    option routers ${routerifs['DMZif']};
+    option domain-name "${domain_name}";
+    option subnet-mask ${networks['DMZif'].netmask()};
+    option broadcast-address ${networks['DMZif'].broadcast()};
+    option domain-name-servers ${routerifs['DMZif']};
+}
+
+{% for host in funchosts %}\
+host ${funchosts[host]} {hardware ethernet ${funcmacs[host]};fixed-address ${funcifs[host]};}
+{% end %}\

@@ -1,0 +1,16 @@
+This folder contains an example configuration for two coupled Umbrella Linux
+systems. They can be deployed in virtualbox using the Installer script from
+the parent directory (but with the configuration files from one of the
+subdirectories: main or sub).
+
+These systems trust each other (by trusting each other's certificate),
+mirror each-other's DNS and allow cross-domain Jabber connections. The
+"main" system, additionally, has VPN configured allowing to deploy roaming
+workstations.
+
+Because the trust is designated by including the trusted system's certificate
+in firewall.xml file, both these examples come with pre-generated
+umbrella_keys.xml files. If you want to generate your own passwords -- omit
+the umbrella_keys.xml when running the installer, but update the firewall.xml
+file of another system once the umbrella_keys.xml (and the certificate,
+contained within) is generated.

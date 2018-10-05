@@ -12,8 +12,15 @@
     <Package name='libpam-ccreds'/>
     <Package name='libpam-cracklib'/>
     <Package name='wamerican'/>
-    <Package name='sudo-ldap'/>
-    <Path name='/etc/sudo-ldap.conf'/>
+    <Group name='roamingworkstation' negate='true'>
+        <!-- on full-time networked workstations/servers sudo-ldap is used -->
+        <Package name='sudo-ldap'/>
+        <Path name='/etc/sudo-ldap.conf'/>
+    </Group>
+    <Group name='roamingworkstation'>
+        <!-- on intermittently-connected we stay with normal sudo. -->
+        <Package name='sudo'/>
+    </Group>
     <Path name='/etc/pam.d/common-account'/>
     <Path name='/etc/pam.d/common-auth'/>
     <Path name='/etc/pam.d/common-password'/>

@@ -1,6 +1,7 @@
 {% python
 from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
+short_hostname=metadata.hostname.split('.')[0]
 %}\
 ###
 ###'              ejabberd configuration file
@@ -55,14 +56,6 @@ log_rotate_date: ""
 ## 100 is ejabberd's default.
 log_rate_limit: 100
 
-##
-## watchdog_admins: Only useful for developers: if an ejabberd process
-## consumes a lot of memory, send live notifications to these XMPP
-## accounts.
-##
-watchdog_admins:
-  - "itadmin@${domain_name}"
-
 ###.  ===============
 ###'  NODE PARAMETERS
 
@@ -87,12 +80,35 @@ watchdog_admins:
 hosts:
   - "${domain_name}"
 
+###.  ============
+###'  Certificates
+
+## List all available PEM files containing certificates for your domains,
+## chains of certificates or certificate keys. Full chains will be built
+## automatically by ejabberd.
+##
+## certfiles:
+##   - "/etc/letsencrypt/live/example.org/*.pem"
+##   - "/etc/letsencrypt/live/example.com/*.pem"
+##
+## If your system provides only a single CA file (CentOS/FreeBSD):
+## ca_file: "/etc/ssl/certs/ca-bundle.pem"
+certfiles:
+  - "/etc/ejabberd/ejabberd.pem"
+
+ca_file: "/etc/ssl/certs-umbrella/ca-certificates.crt"
+
 ##
 ## route_subdomains: Delegate subdomains to other XMPP servers.
 ## For example, if this ejabberd serves example.org and you want
 ## to allow communication with an XMPP server called im.example.org.
 ##
+{% if 'DMZxmpp' in metadata.groups %}\
+route_subdomains: s2s
+{% end %}\
+{% if 'DMZxmpp' not in metadata.groups %}\
 ## route_subdomains: s2s
+{% end %}\
 
 ###.  ===============
 ###'  LISTENING PORTS
@@ -106,38 +122,17 @@ listen:
     port: 5222
     ip: "::"
     module: ejabberd_c2s
-    ##
-    ## If TLS is compiled in and you installed a SSL
-    ## certificate, specify the full path to the
-    ## file and uncomment these lines:
-    ##
-    certfile: "/etc/ejabberd/ejabberd.pem"
     starttls: true
-    ##
-    ## To enforce TLS encryption for client connections,
-    ## use this instead of the "starttls" option:
-    ##
     starttls_required: true
-    ##
-    ## Custom OpenSSL options
-    ##
-    protocol_options:
-      - "no_sslv3"
-    ##   - "no_tlsv1"
     max_stanza_size: 65536
     shaper: c2s_shaper
     access: c2s
     zlib: true
-    resend_on_timeout: if_offline
 {% if 'DMZxmpp' in metadata.groups %}\
   - 
     port: 5269
     ip: "::"
     module: ejabberd_s2s_in
-    certfile: "/etc/ejabberd/ejabberd.pem"
-    starttls: true
-    starttls_required: true
-    cafile: "/etc/ssl/certs-umbrella/ca-certificates.crt"
 {% end %}\
   ##
   ## ejabberd_service: Interact with external components (transports, ...)
@@ -195,18 +190,7 @@ disable_sasl_mechanisms: "digest-md5"
 ## Allowed values are: false optional required required_trusted
 ## You must specify a certificate file.
 ##
-s2s_use_starttls: required_trusted
-
-##
-## s2s_certfile: Specify a certificate file.
-##
-s2s_certfile: "/etc/ejabberd/ejabberd.pem"
-
-## Custom OpenSSL options
-##
-s2s_protocol_options:
-  - "no_sslv3"
-##   - "no_tlsv1"
+s2s_use_starttls: required
 
 ##
 ## domain_certfile: Specify a different certificate for each served hostname.
@@ -239,6 +223,7 @@ s2s_protocol_options:
 ###'  AUTHENTICATION
 
 sasl_realm: "${realm_name}"
+sasl_keytab: "/etc/ejabberd/xmpp.keytab"
 
 ##
 ## auth_method: Method used to authenticate the users.
@@ -286,12 +271,12 @@ ldap_servers:
   - "ldap2.${domain_name}"
 
 ## Encryption of connection to LDAP servers:
-ldap_encrypt: none
-## ldap_encrypt: tls
+## ldap_encrypt: none
+ldap_encrypt: tls
 
 ## Port to connect to on LDAP servers:
-ldap_port: 389
-## ldap_port: 636
+## ldap_port: 389
+ldap_port: 636
 
 ## LDAP manager:
 ## ldap_rootdn: "dc=example,dc=com"
@@ -592,15 +577,20 @@ modules:
   mod_client_state: {}
   mod_configure: {} # requires mod_adhoc
   mod_disco: {}
-  mod_echo: {}
-  mod_irc: {}
-  mod_http_bind: {}
+  mod_echo:
+    host: "${short_hostname}.@HOST@"
+  ## mod_irc: {}
+  ## mod_http_bind: {}
   ## mod_http_fileserver:
   ##   docroot: "/var/www"
   ##   accesslog: "/var/log/ejabberd/access.log"
   mod_last: {}
+  mod_mam:
+    iqdisc: one_queue
+    db_type: mnesia
+    default: always
   mod_muc: 
-    ## host: "conference.@HOST@"
+    host: "${short_hostname}.@HOST@"
     access: muc
     access_create: muc_create
     access_persistent: muc_create
@@ -616,8 +606,10 @@ modules:
   ##   interval: 60
   mod_privacy: {}
   mod_private: {}
-  mod_proxy65: {}
+  mod_proxy65:
+    host: "${short_hostname}.@HOST@"
   mod_pubsub: 
+    host: "${short_hostname}.@HOST@"
     access_createnode: pubsub_createnode
     ## reduces resource comsumption, but XEP incompliant
     ignore_pep_from_offline: true
@@ -683,40 +675,13 @@ modules:
     ## ldap_ufilter: "(&(objectClass=inetOrgPerson)(uid=%u))"
   mod_stats: {}
   mod_time: {}
-  ## mod_vcard:
-  ##   search: false
-  mod_vcard_ldap:
-    ldap_uids: {"uid": "%u"}
-    matches: infinity
-    ldap_vcard_map:
-      "NICKNAME": {"%u": []}
-      "FN": {"%s": ["cn"]}
-      "EMAIL": {"%s": ["mail"]}
-      "GIVEN": {"%s": ["givenName"]}
-      "MIDDLE": {"%s": ["initials"]}
-      "FAMILY": {"%s": ["sn"]}
-      "ORGNAME": {"%s": ["o"]}
-      "ORGUNIT": {"%s": ["ou"]}
-      "TITLE": {"%s": ["title"]}
-      "TEL": {"%s": ["telephoneNumber"]}
-    ldap_search_fields:
-      "User": "%u"
-      "Full Name":  "cn"
-      "Email": "mail"
-    ldap_search_reported:
-      "Full Name": "FN"
-      "Nickname": "NAME"
-      "Email": "EMAIL"
+  mod_vcard:
+    search: true
+    host: "${short_hostname}.@HOST@"
+    db_type: ldap
   mod_version: {}
-
-##
-## Enable modules with custom options in a specific virtual host
-##
-## host_config:
-##   "localhost":
-##     modules:
-##       mod_echo:
-##         host: "mirror.localhost"
+  mod_stream_mgmt:
+    resend_on_timeout: if_offline
 
 ##
 ## Enable modules management via ejabberdctl for installation and
@@ -724,7 +689,7 @@ modules:
 ## (enabled by default)
 ##
 
-allow_contrib_modules: true
+allow_contrib_modules: false
 
 ###.
 ###'

@@ -49,6 +49,7 @@
 <Path type='directory' name="/var/cache/pyzor" mode='0755' owner='mail' group='mail'/>
 <Path type='directory' name="/var/ossec/logs/archives" mode='750' owner='ossec' group='ossec'/>
 <Path type='directory' name="/etc/bind" mode='2775' owner='root' group='bind'/>
+<Path type='directory' name="/var/cache/bind" mode='2775' owner='root' group='bind'/>
 <Group name='local-bcfg2-rules-defined'>
     <Path type='symlink' name='/var/lib/bcfg2/Rules/local-rules.xml' to='../Local/Rules/local-rules.xml'/>
 </Group>

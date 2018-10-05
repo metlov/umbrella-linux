@@ -2,6 +2,9 @@
 from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 nagios_pass=metadata.Properties['umbrella_keys.xml'].xdata.find('snmp_nagios_pass').text
+
+xpath_to_pubdev='server[function="monitor"]/pubif/dev'
+monitor_dev=metadata.Properties['umbrella.xml'].xdata.find(xpath_to_pubdev).text
 %}\
 ; automatic login for check_snmp
 [check_snmp]
@@ -12,3 +15,6 @@ privproto=AES
 secname=nagios
 authpasswd=${nagios_pass}
 privpasswd=${nagios_pass}
+
+[check_dhcp]
+interface=${monitor_dev}

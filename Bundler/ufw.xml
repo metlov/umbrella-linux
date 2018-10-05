@@ -1,0 +1,9 @@
+<Bundle name='ufw'>
+<Group name='ubuntu'>
+    <Package name='ufw'/>
+    <Service name='ufw'/>
+    <Path name='/etc/ufw/ufw.conf'/>
+    <Path name='/etc/ufw/user.rules'/>
+    <Path name='/etc/ufw/user6.rules'/>
+</Group>
+</Bundle>

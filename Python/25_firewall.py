@@ -19,6 +19,7 @@ if auth_in_DMZ is not None:
 else:
   auth_in_DMZ = False
 mail_in_DMZ = metadata.Properties['firewall.xml'].xdata.find('mail_in_DMZ') is not None
+admin_from_VPN = metadata.Properties['firewall.xml'].xdata.find('admin_from_VPN') is not None
 ssh_to_sec = metadata.Properties['firewall.xml'].xdata.find('ssh_to_sec') is not None
 pub_nfs_from_sec = metadata.Properties['firewall.xml'].xdata.find('pub_nfs_from_sec') is not None
 jabber_from_sec = metadata.Properties['firewall.xml'].xdata.find('jabber_from_sec') is not None

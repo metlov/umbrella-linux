@@ -1,5 +1,6 @@
 <Bundle name='mdadm'>
     <Package name='mdadm'/>
     <Path name='/etc/initramfs-tools/conf.d/mdadm'/>
+    <Path name='/etc/sysctl.d/90-raid.conf'/>
     <Service name='mdadm'/>
 </Bundle>

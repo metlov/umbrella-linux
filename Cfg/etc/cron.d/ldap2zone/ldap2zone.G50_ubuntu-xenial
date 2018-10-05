@@ -1,0 +1,3 @@
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+*/5 * * * *   bind  /usr/local/bin/umbrella-ldap2zone

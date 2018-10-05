@@ -77,7 +77,7 @@
     <pubnet>172.17.128.0/21</pubnet>   <!-- public network (Linux workstations and servers with Internet access) -->
     <secnet>172.17.4.0/26</secnet>     <!-- secure network (Linux workstations and servers without Internet access) -->
     <DMZnet>172.17.3.0/26</DMZnet>     <!-- DMZ -->
-    <!-- <vpnet>172.18.16.0/24</vpnet> -->      <!-- subnet for VPN clients, if enabled -->
+    <!-- <vpnet>10.78.16.0/24</vpnet> -->      <!-- subnet for VPN clients, if DMZvpn is enabled -->
 
     <!-- DHCP service in the pub subnet -->
     <pub_dhcp>
@@ -87,7 +87,9 @@
 
     <!-- DNS cache server -->
     <!-- if omitted the DNS server on the router will perform its own lookups -->
+    <!-- several DNS cache servers can be specified -->
     <!-- <DNScache>8.8.8.8</DNScache> -->
+    <!-- <DNScache>8.8.4.4</DNScache> -->
 
     <!-- NTP servers to synchronize the time with -->
     <!-- if none are specified the local clock on config server will be used -->
@@ -136,7 +138,7 @@
     <!-- <install_zabbix/> -->
 
     <!-- normally the NTP server is on config server, but some setups -->
-    <!-- (most notably the one, based on LXD) can't sent the system   -->
+    <!-- (most notably the one, based on LXD) can't set the system    -->
     <!-- time from within the container. This option allows to move   -->
     <!-- the NTP server from config server to the VM host, which is   -->
     <!-- able (presumably) to set its own time. Please note that such -->
@@ -260,6 +262,37 @@
             <mac>00:16:3e:63:b0:83</mac>
         </pubif>
     </server>
+    <!-- this is backdoor server -->
+    <!-- Backdoor server can be enabled to allow alternative access route
+         inside the Umbrella Linux system.
+         The rule of thumb here is that if you administer your Umbrella
+         system locally - you do not need a backdoor. If you manage the
+         system remotely, there are cases (such as unbootable router, borked
+         firewall, unreachable LDAP and Kerberos) when you will really
+         appreciate that you have an alternative route to the system and
+         can still fix it remotely.
+         Backdoor server does not use NFS homes (to be able to work if NFS
+         is down), so that you may want to generate additional SSH keys,
+         specifically for backdoor access.
+         It is your decision - enable it or not. If enabled, it is quite
+         secure: its firewall is configured to only let in SSH connections,
+         the server is automatically upgraded and monitored by OSSEC.
+    -->
+    <!-- <server> 
+        <function>backdoor</function>
+        <name>backdoor</name>
+        <extif>
+            <dev>eth1</dev>
+            <ip>192.168.15.20</ip>
+            <mac>00:16:3e:a8:63:91</mac>
+            <gateway>192.168.15.1</gateway>
+        </extif>
+        <pubif>
+            <dev>eth0</dev>
+            <ip>172.17.128.10</ip>
+            <mac>00:16:3e:91:14:3a</mac>
+        </pubif>
+    </server> -->
     <server>
         <function>DMZsmtp</function>     <!-- this is DMZ SMTP and DNS server -->
         <name>smtp</name>
@@ -278,4 +311,26 @@
             <mac>00:16:3e:32:ec:1b</mac>
         </DMZif>
     </server>
+    <!-- The vpn server enables roaming Umbrella Workstations -->
+    <!-- Note that it is necessary to define vpn network by uncommenting  -->
+    <!-- <vpnet/> tag at the beginning of this file. The addresses for the-->
+    <!-- roaming workstations will be allocated from <vpnet/> .           -->
+    <!-- It is advisable to enable <auth_in_DMZ/> and <mail_in_DMZ> in    -->
+    <!-- firewall.xml so that the users of roaming workstations can       -->
+    <!-- authenticate and read mail. For them to have Jabber connections  -->
+    <!-- DMZxmpp also needs to be enabled.                                -->
+    <!-- If you want system administrators to perform system management   -->
+    <!-- remotely via VPN, enable <admin_from_VPN/> in firewall.xml .     -->
+    <!-- The roaming workstations themselves are added to the clients.xml -->
+    <!-- as follows:                                                      -->
+    <!-- <Client profile="roamingworkstation" name="roamer.umbrella-inc.ru" uuid="roamer.umbrella-inc.ru" auth="cert" floating="true" version="1.3.5"/> -->
+    <!-- <server>
+        <function>DMZvpn</function
+        <name>vpn</name>
+        <DMZif>
+            <dev>eth0</dev>
+            <ip>172.17.3.6</ip>
+            <mac>00:16:3e:13:ad:02</mac>
+        </DMZif>
+    </server> -->
 </Properties>

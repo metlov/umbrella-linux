@@ -43,5 +43,9 @@
 
   <!-- extra services, having their own bundles -->
   <Service name='watchdog' status='on' type='systemd'/>
+  <Service name='ulogd2' status='on' type='systemd'/>
+  <Service name='ufw' status='on' type='systemd'/>
+  <Service name='nut-server' status='on' type='systemd'/>
+  <Service name='nut-client' status='on' type='systemd'/>
 </Group>
 </Rules>

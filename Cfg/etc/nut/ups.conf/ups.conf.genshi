@@ -1,0 +1,11 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+{% if 'ups-powercom' in metadata.groups %}\
+[UPS]
+       driver = usbhid-ups
+       port = auto
+       desc = "Powercom UPS"
+{% end %}\
