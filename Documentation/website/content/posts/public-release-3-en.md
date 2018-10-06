@@ -26,6 +26,10 @@ This is, probably, the last Ubuntu Xenial based release. The work is underway on
 * more custom OSSEC rules to improve monitoring/reduce the level of OSSEC messages SPAM.
 * numerous bugfixes and enhancements of both the system and the installer.
 
+### Hotfix vesion 0.3.1 -- Summary of Changes:
+
+* fix: 20_networks.py failure in case no DNScache was specified.
+
 See the
 [installation instructions](/umbrella-linux/installation/)
 to try Umbrella Linux yourself.

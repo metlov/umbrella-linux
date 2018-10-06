@@ -60,5 +60,6 @@ DNScache=None
 if metadata.Properties['umbrella.xml'].xdata.find('DNScache') is not None:
   DNScache=[cache.text for cache in metadata.Properties['umbrella.xml'].xdata.findall('DNScache')]
 # transition code for the case when DMZsmtp was specified as DNS cache
-DNScache=[ ip for ip in DNScache if ipcalc.IP(ip) not in wholenet ]
-if len(DNScache)==0: DNScache=None
+if DNScache is not None:
+  DNScache=[ ip for ip in DNScache if ipcalc.IP(ip) not in wholenet ]
+  if len(DNScache)==0: DNScache=None

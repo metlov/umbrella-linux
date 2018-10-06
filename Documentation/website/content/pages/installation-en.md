@@ -27,6 +27,9 @@ you will need a VM with 25Gb of hard drive, 3Gb RAM and a couple of virtual
 CPUs. When creating a VM connect the above-downloaded Ubuntu minimal
 installation image to its virtual CD drive.
 
+    When installing into VirtualBox with the network adapter in Bridged mode,
+please ensure that promiscous mode is allowed for this adapter.
+
     *Optional:* it also can be a good idea to have a secondary network card installed
 on your physical machine so that you can later pass it through to the Umbrella
 VM and have it manage the network behind it (installing and using workstations
@@ -47,21 +50,24 @@ root's home ( e.g. with
 These are all simple text files and `./umbrella-install`
 is a bash script, please `chmod +x ./umbrella-install` after downloading.
 If you wish to generate unique passwords and certificates for your system
-(which is, basically, any time if you change the system name or location
+(it is necessary, for example, if you change the system name or location
 in umbrella.xml) -- delete the `umbrella_keys.xml` file (it will be recreated
 by the installer with your own settings). Do not install any additional
 packages at this point (may be except `mc` and `aptitude`).
 
-5. Review the `*.xml` files and alter the settings there (since there is no
-documentation yet, you will need to consult somebody if you want to do
-some non-trivial changes). Again, if you have changed the system name (or
-location, or just in case) -- delete the umbrella_keys.xml to have it
-regenerated.
+5. Review the `*.xml` files and alter the settings there.
+You may want to check the name of vmhost (must coincide with the name
+of the Ubuntu system, used for installation),
+the definitions of the extif on router (the IP and
+gatewey addresses) and vmhost (mac address) to ensure they correspond to
+the ones, reported by `ifconfig` and `route`.
+Since there is no documentation yet, you will need to consult somebody
+if you want to do some non-trivial changes.
 
 5. Run the "./umbrella-install" script you've also downloaded on the previous
 step. It should do everything automatically, but may require a single hard
 (with "Power off"/"Power on") reboot of the virtual machine. After reboot
-run the script again and it should finish the installation. It may take
+run the script again, the installation will continue. It may take
 several hours to complete depending on the speed of your hard drive.
 Ejoy your new Umbrella Linux system !
 
