@@ -1,4 +1,4 @@
-<Bundle name='www-autoconfig'>
+<Bundle>
     <Package name='apache2'/>
     <Path name='/etc/apache2/sites-available/autoconfig'/>
     <Path name='/etc/apache2/sites-enabled/autoconfig.conf'/>

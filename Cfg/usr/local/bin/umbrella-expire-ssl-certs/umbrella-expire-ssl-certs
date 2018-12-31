@@ -3,7 +3,7 @@
 DAYS=7   # days before the expiration to delete the certificate
 
 if [ $# -eq 0 ] ; then
-    hostlist=`find /var/lib/bcfg2/SSLCA -name '*.pem.H_*' -print0 | xargs -0 -n 1 $0`
+    hostlist=`find /var/lib/bcfg2/Cfg -name '*.pem.H_*' -print0 | xargs -0 -n 1 $0`
     hostlist=`echo "${hostlist}" | sort -u`
     if [ -n "$hostlist" ]; then
         echo "The certificates for the following hosts were deleted:" 1>&2
@@ -25,8 +25,8 @@ elif [ $# -eq 1 ] ; then
         cert_name=${fname%%.H_*}
         host_name=${fname#${cert_name}.H_}
         dircert=$(dirname $1)
-        keypath=`xmllint --xpath 'string(//CertInfo/Cert[1]/@key)' ${dircert}/cert.xml`
-        keypath="/var/lib/bcfg2/SSLCA${keypath}"
+        keypath=`xmllint --xpath 'string(//CertInfo/Cert[1]/@key)' ${dircert}/sslcert.xml`
+        keypath="/var/lib/bcfg2/Cfg${keypath}"
         key_name=$(basename ${keypath})
         keyfilename=${keypath}/${key_name}.H_${host_name}
         echo "deleting $1" 1>&2

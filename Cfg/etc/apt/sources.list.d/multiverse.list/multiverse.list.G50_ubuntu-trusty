@@ -1,4 +1,0 @@
-# add multiverse
-deb http://archive.ubuntu.com/ubuntu trusty multiverse
-deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse
-deb http://security.ubuntu.com/ubuntu trusty-security multiverse

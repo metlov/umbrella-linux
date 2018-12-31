@@ -1,14 +1,8 @@
-<Bundle name='apt-cacher'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='apt-cacher-ng'/>
-    <Group name='ubuntu-trusty'>
-        <BoundPOSIXUser name="apt-cacher-ng" home="/var/cache/apt-cacher-ng" shell="/bin/false" gecos="" uid="103" group="apt-cacher-ng"/>
-        <BoundPOSIXGroup name="apt-cacher-ng" gid="108"/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXUser name="apt-cacher-ng" home="/var/cache/apt-cacher-ng" shell="/bin/false" gecos="" uid="622" group="apt-cacher-ng"/>
-        <BoundPOSIXGroup name="apt-cacher-ng" gid="622"/>
-    </Group>
+    <BoundPOSIXUser name="apt-cacher-ng" home="/var/cache/apt-cacher-ng" shell="/bin/false" gecos="" uid="622" group="apt-cacher-ng"/>
+    <BoundPOSIXGroup name="apt-cacher-ng" gid="622"/>
     <Service name='apt-cacher-ng'/>
 </Group>
 </Bundle>

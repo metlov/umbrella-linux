@@ -1,4 +1,4 @@
-<Bundle name='bind' xmlns:py="http://genshi.edgewall.org/">
+<Bundle xmlns:py="http://genshi.edgewall.org/">
 <?python
 from genshi.template import TemplateError
 import socket
@@ -11,48 +11,31 @@ execfile(repo+'/Python/30_networking.py')
     <Package name='bind9'/>
     <Package name='bind9-host'/>
     <Group name='DMZsmtp' negate='true'>
-        <Group name='ubuntu-trusty'>
-            <Package name='ldap2zone'/>
-            <Path name='/etc/default/ldap2zone'/>
-            <Path name='/etc/cron.d/ldap2zone'/>
-            <Path name='/usr/sbin/ldap2bind'/>
-            <Path name='/etc/bind/named.conf.ldap2zone'/>
-        </Group>
-        <Group name='ubuntu-xenial'>
-<!--            <Package name='argonaut-ldap2zone'/>
-            <Path name='/etc/argonaut/argonaut.conf'/> -->
-            <Package name='libapp-daemon-perl'/>
-            <Package name='libhttp-daemon-perl'/>
-            <Package name='liblog-handler-perl'/>
-            <Path name='/etc/bind'/> <!-- make writable for bind user -->
-            <Path name="/var/cache/bind"/>
-            <Path name='/etc/cron.d/ldap2zone'/> <!-- runs as bind user -->
-            <Path name='/etc/bind/named.conf.ldap2zone'/>
-            <Path name='/usr/local/bin/umbrella-ldap2zone'/>
-            <!-- headers for the main forward and reverse zones -->
-            <Path name='/etc/bind/zones/mainzone'/>
-            <Path name='/etc/bind/zones/mainzone.rev'/>
-            <!-- statically define the internal versions of served zones -->
-            <Path name='/etc/bind/zones'/>
-            <py:for each="iface in ['pub','sec','DMZ']">
-                <py:for each="i in range(len(domain_names_list))">
-                    <py:if test="domain_names_list[i]!=domain_name">
-                    <Path name='/etc/bind/zones/${iface}_zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
-                    </py:if>
-                </py:for>
+        <Package name='libapp-daemon-perl'/>
+        <Package name='libhttp-daemon-perl'/>
+        <Package name='liblog-handler-perl'/>
+        <Path name='/etc/bind'/> <!-- make writable for bind user -->
+        <Path name="/var/cache/bind"/>
+        <Path name='/etc/cron.d/ldap2zone'/> <!-- runs as bind user -->
+        <Path name='/etc/bind/named.conf.ldap2zone'/>
+        <Path name='/usr/local/bin/umbrella-ldap2zone'/>
+        <!-- headers for the main forward and reverse zones -->
+        <Path name='/etc/bind/zones/mainzone'/>
+        <Path name='/etc/bind/zones/mainzone.rev'/>
+        <!-- statically define the internal versions of served zones -->
+        <Path name='/etc/bind/zones'/>
+        <py:for each="iface in ['pub','sec','DMZ']">
+            <py:for each="i in range(len(domain_names_list))">
+                <py:if test="domain_names_list[i]!=domain_name">
+                <Path name='/etc/bind/zones/${iface}_zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
+                </py:if>
             </py:for>
-        </Group>
+        </py:for>
     </Group>
     <Service name='bind9'/>
-    <Group name='ubuntu-trusty'>
-        <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="103" group="bind"/>
-        <BoundPOSIXGroup name="bind" gid="108"/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <Package name='dns-root-data'/>
-        <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="108" group="bind"/>
-        <BoundPOSIXGroup name="bind" gid="113"/>
-    </Group>
+    <Package name='dns-root-data'/>
+    <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="108" group="bind"/>
+    <BoundPOSIXGroup name="bind" gid="113"/>
     <Path name='/etc/default/bind9'/>
     <Path name='/etc/bind/named.conf'/>
     <Path name='/etc/bind/named.conf.local'/>

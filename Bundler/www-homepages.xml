@@ -1,4 +1,4 @@
-<Bundle name='www-homepages'>
+<Bundle>
 <Group name='ubuntu'>
         <!-- implements the user's WWW homepages replication from PUB   -->
         <!-- to DMZ and their serving by the main WWW server.           -->

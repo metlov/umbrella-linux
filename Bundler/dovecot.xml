@@ -1,48 +1,30 @@
-<Bundle name='dovecot'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='dovecot-imapd'/>
-    <Group name='ubuntu-trusty'>
-        <BoundPOSIXUser name="dovecot" home="/usr/lib/dovecot" shell="/bin/false" gecos="Dovecot mail server,,," uid="105" group="dovecot"/>
-        <BoundPOSIXUser name="dovenull" home="/nonexistent" shell="/bin/false" gecos="Dovecot login user,,," uid="106" group="dovenull"/>
-        <BoundPOSIXGroup name="dovecot" gid="111"/>
-        <BoundPOSIXGroup name="dovenull" gid="112"/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXUser name="dovecot" home="/usr/lib/dovecot" shell="/bin/false" gecos="Dovecot mail server,,," uid="629" group="dovecot"/>
-        <BoundPOSIXUser name="dovenull" home="/nonexistent" shell="/bin/false" gecos="Dovecot login user,,," uid="626" group="dovenull"/>
-        <BoundPOSIXGroup name="dovecot" gid="629"/>
-        <BoundPOSIXGroup name="dovenull" gid="626"/>
-        <BoundPOSIXUser name="vmail" home="/var/maildirs" shell="/bin/false" gecos="Virtual mail accounts,,," uid="654" group="vmail"/>
-        <BoundPOSIXGroup name="vmail" gid="654"/>
-    </Group>
+    <BoundPOSIXUser name="dovecot" home="/usr/lib/dovecot" shell="/bin/false" gecos="Dovecot mail server,,," uid="629" group="dovecot"/>
+    <BoundPOSIXUser name="dovenull" home="/nonexistent" shell="/bin/false" gecos="Dovecot login user,,," uid="626" group="dovenull"/>
+    <BoundPOSIXGroup name="dovecot" gid="629"/>
+    <BoundPOSIXGroup name="dovenull" gid="626"/>
+    <BoundPOSIXUser name="vmail" home="/var/maildirs" shell="/bin/false" gecos="Virtual mail accounts,,," uid="654" group="vmail"/>
+    <BoundPOSIXGroup name="vmail" gid="654"/>
     <Package name='dovecot-pop3d'/>
     <Path name='/etc/ssl/imap.pem'/>
     <Path name='/etc/ssl/private/imap.key'/>
     <Package name='dovecot-gssapi'/>
-    <Group name='ubuntu-xenial'>
-        <!-- on Ubuntu Xenial and up Dovecot directly interfaces with LDAP  -->
-        <!-- for user list and quota support.                               -->
-        <!-- Not every user now gets a mailbox, but only the specially      -->
-        <!-- designated ones in LDAP. It is possible to have a primary      -->
-        <!-- address on the external server (in which case the local        -->
-        <!-- mailbox is not created). It is also possible to have a user    -->
-        <!-- with no POSIX account, but with mailbox (accessible via        -->
-        <!-- webmail for instance).                                         -->
-        <Package name='dovecot-ldap'/>
-        <Path name='/etc/dovecot/dovecot-ldap.conf'/>
-        <!-- to enable plain logins of virtual mailbox users -->
-        <Path name='/etc/pam.d/dovecot'/>
-        <!-- we also use the antispam and sieve plugins -->
-        <Package name='dovecot-antispam'/>
-        <Package name='dovecot-sieve'/>
-        <!-- default sieve script -->
-        <Path name='/etc/sieve/default.sieve'/>
-        <Action name='sieve-recompile-default'/>
-        <Package name='dovecot-managesieved'/>
+    <Package name='dovecot-ldap'/>
+    <Path name='/etc/dovecot/dovecot-ldap.conf'/>
+    <!-- to enable plain logins of virtual mailbox users -->
+    <Path name='/etc/pam.d/dovecot'/>
+    <!-- we also use the antispam and sieve plugins -->
+    <Package name='dovecot-antispam'/>
+    <Package name='dovecot-sieve'/>
+    <!-- default sieve script -->
+    <Path name='/etc/sieve/default.sieve'/>
+    <Action name='sieve-recompile-default'/>
+    <Package name='dovecot-managesieved'/>
 
-        <!-- the directory, where the mail is stored -->
-        <Path name="/var/maildirs"/>
-    </Group>
+    <!-- the directory, where the mail is stored -->
+    <Path name="/var/maildirs"/>
     <Path name='/etc/dovecot/dovecot.conf'/>
     <Service name='dovecot'/>
 </Group>

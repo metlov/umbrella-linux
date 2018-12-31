@@ -1,4 +1,4 @@
-<Bundle name='cli' xmlns:xi="http://www.w3.org/2001/XInclude">
+<Bundle independent="true" xmlns:xi="http://www.w3.org/2001/XInclude">
     <!-- These are various non system-critical CLI tools installed on top -->
     <!-- of the desktop environment. Additional tools can be specified in -->
     <!-- Local/Bundler/cli.xml , which is included here. -->
@@ -13,6 +13,7 @@
     <Package name='hunspell-en-us'/>
     <Package name='hunspell-ru'/>
     <Package name='lm-sensors'/>
+    <Service name='lm-sensors'/>
     <Package name='libnss3-tools'/>
     <Package name='manpages'/>
     <Group name='ntfs-3g'>
@@ -24,9 +25,6 @@
     <Package name='rar'/>
     <Package name='schroot'/>
     <Package name='debootstrap'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='systemd-shim'/>
-    </Group>
 
     <Package name='fortune-mod'/>
     <Package name='fortunes'/>
@@ -49,11 +47,6 @@
     <Package name='apparmor'/>
     <Package name='apparmor-utils'/>
     <Path name='/etc/apparmor.d/tunables/home.d/umbrella'/>
-
-    <Group name='ubuntu-trusty'>
-        <!-- fix anacron message spam if PC is turned on at 7:30 -->
-        <Path name='/etc/cron.d/anacron'/>
-    </Group>
 
     <Group name='localfsworkstation'>
         <Path name='/usr/local/bin/prepare-umbrella-image'/>

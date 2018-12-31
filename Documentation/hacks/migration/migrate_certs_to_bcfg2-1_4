@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ $# -eq 0 ] ; then
+  BCFG2_REPOSITORY=/var/lib/bcfg2
+
+  if [ ! -d "${BCFG2_REPOSITORY}/SSLCA" ]; then
+    echo "${BCFG2_REPOSITORY}/SSLCA does not exist."
+    echo "Probably already migrated."
+    exit 9
+  fi
+
+  echo "This script will move SSL certificates from"
+  echo "${BCFG2_REPOSITORY}/SSLCA"
+  echo "to"
+  echo "${BCFG2_REPOSITORY}/Cfg"
+  echo
+  read -p "Please type \"yes\" if you really want to do this: "
+  if [ "$REPLY" != "yes" ]; then
+    exit
+  fi
+
+  find ${BCFG2_REPOSITORY}/SSLCA \( -name '*.pem.H_*' -or -name '*.key.H_*' \) -print0 | xargs -0 -r -n 1 $0
+elif [ $# -eq 1 ] ; then
+  TARGET=${1//\/SSLCA\//\/Cfg\/}
+  mkdir -p "$(dirname $TARGET)"
+  mv ${1} ${TARGET}
+else
+  echo "wrong number of arguments."
+fi
+

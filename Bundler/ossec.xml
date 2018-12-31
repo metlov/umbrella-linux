@@ -1,4 +1,4 @@
-<Bundle name='ossec'>
+<Bundle>
 <Group name='ubuntu'>
     <Group name='ossec-client'>
         <BoundPOSIXUser name="ossec" home="/var/ossec/" shell="/bin/false" gecos="" uid="651" group="ossec"/>

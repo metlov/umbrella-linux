@@ -1,4 +1,4 @@
-<Bundle name='invenio'>
+<Bundle independent="true">
 <!-- Invenio itself still need to be installed and configured manually. -->
 <!-- Here we try to deal with its dependencies as much as possible, but -->
 <!-- still some necessary python packages are not packaged as DEBs yet. -->
@@ -55,6 +55,7 @@
     <Package name='libxslt1-dev'/>
     <Package name='python-unidecode'/>
     <Package name='python-redis'/>
+    <Service name='redis-server'/>
     <Package name='python-xapian'/>
     <Package name='build-essential'/>
     <Package name='fakeroot'/>

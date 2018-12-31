@@ -1,4 +1,4 @@
-<Bundle name='ldap-auth'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='libsasl2-modules'/>
     <Package name='libsasl2-modules-gssapi-mit'/>

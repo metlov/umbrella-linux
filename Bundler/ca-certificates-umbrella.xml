@@ -1,4 +1,4 @@
-<Bundle name='ca-certificates-umbrella' xmlns:py="http://genshi.edgewall.org/">
+<Bundle xmlns:py="http://genshi.edgewall.org/">
    <!-- Registry of CA certificates trusted by this Umbrella for  -->
    <!-- external collections.                                     -->
    <!-- The certificates themselves are specified in firewall.xml -->

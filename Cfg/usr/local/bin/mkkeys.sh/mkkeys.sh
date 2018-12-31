@@ -137,10 +137,10 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
         ${PECHO} "Revoking and deleting SSL and SSH keys of bcfg2 hosts: " ${EXTRABCFG2HOSTS}
         for bcfg2_host in ${EXTRABCFG2HOSTS}; do
             echo "Revoking SSL keys of ${bcfg2_host}"
-            find /var/lib/bcfg2/SSLCA/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 -n 1 su -s /bin/bash bcfg2 /usr/local/bin/umbrella-revoke-key
+            find /var/lib/bcfg2/Cfg/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 -n 1 su -s /bin/bash bcfg2 /usr/local/bin/umbrella-revoke-key
             echo "Deleting SSL keys of ${bcfg2_host}"
-            find /var/lib/bcfg2/SSLCA/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 -r rm
-            find /var/lib/bcfg2/SSLCA/ -name "*.key.H_${bcfg2_host}" -print0 | xargs -0 -r rm
+            find /var/lib/bcfg2/Cfg/ -name "*.pem.H_${bcfg2_host}" -print0 | xargs -0 -r rm
+            find /var/lib/bcfg2/Cfg/ -name "*.key.H_${bcfg2_host}" -print0 | xargs -0 -r rm
             echo "Deleting SSH keys of ${bcfg2_host}"
             find /var/lib/bcfg2/SSHbase/ -name "*.H_${bcfg2_host}" -print0 | xargs -0 -r rm
         done
@@ -181,7 +181,7 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
             LOCATION=`${PLDAPSEARCH} -x -LLL "(&$LDAP_CLASS_WORKSTATION(cn=${KEY%%.${DOMAIN_NAME}}))" l | ${PGREP} '^l: ' | ${PSED} -e 's/^l: //g'`
             if [ "$LOCATION" == "roaming" ]; then
                 # roaming workstation
-                ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"roamingworkstation\" name=\"$KEY\" uuid=\"$KEY\" floating=\"true\" auth=\"cert\" version=\"1.3.5\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
+                ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"roamingworkstation\" name=\"$KEY\" uuid=\"$KEY\" floating=\"true\" auth=\"cert\" version=\"1.4.0pre2\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
             else
                 # locally-connected workstation or server
                 IP=`${PLDAPSEARCH} -x -LLL "(&$LDAP_CLASS(cn=$KEY))" ipHostNumber | ${PGREP} ipHostNumber | ${PSED} -e 's/ipHostNumber: //g'`
@@ -192,7 +192,7 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
                 echo -n $KEY $IP
                 CLASS=`${IPCLASS} ${IP}`
                 if [ ! -z "$CLASS" -a "$CLASS" != " " ]; then
-                    ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"$CLASS\" name=\"$KEY\" version=\"1.3.5\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
+                    ${PPERL} -pi -e "s/<\!--PLACEHOLDER-->/<Client profile=\"$CLASS\" name=\"$KEY\" version=\"1.4.0pre2\"\/>\n  <\!--PLACEHOLDER-->/g" ${CLIENTSPATH}
                 else
                     echo "The class of workstation $KEY ($IP) can't be determined."
                     echo "Please fix the IP address or add to the clients.xml manually."

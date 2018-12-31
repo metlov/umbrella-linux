@@ -1,4 +1,4 @@
-<Bundle name='redis'>
+<Bundle>
     <Package name='redis-server'/>
     <BoundPOSIXUser name="redis" home="/var/lib/redis" shell="/bin/false" gecos="" uid="662" group="redis"/>
     <BoundPOSIXGroup name="redis" gid="662"/>

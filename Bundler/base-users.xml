@@ -1,4 +1,4 @@
-<Bundle name="base-users">
+<Bundle>
   <BoundPOSIXUser name="sync" home="/bin" shell="/bin/sync" gecos="sync" uid="4" group="nogroup"/>
   <BoundPOSIXUser name="gnats" home="/var/lib/gnats" shell="/usr/sbin/nologin" gecos="Gnats Bug-Reporting System (admin)" uid="41" group="gnats"/>
   <BoundPOSIXUser name="uucp" home="/var/spool/uucp" shell="/usr/sbin/nologin" gecos="uucp" uid="10" group="uucp"/>
@@ -13,37 +13,14 @@
   <BoundPOSIXUser name="news" home="/var/spool/news" shell="/usr/sbin/nologin" gecos="news" uid="9" group="news"/>
   <BoundPOSIXUser name="man" home="/var/cache/man" shell="/usr/sbin/nologin" gecos="man" uid="6" group="man"/>
   <BoundPOSIXUser name="root" home="/root" shell="/bin/bash" gecos="root" uid="0" group="root"/>
-
   <BoundPOSIXUser name="list" home="/var/list" shell="/usr/sbin/nologin" gecos="Mailing List Manager" uid="38" group="list"/>
   <BoundPOSIXUser name="games" home="/usr/games" shell="/usr/sbin/nologin" gecos="games" uid="5" group="games"/>
   <BoundPOSIXUser name="www-data" home="/var/www" shell="/usr/sbin/nologin" gecos="www-data" uid="33" group="www-data"/>
   <BoundPOSIXUser name="backup" home="/var/backups" shell="/usr/sbin/nologin" gecos="backup" uid="34" group="backup"/>
-  <Group name="ubuntu-trusty">
-    <BoundPOSIXUser name="libuuid" home="/var/lib/libuuid" shell="" gecos="" uid="100" group="libuuid"/>
-    <BoundPOSIXUser name="syslog" home="/home/syslog" shell="/bin/false" gecos="" uid="101" group="syslog">
-      <MemberOf group="adm"/>
-    </BoundPOSIXUser>
-    <Group name='vm'>
-      <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="102" group="nogroup"/>
-    </Group>
-    <Group name='vm' negate='true'>
-      <Group name='server'>
-        <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="104" group="nogroup"/>
-      </Group>
-      <Group name='ltsp'>
-        <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="104" group="nogroup"/>
-      </Group>
-      <Group name='ltsp' negate='true'>
-        <Group name='workstation'>
-          <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="115" group="nogroup"/>
-        </Group>
-      </Group>
-    </Group>
-  </Group>
   <Group name="ubuntu-xenial">
     <BoundPOSIXUser name="uuidd" home="/run/uuidd" shell="/bin/false" gecos="" uid="617" group="uuidd"/>
     <BoundPOSIXUser name="syslog" home="/home/syslog" shell="/bin/false" gecos="" uid="104" group="syslog">
-      <MemberOf group="adm"/>
+    <MemberOf group="adm"/>
     </BoundPOSIXUser>
     <BoundPOSIXUser name="systemd-timesync" home="/run/systemd" shell="/bin/false" gecos="systemd Time Synchronization,,," uid="100" group="systemd-timesync"/>
     <BoundPOSIXUser name="systemd-network" home="/run/systemd/netif" shell="/bin/false" gecos="systemd Network Management,,," uid="101" group="systemd-network"/>
@@ -57,11 +34,6 @@
   <BoundPOSIXGroup name="backup" gid="34"/>
   <BoundPOSIXGroup name="plugdev" gid="46"/>
   <BoundPOSIXGroup name="sudo" gid="27"/>
-  <Group name="ubuntu-trusty">
-    <BoundPOSIXGroup name="crontab" gid="103"/>
-    <BoundPOSIXGroup name="syslog" gid="104"/>
-    <BoundPOSIXGroup name="netdev" gid="102"/>
-  </Group>
   <Group name="ubuntu-xenial">
     <BoundPOSIXGroup name="crontab" gid="107"/>
     <BoundPOSIXGroup name="syslog" gid="108"/>
@@ -96,32 +68,6 @@
   <BoundPOSIXGroup name="nogroup" gid="65534"/>
   <BoundPOSIXGroup name="dip" gid="30"/>
   <BoundPOSIXGroup name="list" gid="38"/>
-  <Group name="ubuntu-trusty">
-    <BoundPOSIXGroup name="libuuid" gid="101"/>
-    <Group name='archive' negate='true'>
-      <BoundPOSIXGroup name="ssl-cert" gid="107"/>
-    </Group>
-    <Group name='archive'>
-      <BoundPOSIXGroup name="ssl-cert" gid="112"/>
-    </Group>
-    <Group name='vm'>
-      <BoundPOSIXGroup name="ssh" gid="105"/>
-      <BoundPOSIXGroup name="admin" gid="106"/>
-    </Group>
-    <Group name='vm' negate='true'>
-      <Group name='server'>
-        <BoundPOSIXGroup name="ssh" gid="108"/>
-      </Group>
-      <Group name='ltsp'>
-        <BoundPOSIXGroup name="ssh" gid="108"/>
-      </Group>
-      <Group name='ltsp' negate='true'>
-        <Group name='workstation'>
-          <BoundPOSIXGroup name="ssh" gid="115"/>
-        </Group>
-      </Group>
-    </Group>
-  </Group>
   <Group name="ubuntu-xenial">
     <BoundPOSIXGroup name="input" gid="106"/>
     <BoundPOSIXGroup name="messagebus" gid="110"/>

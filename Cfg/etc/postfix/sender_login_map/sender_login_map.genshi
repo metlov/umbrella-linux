@@ -11,7 +11,4 @@ execfile(repo+'/Python/00_baseparams.py')
 {%   for alias in metadata.Properties['mailaliases.xml'].xdata.findall('mailalias') %}\
 /^${alias.find('alias').text}@${domain}$$/            ${', '.join([user.text for user in alias.findall('user')])}
 {%   end %}\
-{%   if 'ubuntu-trusty' in metadata.groups %}\
-/^(.*)@${domain}$$/              $$1
-{%   end %}\
 {% end %}\

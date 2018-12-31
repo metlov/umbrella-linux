@@ -1,38 +1,22 @@
-<Bundle name='nfsv4'>
+<Bundle>
 <Group name='ubuntu'>
-    <Group name='ubuntu-trusty'>
-      <BoundPOSIXUser name="statd" home="/var/lib/nfs" shell="/bin/false" gecos="" uid="203" group="nogroup"/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-      <BoundPOSIXUser name="statd" home="/var/lib/nfs" shell="/bin/false" gecos="" uid="620" group="nogroup"/>
-    </Group>
+    <BoundPOSIXUser name="statd" home="/var/lib/nfs" shell="/bin/false" gecos="" uid="620" group="nogroup"/>
     <Package name='nfs-common'/>
     <Package name='keyutils'/>
     <Path name='/etc/idmapd.conf'/>
     <Path name='/etc/default/nfs-common'/>
-    <Group name='ubuntu-trusty'>
-        <Service name='gssd'/>
-        <Service name='idmapd'/>
-<!--    <Service name='portmap'/> -->
-        <Service name='rpcbind'/>
-        <Service name='rpcbind-boot'/>
-        <Service name='gssd-mounting'/>
-        <Service name='idmapd-mounting'/>
-        <Service name='statd'/>
-        <Service name='statd-mounting'/>
-        <Service name='portmap-wait'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <!-- use an old semantic of returning EACCESS instead of EKEYEXPIRED -->
-        <!-- some useful programs still don't understand EKEYEXPIRED and hang-->
-        <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
+    <!-- use an old semantic of returning EACCESS instead of EKEYEXPIRED -->
+    <!-- some useful programs still don't understand EKEYEXPIRED and hang-->
+    <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
 
-        <!-- disable fast retransmissions, which kill NFS at heavy loads -->
-        <Path name='/etc/sysctl.d/90-frto.conf'/>
-    </Group>
+    <!-- disable fast retransmissions, which kill NFS at heavy loads -->
+    <Path name='/etc/sysctl.d/90-frto.conf'/>
     <!-- svcgssd is needed on clients to make delegations work -->
     <Package name='nfs-kernel-server'/>
     <Path name='/etc/default/nfs-kernel-server'/>
     <Service name='nfs-kernel-server'/>
+    <Service name='nfs-client.target'/>
+    <Service name='nfs-server'/>
+    <Service name='rpcbind.socket'/>
 </Group>
 </Bundle>

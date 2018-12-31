@@ -11,5 +11,5 @@
 # version 3. The full text of the licence is in the LICENSE file inside
 # the root directory of the Umbrella Linux configuration repository.
 
-/usr/sbin/bcfg2-admin reports purge --expired > /dev/null 2>&1
-/usr/sbin/bcfg2-admin reports purge --days 90 > /dev/null 2>&1
+/usr/sbin/bcfg2-admin purgereports --expired > /dev/null 2>&1
+/usr/sbin/bcfg2-admin purgereports --days 90 > /dev/null 2>&1

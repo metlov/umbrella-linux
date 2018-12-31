@@ -2,6 +2,7 @@
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
 execfile(repo+'/Python/30_networking.py')
 %}\
 {% if 'router' in metadata.groups %}\
@@ -31,6 +32,21 @@ view ${iface}net {
 {% if 'DMZsmtp' in metadata.groups %}\
 include "/etc/bind/named.conf.default-zones";
 
+{% if ('mail' in funchosts) and \
+      ('list.dnswl.org' in dns_smtp_whitelists) and \
+      (DNScache is not None ) %}\
+// Disable forwarders for DNSWL requests (you will need to register
+// the external IP ${ext_address} with DNSWL.org service).
+//
+// The logic here is that in the internal setting (no direct Internet access
+// there is no need for DNSWL, the whitelisting should be handled upstream).
+// When facing the Internet, the system will make the direct DNSWL names
+// resolution irrespective of the DNScache setting.
+zone "dnswl.org" {
+    type forward;
+};
+
+{% end %}\
 // zones for which we answer authoritatively
 {%   for i in range(len(domain_names_list)) %}\
 zone "${domain_names_list[i]}" {

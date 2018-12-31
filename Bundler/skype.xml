@@ -1,4 +1,4 @@
-<Bundle name='skype'>
+<Bundle>
     <Group name='ubuntu-xenial'>
         <!-- currently Microsoft distributes only 64-bit version of Skype -->
         <!-- on Linux -->

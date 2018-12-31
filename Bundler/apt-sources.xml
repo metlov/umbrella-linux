@@ -1,4 +1,4 @@
-<Bundle name='apt-sources' xmlns:xi="http://www.w3.org/2001/XInclude">
+<Bundle xmlns:xi="http://www.w3.org/2001/XInclude">
    <Package name='apt-transport-https'/>
    <Path name='/etc/apt/apt.conf'/>
    <Group name='roaming' negate='true'>  <!-- VPN hosts get packages directly-->
@@ -17,5 +17,7 @@
        <!-- install at present                                        -->
        <!-- <Path name='/etc/apt/trusted.gpg.d/google.gpg'/> -->
    </Group>
+   <Service name='apt-daily.timer'/>
+   <Service name='apt-daily-upgrade.timer'/>
    <xi:include href="../Local/Bundler/apt-sources.xml"><xi:fallback/></xi:include>
 </Bundle>

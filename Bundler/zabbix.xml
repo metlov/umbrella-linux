@@ -1,4 +1,4 @@
-<Bundle name='zabbix' xmlns:py="http://genshi.edgewall.org/">
+<Bundle xmlns:py="http://genshi.edgewall.org/">
 <?python
 from genshi.template import TemplateError
 import socket
@@ -9,10 +9,6 @@ execfile(repo+'/Python/20_networks.py')
 <py:if test="install_zabbix and 'monitor' in funchosts">
 <Group name='ubuntu'>
     <Group name='monitor'>
-        <Group name='ubuntu-trusty'>
-            <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="105" group="zabbix"/>
-            <BoundPOSIXGroup name="zabbix" gid="111"/>
-        </Group>
         <Package name='zabbix-server-mysql'/>
         <Path name='/etc/zabbix/zabbix_server.conf'/>
         <Path name='/etc/default/zabbix-server'/>
@@ -29,16 +25,8 @@ execfile(repo+'/Python/20_networks.py')
         <Path name='/etc/zabbix/zabbix_proxy.conf'/>
         <Path name='/etc/default/zabbix-proxy'/>
     </Group>
-    <Group name='monitor' negate='true'>
-        <Group name='ubuntu-trusty'>
-            <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="650" group="zabbix"/>
-            <BoundPOSIXGroup name="zabbix" gid="650"/>
-        </Group>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="218" group="zabbix"/>
-        <BoundPOSIXGroup name="zabbix" gid="226"/>
-    </Group>
+    <BoundPOSIXUser name="zabbix" home="/var/run/zabbix/" shell="/bin/false" gecos="" uid="650" group="zabbix"/>
+    <BoundPOSIXGroup name="zabbix" gid="650"/>
     <py:if test="('router' in metadata.groups or 'vmhost' in metadata.groups) or ((not ip_addr in networks['DMZif']) and (not ip_addr in networks['secif'])) or (ip_addr in networks['secif'] and 'archive' in funchosts)">
         <Package name='zabbix-agent'/>
         <Path name='/etc/zabbix/zabbix_agentd.conf.d/zabbix_agentd.conf'/>

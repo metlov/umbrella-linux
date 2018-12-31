@@ -1,4 +1,4 @@
-<Bundle name='nagios' xmlns:xi="http://www.w3.org/2001/XInclude">
+<Bundle xmlns:xi="http://www.w3.org/2001/XInclude">
   <Path name='/etc/nagiosgen.status'/>
   <Group name='ubuntu'>
     <Group name='nagios-server'>
@@ -8,7 +8,7 @@
       <Path name='/etc/nagios3/apache2.conf'/>
       <Path name='/etc/nagios3/cgi.cfg'/>
       <Path name='/etc/nagios3/conf.d/zzz_nagiosgen.cfg'
-                  altsrc='/etc/nagios/nagiosgen.cfg'/>
+                  altsrc='/etc/nagios/conf.d/bcfg2.cfg'/>
 
       <!-- override the default Nagios configuration files -->
       <Path name='/etc/nagios3/conf.d/contacts_nagios2.cfg'/>
@@ -23,14 +23,8 @@
       <Package name='fonts-dejavu-core'/>
       <Service name='nagios3'/>
       <Service name='apache2'/>
-      <Group name='ubuntu-trusty'>
-        <Package name='libapache2-mod-php5'/>
-        <Package name='nagios-plugins'/>
-      </Group>
-      <Group name='ubuntu-xenial'>
-        <Package name='libapache2-mod-php'/>
-        <Package name='monitoring-plugins'/>
-      </Group>
+      <Package name='libapache2-mod-php'/>
+      <Package name='monitoring-plugins'/>
       <Package name='libapache2-mod-authz-unixgroup'/>
       <Path name='/etc/apache2/sites-available/default-ssl.conf'/>
       <Path name='/etc/apache2/sites-enabled/000-default.conf'/>

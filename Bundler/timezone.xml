@@ -1,4 +1,4 @@
-<Bundle name='timezone'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='tzdata'/>
     <Path name='/etc/timezone'/>

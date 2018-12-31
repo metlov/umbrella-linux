@@ -27,8 +27,8 @@ Cfg/etc/openvpn/ta.key/ta.key.H_dummy.host
 
 # Do not store SSL certificates and keys, but store the XML files,
 # specifying their structure.
-/SSLCA/**/*.pem.H_*
-/SSLCA/**/*.key.H_*
+/Cfg/**/*.pem.H_*
+/Cfg/**/*.key.H_*
 
 # Do not store the random seed
 /.rnd

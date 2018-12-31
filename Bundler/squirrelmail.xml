@@ -1,4 +1,4 @@
-<Bundle name='squirrelmail'>
+<Bundle>
   <Group name='ubuntu'>
     <Group name='www-server-ssl'>
         <!-- load and export logo files via the web server -->
@@ -42,6 +42,7 @@
         <Package name='squirrelmail-folder-sizes'/>
         <Package name='kpoppassd'/>
         <Package name='openbsd-inetd'/>
+        <Service name='inetd'/>
         <Package name='squirrelmail-change-pass'/>
         <Path name='/etc/squirrelmail/config_change_pass.php'/>
 

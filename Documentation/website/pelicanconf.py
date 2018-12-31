@@ -44,10 +44,14 @@ languages_lookup = {
     'ru': 'Русский',
     }
 
+DISPLAY_PAGES_ON_MENU = True
+DISPLAY_CATEGORIES_ON_MENU = True
+
 def lookup_lang_name(lang_code):
    return languages_lookup[lang_code]
 
-JINJA_EXTENSIONS = ['jinja2.ext.i18n']
+JINJA_ENVIRONMENT = {'extensions': ['jinja2.ext.i18n']}
+#JINJA_EXTENSIONS = ['jinja2.ext.i18n']
 
 JINJA_FILTERS = {
     'lookup_lang_name': lookup_lang_name,

@@ -19,12 +19,7 @@ namespace {
 passdb {
   driver = pam
 }
-{% if 'ubuntu-trusty' in metadata.groups %}\
-protocols = imap pop3
-{% end %}\
-{% if 'ubuntu-xenial' in metadata.groups %}\
 protocols = imap pop3 sieve
-{% end %}\
 service auth {
   unix_listener /var/spool/postfix/private/dovecot-auth {
     mode = 0660
@@ -35,24 +30,14 @@ service auth {
 ssl_cert = </etc/ssl/imap.pem
 ssl_key = </etc/ssl/private/imap.key
 ssl = required
-{% if 'ubuntu-trusty' in metadata.groups %}\
-userdb {
-#  args = blocking=yes
-  override_fields = home=/var/maildirs/%n mail=maildir:/var/maildirs/%n/mail
-  driver = passwd
-}
-{% end %}\
-{% if 'ubuntu-xenial' in metadata.groups %}\
 userdb {
   driver = ldap
   args = /etc/dovecot/dovecot-ldap.conf
 }
-{% end %}\
 
 protocol pop3 {
   pop3_uidl_format = UID%u-%v
 }
-{% if 'ubuntu-xenial' in metadata.groups %}\
 
 protocol imap {
   mail_max_userip_connections = 512
@@ -106,4 +91,3 @@ service managesieve {
 }
 protocol sieve {
 }
-{% end %}\

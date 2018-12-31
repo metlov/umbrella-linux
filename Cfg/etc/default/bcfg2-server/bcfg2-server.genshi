@@ -1,0 +1,21 @@
+# Configuration options for bcfg2 server
+
+# BCFG2_SERVER_OPTIONS:
+# Set the default options for Bcfg2 Server on startup
+#   Default: ""
+BCFG2_SERVER_OPTIONS="-C /etc/bcfg2-server.conf"
+
+# BCFG2_SERVER_ENABLED:
+# Should Bcfg2 Server be run automatically by system scripts
+#
+# Uncomment the following line to enable any of the below selections
+#   Default: 0 (disable)
+{% if 'config' in metadata.groups %}\
+BCFG2_SERVER_ENABLED=1
+{% end %}\
+{% if 'config' not in metadata.groups %}\
+BCFG2_SERVER_ENABLED=0
+{% end %}\
+
+PIDFILE=/var/run/bcfg2-server/bcfg2-server.pid
+DAEMON_ARGS="-D $$PIDFILE"

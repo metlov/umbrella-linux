@@ -84,7 +84,7 @@ for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
     dns-nameservers ${dmzip}
 {%         end %}\
 {%     end %}\
-{%     if 'DMZsmtp' in funchosts %}\
+{%     if 'DMZsmtp' not in funchosts %}\
 {% python
 if DNScache is None:
   DNScache= [ str(routerifs['DMZif']) ]

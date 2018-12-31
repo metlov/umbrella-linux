@@ -1,10 +1,10 @@
 <Rules priority="0">
-<Group name='ubuntu-trusty'>
-    <Service name='qemu-kvm' status='on' type='upstart'/>
-    <Service name='libvirt-bin' status='on' type='upstart'/>
-</Group>
-<Group name='ubuntu-xenial'>
+    <Service name='cgmanager' status='ignore' type='systemd'/>
+    <Service name='cgproxy' status='ignore' type='systemd'/>
     <Service name='libvirt-bin' status='on' type='systemd'/>
+    <Service name='libvirt-guests' status='ignore' type='systemd'/>
+    <Service name='open-vm-tools' status='ignore' type='systemd'/>
     <Service name='qemu-kvm' status='on' type='systemd'/>
-</Group>
+    <Service name='virtlockd.socket' status='ignore' type='systemd'/>
+    <Service name='virtlogd.socket' status='ignore' type='systemd'/>
 </Rules>

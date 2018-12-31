@@ -1,4 +1,4 @@
-<Bundle name='ssh'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='openssh-server'/>
     <Package name='openssh-client'/>

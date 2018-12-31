@@ -1,4 +1,4 @@
-<Bundle name='grub'>
+<Bundle>
 <Group name='ubuntu'>
     <Group name='grub-legacy'>
         <Package name='grub'/>

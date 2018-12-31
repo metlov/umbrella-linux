@@ -1,4 +1,4 @@
-<Bundle name='capt-driver'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='cndrvcups-capt'/>
     <Package name='cndrvcups-common'/>

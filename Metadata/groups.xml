@@ -15,7 +15,6 @@
       <Bundle name='router'/>
       <Bundle name='bind'/>
       <Bundle name='dhcp-server'/>
-      <Bundle name='psad'/>
       <Bundle name='arpwatch'/>
    </Group>
    <Group profile='true' name='backdoor'>
@@ -59,7 +58,6 @@
       <Group name='www-server-ssl'/>
       <Group name='database-server'/>
       <Bundle name='redis'/>
-<!--      <Bundle name='elasticsearch'/> -->
       <Bundle name='invenio'/>
    </Group>
    <Group profile='true' name='nfs'>
@@ -79,7 +77,6 @@
    <Group profile='true' name='mail'>
       <Group name='pubserver'/>
       <Bundle name='dkimproxy'/>
-      <Bundle name='dcc'/>
       <Bundle name='spamassassin'/>
       <Bundle name='postfix'/>
       <Bundle name='dovecot'/>
@@ -160,7 +157,11 @@
       <Bundle name='logo'/>
    </Group>
    <Group name='physical'>
+      <Group name='acpid'/>
       <Bundle name='smartmontools'/>
+   </Group>
+   <Group name='virt-qemu'>
+      <Group name='acpid'/>
    </Group>
    <Group profile='true' name='vmhost'>
       <Group name='pubserver'/>
@@ -170,6 +171,7 @@
    </Group>
    <Group name='lxd-containers-host'>
       <!-- VM host, which is based on LXD -->
+      <Group name='acpid'/>
       <Bundle name='lxd'/>
    </Group>
    <Group name='libvirt-host'>
@@ -210,6 +212,7 @@
       </xi:fallback>
    </xi:include>
    <Group name='gui'>
+      <Group name='acpid'/>
       <Group name='office'/>
       <Bundle name='cups'/>
       <Bundle name='gui'/>
@@ -248,10 +251,6 @@
    <Group name='local-fs'>
       <Bundle name='autofs'/>
       <Group name='network-fs' negate='true'/>
-   </Group>
-   <Group name='ubuntu-trusty'>
-      <Group name='ubuntu'/>
-      <Group name='base'/>
    </Group>
    <Group name='ubuntu-xenial'>
       <Group name='ubuntu'/>
@@ -299,8 +298,6 @@
       <Bundle name='apt-sources'/>
       <Bundle name='base'/>
       <Bundle name='base-users'/>
-      <Bundle name='base-services'/>
-      <Bundle name='acpid'/>
       <Bundle name='bcfg2'/>
       <Bundle name='ca-certificates'/>
       <Bundle name='ca-certificates-umbrella'/>
@@ -333,6 +330,9 @@
    <!-- watchdog service to reboot in case of hangs -->
    <Group name='watchdog'>
       <Bundle name='watchdog'/>
+   </Group>
+   <Group name='acpid'>
+      <Bundle name='acpid'/>
    </Group>
    <!-- network UPS tools -->
    <Group name='ups-master'>

@@ -1,16 +1,11 @@
 <Rules priority="0">
-<Service name='bcfg2' status='on' type='deb'/>
+<Service name='bcfg2' status='on' type='systemd'/>
 <Group name='www-server-ssl'>
     <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.conf' to='../mods-available/ssl.conf'/>
     <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.load' to='../mods-available/ssl.load'/>
 </Group>
 <Group name='config'>
-    <Group name='ubuntu-trusty'>
-        <Service name='bcfg2-server' status='on' type='deb'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <Service name='bcfg2-server' status='on' type='systemd'/>
-    </Group>
+    <Service name='bcfg2-server' status='on' type='systemd'/>
     <Path type='directory' name="/var/run/bcfg2-server" mode='755' owner='bcfg2' group='bcfg2'/>
     <Path type='symlink' name='/etc/apache2/conf-enabled/bcfg2.conf' to='../conf-available/bcfg2.conf'/>
     <Path type='symlink' name='/etc/apache2/sites-enabled/autoconfig.conf' to='../sites-available/autoconfig'/>
@@ -27,8 +22,6 @@
 </Group>
 <Group name='monitor'>
     <Path type='symlink' name='/etc/apache2/conf-enabled/bcfg2.conf' to='../conf-available/bcfg2.conf'/>
-    <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.conf' to='../mods-available/ssl.conf'/>
-    <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.load' to='../mods-available/ssl.load'/>
     <Path type='symlink' name='/etc/apache2/mods-enabled/wsgi.conf' to='../mods-available/wsgi.conf'/>
     <Path type='symlink' name='/etc/apache2/mods-enabled/wsgi.load' to='../mods-available/wsgi.load'/>
     <!-- actions to compile python files -->

@@ -1,5 +1,5 @@
 <Rules priority="0">
-<Group name='ubuntu-trusty'>
+<!--
     <Group name='config'>
         <Service name='zabbix-server' status='on' type='upstart'/>
         <Path type='symlink' name='/etc/apache2/sites-enabled/zabbix.conf' to='../sites-available/zabbix'/>
@@ -8,5 +8,5 @@
         <Service name='zabbix-proxy' status='on' type='upstart'/>
     </Group>
     <Service name='zabbix-agent' status='on' type='upstart'/>
-</Group>
+-->
 </Rules>

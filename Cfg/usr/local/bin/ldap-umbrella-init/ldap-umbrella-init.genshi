@@ -22,26 +22,6 @@ if [[ $$response =~ ^(yes|y)$$ ]]; then
     rm -rf /etc/ldap/slapd.d/*
     echo "Importing the new configuration and schema."
     slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/umbrella/initial-config.ldif
-{% if 'ubuntu-trusty' in metadata.groups %}\
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/core.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/cosine.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/rfc2307bis.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/inetorgperson.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/samba3.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gofon.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gosystem.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/goto.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gosa-samba3.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/gofax.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/goserver.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/goto-mime.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/trust.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/sudo.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/dnszone.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/gosa/dhcp.ldif
-    slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/umbrella/initial-databases.ldif
-{% end %}\
-{% if 'ubuntu-xenial' in metadata.groups %}\
     # here we install the basic Fusion Directory schema
     slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/core.ldif
     slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/schema/cosine.ldif
@@ -86,7 +66,6 @@ if [[ $$response =~ ^(yes|y)$$ ]]; then
 
     # create the databases
     slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/umbrella/initial-databases.ldif
-{% end %}\
 
 {% if 'ldap-master' in metadata.groups %}\
     echo "Importing data."

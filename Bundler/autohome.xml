@@ -1,18 +1,10 @@
-<Bundle name='autohome'>
+<Bundle>
 <Group name='ubuntu'>
-    <Group name='ubuntu-trusty'>
-    <!-- on trusty these scripts are installed unconditionally -->
-    <!-- on both mail and nfs servers -->
+    <!-- these scripts are not installed on mail server becuse -->
+    <!-- mailboxes are now created automatically by dovecot. -->
+    <Group name='mail' negate='true'>
         <Path name='/etc/cron.d/mkhomes'/>
         <Path name='/usr/local/bin/mkhomes.sh'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-    <!-- on xenial these scripts are not installed on mail server becuse -->
-    <!-- mailboxes are now created automatically by dovecot. -->
-        <Group name='mail' negate='true'>
-            <Path name='/etc/cron.d/mkhomes'/>
-            <Path name='/usr/local/bin/mkhomes.sh'/>
-        </Group>
     </Group>
 </Group>
 </Bundle>

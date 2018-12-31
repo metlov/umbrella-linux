@@ -1,8 +1,10 @@
-<Bundle name='cron'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='cron'/>
     <Service name='cron'/>
     <Path name='/etc/crontab'/>
     <Path name='/etc/cron.deny'/>
+    <Package name='at'/>
+    <Service name='atd'/>
 </Group>
 </Bundle>

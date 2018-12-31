@@ -1,14 +1,9 @@
-<Bundle name='login'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='libpam-ldap'/>
     <Package name='libpam-modules'/>
-    <Group name='ubuntu-trusty'>
-      <Package name='libpam-foreground'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-      <Package name='libpam-ck-connector'/>
-      <Package name='libpam-systemd'/>
-    </Group>
+    <Package name='libpam-ck-connector'/>
+    <Package name='libpam-systemd'/>
     <Package name='libpam-ccreds'/>
     <Package name='libpam-cracklib'/>
     <Package name='wamerican'/>
@@ -26,11 +21,6 @@
     <Path name='/etc/pam.d/common-password'/>
     <Path name='/etc/pam.d/common-session'/>
     <Path name='/etc/pam.d/common-session-noninteractive'/>
-    <Group name='ubuntu-trusty'>
-        <Group name='ltsp'>
-            <Path name='/etc/pam_session.sh'/>
-        </Group>
-    </Group>
     <Path name='/etc/security/access.conf'/>
     <Path name='/etc/sudoers'/>
     <Path name='/etc/security/group.conf'/>
@@ -50,5 +40,13 @@
         <!-- TODO: need the equivalent scripts for other shells -->
         <Path name='/etc/bash.bash_logout'/>
     </Group>
+    <Service name='getty@tty1'/>
+    <Service name='getty@tty2'/>
+    <Service name='getty@tty3'/>
+    <Service name='getty@tty4'/>
+    <Service name='getty@tty5'/>
+    <Service name='getty@tty6'/>
+    <Service name='getty@tty7'/>
+    <Service name='getty@tty8'/>
 </Group>
 </Bundle>

@@ -425,7 +425,7 @@ configure_vm() {
       lxc file push - $1/etc/bcfg2.conf
   fi
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b apt-sources"
+    "bcfg2 -Qqv -b apt-sources"
   if [ "$1" == ${config_hostname} -o "$1" == ${proxy_hostname} ]; then
   lxc exec $1 -- /bin/bash -c \
     "rm /etc/apt/apt.conf.d/99proxy"
@@ -433,9 +433,9 @@ configure_vm() {
   lxc exec $1 -- /bin/bash -c \
     "apt-get update"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qv -b ntp"
+    "bcfg2 -D POSIXUsers -Qqv -b ntp"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ntp"
+    "bcfg2 -Qqv -b ntp"
   if [ -n "$2" ]; then
     $2 $1
   fi
@@ -447,19 +447,19 @@ Dpkg::Options {
 }
 EOF
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qv -b base-users:base:base-services"
+    "bcfg2 -D POSIXUsers -Qqv -b base-users:base"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b base-users:base:base-services"
+    "bcfg2 -Qqv -b base-users:base"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ldap-auth"
+    "bcfg2 -Qqv -b ldap-auth"
   lxc exec $1 -- /bin/bash -c \
-    "env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login"
+    "env SUDO_FORCE_REMOVE=yes bcfg2 -Qqv -b login"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ssh"
+    "bcfg2 -Qqv -b ssh"
   lxc exec $1 -- /bin/bash -c \
     "bcfg2 -D POSIXUsers -qv"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -qv -r Packages"
+    "bcfg2 -qv -r packages"
   lxc exec $1 -- /bin/bash -c \
     "rm -f /etc/apt/apt.conf.d/99local"
   if [ -n "$3" ]; then
@@ -479,7 +479,7 @@ EOF
 # quirks to initialize kerberos and ldap
 configure_quirks_init_krb5_ldap() {
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b kerberos-kdc"
+    "bcfg2 -Qqv -b kerberos-kdc"
   if [ "$1" == ${config_hostname} ]; then
   # we only init kerberos on config
     if ! lxc exec $1 -- /bin/bash -c \
@@ -489,9 +489,9 @@ configure_quirks_init_krb5_ldap() {
     fi
   fi
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qv -b ldap-server"
+    "bcfg2 -D POSIXUsers -Qqv -b ldap-server"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qv -b ldap-server"
+    "bcfg2 -Qqv -b ldap-server"
   if ! lxc exec $1 -- /bin/bash -c \
     "[[ -e /etc/ldap/schema/fusiondirectory/core-fd.ldif ]]"; then
     lxc exec $1 -- /bin/bash -c \
@@ -1602,14 +1602,11 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
       "usermod -a -G ssl-cert bcfg2"
   fi
 
-  # copy the apt sources (needed to enable multiverse, which is typically present
-  # in "normal" Ubuntu install on host, but not in container)
-  lxc file push /etc/apt/sources.list ${config_hostname}/etc/apt/sources.list
   lxc exec ${config_hostname} -- /bin/bash -c \
     "apt-get update"
 
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "apt-get install --assume-yes bcfg2-server git mc python-ipcalc python-passlib ssl-cert"
+    "apt-get install --assume-yes bcfg2-server git mc python-ipcalc python-passlib ssl-cert python-pymysql python-django"
 
   # if we had a custom git certificate installed
   if [ -d ~/git-certs ]; then
@@ -1942,28 +1939,10 @@ fi
 
 if lxc exec ${config_hostname} -- /bin/bash -c \
   "[[ ! -e /etc/bcfg2-server.conf ]]" ; then
-  echo -n "Generate and install bcfg2 configuration files, hotfixes ${config_hostname}..."
+  echo -n "Generate and install bcfg2 configuration files on ${config_hostname}..."
   (
   set -e
   set -o xtrace
-
-  # apply bcfg2 hotfixes
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "cp /var/lib/bcfg2/Cfg/usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py/Core.py.G50_ubuntu-xenial /usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py"
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py"
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "cp /var/lib/bcfg2/Cfg//usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Bundler.py/Bundler.py.G50_ubuntu-xenial /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Bundler.py"
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Bundler.py"
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "cp /var/lib/bcfg2/Cfg/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Cfg/__init__.py/__init__.py /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Cfg/__init__.py"
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Cfg/__init__.py"
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "cp /var/lib/bcfg2//Cfg/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugin/helpers.py/helpers.py /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugin/helpers.py"
-  lxc exec ${config_hostname} -- /bin/bash -c \
-    "python -m py_compile /usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugin/helpers.py"
 
   # install the CA certificate as "trusted"
   lxc exec ${config_hostname} -- /bin/bash -c \
@@ -1978,8 +1957,10 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
     "chown bcfg2:bcfg2 /var/run/bcfg2-server"
 
   # install defaults file
+  deliffalse="/{% if 'config' not in metadata.groups %}/,/{% end %}/d"
+  renderiftrue="/{% if 'config' in metadata.groups %}/,/{% end %}/ { /{% if 'config' in metadata.groups %}/d; /{% end %}/d }"
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "cp /var/lib/bcfg2/Cfg/etc/default/bcfg2-server/bcfg2-server.G50_config /etc/default/bcfg2-server"
+    "cat /var/lib/bcfg2/Cfg/etc/default/bcfg2-server/bcfg2-server.genshi | sed \"${deliffalse}\" | sed \"${renderiftrue}\" > /etc/default/bcfg2-server"
 
   # generate clients xml
   cat >/tmp/clients.xml <<EOF
@@ -2099,9 +2080,9 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   lxc exec ${config_hostname} -- /bin/su -s /bin/bash - bcfg2 -c \
     "export PATH=/usr/sbin:\$PATH && cd /var/lib/bcfg2 && bcfg2-info -C /etc/bcfg2-server.conf buildfile /etc/ssl/www.pem ${config_hostname}.${domain_name}"
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "cp /var/lib/bcfg2/SSLCA/etc/ssl/www.pem/www.pem.H_${config_hostname}.${domain_name} /etc/ssl/www.pem"
+    "cp /var/lib/bcfg2/Cfg/etc/ssl/www.pem/www.pem.H_${config_hostname}.${domain_name} /etc/ssl/www.pem"
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "cp /var/lib/bcfg2/SSLCA/etc/ssl/private/www.key/www.key.H_${config_hostname}.${domain_name} /etc/ssl/private/www.key"
+    "cp /var/lib/bcfg2/Cfg/etc/ssl/private/www.key/www.key.H_${config_hostname}.${domain_name} /etc/ssl/private/www.key"
   lxc exec ${config_hostname} -- /bin/bash -c \
     "chmod 711 /etc/ssl/private"
   lxc exec ${config_hostname} -- /bin/bash -c \
@@ -2142,7 +2123,7 @@ ensure_bcfg2() {
     sleep 25
 
     lxc exec ${config_hostname} -- /bin/bash -c \
-      "bcfg2 -Qv -s disabled -b bcfg2"
+      "bcfg2 -Qqv -s disabled -b bcfg2"
 
 #  lxc exec ${config_hostname} -- /bin/bash -c \
 #    "systemctl restart bcfg2-server"
@@ -2327,7 +2308,7 @@ if lxc exec ${ltsp_hostname} -- /bin/bash -c \
     "env TC_NONINTERACTIVE=yes x2gothinclient_create"
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
-    "bcfg2 -qv -r Packages"
+    "bcfg2 -qv -r packages"
 
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
@@ -2388,17 +2369,17 @@ chmod 644 /usr/local/share/ca-certificates/bcfg2ca.crt
 update-ca-certificates
 apt-get install -y bcfg2 mc ssl-cert
 lxc file pull ${config_hostname}/etc/bcfg2.conf /etc/bcfg2.conf
-bcfg2 -Qv -b apt-sources
+bcfg2 -Qqv -b apt-sources
 apt-get update
-bcfg2 -D POSIXUsers -Qv -b ntp
-bcfg2 -Qv -b ntp
-bcfg2 -D POSIXUsers -Qv -b base-users:base:base-services
-bcfg2 -Qv -b base-users:base:base-services
-bcfg2 -Qv -b ldap-auth
-env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login
-bcfg2 -Qv -b ssh
+bcfg2 -D POSIXUsers -Qqv -b ntp
+bcfg2 -Qqv -b ntp
+bcfg2 -D POSIXUsers -Qqv -b base-users:base
+bcfg2 -Qqv -b base-users:base
+bcfg2 -Qqv -b ldap-auth
+env SUDO_FORCE_REMOVE=yes bcfg2 -Qqv -b login
+bcfg2 -Qqv -b ssh
 bcfg2 -D POSIXUsers -qv
-bcfg2 -qv -r Packages
+bcfg2 -qv -r packages
 getent passwd lxc-dnsmasq &>/dev/null && deluser lxc-dnsmasq
 getent passwd dnsmasq &>/dev/null && deluser dnsmasq
 getent group sambashare &>/dev/null && delgroup sambashare

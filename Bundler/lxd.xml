@@ -1,4 +1,4 @@
-<Bundle name='lxd'>
+<Bundle>
 <Group name='ubuntu'>
     <BoundPOSIXGroup name="lxd" gid="660"/>
     <BoundPOSIXUser name="lxd" home="/var/lib/lxd/" shell="/bin/false" gecos="" uid="660" group="nogroup"/>
@@ -9,10 +9,15 @@
     <Package name='xdelta3'/>
     <Package name='bridge-utils'/>
     <Package name='ufw'/>
+    <Service name='ufw'/>
 
     <Package name='libxml2-utils'/>        <!-- for the maintenance mode  -->
                                            <!-- of the Umbrella Installer -->
 
     <Path name='/etc/rc.local'/>            <!-- bufferbloat fix -->
+
+    <Service name='lxcfs'/>
+    <Service name='lxd-containers'/>
+    <Service name='lxd.socket'/>
 </Group>
 </Bundle>

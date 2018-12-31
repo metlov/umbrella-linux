@@ -1,40 +1,22 @@
-<Bundle name='ldap-server'>
+<Bundle>
 <Group name='ubuntu'>
     <!-- user and group -->
-    <Group name='ubuntu-trusty'>
-        <BoundPOSIXGroup name="openldap" gid="109"/>
-        <BoundPOSIXUser name="openldap" home="/var/lib/ldap" shell="/bin/false" gecos="OpenLDAP Server Account" uid="104" group="openldap">
-            <MemberOf>ssl-cert</MemberOf>
-        </BoundPOSIXUser>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXGroup name="openldap" gid="619"/>
-        <BoundPOSIXUser name="openldap" home="/var/lib/ldap" shell="/bin/false" gecos="OpenLDAP Server Account" uid="619" group="openldap">
-            <MemberOf>ssl-cert</MemberOf>
-            <MemberOf>sasl</MemberOf>
-        </BoundPOSIXUser>
-    </Group>
+    <BoundPOSIXGroup name="openldap" gid="619"/>
+    <BoundPOSIXUser name="openldap" home="/var/lib/ldap" shell="/bin/false" gecos="OpenLDAP Server Account" uid="619" group="openldap">
+        <MemberOf>ssl-cert</MemberOf>
+        <MemberOf>sasl</MemberOf>
+    </BoundPOSIXUser>
 
     <!-- additional schema -->
-    <Group name='ubuntu-trusty'>
-        <!-- Gosa schema definitions on Trusty -->
-        <Package name='gosa-schema'/>
-        <Package name='gosa-plugin-dhcp-schema'/>
-        <Package name='gosa-plugin-dns-schema'/>
-        <Package name='gosa-plugin-sudo-schema'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <!-- Fusiondirectory schema definitions on Xenial -->
-        <Package name='fusiondirectory-schema'/>
-        <Package name='fusiondirectory-plugin-dhcp-schema'/>
-        <Package name='fusiondirectory-plugin-dns-schema'/>
-        <Package name='fusiondirectory-plugin-sudo-schema'/>
-        <Package name='fusiondirectory-plugin-systems-schema'/>
-        <Package name='fusiondirectory-plugin-mail-schema'/>
-        <Package name='fusiondirectory-plugin-alias-schema'/>
-        <Package name='fusiondirectory-plugin-argonaut-schema'/>
-        <Package name='fusiondirectory-plugin-puppet-schema'/>
-    </Group>
+    <Package name='fusiondirectory-schema'/>
+    <Package name='fusiondirectory-plugin-dhcp-schema'/>
+    <Package name='fusiondirectory-plugin-dns-schema'/>
+    <Package name='fusiondirectory-plugin-sudo-schema'/>
+    <Package name='fusiondirectory-plugin-systems-schema'/>
+    <Package name='fusiondirectory-plugin-mail-schema'/>
+    <Package name='fusiondirectory-plugin-alias-schema'/>
+    <Package name='fusiondirectory-plugin-argonaut-schema'/>
+    <Package name='fusiondirectory-plugin-puppet-schema'/>
 
     <!-- data and script for LDAP initialization -->
     <Path name='/etc/ldap/umbrella/initial-config.ldif'/>

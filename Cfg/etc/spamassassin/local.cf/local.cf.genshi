@@ -42,20 +42,11 @@ bayes_ignore_header Resent-Message-ID
 bayes_ignore_header Resent-Subject
 bayes_ignore_header Resent-To
 
-{% if extif_enabled and 'ubuntu-trusty' in metadata.groups %}\
-dcc_home /var/lib/dcc
-{% end %}\
-{% if 'ubuntu-trusty' in metadata.groups %}\
-rewrite_header Subject *****SPAM*****
-report_safe 1
-{% end %}\
-{% if 'ubuntu-xenial' in metadata.groups %}\
 report_safe 0
 
 # disable networked checks
 skip_rbl_checks         1
 skip_uribl_checks       1
-{% end %}\
 ok_locales en ru uk cz pl fr de
 
 # put more trust in trusted servers
@@ -68,16 +59,6 @@ score BAYES_80 3.300
 score RP_MATCHES_RCVD -0.001
 score RATWARE_MPOP_WEBMAIL 0.1
 
-{% if 'ubuntu-trusty' in metadata.groups %}\
-use_pyzor 1
-pyzor_timeout 10
-
-ifplugin Mail::SpamAssassin::Plugin::Pyzor
-pyzor_path /usr/bin/pyzor
-pyzor_options --homedir /var/cache/pyzor
-endif
-
-{% end %}\
 score FUZZY_XPILL 0
 
 #Reference: http://www.ijs.si/software/amavisd/amavisd-new-docs.html#dkim
@@ -176,6 +157,9 @@ def_whitelist_from_dkim  *@twitter.com
 def_whitelist_from_dkim  *@*.twitter.com
 def_whitelist_from_dkim  *@*.twitter.com
 
+def_whitelist_from_dkim  *@mail.ru
+def_whitelist_from_dkim  *@rambler.ru
+
 # slightly penalize DKIM in expectation of explicit whitelisting of known good
 # providers
 score DKIM_VERIFIED 0.3
@@ -213,6 +197,16 @@ header __L_FROM_PAYPAL From:addr =~ /[\@.]paypal\.com$$/mi
 header __L_FROM_EBAY   From:addr =~ /[\@.]ebay\.(com|at|be|ca|ch|de|ee|es|fr|hu|ie|in|it|nl|ph|pl|pt|se|co\.(kr|uk)|com\.(au|cn|hk|mx|my|sg))$$/mi
 meta     L_NOTVALID_PAY !DKIM_VERIFIED && (__L_FROM_PAYPAL || __L_FROM_EBAY)
 score    L_NOTVALID_PAY 6
+
+# mail.ru
+header __L_FROM_MAILRU From:addr =~ /[\@.]mail\.ru$$/mi
+meta     L_NOTVALID_MAILRU !DKIM_VERIFIED && __L_FROM_MAILRU
+score    L_NOTVALID_MAILRU 6
+
+# rambler
+header __L_FROM_RAMBLER From:addr =~ /[\@.]rambler\.ru$$/mi
+meta     L_NOTVALID_RAMBLER !DKIM_VERIFIED && __L_FROM_RAMBLER
+score    L_NOTVALID_RAMBLER 6
 
 # our domains
 header __L_FROM_US From:addr =~ /[\@.](${'|'.join(domain_names_escaped)})$$/mi

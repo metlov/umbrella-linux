@@ -1,4 +1,4 @@
-<Bundle name='nut'>
+<Bundle>
 <Group name='ubuntu'>
     <BoundPOSIXGroup name="nut" gid="668"/>
     <BoundPOSIXUser name="nut" home="/var/lib/nut" shell="/bin/false" gecos="" uid="668" group="nut">

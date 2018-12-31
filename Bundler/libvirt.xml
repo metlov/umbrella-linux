@@ -1,28 +1,11 @@
-<Bundle name='libvirt'>
+<Bundle>
 <Group name='ubuntu'>
-    <Group name='ubuntu-trusty'>
-        <BoundPOSIXGroup name="kvm" gid="112"/>
-        <BoundPOSIXGroup name="libvirtd" gid="113"/>
-        <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="105" group="nogroup"/>
-        <BoundPOSIXUser name="libvirt-dnsmasq" home="/var/lib/libvirt/dnsmasq" shell="/bin/false" gecos="Libvirt Dnsmasq,,," uid="107" group="libvirtd"/>
-        <BoundPOSIXUser name="libvirt-qemu" home="/var/lib/libvirt" shell="/bin/false" gecos="Libvirt Qemu,,," uid="106" group="kvm"/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXGroup name="kvm" gid="117"/>
-        <BoundPOSIXGroup name="libvirtd" gid="118"/>
-        <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="109" group="nogroup"/>
-        <BoundPOSIXUser name="libvirt-dnsmasq" home="/var/lib/libvirt/dnsmasq" shell="/bin/false" gecos="Libvirt Dnsmasq,,," uid="112" group="libvirtd"/>
-        <BoundPOSIXUser name="libvirt-qemu" home="/var/lib/libvirt" shell="/bin/false" gecos="Libvirt Qemu,,," uid="111" group="kvm"/>
-    </Group>
-    <Group name='ubuntu-trusty'>
-        <!-- on xenial this lxc dependence is handled by systemd-->
-        <Package name='cgroup-lite'/>
-        <Service name='cgroup-lite'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <!-- on xenial we need to resolve a variant libvirt dependence -->
-        <Package name='cgmanager'/>
-    </Group>
+    <BoundPOSIXGroup name="kvm" gid="117"/>
+    <BoundPOSIXGroup name="libvirtd" gid="118"/>
+    <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="109" group="nogroup"/>
+    <BoundPOSIXUser name="libvirt-dnsmasq" home="/var/lib/libvirt/dnsmasq" shell="/bin/false" gecos="Libvirt Dnsmasq,,," uid="112" group="libvirtd"/>
+    <BoundPOSIXUser name="libvirt-qemu" home="/var/lib/libvirt" shell="/bin/false" gecos="Libvirt Qemu,,," uid="111" group="kvm"/>
+    <Package name='cgmanager'/>
     <Package name='libvirt-bin'/>
     <Package name='python-libvirt'/>
     <Package name='qemu-kvm'/>
@@ -39,6 +22,12 @@
 
     <Service name='libvirt-bin'/>
     <Service name='qemu-kvm'/>
+    <Service name='cgmanager'/>
+    <Service name='cgproxy'/>
+    <Service name='libvirt-guests'/>
+    <Service name='open-vm-tools'/>
+    <Service name='virtlockd.socket'/>
+    <Service name='virtlogd.socket'/>
     <Path name='/etc/rc.local'/>            <!-- bufferbloat fix -->
 
     <!-- enable read access to Umbrella VM images -->

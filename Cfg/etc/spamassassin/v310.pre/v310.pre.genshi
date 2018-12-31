@@ -23,25 +23,6 @@ execfile(repo+'/Python/30_networking.py')
 # added to new files, named according to the release they're added in.
 ###########################################################################
 
-{% if 'ubuntu-trusty' in metadata.groups %}\
-{%     if extif_enabled %}\
-# DCC - perform DCC message checks.
-loadplugin Mail::SpamAssassin::Plugin::DCC
-{%     end %}\
-
-# Pyzor - perform Pyzor message checks.
-#
-loadplugin Mail::SpamAssassin::Plugin::Pyzor
-
-# Razor2 - perform Razor2 message checks.
-#
-loadplugin Mail::SpamAssassin::Plugin::Razor2
-
-# SpamCop - perform SpamCop message reporting
-#
-loadplugin Mail::SpamAssassin::Plugin::SpamCop
-
-{% end if 'ubuntu-trusty' %}\
 # AntiVirus - some simple anti-virus checks, this is not a replacement
 # for an anti-virus filter like Clam AntiVirus
 #

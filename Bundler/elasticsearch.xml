@@ -1,6 +1,0 @@
-<Bundle name='elasticsearch'>
-    <Package name='elasticsearch'/>
-    <Package name='openjdk-8-jdk-headless'/>
-    <BoundPOSIXUser name="elasticsearch" home="/home/elasticsearch" shell="/bin/false" gecos="" uid="663" group="elasticsearch"/>
-    <BoundPOSIXGroup name="elasticsearch" gid="663"/>
-</Bundle>

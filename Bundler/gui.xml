@@ -1,11 +1,7 @@
-<Bundle name='gui' xmlns:xi="http://www.w3.org/2001/XInclude">
+<Bundle independent="true" xmlns:xi="http://www.w3.org/2001/XInclude">
     <Package name='xserver-xorg-input-all'/>
     <Package name='xserver-xorg-video-all'/>
     <Package name='acpi-support'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='bluez-alsa'/>
-        <Package name='bluez-cups'/>
-    </Group>
     <Package name='colord'/>
     <Package name='cups-bsd'/>
     <Package name='desktop-base'/>
@@ -48,9 +44,6 @@
     <Package name='humanity-icon-theme'/>
 <!--    <Package name='language-pack-ru'/> -->
     <Package name='libaacs0'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='libavcodec54'/>
-    </Group>
     <Group name='ubuntu-xenial'>
         <Package name='libavcodec-ffmpeg56'/>
     </Group>
@@ -59,16 +52,9 @@
     <Package name='libegl1-mesa'/>
     <Package name='libgl1-mesa-glx'/>
     <Package name='libjack-jackd2-0'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='libllvm3.6'/>
-    </Group>
     <Package name='libunity-scopes-json-def-desktop'/>
     <Package name='mplayer2'/>
     <Package name='notification-daemon'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='oxygen-icon-theme'/>
-        <Package name='packagekit'/>
-    </Group>
     <Group name='ubuntu-xenial'>
         <Package name='oxygen5-icon-theme'/>
     </Group>
@@ -83,19 +69,12 @@
     <Package name='printer-driver-pxljr'/>
     <Package name='printer-driver-sag-gdi'/>
     <Package name='printer-driver-splix'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='python-requests'/>
-    </Group>
     <Package name='pulseaudio'/>
     <Package name='pulseaudio-module-x11'/>
     <Package name='pulseaudio-utils'/>
     <Package name='rtkit'/>
     <Package name='system-config-printer-udev'/>
     <Package name='smbclient'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='ttf-indic-fonts-core'/>
-        <Package name='ttf-punjabi-fonts'/>
-    </Group>
     <Package name='ttf-dejavu-core'/>
     <Package name='ttf-dejavu-extra'/>
     <Package name='qpdf'/>
@@ -135,16 +114,6 @@
 
     <!-- Secure worstation do not have the necessary connectivity -->
     <Group name='net-pub'>
-        <!-- <Package name='telegram'/> -->
-        <Group name='trusty'>
-            <Package name='libseccomp2'/>
-            <Package name='python-twisted'/>
-            <Package name='python-lzma'/>
-            <Package name='python-parsley'/>
-            <Package name='python-support'/>
-            <Package name='python-txsocksx'/>
-            <Package name='wmctrl'/>
-        </Group>
         <Package name='thunderbird'/>
         <Package name='thunderbird-locale-ru'/>
         <Path name='/etc/thunderbird/syspref.js'/>
@@ -206,9 +175,6 @@
     <Package name='festvox-kallpc16k'/>
     <Package name='festvox-ru'/>
     <Package name='libpam-gnome-keyring'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='pam-kwallet'/>
-    </Group>
 
     <Group name='admworkstation'>
         <Package name='clusterssh'/>
@@ -247,17 +213,9 @@
     <Path name='/usr/share/razor/graphics/rqt-2.svg'/> -->
     <Package name='razorqt-power'/>
     <Path name='/etc/xdg/razor/razor.conf'/>
-    <Group name='ubuntu-trusty'>
-        <!-- since razor-power does not support authorization we have to enable anyone to shutdown/restart -->
-        <Path name='/usr/share/polkit-1/actions/org.freedesktop.login1.policy'/>
-        <Path name='/etc/lightdm/lightdm.conf.d/50-disable-user-list.conf'/>
-        <Path name='/etc/lightdm/lightdm.conf.d/30-xreset.conf'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <Path name='/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf'/>
-        <Path name='/etc/lightdm/lightdm.conf.d/60-disable-guest.conf'/>
-        <Path name='/var/lib/lightdm'/>
-    </Group>
+    <Path name='/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf'/>
+    <Path name='/etc/lightdm/lightdm.conf.d/60-disable-guest.conf'/>
+    <Path name='/var/lib/lightdm'/>
     <Path name='/etc/pam.d/lightdm'/>
     <Path name='/etc/X11/Xreset.d/killall'/>
     <Path name='/usr/share/applications/mc.desktop'/>

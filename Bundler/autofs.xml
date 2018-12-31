@@ -1,4 +1,4 @@
-<Bundle name='autofs'>
+<Bundle>
 <Group name='ubuntu'>
     <!-- starting with Precise homes are mounted via autofs    -->
     <!-- this works even if no nfs server is defined, in which -->

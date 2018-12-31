@@ -1,4 +1,4 @@
-<Bundle name='ulog'>
+<Bundle>
 <Group name='ubuntu'>
     <BoundPOSIXUser name="ulog" home="/var/log/ulog" shell="/bin/false" gecos="" uid="665" group="ulog"/>
     <BoundPOSIXGroup name="ulog" gid="665"/>

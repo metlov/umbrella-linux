@@ -56,7 +56,7 @@ with a roamingworkstation profile. This can be done by
    for it).
 2) waiting until the /var/lib/bcfg2/Metadata/clients.xml is updated.
 3) changing the line for the newly registered workstation into
-<Client profile="roamingworkstation" name="$TARGET_FQDN" uuid="$TARGET_FQDN" floating="true" auth="cert" version="1.3.5"/>
+<Client profile="roamingworkstation" name="$TARGET_FQDN" uuid="$TARGET_FQDN" floating="true" auth="cert" version="1.4.0pre2"/>
 EOF
     exit 9
 fi
@@ -268,8 +268,8 @@ EOF
     apt-get purge -y ntp || true
     bcfg2 -D POSIXUsers -Qv -b ntp
     bcfg2 -Qv -b ntp
-    bcfg2 -D POSIXUsers -Qv -b base-users:base:base-services
-    bcfg2 -Qv -b base-users:base:base-services
+    bcfg2 -D POSIXUsers -Qv -b base-users:base
+    bcfg2 -Qv -b base-users:base
     bcfg2 -Qv -b ldap-auth
     env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login
     bcfg2 -Qv -b ssh

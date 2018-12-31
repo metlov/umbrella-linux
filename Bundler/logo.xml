@@ -1,17 +1,10 @@
-<Bundle name='logo'>
+<Bundle>
 <Group name='ubuntu'>
-    <Group name='ubuntu-trusty'>
-        <Package name='umbrella-wallpaper'/>
-        <Package name='umbrella-shortcut'/>
-        <Path name='/etc/cron.daily/umbrella-update'/>
+    <Group name='gui'>
+        <Package name='umbrella-logo'/>
+        <Package name='umbrella-plymouth'/>
     </Group>
-    <Group name='ubuntu-xenial'>
-        <Group name='gui'>
-            <Package name='umbrella-logo'/>
-            <Package name='umbrella-plymouth'/>
-        </Group>
-        <BoundPOSIXUser name="umbrella-skel" home="/var/lib/umbrella-skel" shell="/bin/false" gecos="Umbrella skel updater" uid="658" group="nogroup"/>
-        <Package name='umbrella-skel'/>
-    </Group>
+    <BoundPOSIXUser name="umbrella-skel" home="/var/lib/umbrella-skel" shell="/bin/false" gecos="Umbrella skel updater" uid="658" group="nogroup"/>
+    <Package name='umbrella-skel'/>
 </Group>
 </Bundle>

@@ -1,4 +1,4 @@
-<Bundle name='desktop-kde'>
+<Bundle independent="true">
 <!-- KDE desktop environment  -->
 <Group name='ubuntu'>
     <Package name='kubuntu-desktop'/>
@@ -126,5 +126,7 @@
     <Package name='libqt5multimediawidgets5'/>
     <Package name='libqt5quickwidgets5'/>
     <Package name='gdb'/>
+
+    <Service name='ofono'/>
 </Group>
 </Bundle>

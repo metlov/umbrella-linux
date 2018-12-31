@@ -1,9 +1,11 @@
-<Bundle name='cups'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='cups'/>
     <Package name='cups-browsed'/>
     <Package name='cups-pdf'/>
     <Service name='cups'/>
+    <Service name='cups.path'/>
+    <Service name='cups.socket'/>
     <Service name='cups-browsed'/>
     <Path name='/etc/cups/cupsd.conf'/>
     <Path name='/etc/ssl/cups.pem'/>

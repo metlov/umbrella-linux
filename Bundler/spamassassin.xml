@@ -1,16 +1,10 @@
-<Bundle name='spamassassin'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='spamassassin'/>
     <Package name='spamc'/>
     <Package name='libwww-perl'/>
-    <Group name='ubuntu-trusty'>
-        <BoundPOSIXUser name="debian-spamd" home="/var/lib/spamassassin" shell="/bin/sh" gecos="" uid="104" group="debian-spamd"/>
-        <BoundPOSIXGroup name="debian-spamd" gid="109"/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXUser name="debian-spamd" home="/var/lib/spamassassin" shell="/bin/sh" gecos="" uid="623" group="debian-spamd"/>
-        <BoundPOSIXGroup name="debian-spamd" gid="623"/>
-    </Group>
+    <BoundPOSIXUser name="debian-spamd" home="/var/lib/spamassassin" shell="/bin/sh" gecos="" uid="623" group="debian-spamd"/>
+    <BoundPOSIXGroup name="debian-spamd" gid="623"/>
     <Package name='pyzor'/>
     <Path name='/var/cache/pyzor'/>
     <Path name='/var/cache/pyzor/servers'/>

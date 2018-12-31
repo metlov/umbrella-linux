@@ -1,4 +1,4 @@
-<Bundle name='pbx'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='asterisk'/>
     <Package name='liburiparser1'/>

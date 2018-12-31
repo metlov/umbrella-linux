@@ -1,9 +1,19 @@
 <Rules priority="0">
 <Group name='ubuntu-xenial'>
+    <Service name='accounts-daemon' status='ignore' type='systemd'/>
+    <Service name='anacron-resume' status='ignore' type='systemd'/>
+    <Service name='anacron' status='ignore' type='systemd'/>
     <Service name='cups' status='ignore' type='systemd'/>
+    <Service name='cups.path' status='ignore' type='systemd'/>
+    <Service name='cups.socket' status='ignore' type='systemd'/>
     <Service name='cups-browsed' status='on' type='systemd'/>
     <Service name='ccpd-start' status='ignore' type='systemd'/>
+    <Service name='ModemManager' status='ignore' type='systemd'/>
+    <Service name='NetworkManager-wait-online' status='ignore' type='systemd'/>
+    <Service name='NetworkManager' status='ignore' type='systemd'/>
     <Service name='nbd-server' status='on' type='systemd'/>
+    <Service name='ofono' status='ignore' type='systemd'/>
+    <Service name='pppd-dns' status='ignore' type='systemd'/>
     <Service name='stunnel4' status='on' type='systemd'/>
     <Service name='tftpd-hpa' status='on' type='systemd'/>
     <Group name='ltsp'>
@@ -15,5 +25,6 @@
     <Group name='ltsp' negate='true'>
         <Service name='gpu-manager' status='ignore' type='systemd'/>
     </Group>
+    <Service name='x2goserver' status='on' type='systemd'/>
 </Group>
 </Rules>

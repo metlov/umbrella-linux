@@ -1,11 +1,8 @@
-<Bundle name='desktop-lubuntu'>
+<Bundle independent="true">
 <!-- LXDE desktop environment as customized by lubuntu -->
 <Group name='ubuntu'>
     <Package name='audacious'/>
     <Package name='audacious-plugins'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='cups-driver-gutenprint'/>
-    </Group>
     <Package name='desktop-file-utils'/>
     <Package name='dmz-cursor-theme'/>
     <Package name='evince'/>
@@ -24,18 +21,12 @@
 <!--    <Package name='file-roller'/> -->
     <Package name='xarchiver'/>
 <!--    <Package name='firefox'/> -->
-    <Group name='ubuntu-trusty'>
-        <Package name='fonts-droid'/>
-    </Group>
     <Package name='fonts-liberation'/>
     <Package name='fonts-nanum'/>
     <Group name='ubuntu-xenial'>
         <Package name='fonts-noto-cjk'/>
     </Group>
     <Package name='galculator'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='gecko-mediaplayer'/>
-    </Group>
     <Package name='gnome-accessibility-themes'/>
     <Package name='gnome-icon-theme-symbolic'/>
     <Package name='gnome-keyring'/>
@@ -73,19 +64,17 @@
     <Package name='libqmi-glib1'/> <!-- unaccounted modemmanager dependency -->
     <Package name='mtpaint'/>
     <Package name='network-manager-gnome'/>
+    <Service name='ModemManager'/>
+    <Service name='NetworkManager-wait-online'/>
+    <Service name='NetworkManager'/>
     <Package name='obconf'/>
     <Group name='ubuntu-xenial'>
         <Package name='pinentry-gtk2'/>
         <Package name='python3-aptdaemon.pkcompat'/>
     </Group>
     <Package name='pm-utils'/>
-    <Group name='ubuntu-trusty'>
-        <Package name='python-gudev'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <Package name='scrot'/>
-        <Package name='simple-scan'/>
-    </Group>
+    <Package name='scrot'/>
+    <Package name='simple-scan'/>
     <Package name='software-properties-gtk'/>
     <Package name='synaptic'/>
     <Package name='system-config-printer-gnome'/>
@@ -117,5 +106,9 @@
     <Package name='xterm'/>
     <Package name='xul-ext-ubufox'/>
     <Package name='xz-utils'/>
+    <Service name='accounts-daemon'/>
+    <Service name='anacron-resume'/>
+    <Service name='anacron'/>
+    <Service name='pppd-dns'/>
 </Group>
 </Bundle>

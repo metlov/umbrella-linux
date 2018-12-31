@@ -1,4 +1,4 @@
-<Bundle name='mailman'>
+<Bundle>
     <Package name='mailman'/>
     <Path name='/etc/apache2/conf-available/mailman.conf'/>
     <Path name='/etc/apache2/conf-enabled/mailman.conf'/>

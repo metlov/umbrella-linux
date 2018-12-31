@@ -27,7 +27,7 @@ session optional                        pam_umask.so
 session optional                        pam_krb5.so minimum_uid=1100
 {% end %}\
 session required        pam_unix.so
-{% if 'ubuntu-xenial' in metadata.groups %}\
+{% if 'ubuntu-xenial' in metadata.groups and not 'vmhost' in metadata.groups %}\
 session required        pam_loginuid.so
 session required        pam_systemd.so
 {% end %}\
@@ -39,16 +39,11 @@ session required        pam_encfs.so
 session optional                        pam_ldap.so
 {% end %}\
 session optional                        pam_ck_connector.so nox11
-{% if 'ubuntu-trusty' in metadata.groups and 'ltsp' in metadata.groups %}\
-
-# Kill all user processes at logout on LTSP server
-session optional        pam_exec.so     quiet /etc/pam_session.sh
-{% end %}\
 {% if 'local-fs' in metadata.groups %}\
-{%   if 'ubuntu-trusty' in metadata.groups or 'DMZwww' in metadata.groups %}\
+{%   if 'DMZwww' in metadata.groups %}\
 session required pam_mkhomedir.so
 {%   end %}\
-{%   if 'ubuntu-xenial' in metadata.groups and not 'DMZwww' in metadata.groups %}\
+{%   if not 'DMZwww' in metadata.groups %}\
 session required pam_mkhomedir.so skel=/var/lib/umbrella-skel/unpacked
 {%   end %}\
 {% end %}\

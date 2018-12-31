@@ -43,10 +43,8 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
     <py:if test="'monitor' in funchosts">
         <Group name='ossec-client'/>
     </py:if>
-    <py:if test="'ubuntu-xenial' in metadata.groups">
-        <!-- this is needed because x2go thin clients have root on NFS -->
-        <Group name='nfs-server'/>
-    </py:if>
+    <!-- x2go thin clients have root on NFS -->
+    <Group name='nfs-server'/>
 </py:if>
 <py:if test="'nfs' in metadata.groups">
     <!-- nfs will initiate the public_html replication -->

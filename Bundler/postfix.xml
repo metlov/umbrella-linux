@@ -1,43 +1,28 @@
-<Bundle name='postfix'>
+<Bundle>
 <Group name='ubuntu'>
     <Package name='postfix'/>
-    <Group name='ubuntu-trusty'>
-        <BoundPOSIXUser name="postfix" home="/var/spool/postfix" shell="/bin/false" gecos="" uid="204" group="postfix">
-            <MemberOf>ssl-cert</MemberOf>
-        </BoundPOSIXUser>
-        <BoundPOSIXGroup name="postdrop" gid="210"/>
-        <BoundPOSIXGroup name="postfix" gid="209"/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXUser name="postfix" home="/var/spool/postfix" shell="/bin/false" gecos="" uid="628" group="postfix">
-            <MemberOf>ssl-cert</MemberOf>
-        </BoundPOSIXUser>
-        <BoundPOSIXGroup name="postdrop" gid="627"/>
-        <BoundPOSIXGroup name="postfix" gid="628"/>
-    </Group>
+    <BoundPOSIXUser name="postfix" home="/var/spool/postfix" shell="/bin/false" gecos="" uid="628" group="postfix">
+        <MemberOf>ssl-cert</MemberOf>
+    </BoundPOSIXUser>
+    <BoundPOSIXGroup name="postdrop" gid="627"/>
+    <BoundPOSIXGroup name="postfix" gid="628"/>
     <Path name='/etc/postfix/master.cf'/>
     <Path name='/etc/postfix/main.cf'/>
     <Path name='/etc/aliases'/>
     <Action name='newaliases'/>
     <Path name='/etc/postfix/transport'/>
     <Group name='mail'>
-        <Group name='ubuntu-trusty'>
-            <Package name='procmail'/>
-            <Path name='/etc/procmailrc'/>
-        </Group>
-        <Group name='ubuntu-xenial'>
-            <Package name='postfix-ldap'/>
-            <Path name='/etc/postfix/local_recipients.cf'/>
-            <Path name='/etc/postfix/alias_system'/>
-            <Path name='/etc/postfix/alias_map.cf'/>
-            <Path name='/etc/postfix/alias_map_forward.cf'/>
-            <Path name='/etc/postfix/alias_map_dupforw.cf'/>
-            <Path name='/etc/postfix/sender_login_map.cf'/>
-            <!-- distribution lists for posix groups -->
-            <Path name='/etc/postfix/alias_map_distlist.cf'/>
-            <Path name='/etc/postfix/alias_map_distlist_ext.cf'/>
-            <Path name='/etc/postfix/map_uid_mail.cf'/>
-        </Group>
+        <Package name='postfix-ldap'/>
+        <Path name='/etc/postfix/local_recipients.cf'/>
+        <Path name='/etc/postfix/alias_system'/>
+        <Path name='/etc/postfix/alias_map.cf'/>
+        <Path name='/etc/postfix/alias_map_forward.cf'/>
+        <Path name='/etc/postfix/alias_map_dupforw.cf'/>
+        <Path name='/etc/postfix/sender_login_map.cf'/>
+        <!-- distribution lists for posix groups -->
+        <Path name='/etc/postfix/alias_map_distlist.cf'/>
+        <Path name='/etc/postfix/alias_map_distlist_ext.cf'/>
+        <Path name='/etc/postfix/map_uid_mail.cf'/>
         <Path name='/etc/postfix/sender_login_map'/>
         <Path name='/etc/ssl/smtp.pem'/>
         <Path name='/etc/ssl/private/smtp.key'/>

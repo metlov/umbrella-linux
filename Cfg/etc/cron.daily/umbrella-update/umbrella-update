@@ -1,3 +1,0 @@
-#!/bin/bash
-test -x /usr/local/bin/umbrella-wallpaper.sh && /usr/local/bin/umbrella-wallpaper.sh
-test -x /usr/local/bin/umbrella-shortcut.sh && /usr/local/bin/umbrella-shortcut.sh

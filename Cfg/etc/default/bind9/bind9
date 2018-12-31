@@ -2,4 +2,4 @@
 RESOLVCONF=yes
 
 # startup options for the server
-OPTIONS="-u bind"
+OPTIONS="-4 -u bind"

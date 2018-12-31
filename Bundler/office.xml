@@ -1,9 +1,7 @@
-<Bundle name='office'>
+<Bundle>
     <Package name='libreoffice'/>
     <Package name='libreoffice-l10n-ru'/>
     <Package name='libreoffice-style-galaxy'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libreoffice-style-elementary'/>
-        <Package name='libreoffice-sdbc-hsqldb'/>
-    </Group>
+    <Package name='libreoffice-style-elementary'/>
+    <Package name='libreoffice-sdbc-hsqldb'/>
 </Bundle>

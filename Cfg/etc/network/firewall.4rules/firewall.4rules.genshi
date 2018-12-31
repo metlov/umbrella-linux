@@ -390,15 +390,9 @@ all_interfaces=[IFPUB,IFSEC]
 -A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_TFTP_IP} --dport 9571 -j ACCEPT
 -A FORWARD -p udp -i ${IFSEC} -o ${IFPUB} -d ${PUB_TFTP_IP} --dport 69 -j ACCEPT
 -A FORWARD -p udp -i ${IFPUB} -o ${IFSEC} -s ${PUB_TFTP_IP} --dport 1024 -j ACCEPT
-{% if 'ubuntu-trusty' in metadata.groups %}\
-# access NBD server on ltsp host for thin client rootfs
--A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_NBD_IP} --dport 10809 -j ACCEPT
-{% end %}\
-{% if 'ubuntu-xenial' in metadata.groups %}\
 # access NFSv3 server on ltsp host for thin client rootfs
 -A FORWARD -p tcp -i ${IFSEC} -o ${IFPUB} -d ${PUB_NBD_IP} -j ACCEPT
 -A FORWARD -p udp -i ${IFSEC} -o ${IFPUB} -d ${PUB_NBD_IP} -j ACCEPT
-{% end %}\
 {% end %}\
 {% if 'proxy' in funchosts %}\
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_PRX_IP} --dport 3142 -j ACCEPT

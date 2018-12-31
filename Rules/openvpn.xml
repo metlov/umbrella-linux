@@ -1,10 +1,5 @@
 <Rules priority="0">
-<Group name='ubuntu-trusty'>
-    <Service name='openvpn' status='on' type='deb'/>
-</Group>
-<Group name='ubuntu-xenial'>
     <Service name='openvpn' status='on' type='systemd'/>
     <Action name='generateDHparams' timing='pre' shell='true' when='modified' command='[ -f /etc/ssl/dh2048.pem ] || openssl dhparam -out /etc/ssl/dh2048.pem 2048' status='ignore'/>
     <Path type='directory' name='/var/lib/openvpn' owner='root' group='openvpn' mode='0775'/>
-</Group>
 </Rules>

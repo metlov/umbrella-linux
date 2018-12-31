@@ -1,44 +1,85 @@
 <Rules priority="0">
 <Group name='ubuntu-xenial'>
+  <Group name='virt-lxc' negate='true'>
+    <Service name='acpid' status='on' type='systemd'/>
+  </Group>
+  <Group name='virt-lxc'>
+    <Service name='acpid' status='off' type='systemd'/>
+  </Group>
+  <Service name='acpid.path' status='ignore' type='systemd'/>
+  <Service name='acpid.socket' status='ignore' type='systemd'/>
   <Service name='apache2' status='on' type='systemd'/>
+  <Service name='apport-forward.socket' status='ignore' type='systemd'/>
   <Service name='apt-cacher-ng' status='on' type='systemd'/>
+  <Service name='apt-daily.timer' status='on' type='systemd'/>
+  <Service name='apt-daily-upgrade.timer' status='on' type='systemd'/>
   <Service name='arpwatch' status='on' type='systemd'/>
+  <Service name='atd' status='on' type='systemd'/>
   <Service name='autofs' status='on' type='systemd'/>
-  <Service name='acpid' status='on' type='systemd'/>
   <Service name='asterisk' status='on' type='systemd'/>
   <Service name='bind9' status='on' type='systemd'/>
   <Service name='cachefilesd' status='on' type='systemd'/>
   <Service name='cron' status='on' type='systemd'/>
   <Service name='dkimproxy' status='on' type='systemd'/>
+  <Service name='dm-event.socket' status='ignore' type='systemd'/>
   <Service name='dovecot' status='on' type='systemd'/>
   <Service name='ejabberd-gssapi' status='on' type='systemd'/>
   <Service name='fusioninventory-agent' status='on' type='systemd'/>
+  <Service name='getty@tty1' status='ignore' type='systemd'/>
+  <Service name='getty@tty2' status='ignore' type='systemd'/>
+  <Service name='getty@tty3' status='ignore' type='systemd'/>
+  <Service name='getty@tty4' status='ignore' type='systemd'/>
+  <Service name='getty@tty5' status='ignore' type='systemd'/>
+  <Service name='getty@tty6' status='ignore' type='systemd'/>
+  <Service name='getty@tty7' status='ignore' type='systemd'/>
+  <Service name='getty@tty8' status='ignore' type='systemd'/>
   <Service name='gssd' status='on' type='systemd'/>
   <Service name='idmapd' status='on' type='systemd'/>
+  <Service name='inetd' status='ignore' type='systemd'/>
   <Service name='irqbalance' status='on' type='systemd'/>
   <Service name='isc-dhcp-server' status='on' type='systemd'/>
   <Service name='isc-dhcp-server6' status='ignore' type='systemd'/>
+  <Service name='iscsid' status='ignore' type='systemd'/>
   <Service name='krb5-kdc' status='on' type='systemd'/>
   <Service name='krb5-admin-server' status='on' type='systemd'/>
   <Service name='libnss-ldap' status='ignore' type='systemd'/>
+  <Service name='lm-sensors' status='ignore' type='systemd'/>
+  <Service name='lvm2-lvmetad.socket' status='ignore' type='systemd'/>
+  <Service name='lvm2-lvmpolld.socket' status='ignore' type='systemd'/>
+  <Service name='lvm2-monitor.service' status='on' type='systemd'/>
+  <Service name='lxcfs' status='ignore' type='systemd'/>
+  <Service name='lxd-containers' status='ignore' type='systemd'/>
+  <Service name='lxd.socket' status='ignore' type='systemd'/>
   <Service name='mdadm' status='on' type='systemd'/>
   <Service name='mysql' status='on' type='systemd'/>
   <Service name='nagios3' status='on' type='systemd'/>
   <Service name='netfilter-persistent' status='ignore' type='systemd'/>
+  <Service name='networking' status='on' type='systemd'/>
+  <Service name='nfs-client.target' status='on' type='systemd'/>
+  <Service name='nfs-server' status='on' type='systemd'/>
   <Service name='nfs-kernel-server' status='on' type='systemd'/>
   <Service name='nscd' status='on' type='systemd'/>
   <Service name='ntp' status='on' type='systemd'/>
+  <Service name='open-iscsi' status='ignore' type='systemd'/>
   <Service name='ossec' status='on' type='systemd'/>
   <Service name='postfix' status='on' type='systemd'/>
   <Service name='psad' status='on' type='systemd'/>
+  <Service name='redis-server' status='ignore' type='systemd'/>
+  <Service name='remote-fs.target' status='ignore' type='systemd'/>
+  <Service name='resolvconf' status='ignore' type='systemd'/>
   <Service name='rcDCC' status='on' type='systemd'/>
   <Service name='rpcbind' status='on' type='systemd'/>
+  <Service name='rpcbind.socket' status='ignore' type='systemd'/>
+  <Service name='rsyslog' status='on' type='systemd'/>
   <Service name='saslauthd' status='on' type='systemd'/>
   <Service name='slapd' status='on' type='systemd'/>
   <Service name='smartd' status='on' type='systemd'/>
   <Service name='spamassassin' status='on' type='systemd'/>
   <Service name='ssh' status='on' type='systemd'/>
   <Service name='squid' status='on' type='systemd'/>
+  <Service name='systemd-timesyncd' status='ignore' type='systemd'/>
+  <Service name='ureadahead' status='ignore' type='systemd'/>
+  <Service name='uuidd.socket' status='ignore' type='systemd'/>
   <Service name='xinetd' status='on' type='systemd'/>
 
   <!-- extra services, having their own bundles -->

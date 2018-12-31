@@ -1,4 +1,4 @@
-<Bundle name='base'>
+<Bundle independent="true">
    <Package name='ubuntu-minimal'/>
    <Package name='aptitude'/>
    <Group name='ubuntu-xenial'>
@@ -40,6 +40,8 @@
    <Path name='/etc/ssl/private'/>
    <Group name='ubuntu-xenial'>
       <Package name='systemd'/>
+      <Service name='remote-fs.target'/>
+      <Service name='systemd-timesyncd'/>
       <Package name='systemd-sysv'/>
       <Package name='tcpd'/>
       <Package name='dbus'/>
@@ -47,25 +49,14 @@
       <Path name='/usr/lib/dbus-1.0/dbus-daemon-launch-helper'/>
    </Group>
    <Group name='vm'>
-      <Group name='ubuntu-trusty'>
-         <Package name='linux-image-virtual-lts-vivid'/>
-      </Group>
-      <Group name='ubuntu-xenial'>
-         <Group name='virt-lxc' negate='true'>
-            <Package name='linux-image-virtual'/>
-         </Group>
+      <Group name='virt-lxc' negate='true'>
+          <Package name='linux-image-virtual'/>
       </Group>
    </Group>
    <Group name='vm' negate='true'>
-      <Group name='ubuntu-trusty'>
-          <Package name='linux-generic-lts-vivid'/>
-          <Package name='linux-image-generic-lts-vivid'/>
-      </Group>
-      <Group name='ubuntu-xenial'>
-         <Package name='linux-generic'/>
-         <Group name='kernel-signed'>
-             <Package name='linux-signed-generic'/>
-         </Group>
+      <Package name='linux-generic'/>
+      <Group name='kernel-signed'>
+         <Package name='linux-signed-generic'/>
       </Group>
       <Package name='at'/>
       <Package name='crda'/>
@@ -84,11 +75,19 @@
          <Package name='ubuntu-server'/>
          <Package name='byobu'/>
          <Package name='python3-newt'/>
+         <Service name='apport-forward.socket'/>
+         <Service name='iscsid'/>
+         <Service name='open-iscsi'/>
       </Group>
    </Group>
 
    <Group name='lvm'>
       <Package name='lvm2'/>
+      <Package name='dmeventd'/>
+      <Service name='dm-event.socket'/>
+      <Service name='lvm2-lvmetad.socket'/>
+      <Service name='lvm2-lvmpolld.socket'/>
+      <Service name='lvm2-monitor.service'/>
    </Group>
 
    <!-- Umbrella Linux variables -->
@@ -101,21 +100,13 @@
    <Path name='/etc/profile.d/history.sh'/>
    <Path name='/etc/hosts'/>
    <Path name='/etc/resolvconf/resolv.conf.d/original'/>
+   <Service name='resolvconf'/>
    <Path name='/root/.ssh/authorized_keys2'/>
 
    <Group name='roaming' negate='true'>
       <Path name='/etc/network/interfaces'/>
    </Group>
-
-   <Group name='ubuntu-trusty'>
-      <Group name='physical'>
-         <Group name='workstation'>
-            <Path name='/etc/NetworkManager/NetworkManager.conf'/>
-            <Path name='/etc/init/autofs.conf'/>
-            <Path name='/etc/init/lightdm.conf'/>
-         </Group>
-      </Group>
-   </Group>
+   <Service name='networking'/>
 
    <!-- nice MOTD -->
    <Path name='/etc/motd'/>
@@ -153,4 +144,8 @@
    <Group name='virt-lxc'>
       <Path name='/etc/update-motd.d/51-cloudguest'/>
    </Group>
+
+   <Service name='rsyslog'/>
+   <Service name='ureadahead'/>
+   <Service name='uuidd.socket'/>
 </Bundle>

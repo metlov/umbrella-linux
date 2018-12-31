@@ -1,4 +1,4 @@
-<Bundle name='sysadm-scripts'>
+<Bundle>
    <!-- Umbrella SSL certificates expiry -->
    <Path name='/etc/cron.d/expire-ssl-certs'/>
    <Path name='/usr/local/bin/umbrella-expire-ssl-certs'/>

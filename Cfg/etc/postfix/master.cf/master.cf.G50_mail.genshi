@@ -112,7 +112,7 @@ bsmtp     unix  -       n       n       -       -       pipe
 # Dovecot LDA
 #
 dovecot   unix  -       n       n       -       -       pipe
-  flags=DRhu user=vmail:vmail argv=/usr/bin/spamc -u $${user} -e /usr/lib/dovecot/dovecot-lda -f $${sender} -a $${original_recipient} -d $${user}@$${nexthop}
+  flags=DRhu user=vmail:vmail argv=/usr/bin/spamc -s 1024000 -u $${user} -e /usr/lib/dovecot/dovecot-lda -f $${sender} -a $${original_recipient} -d $${user}@$${nexthop}
 
 {% end %}\
 #
@@ -139,9 +139,4 @@ dksign    unix  -       -       n       -       4       smtp
     -o mynetworks=127.0.0.0/8
     -o smtpd_authorized_xforward_hosts=127.0.0.0/8
 
-{% if 'ubuntu-trusty' in metadata.groups %}\
-retry     unix  -       -       -       -       -       error
-{% end %}\
-{% if 'ubuntu-xenial' in metadata.groups %}\
 retry     unix  -       -       n       -       -       error
-{% end %}\

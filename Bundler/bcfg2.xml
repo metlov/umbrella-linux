@@ -1,10 +1,7 @@
-<Bundle name='bcfg2'>
+<Bundle>
 <Package name='bcfg2'/>
 <Package name='debsums'/>
 <Path name='/etc/bcfg2.conf'/>
-<Group name='ubuntu-trusty'>
-   <Service name='bcfg2'/>
-</Group>
 <Group name='workstation'>
    <Path name='/etc/default/bcfg2'/>
 </Group>
@@ -18,38 +15,7 @@
    <Package name='python-cheetah'/>
    <Package name='python-genshi'/>
    <Package name='python-django-south'/>
-   <Group name='ubuntu-trusty'>
-      <Package name='python-mysqldb'/>
-      <!-- bundler in bcfg2 1.3.3 needs fixing to properly support XIncludes -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Bundler.py'/>
-   </Group>
-   <Group name='ubuntu-xenial'>
-      <Package name='python-pymysql'/>
-      <!-- bcfg2 needs fixing for Django 1.8 -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/Storage/DjangoORM.py'/>
-      <Action name='compile-DjangoORM'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/models.py'/>
-      <Action name='compile-models'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py'/>
-      <Action name='compile-Core'/>
-      <!-- bundler in bcfg2 1.3.5 also needs fixing to properly support XIncludes -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Bundler.py'/>
-      <Action name='compile-Bundler'/>
-      <!-- make Cfg plugin follow symlinks when assembling the list of config files -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/Cfg/__init__.py'/>
-      <Action name='compile-Cfg-init'/>
-      <!-- this fixes handling of fallback in xincludes -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugin/helpers.py'/>
-      <Action name='compile-Server-helpers'/>
-      <!-- this is a quick hack to enable local configuration of NagiosGen, -->
-      <!-- which in Bcfg2 1.3.6 has no support for Genshi or Xinclude.      -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Plugins/NagiosGen.py'/>
-      <Action name='compile-NagiosGen'/>
-
-
-      <Path name='/usr/sbin/bcfg2-reports'/>
-
-   </Group>
+   <Package name='python-pymysql'/>
 
    <!-- purge old records from the reports database periodically -->
    <Path name='/etc/cron.daily/bcfg2-reports-purge'/>
@@ -92,37 +58,11 @@
    <Path name='/etc/bcfg2-web.conf'/>
    <Path name='/etc/apache2/conf-available/bcfg2.conf'/>
    <Path name='/etc/apache2/conf-enabled/bcfg2.conf'/>
-   <Group name='ubuntu-trusty'>
-      <!-- fixes to use bcfg2 1.3.3 reporting with Django 1.6 -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/urls.py'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/utils.py'/>
-   </Group>
    <Package name='python-pyinotify'/>
    <Package name='python-cheetah'/>
    <Package name='python-genshi'/>
-   <Group name='ubuntu-trusty'>
-      <Package name='python-mysqldb'/>
-   </Group>
-   <Group name='ubuntu-xenial'>
-      <Package name='python-pymysql'/>
-      <!-- bcfg2 needs fixing for Django 1.8 -->
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/Storage/DjangoORM.py'/>
-      <Action name='compile-DjangoORM'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/settings.py'/>
-      <Action name='compile-settings'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/models.py'/>
-      <Action name='compile-models'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/views.py'/>
-      <Action name='compile-views'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Reporting/templatetags/bcfg2_tags.py'/>
-      <Action name='compile-bcfg2_tags'/>
-      <Path name='/usr/lib/python2.7/dist-packages/Bcfg2/Server/Core.py'/>
-      <Action name='compile-Core'/>
-
-      <Path name='/usr/sbin/bcfg2-reports'/>
-
-      <Path name='/etc/systemd/system/bcfg2-server.service'/>
-   </Group>
+   <Package name='python-pymysql'/>
+   <Path name='/etc/systemd/system/bcfg2-server.service'/>
    <Package name='bcfg2-server'/>
    <Path name='/etc/default/bcfg2-server'/>
    <Package name='bcfg2-web'/>

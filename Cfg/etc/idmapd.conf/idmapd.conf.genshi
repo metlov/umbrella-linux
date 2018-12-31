@@ -5,12 +5,7 @@ execfile(repo+'/Python/00_baseparams.py')
 
 Verbosity = 0
 Pipefs-Directory = /run/rpc_pipefs
-{% if ('ubuntu-trusty' not in metadata.groups) or ('nfs' not in metadata.groups) %}\
 Domain = ${domain_name}
-{% end %}\
-{% if 'ubuntu-trusty' in metadata.groups and 'nfs' in metadata.groups %}\
-Domain = ${realm_name}
-{% end %}\
 
 [Mapping]
 

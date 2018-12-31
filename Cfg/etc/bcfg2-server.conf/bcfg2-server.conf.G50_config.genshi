@@ -5,7 +5,7 @@ execfile(repo+'/Python/10_funchosts.py')
 %}\
 [server]
 repository = /var/lib/bcfg2
-plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,SSHbase,SSLCA,Properties,Reporting,NagiosGen,GroupPatterns,GroupLogic
+plugins = Bundler,Cfg,Metadata,Packages,Probes,Rules,SSHbase,Properties,Reporting,NagiosGen,GroupPatterns,GroupLogic,ACL
 # Uncomment the following to listen on all interfaces
 #listen_all = true
 user = bcfg2
@@ -58,3 +58,4 @@ threshold=1
 
 [errors]
 templated-script = silent
+templated-executable = silent
