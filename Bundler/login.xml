@@ -1,52 +1,67 @@
 <Bundle>
 <Group name='ubuntu'>
-    <Package name='libpam-ldap'/>
-    <Package name='libpam-modules'/>
-    <Package name='libpam-ck-connector'/>
-    <Package name='libpam-systemd'/>
-    <Package name='libpam-ccreds'/>
-    <Package name='libpam-cracklib'/>
-    <Package name='wamerican'/>
-    <Group name='roamingworkstation' negate='true'>
-        <!-- on full-time networked workstations/servers sudo-ldap is used -->
-        <Package name='sudo-ldap'/>
-        <Path name='/etc/sudo-ldap.conf'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='libpam-ldap'/>
+        <Package name='libpam-ck-connector'/>
+        <Package name='libpam-ccreds'/>
+        <Package name='libpam-cracklib'/>
+        <Package name='wamerican'/>
+        <Group name='roamingworkstation' negate='true'>
+            <!-- on full-time networked workstations/servers sudo-ldap is used -->
+            <Package name='sudo-ldap'/>
+            <Path name='/etc/sudo-ldap.conf'/>
+        </Group>
+        <Group name='roamingworkstation'>
+            <!-- on intermittently-connected we stay with normal sudo. -->
+            <Package name='sudo'/>
+        </Group>
+        <Group name='router' negate='true'>
+            <!-- not on servers where users login using SSH with plain passwords -->
+            <!-- the problem seems to be that SSH goes to user's home before the -->
+            <!-- ticket is obtained and krenew seems to interfere with this      -->
+            <!-- may be I just need to disable PK on these servers for users     -->
+            <!-- somehow -->
+            <!-- automatically renew Kerberos tickets -->
+            <Path name='/etc/profile.d/krenew.sh'/>
+            <Path name='/etc/profile.d/krenew.csh'/>
+            <!-- the following script stops krenew on logout in bash -->
+            <!-- TODO: need the equivalent scripts for other shells -->
+            <Path name='/etc/bash.bash_logout'/>
+        </Group>
     </Group>
-    <Group name='roamingworkstation'>
-        <!-- on intermittently-connected we stay with normal sudo. -->
+    <Group name='ubuntu-xenial' negate='true'>
+        <BoundPOSIXGroup name="sssd" gid="669"/>
+        <BoundPOSIXUser name="sssd" home="/var/lib/sss" shell="/usr/sbin/nologin" gecos="SSSD system user,,," uid="669" group="sssd"/>
+        <Service name='sssd'/>
+        <Service name='sssd-secrets.socket'/>
+        <Package name='libpam-sss'/>
+        <Package name='libnss-sss'/>
+        <Package name='libsss-sudo'/>
+        <Package name='sssd-krb5'/>
+        <Package name='sssd-ldap'/>
+        <Path name='/etc/sssd/sssd.conf'/>
+        <!-- for password quality check -->
+        <Package name='cracklib-runtime'/>
+        <Action name='update-cracklib'/>
         <Package name='sudo'/>
     </Group>
+    <!-- login configuration -->
     <Path name='/etc/pam.d/common-account'/>
     <Path name='/etc/pam.d/common-auth'/>
     <Path name='/etc/pam.d/common-password'/>
     <Path name='/etc/pam.d/common-session'/>
     <Path name='/etc/pam.d/common-session-noninteractive'/>
+
+    <Package name='libpam-systemd'/>
+    <!-- access control and group assignment -->
+    <Package name='libpam-modules'/>
     <Path name='/etc/security/access.conf'/>
-    <Path name='/etc/sudoers'/>
     <Path name='/etc/security/group.conf'/>
+    <!-- sudo package selection -->
+    <Path name='/etc/sudoers'/>
+
     <!-- USB devices whitelisting -->
     <Path name='/etc/udev/rules.d/99-blacklist.rules'/>
     <Path name='/etc/udev/rules.d/99-whitelist.rules'/>
-    <Group name='router' negate='true'>
-        <!-- not on servers where users login using SSH with plain passwords -->
-        <!-- the problem seems to be that SSH goes to user's home before the -->
-        <!-- ticket is obtained and krenew seems to interfere with this      -->
-        <!-- may be I just need to disable PK on these servers for users     -->
-        <!-- somehow -->
-        <!-- automatically renew Kerberos tickets -->
-        <Path name='/etc/profile.d/krenew.sh'/>
-        <Path name='/etc/profile.d/krenew.csh'/>
-        <!-- the following script stops krenew on logout in bash -->
-        <!-- TODO: need the equivalent scripts for other shells -->
-        <Path name='/etc/bash.bash_logout'/>
-    </Group>
-    <Service name='getty@tty1'/>
-    <Service name='getty@tty2'/>
-    <Service name='getty@tty3'/>
-    <Service name='getty@tty4'/>
-    <Service name='getty@tty5'/>
-    <Service name='getty@tty6'/>
-    <Service name='getty@tty7'/>
-    <Service name='getty@tty8'/>
 </Group>
 </Bundle>

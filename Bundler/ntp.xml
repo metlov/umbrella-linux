@@ -1,11 +1,28 @@
 <Bundle>
 <Group name='ubuntu'>
-    <Package name='ntp'/>
-    <BoundPOSIXUser name="ntp" home="/home/ntp" shell="/bin/false" gecos="" uid="618" group="ntp"/>
-    <BoundPOSIXGroup name="ntp" gid="618"/>
-    <Path name='/etc/default/ntp'/>
-    <Path name='/etc/ntp.conf'/>
-    <Path name="/var/lib/ntp"/>
-    <Service name='ntp'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='ntp'/>
+        <BoundPOSIXUser name="ntp" home="/home/ntp" shell="/bin/false" gecos="" uid="618" group="ntp"/>
+        <BoundPOSIXGroup name="ntp" gid="618"/>
+        <Path name='/etc/default/ntp'/>
+        <Path name='/etc/ntp.conf'/>
+        <Path name="/var/lib/ntp"/>
+        <Service name='ntp'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='systemd-timesyncd'/>
+        <Group name='ntp-server' negate='true'>
+            <!-- on bionic and higher we use systemd-timesyncd on clients -->
+            <Path name='/etc/systemd/timesyncd.conf'/>
+            <Action name='enable-systemd-NTP-sync'/>
+        </Group>
+        <Group name='ntp-server'>
+            <!-- and chrony on the time server -->
+            <BoundPOSIXUser name="_chrony" home="/var/lib/chrony" shell="/usr/sbin/nologin" gecos="Chrony daemon,,," uid="672" group="_chrony"/>
+            <BoundPOSIXGroup name="_chrony" gid="672"/>
+            <Package name='chrony'/>
+            <Service name='chrony'/>
+        </Group>
+    </Group>
 </Group>
 </Bundle>

@@ -1,7 +1,9 @@
 <Bundle>
 <Group name='ubuntu'>
-    <BoundPOSIXUser name="arpwatch" home="/var/lib/arpwatch" shell="/bin/sh" gecos="ARP Watcher,,," uid="624" group="arpwatch"/>
     <BoundPOSIXGroup name="arpwatch" gid="624"/>
+    <BoundPOSIXUser name="arpwatch" home="/var/lib/arpwatch" shell="/bin/sh" gecos="ARP Watcher,,," uid="624" group="arpwatch">
+        <MemberOf>arpwatch</MemberOf>
+    </BoundPOSIXUser>
     <Path name='/etc/default/arpwatch'/>
     <Package name='arpwatch'/>
     <Service name='arpwatch'/>

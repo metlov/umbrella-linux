@@ -311,6 +311,24 @@
             <mac>00:16:3e:32:ec:1b</mac>
         </DMZif>
     </server>
+    <!-- DMZxmpp server is necessary to enable the external connections -->
+    <!-- to the Jabber domain of this Umbrella installation. This server-->
+    <!-- is unnecessary if only the internal Jabber is needed (in which -->
+    <!-- case the Jabber server is located on the "proxy" VM). Enabling -->
+    <!-- DMZxmpp moves the Jabber into DMZ. New user profiles will be   -->
+    <!-- configured accordingly, but the existing ones will need to be  -->
+    <!-- updated manually.                                              -->
+    <!-- Running Jabber in DMZ requires enabling <auth_in_DMZ/> in      -->
+    <!-- firewall.xml for authentication and authorization.             -->
+    <!-- <server>
+        <function>DMZxmpp</function>
+        <name>xmpp</name>
+        <DMZif>
+            <dev>eth0</dev>
+            <ip>172.17.3.6</ip>
+            <mac>00:16:3e:34:e1:13</mac>
+        </DMZif>
+    </server> -->
     <!-- The vpn server enables roaming Umbrella Workstations -->
     <!-- Note that it is necessary to define vpn network by uncommenting  -->
     <!-- <vpnet/> tag at the beginning of this file. The addresses for the-->
@@ -325,12 +343,12 @@
     <!-- as follows:                                                      -->
     <!-- <Client profile="roamingworkstation" name="roamer.umbrella-inc.ru" uuid="roamer.umbrella-inc.ru" auth="cert" floating="true" version="1.3.5"/> -->
     <!-- <server>
-        <function>DMZvpn</function
+        <function>DMZvpn</function>
         <name>vpn</name>
         <DMZif>
             <dev>eth0</dev>
-            <ip>172.17.3.6</ip>
-            <mac>00:16:3e:13:ad:02</mac>
+            <ip>172.17.3.7</ip>
+            <mac>00:16:3e:11:a1:09</mac>
         </DMZif>
     </server> -->
 </Properties>

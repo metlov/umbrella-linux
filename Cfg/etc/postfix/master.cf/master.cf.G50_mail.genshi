@@ -107,14 +107,12 @@ ifmail    unix  -       n       n       -       -       pipe
 bsmtp     unix  -       n       n       -       -       pipe
   flags=Fq. user=foo argv=/usr/local/sbin/bsmtp -f $$sender $$nexthop $$recipient
 
-{% if 'ubuntu-xenial' in metadata.groups %}\
 #
 # Dovecot LDA
 #
 dovecot   unix  -       n       n       -       -       pipe
   flags=DRhu user=vmail:vmail argv=/usr/bin/spamc -s 1024000 -u $${user} -e /usr/lib/dovecot/dovecot-lda -f $${sender} -a $${original_recipient} -d $${user}@$${nexthop}
 
-{% end %}\
 #
 # specify the location of the DKIM signing proxy
 # Note: we allow "4" simultaneous deliveries here; high-volume sites may

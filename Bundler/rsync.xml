@@ -1,0 +1,8 @@
+<Bundle>
+<Group name='ubuntu'>
+    <Package name='rsync'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='rsync'/>
+    </Group>
+</Group>
+</Bundle>

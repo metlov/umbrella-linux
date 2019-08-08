@@ -1,9 +1,14 @@
 #!/bin/sh -e
 
 {% if 'lxd-containers-defined' in metadata.groups %}\
-# this is necessary for lxd containers to start after reboot thanks for
-# lxd on xenial being socket-activated
+# this is necessary for lxd containers to start after reboot
+# because lxd is socket-activated
+{% if 'ubuntu-xenial' in metadata.groups %}\
 echo -n "" | nc -U /var/lib/lxd/unix.socket
+{% end %}\
+{% if 'ubuntu-xenial' not in metadata.groups %}\
+echo -n "" | nc -UN /var/lib/lxd/unix.socket
+{% end %}\
 
 # this is necessary for router to function, since the LXD containers
 # can not load kernel modules by themseles.

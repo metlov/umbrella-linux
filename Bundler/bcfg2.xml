@@ -1,5 +1,9 @@
 <Bundle>
 <Package name='bcfg2'/>
+<Group name='ubuntu-xenial' negate='true'>
+  <!-- required by gpg, required by python-apt, required by bcfg2 -->
+  <Package name='pinentry-curses'/>
+</Group>
 <Package name='debsums'/>
 <Path name='/etc/bcfg2.conf'/>
 <Group name='workstation'>
@@ -12,10 +16,15 @@
    <Package name='python-ipcalc'/>
    <Package name='python-passlib'/>
    <Package name='python-pyinotify'/>
-   <Package name='python-cheetah'/>
    <Package name='python-genshi'/>
-   <Package name='python-django-south'/>
+   <Package name='python-django'/>
    <Package name='python-pymysql'/>
+   <Group name='ubuntu-xenial'>
+      <Package name='python-cheetah'/>
+   </Group>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Package name='python-six'/>
+   </Group>
 
    <!-- purge old records from the reports database periodically -->
    <Path name='/etc/cron.daily/bcfg2-reports-purge'/>
@@ -59,7 +68,10 @@
    <Path name='/etc/apache2/conf-available/bcfg2.conf'/>
    <Path name='/etc/apache2/conf-enabled/bcfg2.conf'/>
    <Package name='python-pyinotify'/>
-   <Package name='python-cheetah'/>
+   <Group name='ubuntu-xenial'>
+      <Package name='python-cheetah'/>
+      <Package name='python-django-south'/>
+   </Group>
    <Package name='python-genshi'/>
    <Package name='python-pymysql'/>
    <Path name='/etc/systemd/system/bcfg2-server.service'/>
@@ -70,7 +82,6 @@
    <Package name='libapache2-mod-wsgi'/>
    <Path name='/etc/apache2/mods-enabled/wsgi.conf'/>
    <Path name='/etc/apache2/mods-enabled/wsgi.load'/>
-   <Package name='python-django-south'/>
    <Package name='python-mysqldb'/>
 </Group>
 </Bundle>

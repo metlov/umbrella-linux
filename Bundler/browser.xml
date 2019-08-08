@@ -1,0 +1,29 @@
+<Bundle>
+<Group name='ubuntu'>
+    <Group name='chromium-browser'>
+        <Package name='chromium-browser'/>
+        <Path name='/etc/chromium-browser/default'/> <!-- disable disk cache -->
+        <Group name='ltsp' negate='true'>
+             <Package name='chromium-codecs-ffmpeg-extra'/>
+        </Group>
+        <Group name='ltsp'>
+             <Package name='chromium-codecs-ffmpeg'/>
+        </Group>
+        <Package name='chromium-browser-l10n'/>
+        <Path name='/etc/chromium-browser/policies/managed/policy.json'/>
+    </Group>
+    <Group name='firefox-browser'>
+        <Package name='firefox'/>
+        <Group name='lang-en'>
+            <Package name='firefox-locale-en'/>
+        </Group>
+        <Group name='lang-ru'>
+             <Package name='firefox-locale-ru'/>
+        </Group>
+        <Path name='/etc/firefox/syspref.js'/>
+    </Group>
+    <Group name='links-browser'>
+        <Package name='links'/>
+    </Group>
+</Group>
+</Bundle>

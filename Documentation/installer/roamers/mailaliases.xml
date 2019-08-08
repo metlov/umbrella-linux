@@ -1,0 +1,16 @@
+<Properties>
+    <!-- This file defines legacy mail aliases. It is probably best now -->
+    <!-- to leave this file empty and define the aliases via the Fusion -->
+    <!-- Directory interface at https://gosa.<your_domain>/             -->
+
+    <!-- Mail aliases for users in the system. -->
+    <!-- Several users can be specified in the same alias definition.  -->
+    <!-- It means that all of them will receive mail for the alias     -->
+    <!-- and also every one of them will be able to send mail from     -->
+    <!-- the alias.                                                    -->
+    <!-- <mailalias>
+        <alias>director</alias>
+        <user>secretary1_username</user>
+        <user>secretary2_username</user>
+    </mailalias> -->
+</Properties>

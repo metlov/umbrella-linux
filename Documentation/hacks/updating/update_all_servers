@@ -1,0 +1,40 @@
+#!/bin/bash
+set -e
+source /etc/umbrella.conf
+
+
+if [[ ${BCFG2_GROUPS} != *" lxd-containers-host "* ]]; then
+    echo "The script must be run on an LXD container Umbrella Linux VM host."
+    exit 9
+fi
+
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run by the root user."
+   exit 9
+fi
+
+echo "Now this script will update all the core server VMs at once."
+echo "It is advisable that you run the \"refresh_all_servers\" script first"
+echo "and check https://${HOST_MONITOR}/bcfg2 to see what changes are going"
+echo "to be performed. So that you know what you are doing."
+read -r -p "Now please type \"yes\" if you do : " response
+response=${response,,}    # tolower
+if [[ $response =~ ^(yes)$ ]]; then
+    for server in $SERVERS; do
+        echo "------------------------------------------------------------"
+        hname=${server%.$DOMAIN_NAME}
+        echo "root@${hname}:~# bcfg2 -qvk -r packages"
+        if [[ "$server" == "$HOST_VMHOST" ]]; then
+            # run directly on VMhost
+            bcfg2 -qvk -r packages
+        else
+            lxc exec $hname -- /bin/bash -c \
+                "bcfg2 -qvk -r packages"
+        fi
+    done
+
+    echo "------------------------------------------------------------"
+    echo "All the VMs successfully updated."
+    echo "Please visit https://${HOST_MONITOR}/bcfg2 to check the results."
+    echo "------------------------------------------------------------"
+fi

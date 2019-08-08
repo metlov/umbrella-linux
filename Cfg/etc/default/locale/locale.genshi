@@ -4,7 +4,12 @@ execfile(repo+'/Python/00_baseparams.py')
 %}\
 {% choose %}\
 {% when  'server' in metadata.groups %}\
+{%     if 'ubuntu-xenial' in metadata.groups %}\
 LANG="en_US.UTF-8"
+{%     end %}\
+{%     if 'ubuntu-xenial' not in metadata.groups %}\
+LANG="C.UTF-8"
+{%     end %}\
 {% end %}\
 {% otherwise %}\
 LANG="${language}.UTF-8"

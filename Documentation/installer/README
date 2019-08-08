@@ -1,0 +1,213 @@
+This is the base Umbrella system configuration and the installer, which
+will turn a recent (16.04 or 18.04 at the moment of writing) "mini" or
+"server" installation of Ubuntu LTS with default settings into a fully-
+functional Umbrella Linux server.
+
+
+         INSTALLING THE SERVER INTO THE VIRTUALBOX
+
+You can install the system in the VirtualBox as follows:
+
+1. Create the VM with a primary interface, connected to NAT. It is convenient
+to establish a port forwarding to be able later to access your system from the
+host via ssh. This can be done by going to the advanced settings of the
+primary interface, pressing the "Port Forwarding" button and mapping the host
+port 22222 (for example) to the port 22 of the ip address (10.0.2.15 by default)
+of your Umbrella Linux server.
+
+It is also advisable to set the network card type to virtio for improved
+performance and for exposing yourself to fewer emulation bugs.
+
+2. Install a recent Umbuntu server LTS into it with default settings (that is
+not selecting any extra options during the installation, just pressing <Enter>
+when asked for anything but the initial username and password). You can,
+however, use some intricate disk formatting and partition configuration,
+the system will adapt to it.
+
+3. Log in as root and copy the *.xml files from this directory and the
+./umbrella-install script to the home of the root user.
+
+4. You will need to edit umbrella.xml to set the MAC addresses of the router's
+and vmhost external interfaces <extif> tag. The router's external interface
+MAC address must coincide with the current MAC address of the primary interface
+(see it with the "ip a" command) and the vmhost's external interface must be
+set to a new unique MAC (e.g. current external interface MAC +1).
+
+5. Ensure you have the internet connection and run the installer with
+
+   ./umbrella-install
+
+This will install the system using the public Git repository.
+
+If you have access to the private Umbrella Linux development repository, you
+need to specifg login credentials as follows:
+
+   ./umbrella-install -u <git-username>
+
+The script will prompt you for the password, which will be stored in the .netrc
+file.
+
+You can also use your own git clone of the main umbrella repository by
+specifying its URL. For example, if you are installing in VirtualBox, you
+can (supposing your username is "user" and your repository is cloned into
+"~/bcfg2/") access the repository in your home directory on host as follows
+
+   ./umbrella-install -U ssh://user@10.0.2.2/home/user/bcfg2
+
+where "10.0.2.2" is the default IP in the VirtualBox for the host machine. The
+installer will prompt you for ssh password when it comes to cloning the
+repository.
+
+Additionally, you can use the "-b" option together with -U to specify the
+specific branch of the repository to check out, which is tremendously useful
+if you are implementing additional features for Umbrella Linux.
+
+Reboot the VM after installer is finished. Wait for about 5 minutes for the
+system to start and initialize all the VMs.
+
+6. If you used the default *.xml files, you can log in as "putin" with the
+password "123". From there you can either "sudo -i" to become root or
+ssh without password to any Umbrella host (e.g. "ssh config", where in
+"/var/lib/bcfg2" you will find the configuration of your system).
+
+If you have set the ssh port forwarding, it is also possible to log in via
+
+    ssh -l putin -p 22222 localhost
+
+Finally, you can log in graphically by using X2Go. Install it on your host
+and create a new session with
+
+  Server:
+    Host: 127.0.0.1
+    Login: putin
+    Port: 22222
+  Session type:
+    <Custom desktop>    Command: umbrella-session
+
+Starting this session with X2Go should bring you inside the ltsp server of
+your Umbrella Linux in graphical mode. You can start then the web browser
+and visit "gosa.umbrella-inc.ru" to define the users and the workstations.
+
+It is also convenient to create an ssh key for your admin user ("putin" by
+default or any other you have defined in umbrella.xml) and pasting it's
+public part to the <root_ssh_key/> tag in the umbrella_keys.xml. This
+will make it easier to log in as root to any machine in the system virtual
+or not. Note that this change will only become active after the
+configuration of the target machine gets updated by bcfg2.
+
+              CONFIGURING THE SYSTEM
+
+The configuration of the whole system is stored in the /var/lib/bcfg2 directory
+on the config server ("ssh config"). There are many ways to update this
+configuration. But, after the changes it needs to be applied.
+
+All the workstations, including the ltsp server are updated automatically by
+bcfg2 every hour (you can check their status by visiting 
+https://monitor.umbrella-inc.ru/bcfg2 in the web browser). The main servers --
+router, config, cache, etc (you can find their list in the /etc/hosts file
+or directly in umbrella.xml) are currently updated only manually.
+
+To see the state of the configuration, first log in as root to the relevant
+server or the workstation (either via ssh key or via sudo) and run
+
+   bcfg2 -qvne
+
+This will check the configuration against the central repository and report
+any differences (see the bcfg2 documentation for details). To clear the
+differences run
+
+   bcfg2 -qvk -r packages
+
+which will perform the full update, including the apt package lists and remove
+any extra packages, which happen to be installed.
+
+You can also do
+
+   bcfg2 -qv
+
+which will quickly update the system without updating the apt (if you did the
+"apt-get update" or "bcfg2 -qvk" recently).
+
+Bcfg2 also tracks the package lists separately, on the configuration server.
+These lists are updated at bcfg2 server startup, or, if you did not restart
+the configuration server in a while (and especially if you plan to install
+new workstations) you can do it manually by running
+
+  bcfg2-admin xcmd Packages.Refresh
+
+as root on config and waiting for it to report "True".
+
+There are many tools to check and debug the configuration. But, since the
+configuration is updated live it is best to develop and debug it separately
+in the VM before deploying to the production system.
+
+
+
+             INSTALLING WORKSTATIONS
+
+Worstations are connected to the Umbrella System internally via "pub" or "sec"
+network interfaces of the server (roaming workstations, connecting externally
+from the Internet via the "ext" interface are covered in a separate roamers/
+example in this directory). To deploy workstations one needs to connect these
+interfaces.
+
+In the physical system the "pub" and/or "sec" interfaces correspond to the
+separate network cards on the Umbrella Linux system. In VirtualBox they
+can be implemented via additional virtial network cards, which you can
+enable in VM settings easily.
+
+To do this, please stop the main Umbrella VM and enable the "Adapter 2"
+in its settings, note its MAC address. Since you will want other VMs talking
+to these interfaces, it is necessary to change their type from "NAT" to
+"NAT network". You will need to create the corresponding network in VirtualBox
+first. For pub network it is essential that the VirtualBox's DHCP server is
+disabled. It is also advisable (but not necessary, unless VirtualBox implements
+stricter IP packet checks) to match the NAT network IP range with the pub
+network range, defined in Umbrella XML.
+
+Then start the Umbrella Server VM, wait for it to fully initialize and go
+to the /var/lib/bcfg2 directory on config. There, in Properties/umbrella.xml
+you will need to edit the networking configuration of vmhost and router
+to match the new interface configuration. Just like for the "ext" interface,
+it is necessary (to pass VirtualBox packet checks) to have the MAC address
+of the "pub" interface on router matching the MAC of the "Adapter 2" we have
+enabled in the virtualbox, while the vmhost's "pub" interface can have an
+arbitrary free (e.g. +1) MAC address. It is important though that vmhost's pub
+interface is brigded to the correct interface name for the "Adapter 2", as
+seen on VMhost ("enp0s8" in my installation, but you can check it with
+"ip a"). After updating the umbrella.xml with these MAC addresses and the 
+interface name you will need to apply configuration (using "bcfg2 -qvne" to see
+the changes and "bcfg2 -qv" to apply them) on vmhost and router.
+
+Now your Umbrella VM has the pub interface connected.
+
+To deploy a new workstation, create new VM with the external interface,
+connected to the same NAT network. Set the network interface emulation
+to an Intel card and enable PXE network boot in the VM's System settings.
+
+Start the main Umbrella Linux server and register the workstation either
+by visiting "gosa.umbrella-inc.ru" in a browser inside the X2Go session, or
+by running 
+
+umbrella-addworkstation "/Central Office/ws01" 08:00:27:83:0b:de -l VirtualBox -d your@email
+
+as root on config. In the latter command the "ws01" will be the name of the
+new workstation, "Central Office" is the name of your organization's central
+office as declared in organization.xml, MAC address must correspond to the MAC
+of the new workstation VM's primary interface (look it up in the "Adapter 1"
+advanced network settings of the), the -l and -d options set some comments,
+which can be useful for organizing workstations in LDAP. The IP address will
+be automatically allocated.
+
+Wait 5 minutes after finishing the registration for the information to
+propagate to DNS and DHCP servers.
+
+Now you can boot the workstation VM from the network. By default it will
+boot into the terminal mode, connecting (via X2Go) to the ltsp server
+of the Umbrella VM. You can also use the boot menu to initiate the
+hard drive installation of the workstation. After the installation is finished,
+turn off the PXE boot in VM settings or simply switch the primary network
+interface type to "virtio", which will additionally provide better performance
+and stability. After booting the new workstation from the hard drive you can
+log in with your corporate credentials (e.g. "putin"/"123") and have the home
+directory mounted via NFS.

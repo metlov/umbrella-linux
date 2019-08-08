@@ -63,16 +63,16 @@
    <Group profile='true' name='nfs'>
       <Group name='pubserver'/>
       <Group name='nfs-home-server'/>
-      <Bundle name='logo'/>
+      <Group name='umbrella-logo-skel'/>
       <Bundle name='www-homepages'/>
    </Group>
    <Group profile='true' name='archive'>
       <Group name='secserver'/>
       <Group name='nfs-home-server'/>
+      <Group name='umbrella-logo-skel'/>
       <Group name='encfs'/>
       <Group name='database'/>
       <Bundle name='rsnapshot'/>
-      <Bundle name='logo'/>
    </Group>
    <Group profile='true' name='mail'>
       <Group name='pubserver'/>
@@ -108,6 +108,7 @@
    </Group>
    <Group profile='true' name='admworkstation'>
       <Group name='workstation'/>
+      <Group name='links-browser'/>
    </Group>
    <Group profile='true' name='archiveworkstation'>
       <Group name='workstation'/>
@@ -131,6 +132,7 @@
    <Group name='desktop-text'>
       <Bundle name='desktop-text'/>
       <Bundle name='cli'/>
+      <Bundle name='browser'/>
    </Group>
    <Group name='desktop-kde'>
       <Group name='desktop-text'/>
@@ -152,13 +154,17 @@
       <Group name='textmail'/>
       <Group name='network-fs'/>
       <Group name='default-desktop'/>
+      <Group name='networking-NetworkManager'/>
+      <Group name='umbrella-logo-skel'/>
       <Bundle name='cryptsetup'/>
       <Bundle name='zabbix'/>
-      <Bundle name='logo'/>
    </Group>
    <Group name='physical'>
       <Group name='acpid'/>
       <Bundle name='smartmontools'/>
+   </Group>
+   <Group name='physical-server'>
+      <Bundle name='pollinate'/>
    </Group>
    <Group name='virt-qemu'>
       <Group name='acpid'/>
@@ -194,7 +200,6 @@
       <Bundle name='kerberos-kdc'/>
    </Group>
    <Group name='kerberos-slavekdc'>
-      <Bundle name='xinetd'/>
       <Bundle name='kerberos-kdc'/>
    </Group>
    <Group name='ldap-master'>
@@ -211,6 +216,9 @@
          <xi:include href="office.xml"/>
       </xi:fallback>
    </xi:include>
+   <Group name='umbrella-logo-skel'>
+      <Bundle name='logo'/>
+   </Group>
    <Group name='gui'>
       <Group name='acpid'/>
       <Group name='office'/>
@@ -218,6 +226,7 @@
       <Bundle name='gui'/>
       <Bundle name='gui-services'/>
       <Bundle name='gui-users'/>
+      <Bundle name='browser'/>
       <Bundle name='fontconfig'/>
       <Bundle name='recoll'/>
       <Bundle name='videodriver'/>
@@ -252,10 +261,6 @@
       <Bundle name='autofs'/>
       <Group name='network-fs' negate='true'/>
    </Group>
-   <Group name='ubuntu-xenial'>
-      <Group name='ubuntu'/>
-      <Group name='base'/>
-   </Group>
    <Group name='pubserver'>
       <Bundle name='zabbix'/>
       <Group name='server'/>
@@ -272,7 +277,11 @@
       <Group name='auth'/>
       <Group name='network-fs'/>
       <Group name='nagios'/>
+      <Group name='networking-networkd'/>
       <Bundle name='ossec'/>
+   </Group>
+   <Group name='lvm'>
+      <Bundle name='lvm'/>
    </Group>
    <Group name='nfs-home-server'>
       <Bundle name='autohome'/>
@@ -294,16 +303,23 @@
       <Bundle name='postfix'/>
       <Bundle name='mailman'/>
    </Group>
+   <Group name='ubuntu-xenial'>
+      <!-- these groups are not used on xenial -->
+      <Group name='networking-networkd' negate='true'/>
+      <Group name='networking-NetworkManager' negate='true'/>
+   </Group>
    <Group name='ubuntu'>
       <Bundle name='apt-sources'/>
       <Bundle name='base'/>
       <Bundle name='base-users'/>
+      <Bundle name='networking'/>
       <Bundle name='bcfg2'/>
       <Bundle name='ca-certificates'/>
       <Bundle name='ca-certificates-umbrella'/>
       <Bundle name='console'/>
       <Bundle name='cron'/>
       <Bundle name='nscd'/>
+      <Bundle name='rsync'/>
       <Bundle name='snmp'/>
       <Bundle name='ssh'/>
       <Bundle name='timezone'/>
@@ -319,6 +335,9 @@
    <Group name='www-server'>
       <Bundle name='apache2'/>
    </Group>
+   <Group name='squirrelmail'>
+      <Bundle name='squirrelmail'/>
+   </Group>
    <!-- externally accessible database -->
    <Group name='database-server'>
       <Group name='database'/>
@@ -333,6 +352,10 @@
    </Group>
    <Group name='acpid'>
       <Bundle name='acpid'/>
+   </Group>
+   <Group name='vm-full'>
+      <!-- install pollinate on fully virtualized VMs (that is "not containers") -->
+      <Bundle name='pollinate'/>
    </Group>
    <!-- network UPS tools -->
    <Group name='ups-master'>

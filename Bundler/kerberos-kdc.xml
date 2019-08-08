@@ -10,9 +10,15 @@ execfile(repo+'/Python/10_funchosts.py')
     <Package name='libverto-libevent1'/>
     <Path name='/etc/krb5.conf'/>
     <Group name='kerberos-slavekdc'>
-        <Package name='xinetd'/>
-        <Service name='xinetd'/>
-        <Path name='/etc/xinetd.d/krb5_prop'/>
+        <Group name='ubuntu-xenial'>
+            <Package name='xinetd'/>
+            <Service name='xinetd'/>
+            <Path name='/etc/xinetd.d/krb5_prop'/>
+        </Group>
+        <Group name='ubuntu-xenial' negate='true'>
+            <Package name='krb5-kpropd'/>
+            <Service name='krb5-kpropd'/>
+        </Group>
         <Path name='/etc/krb5kdc/kpropd.acl'/>
     </Group>
     <Group name='kerberos-masterkdc'>

@@ -1,3 +1,4 @@
 KRB5_KTNAME=/etc/ejabberd/xmpp.keytab
+KRB5CCNAME=MEMORY:ejabberd-ccache
 EJABBERD_PID_PATH=/run/ejabberd/ejabberd.pid
 ERLANG_NODE=ejabberd@${metadata.hostname.split('.')[0]}

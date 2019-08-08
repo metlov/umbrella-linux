@@ -5,7 +5,6 @@
     <Package name='tftpd-hpa'/>
     <Path name='/etc/default/tftpd-hpa'/>
     <Service name='tftpd-hpa'/>
-    <Package name='schroot'/>
     <BoundPOSIXUser name="tftp" home="/var/lib/tftpboot" shell="/bin/false" gecos="tftp daemon,,," uid="632" group="tftp"/>
     <BoundPOSIXGroup name="tftp" gid="632"/>
     <Path name='/etc/X11/Xsession.d/40-ltsp-server'/>

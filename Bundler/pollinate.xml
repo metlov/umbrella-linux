@@ -1,0 +1,7 @@
+<Bundle>
+<Group name='ubuntu'>
+    <BoundPOSIXUser name="pollinate" home="/var/cache/pollinate" shell="/bin/false" gecos="" uid="671" group="daemon"/>
+    <Package name='pollinate'/>
+    <Service name='pollinate'/>
+</Group>
+</Bundle>

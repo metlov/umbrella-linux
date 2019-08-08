@@ -2,7 +2,12 @@
 <Group name='ubuntu'>
     <Package name='cups'/>
     <Package name='cups-browsed'/>
-    <Package name='cups-pdf'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='cups-pdf'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='printer-driver-cups-pdf'/>
+    </Group>
     <Service name='cups'/>
     <Service name='cups.path'/>
     <Service name='cups.socket'/>

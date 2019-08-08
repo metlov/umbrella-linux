@@ -10,11 +10,11 @@ cp /usr/lib/syslinux/modules/bios/libutil.c32 /var/lib/tftpboot/libutil.c32
 rm -f /var/lib/tftpboot/vesamenu.c32
 cp /usr/lib/syslinux/modules/bios/vesamenu.c32 /var/lib/tftpboot/vesamenu.c32
 rm -f /var/lib/tftpboot/initrd.img.486
-cp /opt/x2gothinclient/chroot/initrd.img.486 /var/lib/tftpboot/initrd.img.486
+cp /opt/x2gothinclient/chroot/initrd.img.686 /var/lib/tftpboot/initrd.img.486
 rm -f /var/lib/tftpboot/memtest86+.bin
 cp /opt/x2gothinclient/chroot/boot/memtest86+.bin /var/lib/tftpboot/memtest86+.bin
 rm -f /var/lib/tftpboot/vmlinuz.486
-cp /opt/x2gothinclient/chroot/vmlinuz.486 /var/lib/tftpboot/vmlinuz.486
+cp /opt/x2gothinclient/chroot/vmlinuz.686 /var/lib/tftpboot/vmlinuz.486
 rm -f /var/lib/tftpboot/640x480-nw.png
 cp /var/lib/umbrella-logo/640x480-nw.png /var/lib/tftpboot/640x480-nw.png
 rm -f /opt/x2gothinclient/chroot/etc/x2go/x2gothinclient_start
@@ -26,9 +26,12 @@ perl -pi -e \
     's|\. /etc/x2go/x2gothinclient_init|/etc/x2go/x2gothinclient_init|g' \
     /opt/x2gothinclient/chroot/etc/init.d/x2gothinclient-chroot
 
-# patch the chroot creation script for Debian "stretch"
+# patch the chroot creation script for Debian "buster"
 perl -pi -e \
-    's|apt-get install linux-image-486|apt-get install linux-image-586|g' \
+    's|\"\$TC_X2GO_DEBURL\" && apt-get update|\"\$TC_X2GO_DEBURL\" && apt-get -o Acquire::AllowInsecureRepositories=true update|g' \
+    /usr/sbin/x2gothinclient_create
+perl -pi -e \
+    's|\"\$TC_X2GO_DEBURL\" && apt-get install x2go-keyring -y|\"\$TC_X2GO_DEBURL\" && apt-get install --allow-unauthenticated x2go-keyring -y|g' \
     /usr/sbin/x2gothinclient_create
 perl -pi -e \
     's|&& apt-get install locales|&& echo -e "en_US.UTF-8 UTF-8\\nru_RU.UTF-8 UTF-8\\nru_UA.UTF-8 UTF-8" > /etc/locale.gen && apt-get install locales|g' \
@@ -36,6 +39,11 @@ perl -pi -e \
 perl -pi -e \
     's|export X2GO_HANDLE_DAEMONS=false|export DEBIAN_FRONTEND="noninteractive" X2GO_HANDLE_DAEMONS=false|g' \
     /usr/sbin/x2gothinclient_create
+
+# patch the thin client update script
+perl -pi -e \
+    's|\"\$TC_CONFIG/freerdp/known_hosts\*\"|\$TC_CONFIG/freerdp/known_hosts\*|g' \
+    /usr/sbin/x2gothinclient_update
 
 # Make sessreg sgid utmp to be able to self-register users sessions
 # in umbrella-session script. The proper solution will be to have wtmp

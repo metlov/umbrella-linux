@@ -1,0 +1,61 @@
+<Properties>
+<!--<external_vpn> -->
+        <!-- name of the VPN interface -->
+        <!-- must match the device name in the openvpn config -->
+<!--    <dev>vpnet</dev> -->
+
+        <!-- networks, which are behind this VPN -->
+<!--    <secnetwork>172.11.16.0/25</secnetwork>
+        <secnetwork>172.11.16.128/25</secnetwork> -->
+
+        <!-- public networks with the internet access enabled -->
+        <!-- <pubnetwork></pubnetwork> -->
+
+        <!-- literal copy of the openvpn configuration file -->
+<!--    <config>
+ nobind
+ dev tap
+ ns-cert-type server
+ remote 10.30.4.100 1026 tcp-client
+ tls-client
+ key-direction 1
+ cipher AES-256-CBC
+ resolv-retry infinite
+ tun-mtu 1500
+ tun-mtu-extra 32
+ mssfix 1450
+ pull
+ comp-lzo no
+ verb 2
+# redirect-gateway def1
+<ca>
+&#x002d;&#x002d;&#x002d;&#x002d;-BEGIN CERTIFICATE&#x002d;&#x002d;&#x002d;&#x002d;-
+MII...........................
+           ...
+..==
+&#x002d;&#x002d;&#x002d;&#x002d;-END CERTIFICATE&#x002d;&#x002d;&#x002d;&#x002d;-
+</ca>
+<cert>
+&#x002d;&#x002d;&#x002d;&#x002d;-BEGIN CERTIFICATE&#x002d;&#x002d;&#x002d;&#x002d;-
+MII...........................
+            ...
+...=
+&#x002d;&#x002d;&#x002d;&#x002d;-END CERTIFICATE&#x002d;&#x002d;&#x002d;&#x002d;-
+</cert>
+<key>
+&#x002d;&#x002d;&#x002d;&#x002d;-BEGIN PRIVATE KEY&#x002d;&#x002d;&#x002d;&#x002d;-
+MII...........................
+             ...
+..........................==
+&#x002d;&#x002d;&#x002d;&#x002d;-END PRIVATE KEY&#x002d;&#x002d;&#x002d;&#x002d;-
+</key>
+<tls-auth>
+&#x002d;&#x002d;&#x002d;&#x002d;-BEGIN OpenVPN Static key V1&#x002d;&#x002d;&#x002d;&#x002d;-
+................................
+             ...
+................................
+&#x002d;&#x002d;&#x002d;&#x002d;-END OpenVPN Static key V1&#x002d;&#x002d;&#x002d;&#x002d;-
+</tls-auth>
+</config>
+</external_vpn> -->
+</Properties>

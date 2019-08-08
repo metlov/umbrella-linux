@@ -1,0 +1,49 @@
+<Bundle>
+<Group name='ubuntu'>
+    <Path name='/etc/hosts'/>
+    <Group name='ubuntu-xenial'>
+        <Path name='/etc/resolvconf/resolv.conf.d/original'/>
+        <Service name='resolvconf'/>
+        <Group name='roaming' negate='true'>
+            <Path name='/etc/network/interfaces'/>
+        </Group>
+       <Service name='networking'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Group name='roaming' negate='true'>
+            <Path name='/etc/netplan/01-netcfg.yaml'/>
+            <Path name='/etc/netplan'/>
+            <Action name='apply-netplan'/>
+            <Group name='networking-networkd'>
+                <!-- make network dispatcher process 'carrier' and 'degraded' states -->
+                <Action name='fix_networkd_dispatcher'/>
+                <!-- set transmit queue for all interfaces is as many states -->
+                <!-- as possible (carrier and degraded are useful for vmhost)-->
+                <Path name='/etc/networkd-dispatcher/carrier.d/set-transmit-queue' altsrc='/etc/networkd-dispatcher/scripts/set-transmit-queue'/>
+                <Path name='/etc/networkd-dispatcher/degraded.d/set-transmit-queue' altsrc='/etc/networkd-dispatcher/scripts/set-transmit-queue'/>
+                <Path name='/etc/networkd-dispatcher/dormant.d/set-transmit-queue' altsrc='/etc/networkd-dispatcher/scripts/set-transmit-queue'/>
+                <Path name='/etc/networkd-dispatcher/routable.d/set-transmit-queue' altsrc='/etc/networkd-dispatcher/scripts/set-transmit-queue'/>
+                <!-- ensure no extra event files for networkd-dispatcher -->
+                <Path name='/etc/networkd-dispatcher/carrier.d'/>
+                <Path name='/etc/networkd-dispatcher/degraded.d'/>
+                <Path name='/etc/networkd-dispatcher/dormant.d'/>
+                <Path name='/etc/networkd-dispatcher/no-carrier.d'/>
+                <Path name='/etc/networkd-dispatcher/off.d'/>
+                <Path name='/etc/networkd-dispatcher/routable.d'/>
+                <!-- disable network waitonline -->
+                <Path name='/etc/systemd/system/systemd-networkd-wait-online.service'/>
+            </Group>
+            <Group name='vm'>
+                <Group name='vmhost' negate='true'>
+                    <!-- disable waiting for online service -->
+
+                </Group>
+            </Group>
+        </Group>
+        <Service name='systemd-networkd'/>
+        <Service name='systemd-networkd.socket'/>
+        <Service name='systemd-resolved'/>
+        <Service name='systemd-networkd-wait-online'/>
+    </Group>
+</Group>
+</Bundle>

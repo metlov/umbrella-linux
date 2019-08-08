@@ -1,0 +1,67 @@
+<Properties>
+    <!-- This tag removes all the restrictions. Delete it if you want to -->
+    <!-- control the access                                              -->
+    <whitelist/>
+
+    <!-- blacklist all devices -->
+    <!-- This is global USB blacklisting switch, if this tag is not present, -->
+    <!-- all the whitelist tags are ignored, since all devices are permitted -->
+    <!-- by default. -->
+<!--<blacklist/> -->
+
+    <!-- To blacklist all devices on a specific host or hosts in a bcfg2       -->
+    <!-- group. One can use <blacklist><host>hostname.domain</host></blacklist> -->
+    <!-- or <blacklist><group>bcfg2group</group></blacklist> . To blacklist    -->
+    <!-- specific devices one can add the <device/> tags inside the <blacklist/>. -->
+    <!-- If this <blacklist/> has neither <host/> nor <group/> tag the devices -->
+    <!-- will be blacklisted on every host.                                    -->
+
+    <!-- The <whitelist/> tag is processed in a similar way. To whitelist a    -->
+    <!-- device on all hosts by not specifying the host in the whitelist tag.  -->
+    <!-- It is also possible to whitelist all devices at a specific host by    -->
+    <!-- specifying only the host tag inside the whitelist (this effectively   -->
+    <!-- disables blacklist for a specific host)   -->
+
+    <!-- Blacklists are processed before the whitelists. This is also the order-->
+    <!-- of their specification in this file, which is enforced by XSD.        -->
+    <!-- By default (if no blacklists and no whitelists are specified) all the -->
+    <!-- devices are allowed. -->
+
+    <!-- the values for <device> tag children: idVendor, idProduct and    -->
+    <!-- serial can be found by running "lsusb -v" with device plugged in -->
+    <!-- by looking up its idVendor, idProduct and iSerial                -->
+
+    <!-- global whitelist for all hosts -->
+<!--<whitelist> -->
+<!--    <device> -->  <!-- USB hubs (must be whitelisted to be able to plug in anything at all) -->
+<!--        <bDeviceClass>09</bDeviceClass>
+        </device>
+        <device> -->  <!-- An Optical Mouse -->
+<!--        <idVendor>idvendor_in_hex</idVendor>
+            <idProduct>idproduct_in_hex</idProduct>
+        </device>
+        <device> -->   <!-- Another Optical Mouse -->
+<!--        <idVendor>idvendor_in_hex</idVendor>
+            <idProduct>idproduct_in_hex</idProduct>
+        </device>
+    </whitelist> -->
+
+    <!-- whitelists for specific hosts -->
+<!--<whitelist>
+        <host>ws1.umbrella-inc.ru</host>
+        <device>  -->  <!-- A printer -->
+<!--        <idVendor>idvendor_in_hex</idVendor>
+            <idProduct>idproduct_in_hex</idProduct>
+        </device>
+        <device>   --> <!-- a specific USB Flash Drive -->
+<!--        <serial>iserial_for_the_device_in_hex</serial>
+        </device>
+    </whitelist>
+
+    <whitelist>
+        <host>ws2.umbrella-inc.ru</host>
+        <device>  -->  <!-- another USB flash drive -->
+<!--         <serial>iserial_for_the_device_in_hex</serial>
+        </device>
+    </whitelist> -->
+</Properties>

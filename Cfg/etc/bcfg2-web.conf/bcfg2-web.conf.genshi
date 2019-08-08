@@ -20,3 +20,4 @@ port = 3306
 transport = DirectStore
 web_prefix = /bcfg2
 file_limit = 1m
+time_zone = ${timezone}

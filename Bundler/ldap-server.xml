@@ -9,14 +9,16 @@
 
     <!-- additional schema -->
     <Package name='fusiondirectory-schema'/>
-    <Package name='fusiondirectory-plugin-dhcp-schema'/>
-    <Package name='fusiondirectory-plugin-dns-schema'/>
     <Package name='fusiondirectory-plugin-sudo-schema'/>
     <Package name='fusiondirectory-plugin-systems-schema'/>
     <Package name='fusiondirectory-plugin-mail-schema'/>
     <Package name='fusiondirectory-plugin-alias-schema'/>
-    <Package name='fusiondirectory-plugin-argonaut-schema'/>
-    <Package name='fusiondirectory-plugin-puppet-schema'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='fusiondirectory-plugin-puppet-schema'/>
+        <Package name='fusiondirectory-plugin-argonaut-schema'/>
+        <Package name='fusiondirectory-plugin-dhcp-schema'/>
+        <Package name='fusiondirectory-plugin-dns-schema'/>
+    </Group>
 
     <!-- data and script for LDAP initialization -->
     <Path name='/etc/ldap/umbrella/initial-config.ldif'/>
@@ -46,7 +48,6 @@
     <Package name='libodbc1'/>
     <Path name='/etc/apparmor.d/local/usr.sbin.slapd'/>
     <Path name='/etc/default/slapd'/>
-    <Path name='/etc/apparmor.d/local/usr.sbin.slapd'/>
     <Service name='slapd'/>
 </Group>
 </Bundle>

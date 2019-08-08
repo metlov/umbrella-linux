@@ -6,6 +6,7 @@
     <Package name='lxd'/>
     <Package name='lxd-client'/>
     <Package name='ebtables'/>
+    <Service name='ebtables'/>
     <Package name='xdelta3'/>
     <Package name='bridge-utils'/>
     <Package name='ufw'/>

@@ -1,0 +1,255 @@
+{% python
+import socket
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/30_networking.py')
+if (entry is not None) and \
+     (entry.find('function').text in ['router','vmhost','backdoor']):
+  type='multiif'
+else:
+  netdev='eth0'
+  # either a workstation or a single-interface server
+  if entry is not None:
+    # single-interface server (we take the IP addr from umbrella.xml)
+    # check that indeed a single interface is declared
+    if not len(ifs) ==1:
+      raise TemplateError('Too many interfaces are declared in umbrella.xml for '+metadata.hostname+' .')
+    interface, ip_addr = ifs.popitem()
+    interface, netdev = ifdevs.popitem()
+    # determine the subnet
+    subnet=networks[interface]
+    if subnet is None:
+      raise TemplateError('No defined subnet for '+str(interface))
+    # check if the address indeed belongs to the subnet
+    if not ip_addr in subnet:
+      raise TemplateError('The address for '+metadata.hostname+' ('+str(ip_addr)+')is not in subnet '+str(subnet)+' .')
+  else:
+    if organization_host:
+      # a workstation in a subnet, defined in the organization.xml file
+      interface=None
+      subnet = ipcalc.Network(ws_org_network)
+    else:
+      # a workstation in one of the standard subnets (pub, sec, etc)
+      # find the subnet
+      subnet=None
+      for iface, net in networks.iteritems():
+        if ip_addr in net:
+          subnet=net
+          interface=iface
+      if subnet is None:
+        raise TemplateError('The address '+ip_addr+' for '+metadata.hostname+' belongs to unknown subnet.')
+  if interface is not None and not interface in routerifs:
+    raise TemplateError('No route is defined for the subnet '+str(subnet)+' .')
+  type='singleif'
+%}\
+{% if type == 'singleif' %}\
+network:
+  version: 2
+{% if 'gui' in metadata.groups %}\
+  renderer: NetworkManager
+{% end %}\
+{% if 'gui' not in metadata.groups %}\
+  renderer: networkd
+{% end %}\
+  ethernets:
+    ${netdev}:
+      dhcp4: no
+      addresses:
+        - ${ip_addr}/${subnet.mask}
+{%     if organization_host %}\
+      gateway4: ${ws_org_gateway}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+{%         if 'net-pub' in metadata.groups %}\
+          - ${routerifs['pubif']}
+{%         end %}\
+{%         if 'net-sec' in metadata.groups %}\
+          - ${routerifs['secif']}
+{%         end %}\
+{%     end %}\
+{%     if not organization_host %}\
+      gateway4: ${routerifs[interface]}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+{%         if interface != 'DMZif' %}\
+          - ${routerifs[interface]}
+{%         end %}\
+{%         if interface == 'DMZif' %}\
+{%             if 'DMZsmtp' in funchosts %}\
+{% python
+# find DMZ interface of DMZsmtp
+dmzip=None
+for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
+  if server.find('function').text=='DMZsmtp':
+    t = server.find('DMZif').find('ip')
+    if (t is not None) and t.text.strip():
+      dmzip=ipcalc.IP(t.text.strip())
+%}\
+{%                 if dmzip is not None %}\
+          - ${dmzip}
+{%                 end %}\
+{%                 if dmzip is not None %}\
+          - ${routerifs[interface]}
+{%                 end %}\
+{%             end %}\
+{%             if 'DMZsmtp' not in funchosts %}\
+{% python
+if DNScache is None:
+  DNScache = [ str(routerifs['DMZif']) ]
+%}\
+{%                  for DNSserver in DNScache %}\
+          - ${DNSserver}
+{%                  end %}\
+{%              end %}\
+{%         end %}\
+{%     end %}\
+{% end %}\
+{% if type == 'multiif' %}\
+{% python
+netnames = {
+  'extif':'External network (accesible from Internet directly)',
+  'intif':"Legacy organization's intranet",
+  'pubif':'Network for public workstations with Internet access',
+  'secif':'Network for secured workstations with no Internet access',
+  'DMZif':'DMZ for Internet-accessible servers',
+  'vpnif':'Network for workstations, connecting via VPN',
+  'winif':'Network for Windows workstations and other insecure devices'
+}
+# elements are tuples of
+# (dev, ip, tag, gateway, nameserver, bridged)
+#   0    1   2      3         4          5
+ethers=set()
+bridges=set()
+for interfaceType in iftypes:
+  interface=entry.find(interfaceType)
+  if interface is not None:
+    dev=interface.find('dev').text
+    ip=interface.find('ip')
+    tag=interface.tag
+    nameserver=None
+    gateway=None
+    if ip is not None:
+      if ip.text is not None and ip.text.strip():
+        ip=ip.text
+        gateway=interface.find('gateway')
+        if gateway is not None:
+          gateway=gateway.text
+          if interface.tag != 'extif' and interface.tag != 'intif':
+            nameserver=gateway
+          else:
+            if 'backdoor' in metadata.groups:
+              if interface.tag != 'extif' and interface.tag != 'intif':
+                nameserver=str(routerifs['pubif'])
+            else:
+              nameserver='127.0.0.1'
+      else:
+        ip=''
+    bridged=interface.find('bridged')
+    bridgeddev=None
+    if bridged is not None:
+      bridgeddev=bridged.text
+      if bridgeddev <> 'none':
+        hwmac=None
+        setmac=None
+        # this is the real device, which is connected to a bridge
+        if 'lxd-containers-host' in metadata.groups:
+          # on the vmhost with lxd containers we need to remap the MAC
+          # addresses of the interfaces
+          # the real physical MAC now belongs to the router, we identify
+          # the interface using this MAC
+          if interface.tag in routerifmacs:
+            hwmac=routerifmacs[interface.tag]
+            # and then we set its MAC to the one, specified in umbrella.xml
+            setmac=interface.find('mac')
+            if setmac is not None:
+              setmac=setmac.text
+              ethers.update([(bridgeddev+"MAC", None, None, None, None,
+                              None, hwmac, setmac, None)])
+        ethers.update([(bridgeddev, None, None, None, None, None, None,
+                        None, None)])
+      else:
+        bridgeddev=''
+    routes=None
+    if (interface.tag == 'DMZif') and ('vpnif' in networks) and \
+       ('DMZvpn' in funchosts) and ('router' in metadata.groups):
+      # when VPN is configured router needs a route into VPN through DMZvpn
+      routes = ( (networks['vpnif'],funcifs['DMZvpn']), )
+    tuple=(dev, ip, tag, gateway, nameserver, bridgeddev, None, None, routes)
+    if bridgeddev is not None:
+      bridges.add(tuple)
+    else:
+      ethers.add(tuple)
+print bridges
+print ethers
+%}\
+{% def RENDER_INTERFACE_TUPLE(tuple) %}\
+    ${tuple[0]}:
+{%     if tuple[6] is not None %}\
+      match:
+        macaddress: ${tuple[6]}
+{%     end %}\
+{%     if tuple[7] is not None %}\
+      macaddress: ${tuple[7]}
+{%     end %}\
+{%     if tuple[5] is not None %}\
+{%         if tuple[5] %}\
+      interfaces:
+        - ${tuple[5]}
+{%         end %}\
+{%         if not tuple[5] %}\
+      interfaces: []
+{%         end %}\
+{%     end %}\
+{%     if tuple[1] is None %}\
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+      optional: true
+{%     end %}\
+{%     if tuple[1] is not None and not tuple[1] %}\
+      dhcp4: yes
+{%     end %}\
+{%     if tuple[1] is not None and tuple[1] %}\
+      addresses:
+        - ${tuple[1]}/${networks[tuple[2]].mask}
+{%         if tuple[3] %}\
+      gateway4: ${tuple[3]}
+{%         end %}\
+{%         if tuple[4] %}\
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - ${tuple[4]}
+{%         end %}\
+{%         if tuple[8] %}\
+      routes:
+{%             for route in tuple[8] %}\
+        - to: ${str(route[0])}
+          via: ${str(route[1])}
+{%             end %}\
+{%         end %}\
+{%     end %}\
+{% end %}\
+network:
+  version: 2
+  renderer: networkd
+{%     if ethers %}\
+  ethernets:
+{%         for ether in sorted(ethers, key=lambda tup: tup[0]) %}\
+${ RENDER_INTERFACE_TUPLE(ether) }\
+{%         end %}\
+{%     end %}\
+{%     if bridges %}\
+  bridges:
+{%         for bridge in sorted(bridges, key=lambda tup: tup[0]) %}\
+${ RENDER_INTERFACE_TUPLE(bridge) }\
+{%         end %}\
+{%     end %}\
+{% end %}\

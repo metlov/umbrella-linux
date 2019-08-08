@@ -1,0 +1,61 @@
+<Properties>
+<!-- structure of the organization -->
+<ou>
+    <name>Central Office</name>
+<!--       The following empty <network_match/> tag is needed if we have -->
+<!--       <network_match/> tags inside of children <ou> elements. -->
+<!--    <network_match/> -->
+    <network>172.17.128.0/21</network>
+    <gateway>172.17.128.1</gateway>
+    <admin_group>itadmins</admin_group>
+    <users_group>crew</users_group>
+    <bcfg2_profile>workstation</bcfg2_profile>
+<!-- an example of remote branch -->
+<!--<ou>
+        <name>Remote branch 01</name>
+        <network_match/>
+        <network>172.16.0.0/24</network>
+        <gateway>172.16.0.1</gateway>
+        <admin_group>itadmins01</admin_group> --> <!-- members of this group and -->
+                                              <!-- of the other admin group  -->
+                                              <!-- higher in the hierarchy   -->
+                                              <!-- such as "itadmins" here   -->
+                                              <!-- will be able to login and -->
+                                              <!-- sudo to root on the work- -->
+                                              <!-- stations of this branch.  -->
+<!--    <users_group>users01</users_group> --><!-- only users from this group-->
+                                              <!-- will be permitted to login-->
+                                              <!-- on the workstations of    -->
+                                              <!-- this branch               -->
+<!--    <bcfg2_profile>localfsworkstation</bcfg2_profile> -->
+                                              <!-- default bcfg2 profile for -->
+                                              <!-- the workstations in this  -->
+                                              <!-- branch.                   -->
+<!--    <ou> -->
+            <!-- Admin computer 1 -->
+            <!-- The absence of the name tag means that no ou in LDAP -->
+            <!-- database will be generated for this entry -->
+<!--        <network_match>172.16.0.31/32/32</network_match> -->
+            <!-- the network will be taken from the parent node -->
+<!--        <bcfg2_profile>localfsadmworkstation</bcfg2_profile> -->
+<!--    </ou> -->
+<!--    <ou> -->
+            <!-- Admin computer 2 -->
+            <!-- The absence of the name tag means that no ou in LDAP -->
+            <!-- database will be generated for this entry -->
+<!--        <network_match>172.16.0.32/32</network_match> -->
+            <!-- the network will be taken from the parent node -->
+<!--        <bcfg2_profile>localfsadmworkstation</bcfg2_profile> -->
+<!--    </ou> -->
+<!--    <ou> -->
+            <!-- Staff computers -->
+            <!-- The absence of the name tag means that no ou in LDAP -->
+            <!-- database will be generated for this entry -->
+<!--        <network_match>10.10.40.0/24</network_match> -->
+            <!-- the rest of the remote branch computers are matched here -->
+            <!-- they get assigned localfsworkstation profile -->
+            <!-- the network is also inherited from the parent node -->
+<!--    </ou> -->
+<!--</ou> -->
+</ou>
+</Properties>

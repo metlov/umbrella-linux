@@ -1,0 +1,52 @@
+#
+# /etc/pam.d/common-session - session-related modules common to all services
+#
+# This file is included from other service-specific PAM config files,
+# and should contain a list of modules that define tasks to be performed
+# at the start and end of sessions of *any* kind (both interactive and
+# non-interactive).
+
+# here are the per-package modules (the "Primary" block)
+{% if 'localfssyncworkstation' in metadata.groups %}\
+session optional        pam_exec.so     quiet seteuid /etc/pam_session_start.sh
+{% end %}\
+session [default=1]                     pam_permit.so
+# here's the fallback if no module succeeds
+session requisite                       pam_deny.so
+# prime the stack with a positive return value if there isn't one already;
+# this avoids us returning an error just because nothing sets a success code
+# since the modules above will each just jump around
+session required                        pam_permit.so
+# The pam_umask module will set the umask according to the system default in
+# /etc/login.defs and user settings, solving the problem of different
+# umask settings with different shells, display managers, remote sessions etc.
+# See "man pam_umask".
+session optional                        pam_umask.so
+# and here are more per-package modules (the "Additional" block)
+{% if 'local-fs' not in metadata.groups %}\
+session optional                        pam_krb5.so minimum_uid=1100
+{% end %}\
+session required        pam_unix.so
+{% if 'ubuntu-xenial' in metadata.groups and not 'vmhost' in metadata.groups %}\
+session required        pam_loginuid.so
+session required        pam_systemd.so
+{% end %}\
+{% if 'encfs' in metadata.groups %}\
+# automatically unmount encfs
+session required        pam_encfs.so
+{% end %}\
+{% if 'local-fs' not in metadata.groups %}\
+session optional                        pam_ldap.so
+{% end %}\
+session optional                        pam_ck_connector.so nox11
+{% if 'local-fs' in metadata.groups %}\
+{%   if 'DMZwww' in metadata.groups %}\
+session required pam_mkhomedir.so
+{%   end %}\
+{%   if not 'DMZwww' in metadata.groups %}\
+session required pam_mkhomedir.so skel=/var/lib/umbrella-skel/unpacked
+{%   end %}\
+{% end %}\
+{% if 'localfssyncworkstation' in metadata.groups %}\
+session optional        pam_exec.so     quiet seteuid /etc/pam_session_stop.sh
+{% end %}\

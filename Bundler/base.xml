@@ -3,27 +3,40 @@
    <Package name='aptitude'/>
    <Group name='ubuntu-xenial'>
       <Package name='libfile-fcntllock-perl'/>
+      <Package name='sysv-rc'/>
+      <Package name='language-pack-en'/>
+      <Package name='language-pack-ru'/>
    </Group>
    <Package name='apparmor'/>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Service name='apparmor'/>
+   </Group>
    <Package name='at'/>
    <Package name='bc'/>
    <Package name='bsdmainutils'/>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Package name='console-setup-linux'/>
+      <Service name='console-setup'/>
+      <Service name='keyboard-setup'/>
+      <Service name='setvtrgb'/>
+
+      <!-- in bionic needs to be explicitly installed -->
+      <Package name='rsyslog'/>
+   </Group>
    <Package name='dnsutils'/>
    <Package name='bind9-host'/>
+   <Package name='eatmydata'/>
    <Package name='ed'/>
    <Package name='gawk'/>
    <Package name='bash-completion'/>
    <Package name='mc'/>
-   <Package name='rsync'/>
    <Package name='nano'/>
+   <Group name='virt-lxc' negate='true'>
+      <Package name='pm-utils'/>
+   </Group>
    <Package name='psmisc'/>
-   <Package name='pm-utils'/>
-   <Package name='sysv-rc'/>
    <Package name='traceroute'/>
    <Package name='wget'/>
-   <Package name='language-pack-en'/>
-   <Package name='language-pack-ru'/>
-   <Package name='liblog-message-simple-perl'/>
    <Package name='logrotate'/>
    <Package name='p7zip-full'/>
    <Package name='patch'/>
@@ -38,29 +51,58 @@
    <Package name='xz-utils'/>
    <Package name='zerofree'/>
    <Path name='/etc/ssl/private'/>
+   <Service name='remote-fs.target'/>
    <Group name='ubuntu-xenial'>
       <Package name='systemd'/>
-      <Service name='remote-fs.target'/>
       <Service name='systemd-timesyncd'/>
       <Package name='systemd-sysv'/>
-      <Package name='tcpd'/>
       <Package name='dbus'/>
       <!-- ensure permissions via rules -->
       <Path name='/usr/lib/dbus-1.0/dbus-daemon-launch-helper'/>
    </Group>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Package name='libnss-systemd'/>
+   </Group>
+   <Package name='tcpd'/>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Group name='vmhost'>
+         <!-- control subuid and subgid ranges -->
+         <Path name='/etc/subuid'/>
+         <Path name='/etc/subgid'/>
+         <!-- disable waiting for online services -->
+         <Path name='/etc/systemd/system/systemd-networkd-wait-online.service'/>
+      </Group>
+   </Group>
    <Group name='vm'>
       <Group name='virt-lxc' negate='true'>
-          <Package name='linux-image-virtual'/>
+          <Group name='ubuntu-xenial'>
+              <Package name='linux-image-virtual-hwe-16.04'/>
+          </Group>
+          <Group name='ubuntu-xenial' negate='true'>
+              <Package name='linux-image-virtual'/>
+          </Group>
       </Group>
    </Group>
    <Group name='vm' negate='true'>
-      <Package name='linux-generic'/>
+          <Group name='ubuntu-xenial'>
+              <Package name='linux-image-generic-hwe-16.04'/>
+          </Group>
+          <Group name='ubuntu-xenial' negate='true'>
+              <Package name='linux-image-generic'/>
+          </Group>
       <Group name='kernel-signed'>
-         <Package name='linux-signed-generic'/>
+          <Group name='ubuntu-xenial'>
+              <Package name='linux-signed-image-generic-hwe-16.04'/>
+          </Group>
+          <Group name='ubuntu-xenial' negate='true'>
+              <Package name='linux-signed-image-generic'/>
+          </Group>
       </Group>
       <Package name='at'/>
       <Package name='crda'/>
       <Package name='dbus'/>
+      <!-- ensure permissions via rules -->
+      <Path name='/usr/lib/dbus-1.0/dbus-daemon-launch-helper'/>
       <Package name='friendly-recovery'/>
       <Package name='busybox-static'/>
       <Package name='irqbalance'/>
@@ -81,15 +123,6 @@
       </Group>
    </Group>
 
-   <Group name='lvm'>
-      <Package name='lvm2'/>
-      <Package name='dmeventd'/>
-      <Service name='dm-event.socket'/>
-      <Service name='lvm2-lvmetad.socket'/>
-      <Service name='lvm2-lvmpolld.socket'/>
-      <Service name='lvm2-monitor.service'/>
-   </Group>
-
    <!-- Umbrella Linux variables -->
    <Path name='/usr/local/bin/umbrella.sh'/>
    <Path name='/etc/umbrella.conf'/>
@@ -98,15 +131,7 @@
 
    <Path name='/scratch'/>
    <Path name='/etc/profile.d/history.sh'/>
-   <Path name='/etc/hosts'/>
-   <Path name='/etc/resolvconf/resolv.conf.d/original'/>
-   <Service name='resolvconf'/>
    <Path name='/root/.ssh/authorized_keys2'/>
-
-   <Group name='roaming' negate='true'>
-      <Path name='/etc/network/interfaces'/>
-   </Group>
-   <Service name='networking'/>
 
    <!-- nice MOTD -->
    <Path name='/etc/motd'/>
@@ -119,7 +144,7 @@
          <Package name='ssmtp'/>
          <Path name='/etc/ssmtp/ssmtp.conf'/>
       </Group>
-      <Package name='heirloom-mailx'/>
+      <Package name='s-nail'/>
       <Path name='/etc/nail.rc'/>
       <Path name='/usr/local/bin/ldapsanity.sh'/>
    </Group>
@@ -148,4 +173,29 @@
    <Service name='rsyslog'/>
    <Service name='ureadahead'/>
    <Service name='uuidd.socket'/>
+
+   <Group name='ubuntu-xenial' negate='true'>
+       <Service name='ondemand'/>
+       <Service name='fstrim.timer'/>
+
+       <!-- disable motd-news -->
+       <Path name='/etc/default/motd-news'/>
+       <Service name='motd-news.timer'/>
+
+       <Group name='ntp-server' negate='true'>
+          <Group name='ntp-client' negate='true'>
+              <!-- if the host is neither ntp client nor server (such as LXC -->
+              <!-- containers) we do not care about systemd-timesyncd -->
+              <Service name='systemd-timesyncd'/>
+          </Group>
+       </Group>
+   </Group>
+   <Service name='getty@tty1'/>
+   <Service name='getty@tty2'/>
+   <Service name='getty@tty3'/>
+   <Service name='getty@tty4'/>
+   <Service name='getty@tty5'/>
+   <Service name='getty@tty6'/>
+   <Service name='getty@tty7'/>
+   <Service name='getty@tty8'/>
 </Bundle>

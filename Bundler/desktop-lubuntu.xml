@@ -15,6 +15,10 @@
         <Package name='fcitx-config-gtk2'/>
         <Package name='fcitx-frontend-gtk2'/>
         <Package name='fcitx-ui-classic'/>
+        <Package name='gksu'/>
+        <Package name='gnome-mplayer'/>
+        <Package name='gnome-time-admin'/>
+        <Package name='lubuntu-software-center'/>
         <Package name='ubuntu-mono'/>
     </Group>
     <Package name='ffmpegthumbnailer'/>
@@ -29,15 +33,18 @@
     <Package name='galculator'/>
     <Package name='gnome-accessibility-themes'/>
     <Package name='gnome-icon-theme-symbolic'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='gnome-icon-theme'/>
+    </Group>
     <Package name='gnome-keyring'/>
-    <Package name='gnome-mplayer'/>
     <Package name='gnome-system-tools'/>
-    <Package name='gnome-time-admin'/>
-    <Package name='gksu'/>
     <Package name='gpicview'/>
     <Package name='gucharmap'/>
     <Package name='guvcview'/>
     <Package name='hardinfo'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='libc6-dev'/> <!-- dependence of zlib1g-dev of hardinfo -->
+    </Group>
     <Package name='ibus'/>
     <Package name='indicator-application-gtk2'/>
     <Package name='language-selector-gnome'/>
@@ -45,9 +52,47 @@
     <Package name='libfm-modules'/>
     <Package name='libgtk2-perl'/>
     <Package name='libmtp-runtime'/>
-    <Package name='lubuntu-core'/>
+    <Group name='ubuntu-xenial'>
+        <!-- here we put the dependencies of lubuntu-core manually -->
+        <!-- except for xorg, which conflicts with -hwe-16.04 -->
+        <Package name='alsa-base'/>
+        <Package name='alsa-utils'/>
+        <Package name='anacron'/>
+        <Package name='bc'/>
+        <Package name='ca-certificates'/>
+        <Package name='dbus-x11'/>
+        <Package name='fonts-dejavu-core'/>
+        <Package name='fonts-freefont-ttf'/>
+        <Package name='foomatic-db-compressed-ppds'/>
+        <Package name='genisoimage'/>
+        <Package name='ghostscript-x'/>
+        <Package name='inputattach'/>
+        <Package name='libsasl2-modules'/>
+        <Package name='lightdm'/>
+        <Package name='lightdm-gtk-greeter'/>
+        <Package name='lubuntu-artwork'/>
+        <Package name='lubuntu-default-settings'/>
+        <Package name='lxpanel'/>
+        <Package name='lxsession'/>
+        <Package name='memtest86+'/>
+        <Package name='openbox'/>
+        <Package name='openprinting-ppds'/>
+        <Package name='pcmanfm'/>
+        <Package name='plymouth-theme-lubuntu-logo'/>
+        <Package name='plymouth-theme-lubuntu-text'/>
+        <Package name='printer-driver-pnm2ppa'/>
+        <Package name='rfkill'/>
+        <Package name='ubuntu-drivers-common'/>
+        <Package name='unzip'/>
+        <Package name='wireless-tools'/>
+        <Package name='wpasupplicant'/>
+        <Package name='xkb-data'/>
+        <Package name='zip'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='lubuntu-core'/>
+    </Group>
     <Package name='lubuntu-default-session'/>
-    <Package name='lubuntu-software-center'/>
     <Package name='lxappearance'/>
     <Package name='lxappearance-obconf'/>
     <Package name='lxinput'/>
@@ -61,7 +106,9 @@
     <Package name='lxterminal'/>
     <Package name='mobile-broadband-provider-info'/>
     <Package name='modemmanager'/>
-    <Package name='libqmi-glib1'/> <!-- unaccounted modemmanager dependency -->
+    <Group name='ubuntu-xenial'>
+        <Package name='libqmi-glib1'/> <!-- unaccounted modemmanager dependency -->
+    </Group>
     <Package name='mtpaint'/>
     <Package name='network-manager-gnome'/>
     <Service name='ModemManager'/>
@@ -80,6 +127,9 @@
     <Package name='system-config-printer-gnome'/>
     <Group name='virt-lxc' negate='true'>
         <Package name='gnome-disk-utility'/>
+        <Group name='ubuntu-xenial' negate='true'>
+            <Service name='udisks2'/>
+        </Group>
         <Package name='gvfs-backends'/>
         <Package name='gvfs-fuse'/>
         <Package name='usb-creator-gtk'/>
@@ -109,6 +159,9 @@
     <Service name='accounts-daemon'/>
     <Service name='anacron-resume'/>
     <Service name='anacron'/>
+    <Service name='apport-autoreport.path'/>
+    <Service name='apport-forward.socket'/>
     <Service name='pppd-dns'/>
+    <Service name='wpa_supplicant'/>
 </Group>
 </Bundle>

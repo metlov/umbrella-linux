@@ -1,4 +1,4 @@
-
+#
 # /etc/pam.d/common-auth - authentication settings common to all services
 #
 # This file is included from other service-specific PAM config files,
@@ -14,21 +14,22 @@
 # pam-auth-update(8) for details.
 
 # here are the per-package modules (the "Primary" block)
-auth    optional                        pam_group.so
-auth    [success=4 default=ignore]      pam_unix.so nullok_secure
-auth    [success=3 new_authtok_reqd=3 user_unknown=1 auth_err=1 default=ignore]   pam_krb5.so minimum_uid=1100 use_first_pass defer_pwchange
-auth    [success=2 default=1]      pam_ccreds.so action=validate use_first_pass minimum_uid=1100
-auth    [default=ignore]                pam_ccreds.so action=update minimum_uid=1100
+{% if 'encfs' in metadata.groups %}\
+auth	sufficient        		pam_encfs.so 
+auth	[success=2 default=ignore]	pam_unix.so nullok_secure try_first_pass
+{% end %}\
+{% if 'encfs' not in metadata.groups %}\
+auth	[success=2 default=ignore]	pam_unix.so nullok_secure
+{% end %}\
+auth	[success=1 default=ignore]	pam_sss.so use_first_pass
 # here's the fallback if no module succeeds
-auth    requisite                       pam_deny.so
+auth	requisite			pam_deny.so
 # prime the stack with a positive return value if there isn't one already;
 # this avoids us returning an error just because nothing sets a success code
 # since the modules above will each just jump around
-{% if 'encfs' in metadata.groups %}\
-# automatically mount encfs
-auth    optional                        pam_encfs.so
-{% end %}\
-auth    optional                        pam_ccreds.so action=store minimum_uid=1100
-auth    required                        pam_permit.so
+auth	required			pam_permit.so
 # and here are more per-package modules (the "Additional" block)
 # end of pam-auth-update config
+
+auth	optional			pam_group.so
+auth	required			pam_access.so

@@ -1,0 +1,79 @@
+This is example configuration for a system with roaming workstations enabled.
+Diff it against the base configuration in the parent directory to see the
+enabled options.
+
+If you are installing into VirtualBox please ensure that your main network card
+(the external interface of the Umbrella Linux server) is configured as belonging
+to a "NAT network". You will need to create the specific named network for this
+in VirtualBox first. The roaming workstations (if you configure them as
+VirtualBox VMs will use the same NAT network for their primary interface, so
+that they are external to the Umbrella Linux server. It is convenient to have
+DHCP enabled in this network, to assign the IP addresses to the newly installed
+roaming workstations automatically by Virtualbox.
+
+After installing this Umbrella server you can register the roaming workstations
+as follows:
+
+1. Connect to the configuration server of your Umbrella Linux as root and
+run the commant like this
+
+umbrella-addworkstation "/Central Office/roamer01" 08:00:27:83:0b:de \
+                        -l roaming -d your@email
+
+The name of the workstation will be "roamer01", "Central Office" is the name of
+the central office in your organization defined in the organization.xml and
+08:00:27:83:0b:de is the MAC address of your workstation (the specific number
+is given here as an example, you will need to change it). It is important that
+the location of the workstation (-l option) is set to "roaming", which ensures
+that the proper profile is assigned. The option -d specifies a comment, which
+can be useful for organizational purposes.
+
+The workstation will be assigned an IP address on LAN, which it will use
+when connecting internally. During the roaming operation the IP address will
+be assinged by the VPN server.
+
+Alternatively, you can create a roaming workstation from the browser
+by connecting to https://gosa.YOUR.DOMAIN/ . It is equally important to
+set the location to "roaming" there as well.
+
+2. Wait 5 minutes until the changes in LDAP will propagate to DNS, DHCP and
+other configuration files.
+
+3. Go to the config server ("ssh config") as admin user, not root. Then run the
+following command:
+
+umbrella-mkinstall roamer01 >installer
+
+It will prepare a customized installation script for "roamer01" and store it in
+the file "installer", created in the current directory.
+
+In case the workstation itself is not physically present on site, you can mail
+this script securely (it contains private keys for the workstation) to its
+owner to let him finish the installation on his own.
+
+4. Install the bare minimum Lubuntu system with default settings, connected to
+the Internet (or to the external NAT network, if you are testing the system in
+VirtualBox). You can use the desktop installer from lubuntu.net (only 16.04
+and 18.04 LTSs are supported at the moment).
+
+After installing and connecting to the Internet, close the graphical session,
+login to a text console as root (via sudo, if necessary), copy the installation
+script from the previous step into the home directory, "chmod +x" and run it.
+Wait for script to finish and reboot the workstation as instructed. You will
+have a fully configured roaming workstation shortly. Log in with your corporate
+credentials, the same you use at the office.
+
+
+
+After the first successul log in, the roaming workstation can be used in an
+offline mode without connection to the Internet or to the main office.
+
+If you started your session offline and connected to the Internet later, you
+will need to run "kinit" command to obtain credentials, necessary to connect
+to the corporate services (such as Jabber). Logging out and back in will also
+do this, but running "kinit" is less invasive.
+
+Roaming workstations connect to the Internet directly, but use VPN to access
+the corporate services (including the corporate web site). They automatically
+update their configuration every hour if connected to the internet (and the
+main office is reachable).

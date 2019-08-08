@@ -16,6 +16,8 @@
     <Service name='lm-sensors'/>
     <Package name='libnss3-tools'/>
     <Package name='manpages'/>
+    <Package name='exfat-fuse'/>
+    <Package name='exfat-utils'/>
     <Group name='ntfs-3g'>
         <Package name='ntfs-3g'/>
     </Group>
@@ -24,6 +26,9 @@
     </Group>
     <Package name='rar'/>
     <Package name='schroot'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='schroot'/>
+    </Group>
     <Package name='debootstrap'/>
 
     <Package name='fortune-mod'/>
@@ -34,7 +39,6 @@
 
     <Group name='admworkstation'>
         <Package name='nmap'/>
-        <Package name='links'/>
     </Group>
 
     <Group name='physical'>

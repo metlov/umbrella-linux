@@ -30,6 +30,42 @@
       <Arch>amd64</Arch>
     </Source>
   </Group>
+  <Group name="ubuntu-bionic">
+    <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="bionic">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="bionic-updates">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://security.ubuntu.com/ubuntu" version="bionic-security">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="bionic">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://deb.torproject.org/torproject.org" version="bionic">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+  </Group>
   <xi:include href="local-sources.xml"><xi:fallback/></xi:include>
   <!-- <xi:include href="../Local/Packages/sources.xml"><xi:fallback/></xi:include> -->
 </Sources>

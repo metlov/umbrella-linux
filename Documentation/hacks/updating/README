@@ -1,0 +1,6 @@
+These scripts can be used to update all the core Umbrella Linux server VMs
+in an LXD environment. They should be run as root from the LXD VM host.
+
+The ./refresh_all_servers script updates the bcgf2 status of all servers in
+bcfg2 reports database, which can be checked via the web interface. The
+./update_all_servers script then can be used to apply the updates.

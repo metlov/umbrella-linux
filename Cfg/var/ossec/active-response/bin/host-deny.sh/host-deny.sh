@@ -9,6 +9,18 @@ ACTION=$1
 USER=$2
 IP=$3
 
+# Import Umbrella Linux variables
+UMBRELLA_CONF=/etc/umbrella.conf
+if [ -f $UMBRELLA_CONF ]; then
+    . $UMBRELLA_CONF
+fi
+# redirect actions to other scripts on selected hosts
+case "$BCFG2_GROUPS" in
+    *DMZsmtp*)
+    exec /var/ossec/active-response/bin/firewall-drop.sh "$@"
+    ;;
+esac
+
 LOCAL=`dirname $0`;
 cd $LOCAL
 cd ../

@@ -5,9 +5,14 @@
     <Package name='keyutils'/>
     <Path name='/etc/idmapd.conf'/>
     <Path name='/etc/default/nfs-common'/>
-    <!-- use an old semantic of returning EACCESS instead of EKEYEXPIRED -->
-    <!-- some useful programs still don't understand EKEYEXPIRED and hang-->
-    <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
+    <Group name='ubuntu-xenial'>
+        <!-- use an old semantic of returning EACCESS instead of EKEYEXPIRED -->
+        <!-- some useful programs still don't understand EKEYEXPIRED and hang-->
+        <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
+        <!-- on bionic the rpc.gssd does not support the '-e' option anymore-->
+        <!-- hopefully, the ticket renewal witth sssd will avoid the key    -->
+        <!-- expiration issues -->
+    </Group>
 
     <!-- disable fast retransmissions, which kill NFS at heavy loads -->
     <Path name='/etc/sysctl.d/90-frto.conf'/>
@@ -17,6 +22,9 @@
     <Service name='nfs-kernel-server'/>
     <Service name='nfs-client.target'/>
     <Service name='nfs-server'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='rpcbind'/>
+    </Group>
     <Service name='rpcbind.socket'/>
 </Group>
 </Bundle>

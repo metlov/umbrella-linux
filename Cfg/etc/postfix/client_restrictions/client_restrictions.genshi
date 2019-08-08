@@ -1,0 +1,9 @@
+{% python
+import os.path
+local_path='/Local/Cfg/etc/postfix/client_restrictions/client_restrictions.genshi'
+local_exists=os.path.isfile(repo+local_path)
+%}\
+#list exceptions to the SPAM rejection policy
+{% if local_exists %}\
+{% include ${repo+local_path} %}\
+{% end %}\

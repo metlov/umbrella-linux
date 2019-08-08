@@ -15,11 +15,14 @@ containers, defined in the umbrella.xml
 
 To install the system, place the set of XML files, describing its configuration
 into the current directory. And run
-    umbrella-install [-u <git-username>]
+    umbrella-install [-u <git-username>] | [-b <branch-name>] -U <repository-URL>
 The -u option allows to use the private Umbrella Linux development git
 repository and will prompt for the repository password. It does not prompt
 for the password if ~/.netrc file is already present. By default public
 Umbrella Linux repository is used.
+
+With the -U option the installer clones the bcfg2 repository from the given
+URL. Using -b option it is also possible to specify the branch to clone.
 
 To maintain the system the script can be run under the root user on the
 VM host of the running Umbrella Linux installation. It will copy the
@@ -42,8 +45,42 @@ EOF
       echo
     fi
     ;;
+    -U)
+    GIT_URL=$2
+    shift
+    shift
+    ;;
+    -b)
+    GIT_BRANCH=$2
+    shift
+    shift
 esac
 done
+
+if [ -n "$GIT_USER" -a -n "$GIT_BRANCH" ]; then
+    cat <<EOF
+It is impossible to specify -u and -b options together. Installing from the private repository
+always uses the master branch.
+EOF
+    exit 1
+fi
+
+if [ -z "$GIT_URL" -a -n "$GIT_BRANCH" ]; then
+    cat <<EOF
+It is impossible to specify -b option alone. Installing from the public repository always uses
+the master branch.
+EOF
+    exit 1
+fi
+
+
+if [ -n "$GIT_USER" -a -n "$GIT_URL" ]; then
+    cat <<EOF
+It is -u and -U options together are not supported. If you specify the full repository URL,
+you can always embed the username.
+EOF
+    exit 1
+fi
 
 ###############################################################################
 ###############################################################################
@@ -163,19 +200,27 @@ normalize_uidgid_in_vm()
     set -e
     set -o xtrace
     lxc exec $1 -- /bin/bash -c \
-      "apt-get purge --assume-yes lxd lxd-client uuid-runtime mlocate"
+      "env DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes eatmydata"
     lxc exec $1 -- /bin/bash -c \
-      "deluser uuidd"
+      "${APT_GET_PURGE} mdadm lvm2 dmsetup genisoimage"
     lxc exec $1 -- /bin/bash -c \
-      "delgroup mlocate"
+      "${APT_GET_PURGE} lxd lxd-client uuid-runtime mlocate landscape-common"
     lxc exec $1 -- /bin/bash -c \
-      "deluser lxd"
+      "getent passwd uuidd &>/dev/null && deluser uuidd; true"
     lxc exec $1 -- /bin/bash -c \
-      "delgroup lxd"
+      "getent group mlocate &>/dev/null && delgroup mlocate; true"
     lxc exec $1 -- /bin/bash -c \
-      "delgroup admin"
+      "getent passwd lxd &>/dev/null && deluser lxd; true"
     lxc exec $1 -- /bin/bash -c \
-      "groupmod -g 110 messagebus"
+      "getent group lxd &>/dev/null && delgroup lxd; true"
+    lxc exec $1 -- /bin/bash -c \
+      "getent group admin &>/dev/null &&  delgroup admin; true"
+    lxc exec $1 -- /bin/bash -c \
+      "getent passwd ubuntu &>/dev/null && deluser ubuntu; true"
+    lxc exec $1 -- /bin/bash -c \
+      "getent group ubuntu &>/dev/null && delgroup ubuntu; true"
+    lxc exec $1 -- /bin/bash -c \
+      "groupmod -g ${GID_messagebus} messagebus"
     lxc exec $1 -- /bin/bash -c \
       "perl -pi -e 's/messagebus:x:107:110:/messagebus:x:106:110:/g' /etc/passwd"
     lxc exec $1 -- /bin/bash -c \
@@ -183,25 +228,25 @@ normalize_uidgid_in_vm()
     lxc exec $1 -- /bin/bash -c \
       "chmod u+s /usr/lib/dbus-1.0/dbus-daemon-launch-helper"
     lxc exec $1 -- /bin/bash -c \
-      "groupmod -g 111 ssh"
+      "groupmod -g ${GID_ssh} ssh"
     lxc exec $1 -- /bin/bash -c \
       "chgrp ssh /usr/bin/ssh-agent"
     lxc exec $1 -- /bin/bash -c \
       "chmod g+s /usr/bin/ssh-agent"
     lxc exec $1 -- /bin/bash -c \
-      "usermod -u 107 sshd"
+      "usermod -u ${UID_ssh} sshd"
 
     # we also push the umbrella package sources here
     if [ "$INSTALLER_MODE" == "y" ]; then
         # we get the sources from the temporary repository
         lxc file push \
-          /tmp/bcfg2/Cfg/etc/apt/sources.list/sources.list.G50_ubuntu-xenial \
+          /tmp/bcfg2/Cfg/etc/apt/sources.list/sources.list.G50_ubuntu-${DISTRIB_CODENAME} \
           $1/etc/apt/sources.list
         lxc file push \
-          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/multiverse.list/multiverse.list.G50_ubuntu-xenial \
+          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/multiverse.list/multiverse.list.G50_ubuntu-${DISTRIB_CODENAME} \
           $1/etc/apt/sources.list.d/multiverse.list
         lxc file push \
-          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/umbrella.list/umbrella.list.G50_ubuntu-xenial \
+          /tmp/bcfg2/Cfg/etc/apt/sources.list.d/umbrella.list/umbrella.list.G50_ubuntu-${DISTRIB_CODENAME} \
           $1/etc/apt/sources.list.d/umbrella.list
         lxc file push \
           /tmp/bcfg2/Cfg/etc/apt/trusted.gpg.d/umbrella.gpg/umbrella.gpg \
@@ -224,11 +269,19 @@ normalize_uidgid_in_vm()
           $1/etc/apt/trusted.gpg.d/umbrella.gpg
     fi
 
+    if [ "$DISTRIB_CODENAME" != "xenial" ]; then
+      # not xenial
+      # apply netplan configuration
+      lxc exec $1 -- /bin/bash -c \
+        "netplan apply"
+      # not xenial
+    fi
+
     # update package lists and upgrade everything
     lxc exec $1 -- /bin/bash -c \
-      "apt-get update"
+      "${APT_GET_UPDATE}"
     lxc exec $1 -- /bin/bash -c \
-      "apt-get upgrade --assume-yes"
+      "${APT_GET_UPGRADE}"
 
     # before reboot
     lxc restart $1
@@ -274,7 +327,7 @@ create_vm() {
     (
     set -e
     set -o xtrace
-    lxc init ubuntu:16.04 -p ${subnet}srv ${vm_hostname}
+    lxc init ubuntu:${DISTRIB_RELEASE} -p ${subnet}srv ${vm_hostname}
     ip=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/ip/text()" ${UMBRELLA_XML}`
     dev=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/dev/text()" ${UMBRELLA_XML}`
     mac=`xmllint --xpath "//Properties//server[function=\"$1\"]/${subnet}if/mac/text()" ${UMBRELLA_XML}`
@@ -299,8 +352,9 @@ create_vm() {
     lxc config set ${vm_hostname} boot.autostart.delay 30
     lxc config set ${vm_hostname} boot.autostart.priority ${priorities[$1]}
 
-    # push /etc/network/interfaces
+    # push network configuration
     eval netmask=\$${subnet}_netmask
+    eval cidr=\$${subnet}_cidr
     eval router=\$router_${subnet}_ip
     dns_server=${router}
     if [ "${subnet}" == "DMZ" ]; then
@@ -312,7 +366,9 @@ create_vm() {
             dns_server="${smtp_DMZ_ip}"
         fi
     fi
-    cat >/tmp/${vm_hostname}_interfaces <<EOF
+    if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+        # xenial
+        cat >/tmp/${vm_hostname}_interfaces <<EOF
 auto lo
 iface lo inet loopback
 
@@ -325,8 +381,31 @@ iface ${dev} inet static
     dns-nameservers ${dns_server}
     dns-search ${domain_name}
 EOF
-    chown root:root /tmp/${vm_hostname}_interfaces
-    lxc file push /tmp/${vm_hostname}_interfaces ${vm_hostname}/etc/network/interfaces
+        chown root:root /tmp/${vm_hostname}_interfaces
+        lxc file push /tmp/${vm_hostname}_interfaces ${vm_hostname}/etc/network/interfaces
+        # xenial
+    else
+        # not xenial
+        cat >/tmp/${vm_hostname}_01-netcfg.yaml <<EOF
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${dev}:
+      dhcp4: no
+      addresses:
+        - ${ip}/${cidr}
+      gateway4: ${router}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - ${dns_server}
+EOF
+        chown root:root /tmp/${vm_hostname}_01-netcfg.yaml
+        lxc file push /tmp/${vm_hostname}_01-netcfg.yaml ${vm_hostname}/etc/netplan/01-netcfg.yaml
+        # not xenial
+    fi
 
 if [ "${subnet}" == "DMZ" ]; then
     # DMZ has no internet access, we rely both on hosts and DMZsmtp to
@@ -380,7 +459,7 @@ EOF
             sleep 10
             # update ipclass script
             lxc exec ${config_hostname} -- /bin/bash -c \
-                "bcfg2 -qQv -b directory"
+                "${BCFG2} -qQv -b directory"
             sleep 10
             # call mkkeys.sh to do its stuff (with locking)
             lxc exec ${config_hostname} -- /bin/bash -c \
@@ -420,22 +499,31 @@ configure_vm() {
     lxc exec $1 -- /bin/bash -c \
       "update-ca-certificates"
     lxc exec $1 -- /bin/bash -c \
-      "apt-get install -y bcfg2 mc ssl-cert"
+      "${APT_GET_INSTALL} bcfg2 mc ssl-cert"
     lxc file pull ${config_hostname}/etc/bcfg2.conf - | \
       lxc file push - $1/etc/bcfg2.conf
   fi
+  if [ "$1" == ${proxy_hostname} ]; then
+    # install apt-cacher-ng manually to enable deb file caching as early as possible
+    lxc exec $1 -- /bin/bash -c \
+      "groupadd -g 622 apt-cacher-ng"
+    lxc exec $1 -- /bin/bash -c \
+      "useradd -d /var/cache/apt-cacher-ng -g apt-cacher-ng -m -s /bin/false -u 622 apt-cacher-ng"
+    lxc exec $1 -- /bin/bash -c \
+      "${APT_GET_INSTALL} apt-cacher-ng"
+  fi
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qqv -b apt-sources"
-  if [ "$1" == ${config_hostname} -o "$1" == ${proxy_hostname} ]; then
+    "${BCFG2} -Qqv -b apt-sources"
+  if [ "$1" == ${config_hostname} ]; then
   lxc exec $1 -- /bin/bash -c \
     "rm /etc/apt/apt.conf.d/99proxy"
   fi
   lxc exec $1 -- /bin/bash -c \
-    "apt-get update"
+    "${APT_GET_UPDATE}"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qqv -b ntp"
+    "${BCFG2} -D POSIXUsers -Qqv -b ntp"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qqv -b ntp"
+    "${BCFG2} -Qqv -b ntp"
   if [ -n "$2" ]; then
     $2 $1
   fi
@@ -447,19 +535,28 @@ Dpkg::Options {
 }
 EOF
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qqv -b base-users:base"
+    "${BCFG2} -D POSIXUsers -Qqv -b base-users:base:networking"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qqv -b base-users:base"
+    "${BCFG2} -Qqv -b base-users:base"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qqv -b ldap-auth"
+    "${BCFG2} -Qqv -b ldap-auth"
   lxc exec $1 -- /bin/bash -c \
-    "env SUDO_FORCE_REMOVE=yes bcfg2 -Qqv -b login"
+    "env SUDO_FORCE_REMOVE=yes ${BCFG2} -Qqv -b login"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qqv -b ssh"
+    "${BCFG2} -Qqv -b ssh"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -qv"
+    "${BCFG2} -D POSIXUsers -qv"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -qv -r packages"
+    "${BCFG2} -qv -r packages"
+  lxc exec $1 -- /bin/bash -c \
+    "${BCFG2} -qv -r packages"
+  if [ "$DISTRIB_CODENAME" != "xenial" ]; then
+    # not xenial
+    # delete unnecessary group
+    lxc exec $1 -- /bin/bash -c \
+      "getent group rdma &>/dev/null && delgroup rdma; true"
+    # not xenial
+  fi
   lxc exec $1 -- /bin/bash -c \
     "rm -f /etc/apt/apt.conf.d/99local"
   if [ -n "$3" ]; then
@@ -479,7 +576,7 @@ EOF
 # quirks to initialize kerberos and ldap
 configure_quirks_init_krb5_ldap() {
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qqv -b kerberos-kdc"
+    "${BCFG2} -Qqv -b kerberos-kdc"
   if [ "$1" == ${config_hostname} ]; then
   # we only init kerberos on config
     if ! lxc exec $1 -- /bin/bash -c \
@@ -489,9 +586,9 @@ configure_quirks_init_krb5_ldap() {
     fi
   fi
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -D POSIXUsers -Qqv -b ldap-server"
+    "${BCFG2} -D POSIXUsers -Qqv -b ldap-server"
   lxc exec $1 -- /bin/bash -c \
-    "bcfg2 -Qqv -b ldap-server"
+    "${BCFG2} -Qqv -b ldap-server"
   if ! lxc exec $1 -- /bin/bash -c \
     "[[ -e /etc/ldap/schema/fusiondirectory/core-fd.ldif ]]"; then
     lxc exec $1 -- /bin/bash -c \
@@ -530,13 +627,40 @@ configure_quirks_ejabberd() {
 cat << EOF
 Welcome to the Umbrella Linux installer !
 
-                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
+                         (c) 2016-2019 Konstantin L. Metlov <metlov@donfti.ru>
                          as well as others (listed in the AUTHORS file)
                          Umbrella Linux (including this installer) is avaiable
                          under the terms of GNU General Public License v3 or
                          later. NO WARRANTY OF ANY KIND IS PROVIDED !!!
 
 EOF
+
+# command definitions
+APT_GET="eatmydata apt-get"
+APT_GET_UPDATE="env DEBIAN_FRONTEND=noninteractive ${APT_GET} update"
+APT_GET_UPGRADE="env DEBIAN_FRONTEND=noninteractive ${APT_GET} upgrade --assume-yes"
+APT_GET_INSTALL="env DEBIAN_FRONTEND=noninteractive ${APT_GET} install --assume-yes"
+APT_GET_PURGE="env DEBIAN_FRONTEND=noninteractive ${APT_GET} purge --assume-yes"
+BCFG2="eatmydata bcfg2"
+
+# check the distribution version
+source /etc/lsb-release
+
+# some other distribution-dependent parameters
+if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+  GID_messagebus=110
+  GID_ssh=111
+  UID_messagebus=106
+  UID_ssh=107
+  NETCONFFILE=/etc/network/interfaces
+else
+  # on bionic and, hopefully, up
+  GID_messagebus=107
+  GID_ssh=110
+  UID_messagebus=103
+  UID_ssh=106
+  NETCONFFILE=/etc/netplan/01-netcfg.yaml
+fi
 
 if [ ! -f /etc/umbrella.conf ]; then
 ##############################################################################
@@ -554,6 +678,13 @@ You will find last command protocol in /var/log/umbrella-install.log
 
 EOF
 
+echo -n "Checking the distribution version..."
+if [ "$DISTRIB_CODENAME" != "xenial" -a "$DISTRIB_CODENAME" != "bionic" ]; then
+   echo "fail"
+   exit 1
+fi
+echo "ok"
+
 # XML file paths
 UMBRELLA_XML="./umbrella.xml"
 UMBRELLA_KEYS_XML="./umbrella_keys.xml"
@@ -565,12 +696,25 @@ if [[ $EUID -ne 0 ]]; then
 fi
 echo "ok"
 
+echo -n "Ensuring eatmydata is installed..."
+(
+set -e
+set -o xtrace
+env DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes eatmydata
+) 2>&1 | cat >/var/log/umbrella-install.log
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+else
+    echo fail
+    exit 1
+fi
+
 echo -n "First we update the system to the MAX..."
 (
 set -e
 set -o xtrace
-apt-get update
-env DEBIAN_FRONTEND=noninteractive apt-get upgrade --assume-yes
+${APT_GET_UPDATE}
+${APT_GET_UPGRADE}
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -585,25 +729,28 @@ if grep -q '^uuidd:' /etc/passwd ; then
   (
   set -e
   set -o xtrace
-  apt-get purge --assume-yes uuid-runtime mlocate
+  ${APT_GET_PURGE} uuid-runtime mlocate
   deluser uuidd
   getent group mlocate &>/dev/null && delgroup mlocate
-  if ! grep -q '# Umbrella Installer Bridges Defined' /etc/network/interfaces; then
+  if ! grep -q '# Umbrella Installer Bridges Defined' ${NETCONFFILE} 2>/dev/null; then
     if grep -q '^lxd:' /etc/passwd ; then
-      # we also remove the initially shipped LXD (to install a backported one later)
-      apt-get purge --assume-yes lxd lxd-client lxd-tools
-      getent passwd lxd &>/dev/null && deluser lxd
-      getent group lxd &>/dev/null && delgroup lxd
+      if [ `id -u lxd` != "660" ]; then
+        # unless lxd user was already configured with proper (Umbrella Linux) uid, we also remove
+        # the initially shipped LXD to reinstall it later with proper lxd user uid
+        ${APT_GET_PURGE} lxd lxd-client lxd-tools
+        getent passwd lxd &>/dev/null && deluser lxd
+        getent group lxd &>/dev/null && delgroup lxd
+      fi
     fi
   fi
-  groupmod -g 110 messagebus
-  groupmod -g 111 ssh
-  if [ ! `id -u messagebus` -eq "106" ]; then
+  groupmod -g "$GID_messagebus" messagebus
+  groupmod -g "$GID_ssh" ssh
+  if [ ! `id -u messagebus` -eq "$UID_messagebus" ]; then
     systemctl stop dbus
     systemctl kill dbus
-    usermod -u 106 messagebus
+    usermod -u "$UID_messagebus" messagebus
   fi
-  getent passwd sshd &>/dev/null && usermod -u 107 sshd
+  getent passwd sshd &>/dev/null && usermod -u "$UID_ssh" sshd
   exit 0
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -617,7 +764,7 @@ fi
 echo -n "Next we need to install some packages..."
 (
 set -o xtrace
-apt-get install --assume-yes python-lxml libxml2-utils git openssh-server bridge-utils
+${APT_GET_INSTALL} python-lxml libxml2-utils git openssh-server bridge-utils
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -631,9 +778,9 @@ echo -n "We check if (after the installation) sshd:ssh has correct UID/GID..."
 set -e
 set -o xtrace
 sshd_user_uid=`id -u sshd`
-[ $sshd_user_uid -eq 107 ]
+[ "$sshd_user_uid" -eq "$UID_ssh" ]
 ssh_group_gid=`cut -d: -f3 < <(getent group ssh)`
-[ $ssh_group_gid -eq 111 ]
+[ "$ssh_group_gid" -eq "$GID_ssh" ]
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -646,9 +793,17 @@ if [ ! -d /tmp/bcfg2 ]; then
   echo -n "Checking out Umbrella Linux repository to /tmp/bcfg2 ..."
   (
   set -o xtrace
-  if [ -z $GIT_USER ]; then
+  if [ -z "$GIT_USER" -a -z "$GIT_URL" ]; then
     # public repository
     git clone https://github.com/metlov/umbrella-linux.git /tmp/bcfg2
+  elif [ -n "$GIT_URL" ]; then
+    if [-z "$GIT_BRANCH" ]; then
+      # cloning master branch from the specified URL 
+      git clone "$GIT_URL" /tmp/bcfg2
+    else
+      # cloning the specified branch from the specified URL
+      git clone "$GIT_URL" -b "$GIT_BRANCH" --single-branch /tmp/bcfg2
+    fi
   else
     # private repository
     if [ ! -f ~/.netrc ]; then
@@ -781,14 +936,14 @@ ext_gateway=`xmllint --xpath '//Properties//server[function="router"]/extif/gate
 # determine the public ip of the VM host
 vmhost_pub_ip=`xmllint --xpath '//Properties//server[function="vmhost"]/pubif/ip/text()' ${UMBRELLA_XML}`
 
-if grep -q '# Umbrella Installer Bridges Defined' /etc/network/interfaces; then
+if grep -q '# Umbrella Installer Bridges Defined' ${NETCONFFILE} 2>/dev/null; then
    echo "Umbrella Installer have already created bridges on this system."
    # the external bridge already defined, only set the variables
    ext_addr=`xmllint --xpath '//Properties//server[function="router"]/extif/ip/text()' ${UMBRELLA_XML}`
    ext_if=`xmllint --xpath '//Properties//server[function="router"]/extif/dev/text()' ${UMBRELLA_XML}`
 else
   # determine the external address
-  ext_addr=`ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'`
+  ext_addr=`ip addr | grep 'state UP' -A2 | tail -n1 | awk '{print $2}' | cut -f1  -d'/'`
   echo -n "Checking that the external address in umbrella.xml matches the real one..."
   (
   set -e
@@ -803,8 +958,39 @@ else
     exit 1
   fi
 
+  ext_mac=` ip addr | grep 'state UP' -A1 | tail -n1  | awk '{print $2}'`
+  echo -n "Checking that the MAC of the router's external interface in umbrella.xml matches the external mac..."
+  (
+  set -e
+  set -o xtrace
+  ext_mac_xml=`xmllint --xpath '//Properties//server[function="router"]/extif/mac/text()' ${UMBRELLA_XML}`
+  [ "$ext_mac" == "$ext_mac_xml" ]
+  ) 2>&1 | cat >/var/log/umbrella-install.log
+  if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+  else
+    echo fail
+    exit 1
+  fi
+
+  ext_mac=` ip addr | grep 'state UP' -A1 | tail -n1  | awk '{print $2}'`
+  vmhost_ext_mac_xml=`xmllint --xpath '//Properties//server[function="vmhost"]/extif/mac/text()' ${UMBRELLA_XML}`
+  echo -n "Checking that the MAC of the VMhost's external bridge interface in umbrella.xml is different..."
+  (
+  set -e
+  set -o xtrace
+  vmhost_ext_mac_xml=`xmllint --xpath '//Properties//server[function="vmhost"]/extif/mac/text()' ${UMBRELLA_XML}`
+  [ "$ext_mac" != "$vmhost_ext_mac_xml" ]
+  ) 2>&1 | cat >/var/log/umbrella-install.log
+  if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo ok
+  else
+    echo fail
+    exit 1
+  fi
+
   # determine the external interface
-  ext_if=`ifconfig | grep -B1 "inet addr:$ext_addr" | awk '$1!="inet" && $1!="--" {print $1}'`
+  ext_if=`ip addr | awk '/state UP/ {print $2}' | sed 's/.$//'`
   echo -n "Checking that the external interface in umbrella.xml matches the real one..."
   (
   set -e
@@ -824,8 +1010,8 @@ else
   set -e
   set -o xtrace
   # get netmask from the current connection
-  ext_netmask_current=`ifconfig "${ext_if}" | sed -rn '2s/ .*:(.*)$/\1/p'`
-  [ "$ext_netmask" == "$ext_netmask_current" ]
+  ext_network_current=`ip -o -f inet addr show "${ext_if}" | awk '/scope global/ {print $4}'`
+  [ "$ext_addr/$ext_cidr" == "$ext_network_current" ]
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -839,7 +1025,7 @@ else
   set -e
   set -o xtrace
   # get default gateway
-  ext_gateway_current=`route -n | grep 'UG[ \t]' | awk '{print $2}'`
+  ext_gateway_current=`ip route list | awk ' /^default/ {print $3}'`
   [ "$ext_gateway" == "$ext_gateway_current" ]
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -849,13 +1035,15 @@ else
     exit 1
   fi
 
+if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+  # xenial
   # now we define these bridges in the network configuration of the host
   # at this stage only the ext_br will be bound to an interface, the rest of
   # the bridges will not be connected to networking devices (this is going
   # to be fixed by bcfg2 and subsequent reboot, which will apply the final
   # configuration
   # also the ext-br will be configured to provide the Internet access
-  cat >/etc/network/interfaces <<EOF
+  cat >${NETCONFFILE} <<EOF
 # Umbrella Installer Bridges Defined 1
 auto lo
 iface lo inet loopback
@@ -906,6 +1094,55 @@ EOF
       echo fail
       exit 1
   fi
+# xenial
+else
+# not xenial
+# bionic uses netplan for network configuration
+  cat >${NETCONFFILE} <<EOF
+# Umbrella Installer Bridges Defined 1
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${ext_if}:
+      dhcp4: no
+      optional: true
+  bridges:
+    ${ext_br}:
+      interfaces:
+        - ${ext_if}
+      addresses:
+        - ${ext_addr}/${ext_cidr}
+      gateway4: ${ext_gateway}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+    ${pub_br}:
+      interfaces: []
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+    ${sec_br}:
+      interfaces: []
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+    ${DMZ_br}:
+      interfaces: []
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+EOF
+  netplan apply
+  sleep 10   # wait for network to become configured
+# not xenial
+fi
 fi
 
 if ! grep -q '^lxd:' /etc/passwd; then
@@ -915,9 +1152,23 @@ if ! grep -q '^lxd:' /etc/passwd; then
   set -o xtrace
   groupadd -g 660 lxd
   useradd -d /var/lib/lxd/ -g nogroup -m -s /bin/false -u 660 lxd
-  apt-get install -t xenial-backports --assume-yes lxd lxd-client lxd-tools
-  apt-get install --assume-yes ebtables xdelta3
+  if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
+    ${APT_GET_INSTALL} -t xenial-backports lxd lxd-client lxd-tools
+    # xenial
+  else
+    # not xenial
+    ${APT_GET_INSTALL} lxd lxd-client lxd-tools
+    # not xenial
+  fi
+  ${APT_GET_INSTALL} ebtables xdelta3
   lxd init --auto --storage-backend dir
+  if [ "$DISTRIB_CODENAME" != "xenial" ]; then
+    # not xenial
+    # delete unnecessary bridge
+    lxc network delete lxdbr0
+    # not xenial
+  fi
 # allow more mounting possibilities
   cat >/etc/apparmor.d/lxc/lxc-default-with-mounting <<EOF
 # Do not load this file.  Rather, load /etc/apparmor.d/lxc-containers, which
@@ -950,14 +1201,31 @@ profile lxc-container-default-with-mounting flags=(attach_disconnected,mediate_d
 }
 EOF
   systemctl reload apparmor.service
-  cat >/etc/rc.local <<EOF
+  if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
+    cat >/etc/rc.local <<EOF
 #!/bin/bash
 # this is necessary for lxd containers to start after reboot thanks for
 # lxd on xenial being socket-activated
-echo -n "" | nc -U /var/lib/lxd/unix.socket
+echo -n "" | nc -UN /var/lib/lxd/unix.socket
 exit 0
 EOF
-chmod +x /etc/rc.local
+    chmod +x /etc/rc.local
+    # xenial
+  else
+    # not xenial
+    # root needs to have assigned subuid and subgid ranges
+    cat >/etc/subuid <<EOF
+root:100000:65536
+EOF
+    cat >/etc/subgid <<EOF
+root:100000:65536
+EOF
+    # we also disable and mask waiting for network devices to become online
+    rm -f /etc/systemd/system/systemd-networkd-wait-online.service
+    ln -s /dev/null /etc/systemd/system/systemd-networkd-wait-online.service
+    # not xenial
+  fi
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -1016,7 +1284,7 @@ if [[ ! $(lxc list) =~ "${router_hostname}" ]]; then
   (
   set -e
   set -o xtrace
-  lxc init ubuntu:16.04 -p router ${router_hostname}
+  lxc init ubuntu:${DISTRIB_RELEASE} -p router ${router_hostname}
   router_ext_mac=`xmllint --xpath '//Properties//server[function="router"]/extif/mac/text()' ${UMBRELLA_XML}`
   router_pub_mac=`xmllint --xpath '//Properties//server[function="router"]/pubif/mac/text()' ${UMBRELLA_XML}`
   router_sec_mac=`xmllint --xpath '//Properties//server[function="router"]/secif/mac/text()' ${UMBRELLA_XML}`
@@ -1036,9 +1304,11 @@ if [[ ! $(lxc list) =~ "${router_hostname}" ]]; then
   lxc config set ${router_hostname} boot.autostart.delay 30
   lxc config set ${router_hostname} boot.autostart.priority 10
 
-  # push /etc/network/interfaces
+  # push network configuration
   # at first we get DNS service from Google
-  cat >/tmp/router_interfaces <<EOF
+  if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
+    cat >/tmp/router_interfaces <<EOF
 auto lo
 iface lo inet loopback
 
@@ -1069,8 +1339,40 @@ iface ${router_DMZ_dev} inet static
     address ${router_DMZ_ip}
     netmask ${DMZ_netmask}
 EOF
-  chown root:root /tmp/router_interfaces
-  lxc file push /tmp/router_interfaces ${router_hostname}/etc/network/interfaces
+    chown root:root /tmp/router_interfaces
+    lxc file push /tmp/router_interfaces ${router_hostname}/etc/network/interfaces
+    # xenial
+  else
+    # not xenial
+    cat >/tmp/router_01-netcfg.yaml <<EOF
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${router_ext_dev}:
+      addresses:
+        - ${ext_addr}/${ext_cidr}
+      gateway4: ${ext_gateway}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+    ${router_pub_dev}:
+      addresses:
+        - ${router_pub_ip}/${pub_cidr}
+    ${router_sec_dev}:
+      addresses:
+        - ${router_sec_ip}/${sec_cidr}
+    ${router_DMZ_dev}:
+      addresses:
+        - ${router_DMZ_ip}/${DMZ_cidr}
+EOF
+    chown root:root /tmp/router_01-netcfg.yaml
+    lxc file push /tmp/router_01-netcfg.yaml ${router_hostname}/etc/netplan/01-netcfg.yaml
+    # not xenial
+  fi
 
   # push /etc/rc.local
   cat >/tmp/rc.local <<EOF
@@ -1099,14 +1401,16 @@ EOF
   fi
 fi
 
-if grep -q '# Umbrella Installer Bridges Defined 1' /etc/network/interfaces; then
+if grep -q '# Umbrella Installer Bridges Defined 1' ${NETCONFFILE}; then
   echo -n "Reconfiguring the host's network to route via the router..."
   (
   set -e
   set -o xtrace
   # The difference here is that the host moves from the external network to
   # pub and that the router is now its default gateway.
-  cat >/etc/network/interfaces <<EOF
+  if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
+    cat >${NETCONFFILE} <<EOF
 # Umbrella Installer Bridges Defined 2
 auto lo
 iface lo inet loopback
@@ -1141,10 +1445,63 @@ auto ${DMZ_br}
 iface ${DMZ_br} inet manual
     bridge_ports none
 EOF
-  # resetting the external bridge's network settings
-  ip addr flush ${ext_br}
-  ifdown ${ext_br}
-  systemctl restart networking.service
+    # resetting the external bridge's network settings
+    ip addr flush ${ext_br}
+    ifdown ${ext_br}
+    systemctl restart networking.service
+    # xenial
+  else
+    # not xenial
+    cat >${NETCONFFILE} <<EOF
+# Umbrella Installer Bridges Defined 2
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${ext_if}MAC:
+      match:
+        macaddress: ${ext_mac}
+      macaddress: ${vmhost_ext_mac_xml}
+      dhcp4: no
+      optional: true
+    ${ext_if}:
+      dhcp4: no
+      optional: true
+  bridges:
+    ${ext_br}:
+      interfaces:
+        - ${ext_if}
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+    ${pub_br}:
+      addresses:
+        - ${vmhost_pub_ip}/${pub_cidr}
+      gateway4: ${router_pub_ip}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - 8.8.8.8
+          - 8.8.4.4
+    ${sec_br}:
+      interfaces: []
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+    ${DMZ_br}:
+      interfaces: []
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+EOF
+    netplan apply
+    sleep 10   # wait for network to become configured
+    # not xenial
+  fi
   lxc start router
   sleep 10
   # now we are disconnected from the internet until the router is started
@@ -1185,7 +1542,6 @@ normalize_uidgid_in_vm ${router_hostname}
 
 pull_server_names_and_IPs_from_umbrella_xml
 
-
 if lxc exec ${router_hostname} -- /bin/bash -c \
   "[[ ! -x /usr/sbin/named ]]" ; then
   echo -n "Installing bind on router..."
@@ -1203,7 +1559,7 @@ if lxc exec ${router_hostname} -- /bin/bash -c \
       "useradd -d /var/cache/bind -g bind -m -s /bin/false -u 108 bind"
   fi
   lxc exec ${router_hostname} -- /bin/bash -c \
-    "apt-get install --assume-yes bind9"
+    "${APT_GET_INSTALL} bind9"
 
   # prepare temporary forward and reverse zone files
   cat >/tmp/tmpzone <<EOF
@@ -1385,14 +1741,16 @@ EOF
   fi
 fi
 
-if grep -q '# Umbrella Installer Bridges Defined 2' /etc/network/interfaces; then
+if grep -q '# Umbrella Installer Bridges Defined 2' ${NETCONFFILE}; then
   echo -n "Reconfiguring the network to use DNS on router..."
   (
   set -e
   set -o xtrace
   # The difference here is that the host moves from the external network to
   # pub and that the router is now its default gateway.
-  cat >/etc/network/interfaces <<EOF
+  if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
+    cat >${NETCONFFILE} <<EOF
 # Umbrella Installer Bridges Defined 3
 auto lo
 iface lo inet loopback
@@ -1465,6 +1823,81 @@ EOF
   lxc restart ${router_hostname}
 
   systemctl restart networking.service
+    # xenial
+  else
+    # not xenial
+    cat >${NETCONFFILE} <<EOF
+# Umbrella Installer Bridges Defined 3
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${ext_if}:
+      dhcp4: no
+      optional: true
+  bridges:
+    ${ext_br}:
+      interfaces:
+        - ${ext_if}
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+    ${pub_br}:
+      addresses:
+        - ${vmhost_pub_ip}/${pub_cidr}
+      gateway4: ${router_pub_ip}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - ${router_pub_ip}
+    ${sec_br}:
+      interfaces: []
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+    ${DMZ_br}:
+      interfaces: []
+      optional: true
+      dhcp4: no
+      dhcp6: no
+      accept-ra: no
+EOF
+    cat >/tmp/router_01-netcfg.yaml <<EOF
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${router_ext_dev}:
+      addresses:
+        - ${ext_addr}/${ext_cidr}
+      gateway4: ${ext_gateway}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - 127.0.0.1
+    ${router_pub_dev}:
+      addresses:
+        - ${router_pub_ip}/${pub_cidr}
+    ${router_sec_dev}:
+      addresses:
+        - ${router_sec_ip}/${sec_cidr}
+    ${router_DMZ_dev}:
+      addresses:
+        - ${router_DMZ_ip}/${DMZ_cidr}
+EOF
+    chown root:root /tmp/router_01-netcfg.yaml
+    lxc file push /tmp/router_01-netcfg.yaml ${router_hostname}/etc/netplan/01-netcfg.yaml
+    lxc exec ${router_hostname} -- /bin/bash -c \
+      "netplan apply"
+    lxc restart ${router_hostname}
+    netplan apply
+    sleep 10   # wait for network to become configured
+    # not xenial
+  fi
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -1510,32 +1943,12 @@ create_profile pub
 create_profile sec
 create_profile DMZ
 
-if [[ ! $(lxc profile list) =~ "secsrv" ]]; then
-  echo -n "Creating \"secsrv\" lxc profile for servers in public subnet..."
-  (
-  set -e
-  set -o xtrace
-  lxc profile create pubsrv
-  lxc profile device add pubsrv root disk path=/ pool=default
-  lxc network attach-profile ${pub_br} pubsrv eth0
-  lxc profile set pubsrv raw.lxc lxc.apparmor.profile=lxc-container-default-with-mounting
-  lxc profile set pubsrv security.privileged true
-  ) 2>&1 | cat >/var/log/umbrella-install.log
-  if [ ${PIPESTATUS[0]} -eq 0 ]; then
-    echo ok
-  else
-    echo fail
-    exit 1
-  fi
-fi
-
-
 if [[ ! $(lxc list) =~ "${config_hostname}" ]]; then
   echo -n "Creating and starting configuration server \"${config_hostname}\"..."
   (
   set -e
   set -o xtrace
-  lxc init ubuntu:16.04 -p pubsrv ${config_hostname}
+  lxc init ubuntu:${DISTRIB_RELEASE} -p pubsrv ${config_hostname}
   config_pub_dev=`xmllint --xpath '//Properties//server[function="config"]/pubif/dev/text()' ${UMBRELLA_XML}`
   config_pub_mac=`xmllint --xpath '//Properties//server[function="config"]/pubif/mac/text()' ${UMBRELLA_XML}`
 
@@ -1547,8 +1960,10 @@ if [[ ! $(lxc list) =~ "${config_hostname}" ]]; then
   lxc config set ${config_hostname} boot.autostart.delay 30
   lxc config set ${config_hostname} boot.autostart.priority 9
 
-  # push /etc/network/interfaces
-  cat >/tmp/config_interfaces <<EOF
+  # push network configuration
+  if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
+    cat >/tmp/config_interfaces <<EOF
 auto lo
 iface lo inet loopback
 
@@ -1561,8 +1976,36 @@ iface ${config_pub_dev} inet static
     dns-nameservers ${router_pub_ip}
     dns-search ${domain_name}
 EOF
-  chown root:root /tmp/config_interfaces
-  lxc file push /tmp/config_interfaces ${config_hostname}/etc/network/interfaces
+    chown root:root /tmp/config_interfaces
+    lxc file push /tmp/config_interfaces ${config_hostname}/etc/network/interfaces
+    # xenial
+  else
+    # not xenial
+    cat >/tmp/config_01-netcfg.yaml <<EOF
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ${config_pub_dev}:
+      dhcp4: no
+      addresses:
+        - ${config_pub_ip}/${pub_cidr}
+      gateway4: ${router_pub_ip}
+      nameservers:
+        search:
+          - ${domain_name}
+        addresses:
+          - ${router_pub_ip}
+EOF
+    chown root:root /tmp/config_01-netcfg.yaml
+    lxc file push /tmp/config_01-netcfg.yaml config/etc/netplan/01-netcfg.yaml
+    # not xenial
+  fi
+
+  # When setting up "config" there is no proxy yet
+  lxc file push - ${config_hostname}/etc/apt/apt.conf.d/99zproxy <<EOF
+Acquire::http::Proxy "false";
+EOF
 
   lxc start ${config_hostname}
   ) 2>&1 | cat >/var/log/umbrella-install.log
@@ -1603,10 +2046,10 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   fi
 
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "apt-get update"
+    "${APT_GET_UPDATE}"
 
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "apt-get install --assume-yes bcfg2-server git mc python-ipcalc python-passlib ssl-cert python-pymysql python-django"
+    "${APT_GET_INSTALL} bcfg2-server git mc python-ipcalc python-passlib ssl-cert python-pymysql python-django"
 
   # if we had a custom git certificate installed
   if [ -d ~/git-certs ]; then
@@ -1657,7 +2100,15 @@ if [ -e ${UMBRELLA_KEYS_XML} ]; then
   xml_file="${UMBRELLA_KEYS_XML}"
   xmllint --noout --schema /tmp/bcfg2/Properties/${xml_file%.*}.xsd ./$xml_file
   CA_pub=`xmllint --xpath '//Properties//CA_pub/text()' ${UMBRELLA_KEYS_XML}`
-  CA_subj=`echo "${CA_pub}" | openssl x509 -noout -subject | sed 's|subject= /||'| sed 's|/|"\n|g' | sed 's|=|="|g' | sed "s|'|\\\'|g" | sed '$s/$/\"/'`
+  if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
+    CA_subj=`echo "${CA_pub}" | openssl x509 -noout -subject | sed 's|subject= /||'| sed 's|/|"\n|g' | sed 's|=|="|g' | sed "s|'|\\\'|g" | sed '$s/$/\"/'`
+    # xenial
+  else
+    # not xenial
+    CA_subj=`echo "${CA_pub}" | openssl x509 -noout -subject | sed 's/subject=//' | sed 's/ = /="/g' | sed "s|'|\\\'|g" | sed 's/, /"\n/g' | sed '$s/$/\"/'`
+    # not xenial
+  fi
   eval $CA_subj
   [ "$C" == "$country_code" ]
   [ "$ST" == "$state" ]
@@ -1912,7 +2363,7 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
 
   # install mysql server and its root password
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes mysql-server"
+    "${APT_GET_INSTALL} mysql-server"
   lxc exec ${config_hostname} -- /bin/bash -c \
     "mysqladmin -u root password \"${mysql_root_pass}\""
 
@@ -1960,66 +2411,71 @@ if lxc exec ${config_hostname} -- /bin/bash -c \
   deliffalse="/{% if 'config' not in metadata.groups %}/,/{% end %}/d"
   renderiftrue="/{% if 'config' in metadata.groups %}/,/{% end %}/ { /{% if 'config' in metadata.groups %}/d; /{% end %}/d }"
   lxc exec ${config_hostname} -- /bin/bash -c \
-    "cat /var/lib/bcfg2/Cfg/etc/default/bcfg2-server/bcfg2-server.genshi | sed \"${deliffalse}\" | sed \"${renderiftrue}\" > /etc/default/bcfg2-server"
+    "cat /var/lib/bcfg2/Cfg/etc/default/bcfg2-server/bcfg2-server.genshi | sed \"${deliffalse}\" | sed \"${renderiftrue}\" | sed 's/\\\$\\\$/\\\$/g' > /etc/default/bcfg2-server"
 
   # generate clients xml
   cat >/tmp/clients.xml <<EOF
 <Clients>
-  <Client profile="config" name="${config_hostname}.${domain_name}" version="1.3.5"><Alias name="gosa.${domain_name}"/><Alias name="kdc1.${domain_name}"/><Alias name="ldap1.${domain_name}"/><Alias name="autoconfig.${domain_name}"/><Alias name="wpad.${domain_name}"/></Client>
+  <Client profile="config" name="${config_hostname}.${domain_name}" version="1.4.0pre2"><Alias name="gosa.${domain_name}"/><Alias name="kdc1.${domain_name}"/><Alias name="ldap1.${domain_name}"/><Alias name="autoconfig.${domain_name}"/><Alias name="wpad.${domain_name}"/></Client>
 EOF
 if [[ ! -z "${proxy_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="proxy" name="${proxy_hostname}.${domain_name}" version="1.3.5"><Alias name="kdc2.${domain_name}"/><Alias name="ldap2.${domain_name}"/></Client>
+  <Client profile="proxy" name="${proxy_hostname}.${domain_name}" version="1.4.0pre2"><Alias name="kdc2.${domain_name}"/><Alias name="ldap2.${domain_name}"/></Client>
+EOF
+fi
+if [[ ! -z "${vmhost_hostname}" ]]; then
+  cat >>/tmp/clients.xml <<EOF
+  <Client profile="vmhost" name="${vmhost_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${ltsp_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="ltsp" name="${ltsp_hostname}.${domain_name}" version="1.3.5"/>
+  <Client profile="ltsp" name="${ltsp_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${mail_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="mail" name="${mail_hostname}.${domain_name}" version="1.3.5"/>
+  <Client profile="mail" name="${mail_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${monitor_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="monitor" name="${monitor_hostname}.${domain_name}" version="1.3.5"/>
+  <Client profile="monitor" name="${monitor_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${backdoor_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="backdoor" name="${backdoor_hostname}.${domain_name}" version="1.3.5"/>
+  <Client profile="backdoor" name="${backdoor_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${nfs_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="nfs" name="nfs.${domain_name}" version="1.3.5"/>
+  <Client profile="nfs" name="nfs.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${router_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="router" name="${router_hostname}.${domain_name}" version="1.3.5"/>
+  <Client profile="router" name="${router_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${smtp_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="DMZsmtp" name="${smtp_hostname}.${domain_name}" version="1.3.5"/>
+  <Client profile="DMZsmtp" name="${smtp_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${www_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="DMZwww" name="${www_hostname}.${domain_name}" version="1.3.5"/>
+  <Client profile="DMZwww" name="${www_hostname}.${domain_name}" version="1.4.0pre2"/>
 EOF
 fi
 if [[ ! -z "${xmpp_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="DMZxmpp" name="${xmpp_hostname}.${domain_name}" version="1.3.5"><Alias name="${domain_name}"/></Client>
+  <Client profile="DMZxmpp" name="${xmpp_hostname}.${domain_name}" version="1.4.0pre2"><Alias name="${domain_name}"/></Client>
 EOF
 fi
 if [[ ! -z "${vpn_hostname}" ]]; then
   cat >>/tmp/clients.xml <<EOF
-  <Client profile="DMZvpn" name="${vpn_hostname}.${domain_name}" version="1.3.5"></Client>
+  <Client profile="DMZvpn" name="${vpn_hostname}.${domain_name}" version="1.4.0pre2"></Client>
 EOF
 fi
 cat >>/tmp/clients.xml <<EOF
@@ -2123,7 +2579,7 @@ ensure_bcfg2() {
     sleep 25
 
     lxc exec ${config_hostname} -- /bin/bash -c \
-      "bcfg2 -Qqv -s disabled -b bcfg2"
+      "${BCFG2} -Qqv -s disabled -b bcfg2"
 
 #  lxc exec ${config_hostname} -- /bin/bash -c \
 #    "systemctl restart bcfg2-server"
@@ -2149,6 +2605,7 @@ ensure_bcfg2() {
 
 ensure_bcfg2
 
+
 #######################################################################
 #                                                                     #
 # At this point we have a fully-functional bcfg2 configuration server #
@@ -2157,7 +2614,10 @@ ensure_bcfg2
 #                                                                     #
 #######################################################################
 # finish configuring config
-configure_vm ${config_hostname} configure_quirks_init_krb5_ldap
+if lxc exec ${config_hostname} -- /bin/bash -c \
+  "[[ ! -e /etc/umbrella.conf ]]" ; then
+  configure_vm ${config_hostname} configure_quirks_init_krb5_ldap
+fi
 
 # check for and start bcfg2 server if necessary
 ensure_bcfg2
@@ -2231,8 +2691,14 @@ fi
 
 # proceed with other VMs
 create_vm proxy configure_quirks_init_krb5_ldap
+
+# after "proxy" is configured, reenable APT proxy on "config"
+lxc exec ${config_hostname} -- /bin/bash -c \
+  "rm -f /etc/apt/apt.conf.d/99zproxy"
+
 create_vm nfs
 create_vm mail
+
 if [ -n ${mail_hostname} ]; then
   if lxc exec ${config_hostname} -- /bin/bash -c \
     "[[ ! -d \"/var/lib/mysql/${SA_db_name}\" ]]" ; then
@@ -2308,7 +2774,7 @@ if lxc exec ${ltsp_hostname} -- /bin/bash -c \
     "env TC_NONINTERACTIVE=yes x2gothinclient_create"
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
-    "bcfg2 -qv -r packages"
+    "${BCFG2} -qv -r packages"
 
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
@@ -2318,10 +2784,10 @@ if lxc exec ${ltsp_hostname} -- /bin/bash -c \
     "ln -s ../default.cfg /var/lib/tftpboot/pxelinux.cfg/default"
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
-    "pushd /tmp/; wget -c http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-i386/current/images/netboot/netboot.tar.gz; popd; pushd /var/lib/tftpboot/; tar xvfz /tmp/netboot.tar.gz ./ubuntu-installer/; popd; rm -f /tmp/netboot.tar.gz"
+    "pushd /tmp/; wget -c http://archive.ubuntu.com/ubuntu/dists/$DISTRIB_CODENAME-updates/main/installer-i386/current/images/netboot/netboot.tar.gz; popd; pushd /var/lib/tftpboot/; tar xvfz /tmp/netboot.tar.gz ./ubuntu-installer/; popd; rm -f /tmp/netboot.tar.gz"
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
-    "pushd /tmp/; wget -c http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/netboot.tar.gz; popd; pushd /var/lib/tftpboot/; tar xvfz /tmp/netboot.tar.gz ./ubuntu-installer/; popd; rm -f /tmp/netboot.tar.gz"
+    "pushd /tmp/; wget -c http://archive.ubuntu.com/ubuntu/dists/$DISTRIB_CODENAME-updates/main/installer-amd64/current/images/netboot/netboot.tar.gz; popd; pushd /var/lib/tftpboot/; tar xvfz /tmp/netboot.tar.gz ./ubuntu-installer/; popd; rm -f /tmp/netboot.tar.gz"
 
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -2355,7 +2821,14 @@ configure_quirks_router() {
     "/usr/local/bin/umbrella-ldap2dhcp"
 }
 
-configure_vm ${router_hostname} "" configure_quirks_router
+# finish configuring router
+if lxc exec ${router_hostname} -- /bin/bash -c \
+  "[[ ! -e /etc/umbrella.conf ]]" ; then
+   # update package lists
+   lxc exec ${router_hostname} -- /bin/bash -c \
+     "${APT_GET_UPDATE} &>/dev/null"
+   configure_vm ${router_hostname} "" configure_quirks_router
+fi
 
 first_admin=`xmllint --xpath "(//Properties//admin/text())[1]" ${UMBRELLA_XML}`
 
@@ -2367,23 +2840,23 @@ lxc file pull ${config_hostname}/etc/pki/CA/certs/bcfg2ca.crt \
   /usr/local/share/ca-certificates/bcfg2ca.crt
 chmod 644 /usr/local/share/ca-certificates/bcfg2ca.crt
 update-ca-certificates
-apt-get install -y bcfg2 mc ssl-cert
+${APT_GET_INSTALL} bcfg2 mc ssl-cert
 lxc file pull ${config_hostname}/etc/bcfg2.conf /etc/bcfg2.conf
-bcfg2 -Qqv -b apt-sources
-apt-get update
-bcfg2 -D POSIXUsers -Qqv -b ntp
-bcfg2 -Qqv -b ntp
-bcfg2 -D POSIXUsers -Qqv -b base-users:base
-bcfg2 -Qqv -b base-users:base
-bcfg2 -Qqv -b ldap-auth
-env SUDO_FORCE_REMOVE=yes bcfg2 -Qqv -b login
-bcfg2 -Qqv -b ssh
-bcfg2 -D POSIXUsers -qv
-bcfg2 -qv -r packages
-getent passwd lxc-dnsmasq &>/dev/null && deluser lxc-dnsmasq
-getent passwd dnsmasq &>/dev/null && deluser dnsmasq
-getent group sambashare &>/dev/null && delgroup sambashare
-getent group lpadmin &>/dev/null && delgroup lpadmin
+${BCFG2} -Qqv -b apt-sources
+${APT_GET_UPDATE}
+${BCFG2} -D POSIXUsers -Qqv -b ntp
+${BCFG2} -Qqv -b ntp
+${BCFG2} -D POSIXUsers -Qqv -b base-users:base:networking
+${BCFG2} -Qqv -b base-users:base
+${BCFG2} -Qqv -b ldap-auth
+env SUDO_FORCE_REMOVE=yes ${BCFG2} -Qqv -b login
+${BCFG2} -Qqv -b ssh
+${BCFG2} -D POSIXUsers -qv
+${BCFG2} -qv -r packages
+if getent passwd lxc-dnsmasq &>/dev/null; then deluser lxc-dnsmasq; fi
+if getent passwd dnsmasq &>/dev/null; then deluser dnsmasq; fi
+if getent group sambashare &>/dev/null; then delgroup sambashare; fi
+if getent group lpadmin &>/dev/null; then delgroup lpadmin; fi
 ) 2>&1 | cat >/var/log/umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
   echo ok

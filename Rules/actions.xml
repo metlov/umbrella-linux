@@ -10,4 +10,5 @@
    <Action name='fix_fusion_warning_2538' timing='post' when='modified' command="perl -pi -e  's/\$ldap = new ldapMultiplexer\(new LDAP\((\$cfg.*)\)/\$ldapObj = new LDAP(\1;\n  \$ldap = new ldapMultiplexer(\$ldapObj)/g' /usr/share/fusiondirectory/include/functions.inc" status='ignore'/>
    <!-- copy the files to tftpd chroot -->
    <Action name='update-tftpboot' timing='post' when='modified' command='umbrella-update-tftpboot' status='ignore'/>
+   <Action name='update-cracklib' timing='post' when='modified' command='update-cracklib' status='ignore'/>
 </Rules>

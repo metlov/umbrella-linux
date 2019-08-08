@@ -6,8 +6,14 @@ execfile(repo+'/Python/10_funchosts.py')
 ?>
 <Group name='ubuntu'>
 <py:if test="'monitor' in funchosts">
-    <BoundPOSIXUser name="snmp" home="/var/lib/snmp" gecos="" shell="/usr/sbin/nologin" uid="647" group="snmp"/>
-    <BoundPOSIXGroup name="snmp" gid="647"/>
+    <Group name='ubuntu-xenial'>
+        <BoundPOSIXUser name="snmp" home="/var/lib/snmp" gecos="" shell="/usr/sbin/nologin" uid="647" group="snmp"/>
+        <BoundPOSIXGroup name="snmp" gid="647"/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <BoundPOSIXUser name="Debian-snmp" home="/var/lib/snmp" gecos="" shell="/usr/sbin/nologin" uid="647" group="Debian-snmp"/>
+        <BoundPOSIXGroup name="Debian-snmp" gid="647"/>
+    </Group>
     <Path name='/etc/default/snmpd'/>
     <Path name='/etc/snmp/snmpd.conf'/>
     <Package name='snmpd'/>

@@ -1,6 +1,8 @@
 {% python
 from genshi.template import TemplateError
 import ipcalc
+import random
+random.seed(metadata.hostname)
 import hashlib
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
@@ -82,8 +84,13 @@ netset |= set(netclasses.iterkeys())
 
 
   <syscheck>
-    <!-- Frequency that syscheck is executed -- default every 20 hours -->
-    <frequency>72000</frequency>
+    <auto_ignore>no</auto_ignore>
+    <alert_new_files>yes</alert_new_files>
+
+    <!-- Randomized Scheduling -->
+    <scan_on_start>no</scan_on_start>
+    <scan_time>${random.randrange(1,6)}:${"%02d" % random.randrange(0,59)}am</scan_time>
+    <frequency>86400</frequency>
 
     <!-- Directories to check  (perform all possible verifications) -->
     <directories check_all="yes">${','.join(dir_list)}</directories>

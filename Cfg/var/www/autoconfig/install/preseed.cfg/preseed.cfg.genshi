@@ -141,12 +141,12 @@ in-target update-ca-certificates; \
 {% if 'proxy' in funchosts %}\
 /bin/echo -e "\nAcquire::http::Proxy \"http://${funchosts['proxy']}:3142/\";" >/target/etc/apt/apt.conf.d/31tempproxy; \
 {% end %}\
-in-target apt-get remove --assume-yes uuid-runtime mlocate; \
+in-target env DEBIAN_FRONTEND=noninteractive apt-get purge --assume-yes lxd lxd-client uuid-runtime mlocate landscape-common; \
 in-target deluser uuidd; \
 in-target delgroup mlocate; \
-in-target env DEBIAN_FRONTEND=noninteractive bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -D POSIXUsers -qv; \
-in-target env DEBIAN_FRONTEND=noninteractive bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -b apt-sources -Qv; \
-in-target env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -b ssh:apt-sources:login:kerberos:ldap-auth:bcfg2 -Qvk; \
-in-target env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -s disabled -r Packages -qvk; \
-in-target env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 --ca-cert=/etc/ssl/certs/bcfg2ca.pem -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -s disabled -r Packages -qv; \
+in-target env DEBIAN_FRONTEND=noninteractive bcfg2 -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -D POSIXUsers -qv; \
+in-target env DEBIAN_FRONTEND=noninteractive bcfg2 -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -b apt-sources -Qqv; \
+in-target env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -b ssh:apt-sources:login:kerberos:ldap-auth:bcfg2 -Qqvk; \
+in-target env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -s disabled -r packages -qvk; \
+in-target env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 -S https://${funchosts['config']}:6789 -x ${bcfg2pass} -s disabled -r packages -r users -qv; \
 rm -f /target/etc/apt/apt.conf.d/31tempproxy

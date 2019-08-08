@@ -51,17 +51,10 @@ delay_warning_time = 1h
 # maximum message size is 40 Mb
 message_size_limit = 40971520
 
-smtpd_recipient_restrictions = permit_mynetworks reject_unauth_destination
-
-smtpd_client_restrictions = permit_mynetworks,
+smtpd_client_restrictions =
+    permit_mynetworks,
     check_client_access texthash:/etc/postfix/client_restrictions,
-    reject_unauth_destination,
-    reject_invalid_hostname,
-    reject_unauth_pipelining,
-    reject_non_fqdn_sender,
-    reject_unknown_sender_domain,
-    reject_non_fqdn_recipient,
-    reject_unknown_recipient_domain,
+    reject_unknown_client_hostname,
 {% for dnsname in dns_smtp_whitelists %}\
     permit_dnswl_client ${dnsname},
 {% end %}\
@@ -70,9 +63,30 @@ smtpd_client_restrictions = permit_mynetworks,
 {% end %}\
     permit
 
-# black list certain well known SPAM domains, based on MAIL FROM
-smtpd_sender_restrictions = check_sender_access texthash:/etc/postfix/access,
+smtpd_helo_required = yes
+smtpd_helo_restrictions =
+    permit_mynetworks,
+    check_client_access texthash:/etc/postfix/client_restrictions,
+    reject_non_fqdn_helo_hostname,
+    reject_invalid_helo_hostname,
     permit
+
+# black list certain well known SPAM domains, based on MAIL FROM
+smtpd_sender_restrictions =
+    check_sender_access texthash:/etc/postfix/access,
+    reject_non_fqdn_sender,
+    reject_unknown_sender_domain,
+    permit
+
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    check_client_access texthash:/etc/postfix/client_restrictions,
+    reject_non_fqdn_recipient,
+    reject_unknown_recipient_domain,
+    reject_unauth_destination,
+    permit
+
+smtpd_data_restrictions = reject_unauth_pipelining
 
 # rejecting unknown users
 relay_recipient_maps = ${', '.join(relay_rcpt_maps)}

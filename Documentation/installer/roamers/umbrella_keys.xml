@@ -1,0 +1,150 @@
+<Properties>
+    <!-- *** Generated initially by the Umbrella Linux installer. *** -->
+
+    <!-- This file contains various public and private keys.  -->
+    <!-- Please keep it protected.                            -->
+    <!-- It is also possible to store it encrypted and still have it -->
+    <!-- usable by bcfg2. See the bcfg2 documentation on encrypting  -->
+    <!-- Property files.                                             -->
+
+    <!-- ssh keys, which can log in under root account -->
+    <!-- key for root@vmhost (can be very useful in non LXD settings) -->
+    <!-- <root_ssh_key>ssh-rsa AAAAB3Nza.......SQpMR root@vmhost</root_ssh_key> -->
+
+    <!-- You may want to add admin ssh keys here after the admins find -->
+    <!-- chance to log in and generate them.                           -->
+    <!-- admin1 -->
+    <!-- <root_ssh_key>ssh-rsa AAAAB3Nza.....zr6Q== admin1@host</root_ssh_key> -->
+
+    <!-- OPTIONAL: public part of the ssh key for the root user on nfs server-->
+    <!-- currently only used if exporting authentication to DMZ and user's   -->
+    <!-- homepages in ~/public_html/ are enabled in firewall.xml .           -->
+    <!-- The private key should be generated for root@'nfs' and should be    -->
+    <!-- passwordless. It is used in ~/public_html/ directories replication  -->
+    <!-- to DMZwww . -->
+    <!-- <nfs_root_ssh_key>ssh-rsa AAAAB3Nza....a9K/h root@nfs</nfs_root_ssh_key> -->
+
+    <!-- Public and private keys for DKIM signatures on outgoing mail.     -->
+    <DKIMpubkey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDvzSWdYozflCxZwHj+8DsnSv2n9Wukx/vClB1OG2HzXj9bqvDWIEpIWd5i4elO4sYRKNsJU8HZMD2JjhK/JSXAj89fikNnQprxJkM8ISW/xZILQzwXdwJFN/LL8cVVVfBqtwXOK42AifanOqy0DLkKqO6csfU3UJ/Ed5Q1s/vvdQIDAQAB</DKIMpubkey>
+    <DKIMseckey>-----BEGIN RSA PRIVATE KEY-----
+MIICXQIBAAKBgQDvzSWdYozflCxZwHj+8DsnSv2n9Wukx/vClB1OG2HzXj9bqvDW
+IEpIWd5i4elO4sYRKNsJU8HZMD2JjhK/JSXAj89fikNnQprxJkM8ISW/xZILQzwX
+dwJFN/LL8cVVVfBqtwXOK42AifanOqy0DLkKqO6csfU3UJ/Ed5Q1s/vvdQIDAQAB
+AoGAZkQZz4XQyCSbyWbw8uAmifpMNM3QK0TyFCgwWzgITM6bvI8pCFha9YIF+iuX
+4QGLMJQ43UBwAhy1ka0aR5QjBam5taPEGkoEC0ePwWzI45HKdNFybEvrI4JX5giL
+YsoehTiTt0JpcP/+n0tg54psTPelHbmJdvmzl1qhpsTmlh0CQQD48AFr6YVVVVm6
+zjLXRRPfPz3X2tkqXbvslqRfFIGBmoNZgDId+sfC+xEdU5HxbzHEg+WH8h2cC+ST
+zo90w90TAkEA9prJbWjSPEdrshq5LJ6CRcP/5gh2V+6000P4TkPfJWBXsBiDBNHB
+BFGJcBWgzrmugJ0d9v3iSeQqpdqAg4S6VwJAAktT+Aai7/JlbU9RMKK2WCxhCYg+
+0CElBj0tLqMlvmgKJd0EmToidS2TLs4CXlNEBiehCeu1UibZ6HLS56SWeQJBAJGV
+e8jNkx/nAhtZT2yZ/0p0lYQWBteOos3+WH7L7ta/88SQE/kqY4rLIBo9invAftaK
+6v+/jnIU82CKiEgceW0CQQD1993SuTiRJ2nJHF13BD7MHoWtQVieKqdpiE809ke+
+xYrKC3XQ8DW4YTrTgpdI1gQSFnSVbRhbhreKu02Qxhpw
+-----END RSA PRIVATE KEY-----</DKIMseckey>
+
+     <!-- The main SSL certificate authority, which signs all the          -->
+     <!-- bcfg2-generated certificates                                     -->
+     <!-- public key (certificate) -->
+     <CA_pub>-----BEGIN CERTIFICATE-----
+MIIETTCCAzWgAwIBAgIJANTmOPeTkuVBMA0GCSqGSIb3DQEBCwUAMIG8MQswCQYD
+VQQGEwJSVTEiMCAGA1UECAwZRG9uZXRzayBQZW9wbGUncyBSZXB1YmxpYzEQMA4G
+A1UEBwwHRG9uZXRzazEWMBQGA1UECgwNVW1icmVsbGEgaW5jLjEWMBQGA1UECwwN
+SVQgZGVwYXJ0bWVudDEmMCQGCSqGSIb3DQEJARYXaXRhZG1pbkB1bWJyZWxsYS1p
+bmMucnUxHzAdBgNVBAMMFmNvbmZpZy51bWJyZWxsYS1pbmMucnUwHhcNMTcxMDAy
+MTIyNTU3WhcNMjcwOTMwMTIyNTU3WjCBvDELMAkGA1UEBhMCUlUxIjAgBgNVBAgM
+GURvbmV0c2sgUGVvcGxlJ3MgUmVwdWJsaWMxEDAOBgNVBAcMB0RvbmV0c2sxFjAU
+BgNVBAoMDVVtYnJlbGxhIGluYy4xFjAUBgNVBAsMDUlUIGRlcGFydG1lbnQxJjAk
+BgkqhkiG9w0BCQEWF2l0YWRtaW5AdW1icmVsbGEtaW5jLnJ1MR8wHQYDVQQDDBZj
+b25maWcudW1icmVsbGEtaW5jLnJ1MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+CgKCAQEA59erTSU8ODjwczeyNqzo1gLnpvPBZekAgGy3Bo7SrFhEu6CwEWKX6RyY
+icsWE36Wu8D/TO2Kb3CJpIqoDwXiB8sBZ7jzsjTDHttlxLnMi4O8XSTZapvKnqGx
+EA7npsk3JX9saAtJk2QYnEzlxRgu7CDjwhudfassjRaT/ugEKqeIQoB6hRM4KPxM
++brU2jBuU2ULjVCekqe+ieiSwsFvILGVIZsXdOi60/cqcQnd/OotNxhWfmF642+Q
+x9ZYE8j5ApbTmtrhEwfotxE2YA1VYHzV80jnMhmKLhxpV2/mzpKUWAn4gYvpbbtt
+Dv2PfPKlz1nB6sTEVxEdVmkU2F9V0wIDAQABo1AwTjAdBgNVHQ4EFgQU3y9e1DBT
+u2C1AiHwSVncUqXPhxIwHwYDVR0jBBgwFoAU3y9e1DBTu2C1AiHwSVncUqXPhxIw
+DAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAUUPs39K9v8MN2cScWswN
+yUpZcBno540UbzoJO54HLF8MHqJryi4xB2Z7160Taf8h0LWZKfrxpo/VUW1NtiyV
+T/qnVvcjeYLfFoP0r7yEjoOL3Lft7N6PYWZskwrduT1AP4BkZWEbDJIKE8CGcvb3
+MGhmOB2LNyRUcT8W3nJg8V4jF1qGIzSK46GGdGCeRbzGIl1ZVDj2sP46uHN2mPEj
+av34BHj9B2S5P7ps5apedmOR0v4HZWjslRimynJxiwxb/XYKlwpBB4HsbcDTzbf7
+bGOK4224trr5MSr3ALYFYJFjDqzW0aRmdKWlK/qD9pN3cBY17AgDY/iWd88Xa77r
+Ng==
+-----END CERTIFICATE-----</CA_pub>
+     <!-- secret key -->
+     <CA_sec>-----BEGIN ENCRYPTED PRIVATE KEY-----
+MIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQIq66fwzYN46MCAggA
+MBQGCCqGSIb3DQMHBAgF7e8Vtuy9CASCBMicCkRFEOIbTui65fSzAG51AtkUUqSR
+v1PBCQ+Amxt2X5boA5jNPlYLnSXUirWt9Xc8SrBar6GfAgXHbbjiRMZCLYoMOnsy
+8VnZq5DOFaaJWmhq+NWb1wfEn/45tYhsDs38XZPYgua6fj1Tjdw9/dRLul+IkGFo
+1xGOuMXdCtDwFcLjrPK3KuOk16HLIgTvrGqI5SBgRC0jdMeoXABNXNKmOpP0xYYd
+t8fr69qSB/fD9foZrKTg/c+F9bJk/4k5YhF/mQYGOurgoSfV3xUsyaWtxNg0P7hm
+XvyO93UfIszkl6vjdEqO0Wryb9QjtN3XSVP13kOXnN9oXeVlmwYamTZ8TYnfGoOV
+2tjlUqnFbV/Zeq+sObnLxYViD9axa9Fjv3f1eNgF27KdMTNqoUZ9dZcypzIHJL9s
+1n2HC7z2wqZ/w6LGj8zU8CcjFuw5OdAv/wOd28W8aRgqvN75aPx6wEbYzHxCLC/z
+sFamQLirIuvTbFFbQQbDNaxhqLHyG6Te+XhE/GRXSu034Jssfh+HrVX3SwyzPJEb
+864uEIxNpVcnw19umLrbBCO1GEiubPLMBGa3yRWm2/gF4cb6iqtZRns9ml4zOA0U
+aCna6wUZ+2foqduSXa0HlOpLxrJ0L8whAt1CblooXPhCkjrQUFFqk2fJjbynC2xS
+4m2wINIA1KzdPS57H7shzLc3Phj4A2Aabqi8iqwPCX5YoyfpbYut8xgwq/CwL5/Y
+oBYeVuhWzWcazvb1OFHkGXcfBPL7B2wcl5XEtvMfDx/nYyngDjTt4nHu2ncQUIYq
+taS4xJF/7OcQ3sLN0RAflx8U3zs2oiTMVfdLaW/uqV64cRQpvgv2TpLOiuMAXOsb
+Kf2Q9GZDIn1lKAKhd/d4ndxgQSsW/zRhULKhknayLMQtp4ZFAa6PK5d6Ya6u22bS
+MLdTb5fPCrPtMAwve0iuEVun3T0x/95hfz4b8LLKbN2x9Lpy2MfzuLjDkdWiSXzk
+522O11rqoupOGKuCu0st5FSXeSSQavPxCN+zJm9pZ2ajVnawsuyOn7ZVbVhgEkaH
+rBJbb6USHi07Cww5csoJykgqvZ1xInPKhgFCLlyWLFYZ/ZWZkqAsPEuLtBjGfdbg
+0NZR5alxcEhYCtHyg6LhUp0XOxxGisnJ9AO1BnkRyKwDfgEtKbdpmrV3TWRzu8OL
+UOL+Q7k16K1g4xkG0RK2FpIOQKk4aqkUU5jo78LA9j1+k/+JnlzJsnGpaJovMG9w
+aSMhahs9+F2YzRZ/yyCCMLo6wUgJKjfTZ0UknwOM7fy/jbgpipE75kMCGNVK/AjV
+cKYGJaLTHXqBGRgCAJ1VNKshkAWXLM5Vwllufk14Pcgy8KJutAllQueXvjPfLS9V
+YmiICeM2j8RU6gdtdG2eWvdOkD2K6unflzLgT1kUkl4u/J1r1QJkNGCkaYIkC/Xc
+d8aTk8GzcSnKJXt5pjCoqUliwgiJ+jYWxsOBU91OZaeL/aoFGpzgS6P4TJArtreT
+sJCtFgCGdlhXGvNBFWH+ndoCrpVhoTPSEZdYwN5AkfumlYzpn6encUkHyssNydpl
+4u805kTGthWlwvHQxZJ0bYCV2loNy3KEhN6MuZUHVFGsYbeQCb9wGW0S80E2lzD0
+u0s=
+-----END ENCRYPTED PRIVATE KEY-----</CA_sec>
+     <!-- passphrase -->
+     <CA_pass>CiAMvG3sngMm2OYjF1yL2otD3cCO0sVY</CA_pass>
+
+     <!-- root password for network-installed workstations in plain text -->
+     <netinstall_root_pass>OKddwW14LD</netinstall_root_pass>
+
+     <!-- SNMPv3 password for nagios user -->
+     <!-- ( must be longer than 8 characters ) -->
+     <snmp_nagios_pass>uF2CflPnQA</snmp_nagios_pass>
+
+     <!-- Global password for Bcfg2 authentication (hosts may have their  -->
+     <!-- individual passwords, specified in clients.xml).                -->
+     <bcfg2_pass>0aSS2MhI</bcfg2_pass>
+
+     <!-- bcfg2 reporting database -->
+     <bcfg2_reports_db_name>bcfg2</bcfg2_reports_db_name>
+     <bcfg2_reports_db_user>bcfg2</bcfg2_reports_db_user>
+     <bcfg2_reports_db_pass>heq3q2Xg6h</bcfg2_reports_db_pass>
+
+     <!-- Spam Assasin database name, user and password -->
+     <SA_db>spamassassin</SA_db>
+     <SA_dbuser>spamassassin</SA_dbuser>
+     <SA_dbpass>3VqJf1TNBQ</SA_dbpass>
+
+     <!-- Root password for backups of MySQL server on config -->
+     <MySQLbackuppass>M0tGV7bOKP</MySQLbackuppass>
+
+     <!-- MySQL password for zabbix database on config -->
+     <MySQLzabbixpass>OKqUh43SMr</MySQLzabbixpass>
+
+     <!-- master password for KRB5 database -->
+     <KRB5_pass>r0Lfh6CIjxJtIVa0BduF</KRB5_pass>
+
+     <!-- Password for the admin user of GOSA -->
+     <GOSA_admin_pass>fPFg87QG</GOSA_admin_pass>
+
+     <!-- root cn=admin,cn=config password to bind to cn=config -->
+     <LDAP_config_pass>h7DXtndw</LDAP_config_pass>
+
+     <!-- cn=syncrepl,(suffix) password for LDAP replication -->
+     <LDAP_syncrepl_pass>fvw4tPeG3t</LDAP_syncrepl_pass>
+
+     <!-- cn=admin,(suffix) root password for LDAP binds to (suffix) -->
+     <LDAP_pass>czhvDlBV</LDAP_pass>
+
+</Properties>

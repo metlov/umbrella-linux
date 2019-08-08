@@ -8,13 +8,23 @@
     <Package name='fusiondirectory-plugin-sudo'/>
     <Package name='fusiondirectory-plugin-mail'/>
     <Package name='fusiondirectory-plugin-alias'/>
-    <Package name='fusiondirectory-plugin-argonaut'/>
-    <Package name='fusiondirectory-plugin-puppet'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='fusiondirectory-plugin-argonaut'/>
+        <Package name='fusiondirectory-plugin-puppet'/>
+    </Group>
     <Package name='fonts-dejavu-core'/>
-    <Package name='libapache2-mod-php7.0'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='libapache2-mod-php7.0'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='libapache2-mod-php7.2'/>
+    </Group>
     <Package name='libcrypt-rijndael-perl'/>
     <Package name='php-mbstring'/>
     <Package name='php-cas'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='phpsessionclean.timer'/>
+    </Group>
     <!-- ensure the old config is not enabled -->
     <Path name='/etc/apache2/conf-enabled/fusiondirectory.conf'/>
     <!-- install and enable web site -->

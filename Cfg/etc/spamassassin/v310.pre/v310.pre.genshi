@@ -28,10 +28,12 @@ execfile(repo+'/Python/30_networking.py')
 #
 #loadplugin Mail::SpamAssassin::Plugin::AntiVirus
 
+{% if 'ubuntu-xenial' in metadata.groups %}\
 # AWL - do auto-whitelist checks
 #
 loadplugin Mail::SpamAssassin::Plugin::AWL
 
+{% end %}\
 # AutoLearnThreshold - threshold-based discriminator for Bayes auto-learning
 #
 loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold

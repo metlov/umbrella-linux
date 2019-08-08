@@ -37,6 +37,15 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 <py:if test="vnc_in_gui_sessions and 'workstation' in metadata.groups">
     <Group name='vncserver'/>
 </py:if>
+<!-- www browser selection -->
+<py:if test="'gui' in metadata.groups">
+    <py:if test="'ubuntu-xenial' in metadata.groups">
+        <Group name='chromium-browser'/>
+    </py:if>
+    <py:if test="'ubuntu-xenial' not in metadata.groups">
+        <Group name='firefox-browser'/>
+    </py:if>
+</py:if>
 <py:if test="'ltsp' in metadata.groups">
     <!-- terminal server also has ossec enabled (if it is enabled -->
     <!-- globally, of course. -->
@@ -97,9 +106,17 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 <py:if test="'virt-lxc' not in metadata.groups and ('server' in metadata.groups or 'ltsp' in metadata.groups)">
     <Group name='watchdog'/>
 </py:if>
+<!-- mark virtual machines with full virtualizatio (not containers) -->
+<py:if test="'virt-lxc' not in metadata.groups and 'vm' in metadata.groups">
+    <Group name='vm-full'/>
+</py:if>
 <!-- enable network-fs caching on physical hosts -->
 <py:if test="'network-fs' in metadata.groups and 'physical' in metadata.groups and not 'vmhost' in metadata.groups">
     <Group name='cachefilesd'/>
+</py:if>
+<!-- mark physical servers -->
+<py:if test="'server' in metadata.groups and 'physical' in metadata.groups">
+    <Group name='physical-server'/>
 </py:if>
 <!-- Kerberos 5 authentication is everywhere except the DMZ.  -->
 <!-- But even then, once the access to the authentication is  -->
@@ -123,5 +140,14 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
             <Group name='ups-slave'/>
         </py:if>
     </py:if>
+</py:if>
+<py:if test="True">
+    <!-- Groups, corresponding to supported languages. -->
+    <!-- note that this merely builds the list of languages, which should be-->
+    <!-- supported. The actual support is done in the individual Bundles.   -->
+    <Group name='lang-en_US'/>  <!-- enabled by default in all installations-->
+    <Group name='lang-en'/>     <!-- generic language -->
+    <Group name='lang-${language}'/>  <!-- default locale from umbrella.xml -->
+    <Group name='lang-${language[:2]}'/> <!-- generic language -->
 </py:if>
 </GroupLogic>

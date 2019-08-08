@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------
 # Umbrella Linux skel management
 #
-#        (c) 2018 Konstantin L. Metlov <metlov@fti.dn.ua>
+#        (c) 2019 Konstantin L. Metlov <metlov@fti.dn.ua>
 #
 # This file is licensed to you on the terms of GNU General Public License
 # version 3. The full text of the licence is in the LICENSE file inside
@@ -48,14 +48,22 @@ upgrade_skel ()
     fi
     # here we shall perform the upgrades to the incremental skel versions one
     # by one
-    # if [ $SKEL_VERSION == "1" ]; then
-    #     # upgrade from version 1 to version 2
-    #
-    #     # if the upgrade is successful -- note that
-    #     SKEL_VERSION=2
-    #     echo "$SKEL_VERSION" > "$HOME/.initialized"
-    # fi
-    # if [ $SKEL_VERSION == "2" ]; then
+    if [ "$SKEL_VERSION" == "1" ]; then
+        # upgrade from version 1 to version 2
+        if [ ! -f "$HOME/.mozilla/firefox/installs.ini" -a \
+            -f "/var/lib/umbrella-skel/unpacked/.mozilla/firefox/installs.ini" -a \
+            ! -f "$HOME/.mozilla/firefox/profiles.ini" -a \
+            -f "/var/lib/umbrella-skel/unpacked/.mozilla/firefox/profiles.ini" \
+            ]; then
+            # do the upgrade and bump the version if it is successful
+            cp "/var/lib/umbrella-skel/unpacked/.mozilla/firefox/installs.ini" \
+               "$HOME/.mozilla/firefox/installs.ini" && \
+            cp "/var/lib/umbrella-skel/unpacked/.mozilla/firefox/profiles.ini" \
+               "$HOME/.mozilla/firefox/profiles.ini" && \
+            (SKEL_VERSION=2; echo "$SKEL_VERSION" > "$HOME/.initialized")
+        fi
+    fi
+    # if [ "$SKEL_VERSION" == "2" ]; then
     #     # upgrade from version 2 to version 3
     #
     #     # if the upgrade is successful -- note that

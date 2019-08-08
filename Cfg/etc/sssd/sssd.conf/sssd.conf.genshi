@@ -1,0 +1,37 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+[sssd]
+config_file_version = 2
+services = nss, pam, sudo
+domains = ${realm_name}
+
+[nss]
+#debug_level = 0xFFF0
+filter_users = root
+filter_groups = root
+
+[pam]
+
+[sudo]
+
+[domain/${realm_name}]
+#debug_level = 0xFFF0
+auth_provider = krb5
+krb5_server = kdc1.${domain_name}, kdc2.${domain_name}, 
+krb5_realm = ${realm_name}
+cache_credentials = true
+
+access_provider = permit
+chpass_provider = krb5
+
+id_provider = ldap
+enumerate = true
+ldap_uri = ldaps://ldap1.${domain_name}, ldaps://ldap2.${domain_name}
+ldap_search_base = ${ldap_root}
+ldap_schema = rfc2307
+
+sudo_provider = ldap
+ldap_sudo_search_base = ou=sudoers,${ldap_root}

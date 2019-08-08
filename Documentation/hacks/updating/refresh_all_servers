@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+source /etc/umbrella.conf
+
+
+if [[ ${BCFG2_GROUPS} != *" lxd-containers-host "* ]]; then
+    echo "The script must be run on an LXD container Umbrella Linux VM host."
+    exit 9
+fi
+
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run by the root user."
+   exit 9
+fi
+
+echo "Now this script will refresh bcfg2 status of all the core server VMs."
+for server in $SERVERS; do
+    echo "------------------------------------------------------------"
+    hname=${server%.$DOMAIN_NAME}
+    echo "root@${hname}:~# bcfg2 -qn"
+    if [[ "$server" == "$HOST_VMHOST" ]]; then
+        # run directly on VMhost
+        bcfg2 -qn
+    else
+
+        lxc exec $hname -- /bin/bash -c \
+            "bcfg2 -qn"
+    fi
+done
+
+echo "------------------------------------------------------------"
+echo "Status of all the VMs is successfully updated."
+echo "Please visit https://${HOST_MONITOR}/bcfg2 to check the results."
+echo "------------------------------------------------------------"

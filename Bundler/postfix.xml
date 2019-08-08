@@ -33,6 +33,7 @@
     </Group>
     <Group name='DMZsmtp'>
           <Package name='postfix-ldap'/>
+          <Package name='pflogsumm'/>
           <Path name='/etc/postfix/access'/>
           <Group name='auth-krb5'>
               <!-- only if LDAP access is enabled in DMZ -->

@@ -1,12 +1,65 @@
 <Bundle independent="true">
 <!-- KDE desktop environment  -->
 <Group name='ubuntu'>
-    <Package name='kubuntu-desktop'/>
+    <Group name='ubuntu-xenial'>
+        <!-- here we put the dependencies of kubuntu-desktop manually -->
+        <!-- except for xorg, which conflicts with -hwe-16.04 -->
+        <Package name='alsa-base'/>
+        <Package name='alsa-utils'/>
+        <Package name='anacron'/>
+        <Package name='ark'/>
+        <Package name='baloo-kf5'/>
+        <Package name='bc'/>
+        <Package name='breeze'/>
+        <Package name='ca-certificates'/>
+        <Package name='dolphin'/>
+        <Package name='fonts-dejavu-core'/>
+        <Package name='fonts-freefont-ttf'/>
+        <Package name='foomatic-db-compressed-ppds'/>
+        <Package name='genisoimage'/>
+        <Package name='ghostscript-x'/>
+        <Package name='inputattach'/>
+        <Package name='kde-cli-tools'/>
+        <Package name='kde-spectacle'/>
+        <Package name='khelpcenter'/>
+        <Package name='khotkeys'/>
+        <Package name='kinfocenter'/>
+        <Package name='kio'/>
+        <Package name='kio-extras'/>
+        <Package name='kmenuedit'/>
+        <Package name='ksysguard'/>
+        <Package name='kwin'/>
+        <Package name='kwrited'/>
+        <Package name='libsasl2-modules'/>
+        <Package name='memtest86+'/>
+        <Package name='okular'/>
+        <Package name='openprinting-ppds'/>
+        <Package name='oxygen-sounds'/>
+        <Package name='plasma-desktop'/>
+        <Package name='pm-utils'/>
+        <Package name='powerdevil'/>
+        <Package name='printer-driver-pnm2ppa'/>
+        <Package name='rfkill'/>
+        <Package name='sddm-theme-breeze'/>
+        <Package name='software-properties-kde'/>
+        <Package name='systemsettings'/>
+        <Package name='ubuntu-drivers-common'/>
+        <Package name='unzip'/>
+        <Package name='wireless-tools'/>
+        <Package name='wpasupplicant'/>
+        <Package name='xdg-user-dirs'/>
+        <Package name='xkb-data'/>
+        <Package name='zip'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='kubuntu-desktop'/>
+    </Group>
     <Package name='amarok'/>
     <Group name='ltsp' negate='true'>
         <Package name='bluedevil'/>
         <Package name='bluez'/>
         <Package name='bluez-cups'/>
+        <Service name='bluetooth'/>
     </Group>
     <Package name='cdrdao'/>
     <Package name='cryptsetup'/>
@@ -115,6 +168,9 @@
     <Package name='ttf-ancient-fonts-symbola'/>
     <Package name='ttf-ubuntu-font-family'/>
     <Package name='udisks2'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='udisks2'/>
+    </Group>
     <Package name='upower'/>
     <Package name='xdg-utils'/>
 

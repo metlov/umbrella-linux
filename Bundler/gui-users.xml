@@ -1,6 +1,9 @@
 <Bundle>
     <BoundPOSIXUser name="colord" home="/var/lib/colord" shell="/bin/false" gecos="colord colour management daemon,,," uid="638" group="colord"/>
-    <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="644" group="nogroup"/>
+    <Group name="ubuntu-xenial">
+        <!-- on bionic and higher it is part of the base-users.xml -->
+        <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="644" group="nogroup"/>
+    </Group>
     <BoundPOSIXUser name="festival" home="/home/festival" shell="/bin/false" gecos="" uid="641" group="audio"/>
     <BoundPOSIXUser name="hplip" home="/var/run/hplip" shell="/bin/false" gecos="HPLIP system user,,," uid="642" group="lp"/>
     <BoundPOSIXUser name="lightdm" home="/var/lib/lightdm" shell="/bin/false" gecos="Light Display Manager" uid="633" group="lightdm"/>

@@ -1,8 +1,10 @@
 <Rules priority="0">
-<Group name='ubuntu-xenial'>
+<Group name='ubuntu'>
     <Service name='accounts-daemon' status='ignore' type='systemd'/>
     <Service name='anacron-resume' status='ignore' type='systemd'/>
     <Service name='anacron' status='ignore' type='systemd'/>
+    <Service name='apport-autoreport.path' status='ignore' type='systemd'/>
+    <Service name='bluetooth' status='ignore' type='systemd'/>
     <Service name='cups' status='ignore' type='systemd'/>
     <Service name='cups.path' status='ignore' type='systemd'/>
     <Service name='cups.socket' status='ignore' type='systemd'/>
@@ -14,8 +16,12 @@
     <Service name='nbd-server' status='on' type='systemd'/>
     <Service name='ofono' status='ignore' type='systemd'/>
     <Service name='pppd-dns' status='ignore' type='systemd'/>
+    <Service name='schroot' status='ignore' type='systemd'/>
     <Service name='stunnel4' status='on' type='systemd'/>
+    <Service name='systemd-networkd-wait-online' status='ignore' type='systemd'/>
     <Service name='tftpd-hpa' status='on' type='systemd'/>
+    <Service name='wpa_supplicant' status='ignore' type='systemd'/>
+    <Service name='udisks2' status='ignore' type='systemd'/>
     <Group name='ltsp'>
         <!-- disable GPU manager on the terminal server, since -->
         <!-- its GPU is irrelevant for its operation (most of  -->

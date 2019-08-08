@@ -6,7 +6,7 @@ export PATH=$PATH:/usr/local/sbin:/usr/local/bin
 export LANG=en_US.UTF-8
 
 if grep -Fxqe "iface eth0 inet dhcp" /etc/network/interfaces; then
-  MAC=`ifconfig | grep eth0 | sed 's/  */#/g' | cut -d# -f 5`
+  MAC=`cat /sys/class/net/$(ip route show default | awk '/default/ {print $5}')/address`
   IP=`ldapsearch -x -LLL "(macAddress=${MAC})" ipHostNumber | grep ipHostNumber | sed -e 's/ipHostNumber: //g`
   if [ -n $IP ]; then
     MASK=`ifconfig | grep eth0 -A 1 | grep -v eth0 | sed 's/  */:/g' | cut -d: -f 8`

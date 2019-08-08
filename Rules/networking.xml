@@ -1,0 +1,16 @@
+<Rules priority="0">
+<Group name='ubuntu-xenial' negate='true'>
+  <!-- disable waiting for online services -->
+  <Path type='symlink' name='/etc/systemd/system/systemd-networkd-wait-online.service' to='/dev/null'/>
+  <!--  -->
+  <Action name='fix_networkd_dispatcher' timing='post' when='modified' shell='true' command="perl -pi -e &quot;s/STATE_IGN = \{'carrier', 'degraded', None\}/STATE_IGN = \{ None \}/g&quot; /usr/bin/networkd-dispatcher" status='ignore'/>
+  <Path type='directory' name='/etc/networkd-dispatcher/carrier.d' owner='root' group='root' mode='0755' prune='true'/>
+  <Path type='directory' name='/etc/networkd-dispatcher/degraded.d' owner='root' group='root' mode='0755' prune='true'/>
+  <Path type='directory' name='/etc/networkd-dispatcher/dormant.d' owner='root' group='root' mode='0755' prune='true'/>
+  <Path type='directory' name='/etc/networkd-dispatcher/no-carrier.d' owner='root' group='root' mode='0755' prune='true'/>
+  <Path type='directory' name='/etc/networkd-dispatcher/off.d' owner='root' group='root' mode='0755' prune='true'/>
+  <Path type='directory' name='/etc/networkd-dispatcher/routable.d' owner='root' group='root' mode='0755' prune='true'/>
+  <Path type='directory' name='/etc/netplan/' owner='root' group='root' mode='0755' prune='true'/>
+  <Action name='apply-netplan' timing='post' when='modified' shell='true' command='netplan apply' status='ignore'/>
+</Group>
+</Rules>

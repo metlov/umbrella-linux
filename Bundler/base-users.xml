@@ -1,26 +1,26 @@
 <Bundle>
+  <BoundPOSIXUser name="root" home="/root" shell="/bin/bash" gecos="root" uid="0" group="root"/>
+  <BoundPOSIXUser name="daemon" home="/usr/sbin" shell="/usr/sbin/nologin" gecos="daemon" uid="1" group="daemon"/>
+  <BoundPOSIXUser name="bin" home="/bin" shell="/usr/sbin/nologin" gecos="bin" uid="2" group="bin"/>
+  <BoundPOSIXUser name="sys" home="/dev" shell="/usr/sbin/nologin" gecos="sys" uid="3" group="sys"/>
   <BoundPOSIXUser name="sync" home="/bin" shell="/bin/sync" gecos="sync" uid="4" group="nogroup"/>
-  <BoundPOSIXUser name="gnats" home="/var/lib/gnats" shell="/usr/sbin/nologin" gecos="Gnats Bug-Reporting System (admin)" uid="41" group="gnats"/>
-  <BoundPOSIXUser name="uucp" home="/var/spool/uucp" shell="/usr/sbin/nologin" gecos="uucp" uid="10" group="uucp"/>
+  <BoundPOSIXUser name="games" home="/usr/games" shell="/usr/sbin/nologin" gecos="games" uid="5" group="games"/>
+  <BoundPOSIXUser name="man" home="/var/cache/man" shell="/usr/sbin/nologin" gecos="man" uid="6" group="man"/>
   <BoundPOSIXUser name="lp" home="/var/spool/lpd" shell="/usr/sbin/nologin" gecos="lp" uid="7" group="lp"/>
   <BoundPOSIXUser name="mail" home="/var/mail" shell="/usr/sbin/nologin" gecos="mail" uid="8" group="mail"/>
-  <BoundPOSIXUser name="irc" home="/var/run/ircd" shell="/usr/sbin/nologin" gecos="ircd" uid="39" group="irc"/>
-  <BoundPOSIXUser name="bin" home="/bin" shell="/usr/sbin/nologin" gecos="bin" uid="2" group="bin"/>
-  <BoundPOSIXUser name="nobody" home="/nonexistent" shell="/usr/sbin/nologin" gecos="nobody" uid="65534" group="nogroup"/>
-  <BoundPOSIXUser name="daemon" home="/usr/sbin" shell="/usr/sbin/nologin" gecos="daemon" uid="1" group="daemon"/>
-  <BoundPOSIXUser name="sys" home="/dev" shell="/usr/sbin/nologin" gecos="sys" uid="3" group="sys"/>
-  <BoundPOSIXUser name="proxy" home="/bin" shell="/usr/sbin/nologin" gecos="proxy" uid="13" group="proxy"/>
   <BoundPOSIXUser name="news" home="/var/spool/news" shell="/usr/sbin/nologin" gecos="news" uid="9" group="news"/>
-  <BoundPOSIXUser name="man" home="/var/cache/man" shell="/usr/sbin/nologin" gecos="man" uid="6" group="man"/>
-  <BoundPOSIXUser name="root" home="/root" shell="/bin/bash" gecos="root" uid="0" group="root"/>
-  <BoundPOSIXUser name="list" home="/var/list" shell="/usr/sbin/nologin" gecos="Mailing List Manager" uid="38" group="list"/>
-  <BoundPOSIXUser name="games" home="/usr/games" shell="/usr/sbin/nologin" gecos="games" uid="5" group="games"/>
+  <BoundPOSIXUser name="uucp" home="/var/spool/uucp" shell="/usr/sbin/nologin" gecos="uucp" uid="10" group="uucp"/>
+  <BoundPOSIXUser name="proxy" home="/bin" shell="/usr/sbin/nologin" gecos="proxy" uid="13" group="proxy"/>
   <BoundPOSIXUser name="www-data" home="/var/www" shell="/usr/sbin/nologin" gecos="www-data" uid="33" group="www-data"/>
   <BoundPOSIXUser name="backup" home="/var/backups" shell="/usr/sbin/nologin" gecos="backup" uid="34" group="backup"/>
+  <BoundPOSIXUser name="list" home="/var/list" shell="/usr/sbin/nologin" gecos="Mailing List Manager" uid="38" group="list"/>
+  <BoundPOSIXUser name="irc" home="/var/run/ircd" shell="/usr/sbin/nologin" gecos="ircd" uid="39" group="irc"/>
+  <BoundPOSIXUser name="gnats" home="/var/lib/gnats" shell="/usr/sbin/nologin" gecos="Gnats Bug-Reporting System (admin)" uid="41" group="gnats"/>
+  <BoundPOSIXUser name="nobody" home="/nonexistent" shell="/usr/sbin/nologin" gecos="nobody" uid="65534" group="nogroup"/>
   <Group name="ubuntu-xenial">
     <BoundPOSIXUser name="uuidd" home="/run/uuidd" shell="/bin/false" gecos="" uid="617" group="uuidd"/>
     <BoundPOSIXUser name="syslog" home="/home/syslog" shell="/bin/false" gecos="" uid="104" group="syslog">
-    <MemberOf group="adm"/>
+        <MemberOf group="adm"/>
     </BoundPOSIXUser>
     <BoundPOSIXUser name="systemd-timesync" home="/run/systemd" shell="/bin/false" gecos="systemd Time Synchronization,,," uid="100" group="systemd-timesync"/>
     <BoundPOSIXUser name="systemd-network" home="/run/systemd/netif" shell="/bin/false" gecos="systemd Network Management,,," uid="101" group="systemd-network"/>
@@ -30,63 +30,89 @@
     <BoundPOSIXUser name="messagebus" home="/var/run/dbus" shell="/bin/false" gecos="" uid="106" group="messagebus"/>
     <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="107" group="nogroup"/>
   </Group>
-  <BoundPOSIXGroup name="tty" gid="5"/>
-  <BoundPOSIXGroup name="backup" gid="34"/>
-  <BoundPOSIXGroup name="plugdev" gid="46"/>
-  <BoundPOSIXGroup name="sudo" gid="27"/>
-  <Group name="ubuntu-xenial">
-    <BoundPOSIXGroup name="crontab" gid="107"/>
-    <BoundPOSIXGroup name="syslog" gid="108"/>
-    <BoundPOSIXGroup name="netdev" gid="109"/>
+  <Group name="ubuntu-xenial" negate="true">
+    <BoundPOSIXUser name="systemd-network" home="/run/systemd/netif" shell="/usr/sbin/nologin" gecos="systemd Network Management,,," uid="100" group="systemd-network"/>
+    <BoundPOSIXUser name="systemd-resolve" home="/run/systemd/resolve" shell="/usr/sbin/nologin" gecos="systemd Resolver,,," uid="101" group="systemd-resolve"/>
+    <BoundPOSIXUser name="syslog" home="/home/syslog" shell="/usr/sbin/nologin" gecos="" uid="102" group="syslog">
+        <MemberOf group="adm"/>
+    </BoundPOSIXUser>
+    <BoundPOSIXUser name="messagebus" home="/nonexistent" shell="/usr/sbin/nologin" gecos="" uid="103" group="messagebus"/>
+    <BoundPOSIXUser name="_apt" home="/nonexistent" shell="/usr/sbin/nologin" gecos="" uid="104" group="nogroup"/>
+    <!-- The users below change their numbers between the minimal and server -->
+    <!-- version (due to LXD being installed) on server. The variant of the  -->
+    <!-- UIDs from minimal CD is used below (/etc/passwd needs to be fixed if-->
+    <!-- installing on top of the server version. -->
+    <BoundPOSIXUser name="uuidd" home="/run/uuidd" shell="/usr/sbin/nologin" gecos="" uid="617" group="uuidd"/>
+    <BoundPOSIXUser name="sshd" home="/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="106" group="nogroup"/>
   </Group>
-  <BoundPOSIXGroup name="video" gid="44"/>
-  <BoundPOSIXGroup name="irc" gid="39"/>
-  <BoundPOSIXGroup name="operator" gid="37"/>
-  <BoundPOSIXGroup name="gnats" gid="41"/>
+  <BoundPOSIXGroup name="root" gid="0"/>
+  <BoundPOSIXGroup name="daemon" gid="1"/>
+  <BoundPOSIXGroup name="bin" gid="2"/>
+  <BoundPOSIXGroup name="sys" gid="3"/>
+  <BoundPOSIXGroup name="adm" gid="4"/>
+  <BoundPOSIXGroup name="tty" gid="5"/>
   <BoundPOSIXGroup name="disk" gid="6"/>
-  <BoundPOSIXGroup name="staff" gid="50"/>
-  <BoundPOSIXGroup name="uucp" gid="10"/>
-  <BoundPOSIXGroup name="utmp" gid="43"/>
-  <BoundPOSIXGroup name="tape" gid="26"/>
   <BoundPOSIXGroup name="lp" gid="7"/>
   <BoundPOSIXGroup name="mail" gid="8"/>
-  <BoundPOSIXGroup name="adm" gid="4"/>
-  <BoundPOSIXGroup name="bin" gid="2"/>
-  <BoundPOSIXGroup name="fax" gid="21"/>
-  <BoundPOSIXGroup name="users" gid="100"/>
-  <BoundPOSIXGroup name="floppy" gid="25"/>
-  <BoundPOSIXGroup name="kmem" gid="15"/>
-  <BoundPOSIXGroup name="sys" gid="3"/>
-  <BoundPOSIXGroup name="dialout" gid="20"/>
-  <BoundPOSIXGroup name="cdrom" gid="24"/>
   <BoundPOSIXGroup name="news" gid="9"/>
-  <BoundPOSIXGroup name="shadow" gid="42"/>
+  <BoundPOSIXGroup name="uucp" gid="10"/>
   <BoundPOSIXGroup name="man" gid="12"/>
-  <BoundPOSIXGroup name="src" gid="40"/>
-  <BoundPOSIXGroup name="daemon" gid="1"/>
-  <BoundPOSIXGroup name="voice" gid="22"/>
-  <BoundPOSIXGroup name="nogroup" gid="65534"/>
-  <BoundPOSIXGroup name="dip" gid="30"/>
-  <BoundPOSIXGroup name="list" gid="38"/>
-  <Group name="ubuntu-xenial">
-    <BoundPOSIXGroup name="input" gid="106"/>
-    <BoundPOSIXGroup name="messagebus" gid="110"/>
-    <BoundPOSIXGroup name="ssh" gid="111"/>
-    <BoundPOSIXGroup name="ssl-cert" gid="616"/>
-    <BoundPOSIXGroup name="uuidd" gid="617"/>
-  </Group>
-  <BoundPOSIXGroup name="games" gid="60"/>
-  <BoundPOSIXGroup name="www-data" gid="33"/>
-  <BoundPOSIXGroup name="sasl" gid="45"/>
-  <BoundPOSIXGroup name="audio" gid="29"/>
-  <BoundPOSIXGroup name="root" gid="0"/>
   <BoundPOSIXGroup name="proxy" gid="13"/>
+  <BoundPOSIXGroup name="kmem" gid="15"/>
+  <BoundPOSIXGroup name="dialout" gid="20"/>
+  <BoundPOSIXGroup name="fax" gid="21"/>
+  <BoundPOSIXGroup name="voice" gid="22"/>
+  <BoundPOSIXGroup name="cdrom" gid="24"/>
+  <BoundPOSIXGroup name="floppy" gid="25"/>
+  <BoundPOSIXGroup name="tape" gid="26"/>
+  <BoundPOSIXGroup name="sudo" gid="27"/>
+  <BoundPOSIXGroup name="audio" gid="29"/>
+  <BoundPOSIXGroup name="dip" gid="30"/>
+  <BoundPOSIXGroup name="www-data" gid="33"/>
+  <BoundPOSIXGroup name="backup" gid="34"/>
+  <BoundPOSIXGroup name="operator" gid="37"/>
+  <BoundPOSIXGroup name="list" gid="38"/>
+  <BoundPOSIXGroup name="irc" gid="39"/>
+  <BoundPOSIXGroup name="src" gid="40"/>
+  <BoundPOSIXGroup name="gnats" gid="41"/>
+  <BoundPOSIXGroup name="shadow" gid="42"/>
+  <BoundPOSIXGroup name="utmp" gid="43"/>
+  <BoundPOSIXGroup name="video" gid="44"/>
+  <BoundPOSIXGroup name="sasl" gid="45"/>
+  <BoundPOSIXGroup name="plugdev" gid="46"/>
+  <BoundPOSIXGroup name="staff" gid="50"/>
+  <BoundPOSIXGroup name="games" gid="60"/>
+  <BoundPOSIXGroup name="users" gid="100"/>
+  <BoundPOSIXGroup name="nogroup" gid="65534"/>
   <Group name="ubuntu-xenial">
     <BoundPOSIXGroup name="systemd-journal" gid="101"/>
     <BoundPOSIXGroup name="systemd-timesync" gid="102"/>
     <BoundPOSIXGroup name="systemd-network" gid="103"/>
     <BoundPOSIXGroup name="systemd-resolve" gid="104"/>
     <BoundPOSIXGroup name="systemd-bus-proxy" gid="105"/>
+    <BoundPOSIXGroup name="input" gid="106"/>
+    <BoundPOSIXGroup name="crontab" gid="107"/>
+    <BoundPOSIXGroup name="syslog" gid="108"/>
+    <BoundPOSIXGroup name="netdev" gid="109"/>
+    <BoundPOSIXGroup name="messagebus" gid="110"/>
+    <BoundPOSIXGroup name="ssh" gid="111"/>
+    <BoundPOSIXGroup name="ssl-cert" gid="616"/>
+    <BoundPOSIXGroup name="uuidd" gid="617"/>
+  </Group>
+  <Group name="ubuntu-xenial" negate="true">
+    <BoundPOSIXGroup name="systemd-journal" gid="101"/>
+    <BoundPOSIXGroup name="systemd-network" gid="102"/>
+    <BoundPOSIXGroup name="systemd-resolve" gid="103"/>
+    <BoundPOSIXGroup name="input" gid="104"/>
+    <BoundPOSIXGroup name="crontab" gid="105"/>
+    <BoundPOSIXGroup name="syslog" gid="106"/>
+    <BoundPOSIXGroup name="messagebus" gid="107"/>
+    <!-- in ubuntu server installs it is necessary to delete lxd mlocate and -->
+    <!-- reassign the gid of uuidd -->
+    <BoundPOSIXGroup name="ssh" gid="110"/>
+    <BoundPOSIXGroup name="ssl-cert" gid="616"/>
+    <BoundPOSIXGroup name="uuidd" gid="617"/>
+    <BoundPOSIXGroup name="netdev" gid="670"/>
   </Group>
 </Bundle>
 

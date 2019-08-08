@@ -46,7 +46,8 @@ TC_DEBMIRROR_URL="http://ftp.debian.org/debian"
 #TC_DISTRO_CODENAME="wheezy"
 # or use older Debian squeeze...
 #TC_DISTRO_CODENAME="squeeze"
-TC_DISTRO_CODENAME="stretch"
+TC_DISTRO_CODENAME="buster"
+TC_ARCH="i386"
 
 # Retrieve X2Go packages from this URL
 ### FIXME: once we release this project, we have to remove the heuler area from the deburl below!!!! ###

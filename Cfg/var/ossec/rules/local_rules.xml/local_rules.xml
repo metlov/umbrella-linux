@@ -11,42 +11,6 @@
   </rule>
 </group> <!-- SYSLOG, SSHD -->
 
-<!-- Backport the commit da43bbdd5862465624bd9648a0ea13fcea1ae16b -->
-<!-- to the current stable ossec-hids 2.8.3-4                     -->
-<!-- should be removed in the next stable version of OSSEC        -->
-<group name="syslog,sshd,">
-  <rule id="5758" level="8">
-    <decoded_as>sshd</decoded_as>
-    <match>^error: maximum authentication attempts exceeded </match>
-    <description>Maximum authentication attempts exceeded.</description>
-    <group>authentication_failed,</group>
-  </rule>
-</group> <!-- SYSLOG, SSHD -->
-
-<!-- Backport the commit 43a9a279ac103001aedb49e7ed1d19b5ca646740 -->
-<!-- to the current stable ossec-hids 2.8.3-4                     -->
-<!-- should be removed in the next stable version of OSSEC        -->
-<group name="syslog,sshd,">
-  <rule id="5750" level="0">
-    <decoded_as>sshd</decoded_as>
-    <if_sid>5700</if_sid>
-    <match>Unable to negotiate with </match>
-    <description>sshd could not negotiate with client.</description>
-  </rule>
-
-  <rule id="5752" level="0">
-    <if_sid>5750</if_sid>
-    <match>no matching key exchange method found.</match>
-    <description>Client did not offer an acceptable key exchange method.</description>
-  </rule>
-
-  <rule id="5753" level="2">
-    <if_sid>5750</if_sid>
-    <match>no matching cipher found.</match>
-    <description>sshd could not negotiate with client, no matching cipher.</description>
-  </rule>
-</group> <!-- SYSLOG, SSHD -->
-
 <!-- Suppress E-mail alerts on certain rules. -->
 
 <!-- Those, related to brute-force SSH attacks. Note that active response -->

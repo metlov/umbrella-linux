@@ -42,13 +42,6 @@ if [[ $$response =~ ^(yes|y)$$ ]]; then
     install_FD_schema service-fd
     install_FD_schema systems-fd
     install_FD_schema systems-fd-conf
-    # dhcp
-    install_FD_schema dhcp-fd
-    install_FD_schema dhcp-fd-conf
-    # dns
-    install_FD_schema dnszone
-    install_FD_schema dns-fd
-    install_FD_schema dns-fd-conf
     # sudo
     install_FD_schema sudo
     install_FD_schema sudo-fd-conf
@@ -58,11 +51,20 @@ if [[ $$response =~ ^(yes|y)$$ ]]; then
     # alias
     install_FD_schema alias-fd
     install_FD_schema alias-fd-conf
+{% if 'ubuntu-xenial' in metadata.groups %}\
+    # dhcp
+    install_FD_schema dhcp-fd
+    install_FD_schema dhcp-fd-conf
+    # dns
+    install_FD_schema dnszone
+    install_FD_schema dns-fd
+    install_FD_schema dns-fd-conf
     # argonaut
     install_FD_schema argonaut-fd
-    # puppet (used in Umbrella to assign bcfg2 profiles to systems individually)
+    # puppet
     install_FD_schema puppet-fd
     install_FD_schema puppet
+{% end %}\
 
     # create the databases
     slapadd -F /etc/ldap/slapd.d -n 0 -l /etc/ldap/umbrella/initial-databases.ldif

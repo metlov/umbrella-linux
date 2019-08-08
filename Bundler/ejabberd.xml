@@ -9,6 +9,12 @@
     <Path name='/etc/default/ejabberd-gssapi' altsrc='/etc/default/ejabberd'/>
     <Path name='/etc/ejabberd/ejabberd.yml'/>
     <Path name='/etc/apparmor.d/local/usr.sbin.ejabberdctl'/>
+    <Group name='ubuntu-xenial'>
+        <!-- gsasl_drv wants to be mmaped now, its apparmor profile will -->
+        <!-- be fixed in the next version of ejabberd package, which will-->
+        <!-- make the next hotfix unnecessary (as it is on bionic).      -->
+        <Path name='/etc/apparmor.d/usr.sbin.ejabberdctl'/>
+    </Group>
     <Package name='fonts-dejavu-core'/>
     <Service name='ejabberd-gssapi'/>
     <Path name='/etc/ssl/ejabberd.pem'/>

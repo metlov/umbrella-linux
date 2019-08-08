@@ -1,0 +1,4 @@
+# add multiverse
+deb http://archive.ubuntu.com/ubuntu bionic multiverse
+deb http://archive.ubuntu.com/ubuntu bionic-updates multiverse
+deb http://security.ubuntu.com/ubuntu bionic-security multiverse

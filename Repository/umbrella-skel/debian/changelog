@@ -1,3 +1,9 @@
+umbrella-skel (0.4) unstable; urgency=low
+
+  * Set default firefox profile.
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Mon, 29 Jul 2019 14:34:30 +0300
+
 umbrella-skel (0.3) unstable; urgency=low
 
   * Use XMPP server address from /etc/umbrella.conf .

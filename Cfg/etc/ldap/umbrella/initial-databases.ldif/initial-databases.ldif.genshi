@@ -81,7 +81,6 @@ olcDbIndex: objectClass pres,eq
 olcDbIndex: uidNumber,gidNumber,memberuid eq
 olcDbIndex: roleOccupant eq
 olcDbIndex: gosaObject,gosaUser pres,eq
-olcDbIndex: zoneName eq,sub
 olcDbIndex: sudoUser eq,sub
 olcDbIndex: gosaMailDeliveryMode sub
 olcDbIndex: ipHostNumber eq
@@ -89,9 +88,18 @@ olcDbIndex: uniqueMember eq
 olcDbIndex: entryUUID eq
 olcDbIndex: entryCSN eq
 olcDbIndex: displayName pres,eq,sub
+{% if 'ubuntu-xenial' in metadata.groups %}\
+olcDbIndex: zoneName eq,sub
 olcDbIndex: dhcpHWAddress eq
 olcDbIndex: dhcpClassData eq
 olcDbIndex: relativeDomainName eq
+{% end %}\
+{% if 'ubuntu-xenial' not in metadata.groups %}\
+olcDbIndex: sudoHost eq,sub
+olcDbIndex: modifyTimestamp eq
+olcDbIndex: ipServicePort eq
+olcDbIndex: ipServiceProtocol eq
+{% end %}\
 olcDbMode: 0600
 olcDbSearchStack: 16
 olcDbShmKey: 0

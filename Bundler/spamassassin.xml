@@ -26,6 +26,10 @@
     <Path name='/etc/spamassassin/v310.pre'/>
     <Path name='/etc/spamassassin/v312.pre'/>
     <Path name='/etc/spamassassin/v320.pre'/>
+    <Path name='/etc/spamassassin/v330.pre'/>
+    <Path name='/etc/spamassassin/v340.pre'/>
+    <Path name='/etc/spamassassin/v341.pre'/>
+    <Path name='/etc/spamassassin/v342.pre'/>
 
 <!--    <Path name='/etc/cron.daily/learnSPAM'/> -->
 

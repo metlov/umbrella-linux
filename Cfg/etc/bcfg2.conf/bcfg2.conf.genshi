@@ -4,7 +4,7 @@ execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 %}\
 [client]
-drivers=APT,POSIXUsers,VCS,Action,POSIX,Systemd
+drivers=POSIXUsers,APT,VCS,Action,POSIX,Systemd
 
 [POSIXUsers]
 uid_blacklist=1000-

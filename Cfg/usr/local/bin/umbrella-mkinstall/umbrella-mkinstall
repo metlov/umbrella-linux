@@ -2,7 +2,7 @@
 cat 1>&2 << EOF
 Welcome to the Umbrella Linux installer generator !
 
-                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
+                         (c) 2016-2019 Konstantin L. Metlov <metlov@donfti.ru>
                          as well as others (listed in the AUTHORS file)
                          Umbrella Linux (including this installer) is avaiable
                          under the terms of GNU General Public License v3 or
@@ -13,13 +13,18 @@ EOF
 
 # installation preparation script goes here
 source /etc/umbrella.conf
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 -o "$1" = "--help" ]; then
     cat 1>&2 <<EOF
-This script generates an installation script for a specified roaming workstation
-to convert a fresh Ubuntu Linux install into a fully-configured Umbrella Linux.
+This script generates an installation script to convert a fresh Lubuntu instal
+into a fully-configured roaming workstation. The roaming workstation is a full
+member of this Umbrella Linux domain with its configuration managed by bcfg2.
+It can connect to the domain both internally (via LAN) and externally (via
+Internet, protected by VPN) as well as work in offline mode. Its users are
+centrally managed. The first login of the user must be done in online mode.
 
 Usage:
     $0 workstation_name >install_script
+
 where workstation_name should be specified without the domain part (primary
 Umbrella Linux domain is assumed). The installation script is dumped to stdout.
 Do not forget to chmod+x the script.
@@ -50,13 +55,23 @@ if ! grep -q "profile=\"roamingworkstation\".*name=\"$TARGET_FQDN\"" \
    /var/lib/bcfg2/Metadata/clients.xml; then
 cat 1>&2 <<EOF
 $TARGET must be registered in /var/lib/bcfg2/Metadata/clients.xml
-with a roamingworkstation profile. This can be done by
-1) registering it at https://gosa.${DOMAIN_NAME}/ as an ordinary
-   workstation (specifying its MAC and allocating an IP address on LAN
-   for it).
-2) waiting until the /var/lib/bcfg2/Metadata/clients.xml is updated.
-3) changing the line for the newly registered workstation into
-<Client profile="roamingworkstation" name="$TARGET_FQDN" uuid="$TARGET_FQDN" floating="true" auth="cert" version="1.4.0pre2"/>
+with a roamingworkstation profile. This can be done by running a
+command as root on config like this
+
+umbrella-addworkstation '/Central Office/$TARGET' 08:00:27:83:0b:de \
+                        -l roaming -d putin@umbrella-inc.ru
+
+where the first argument specifies the workstation name and locaton in the
+organization tree (defined by the organization.xml) and the second argument
+is the MAC address of its interface. It is important that location (specified
+by -l) is set to "roaming", which will ensure that the proper profile is
+assigned.
+
+The registration can also be done via https://gosa.$DOMAIN_NAME/ .
+Location must be set to "roaming" there as well.
+
+After the registration please wait about 5 minutes until
+/var/lib/bcfg2/Metadata/clients.xml file is updated.
 EOF
     exit 9
 fi
@@ -64,12 +79,8 @@ fi
 # this function fetches the specified file from host configuration to stdout
 # for example "fetch_file /etc/hosts"
 function fetch_file {
-  script -q -c \
-    'bcfg2-info -Q /var/lib/bcfg2 -C /etc/bcfg2-server.conf 2>/dev/null' /dev/null <<EOC |
-buildfile $1 ${TARGET_FQDN}
-quit
-EOC
-  sed -e '1,5 d' | sed -e '$ d' | xmllint --xpath '/Path/text()' -
+    bcfg2-info -Q /var/lib/bcfg2 -C /etc/bcfg2-server.conf buildfile $1 ${TARGET_FQDN} 2>/dev/null | \
+        xmllint --xpath '/Path/text()' -
 }
 
 function escape_for_sed {
@@ -106,7 +117,7 @@ exit 0
 cat <<EOF
 Welcome to the Umbrella Linux installer !
 
-                         (c) 2016-2018 Konstantin L. Metlov <metlov@donfti.ru>
+                         (c) 2016-2019 Konstantin L. Metlov <metlov@donfti.ru>
                          as well as others (listed in the AUTHORS file)
                          Umbrella Linux (including this installer) is avaiable
                          under the terms of GNU General Public License v3 or
@@ -119,11 +130,6 @@ Please note, that user accounts will not be migrated. After the install you
 will be able to log in under your corporate account and your home directory
 on this computer will be created anew.
 
-Also, it is strongly advised not to configure the home directory encryption.
-It simply can not work very well in Kerberos environment, where you can change
-your password on a different computer (leaving your home directory key
-passphrase out of sync). Use the whole disk encryption instead !
-
 EOF
 
 echo -n "Checking that the script is run by the root user..."
@@ -132,6 +138,31 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 echo "ok"
+
+# check the distribution version
+source /etc/lsb-release
+echo -n "Checking the distribution version..."
+if [ "$DISTRIB_CODENAME" != "xenial" -a "$DISTRIB_CODENAME" != "bionic" ]; then
+   echo "fail"
+   exit 1
+fi
+echo "ok"
+
+# some distribution-dependent parameters
+if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+  GID_messagebus=110
+  GID_ssh=111
+  UID_messagebus=106
+  UID_ssh=107
+  NETCONFFILE=/etc/network/interfaces
+else
+  # on bionic and, hopefully, up
+  GID_messagebus=107
+  GID_ssh=110
+  UID_messagebus=103
+  UID_ssh=106
+  NETCONFFILE=/etc/netplan/01-netcfg.yaml
+fi
 
 echo -n "Update the system to the MAX..."
 (
@@ -213,7 +244,15 @@ echo -n "Connecting to [ORG_DESCRIPTION] ..."
 (
     set -e
     set -o xtrace
+if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+    # xenial
     openvpn --daemon openvpn --config /etc/openvpn/office.conf
+    # xenial
+else
+    # not xenial
+    systemctl start openvpn@office
+    # not xenial
+fi
     sleep 10
     ping -q -c5 [VPN_HOST] > /dev/null
 ) 2>&1 | cat >./umbrella-install.log
@@ -228,12 +267,12 @@ echo -n "Normalizing uid/gid ..."
 (
     set -e
     set -o xtrace
-    apt-get purge --assume-yes lxd lxd-client uuid-runtime mlocate
+    apt-get purge --assume-yes lxd lxd-client uuid-runtime mlocate landscape-common
     deluser uuidd || true
     delgroup mlocate || true
     deluser lxd || true
     delgroup lxd || true
-    groupmod -g 111 ssh
+    groupmod -g $GID_ssh ssh
     chgrp ssh /usr/bin/ssh-agent
     chmod g+s /usr/bin/ssh-agent
     apt-get purge -y lightdm colord
@@ -247,6 +286,8 @@ echo -n "Normalizing uid/gid ..."
     sleep 5
     killall -9 -u lightdm | true
     killall -9 -u colord  | true
+    deluser lightdm || true
+    delgroup lightdm || true
 ) 2>&1 | cat >./umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -263,23 +304,27 @@ echo -n "Configuring the system ..."
     cat >/etc/bcfg2.conf <<EOF
 [BCFG2_CONF]
 EOF
-    bcfg2 -Qv -b apt-sources
+    bcfg2 -Qqv -b apt-sources
     apt-get update
     apt-get purge -y ntp || true
-    bcfg2 -D POSIXUsers -Qv -b ntp
-    bcfg2 -Qv -b ntp
-    bcfg2 -D POSIXUsers -Qv -b base-users:base
-    bcfg2 -Qv -b base-users:base
-    bcfg2 -Qv -b ldap-auth
-    env SUDO_FORCE_REMOVE=yes bcfg2 -Qv -b login
-    bcfg2 -Qv -b ssh
+    bcfg2 -D POSIXUsers -Qqv -b ntp
+    bcfg2 -Qqv -b ntp
+    bcfg2 -D POSIXUsers -Qqv -b base-users:base:networking
+    bcfg2 -Qqv -b base-users:base:networking
+    bcfg2 -Qqv -b ldap-auth
+    env SUDO_FORCE_REMOVE=yes bcfg2 -Qqv -b login
+    bcfg2 -Qqv -b ssh
     bcfg2 -D POSIXUsers -qv
-    bcfg2 -qvk -r Packages
-    bcfg2 -qvk -r Packages
+    bcfg2 -qvk -r packages
+    bcfg2 -qvk -r packages
     # delete leftover group
     delgroup sambashare || true
-    # sync the user/group lists
-    /etc/cron.hourly/nssupdate
+    if [ "$DISTRIB_CODENAME" = "xenial" ]; then
+      # xenial
+      # sync the user/group lists
+      /etc/cron.hourly/nssupdate
+      # xenial
+    fi
 ) 2>&1 | cat >./umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok

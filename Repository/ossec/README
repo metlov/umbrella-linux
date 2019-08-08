@@ -1,0 +1,66 @@
+The compilation requires pbuilder with .pbuilderrc (the example is
+given at the end of this file).
+
+First, it is necessary to create two chroots with the commands:
+$ sudo DIST=bionic ARCH=amd64 pbuilder create
+$ sudo DIST=bionic ARCH=i386 pbuilder create
+
+Then, the OSSEC deb packages can be built by running
+$ ./generate_ossec.sh -u
+$ ./generate_ossec.sh -d
+$ ./generate_ossec.sh -b
+
+The packages will be at ossec-hids/*.deb and ossec-hids-agent/*.deb .
+
+You may want to remove the temporary directories after building by
+$ sudo chown -R `id -un`:`id -ng` ossec-hids/ ossec-hids-agent/
+$ rm -rf ossec-hids/ ossec-hids-agent/
+
+------------ .pbuilderrc
+set -e
+
+if [ "$DIST" == "bionic" ]; then
+    OS="ubuntu"
+fi
+
+if [ "$OS" == "debian" ]; then
+    MIRRORSITE="http://ftp.ru.debian.org/debian/"
+    COMPONENTS="main contrib non-free"
+    DEBOOTSTRAPOPTS=("${DEBOOTSTRAPOPTS[@]}"
+        "--keyring=/usr/share/keyrings/debian-archive-keyring.gpg")
+    : ${DIST:="wheezy"}
+    : ${ARCH:="amd64"}
+    if [ "$DIST" == "wheezy" ]; then
+        #EXTRAPACKAGES="$EXTRAPACKAGES debian-backports-keyring"
+        OTHERMIRROR="$OTHERMIRROR | deb $MIRRORSITE wheezy-backports $COMPONENTS"
+    fi
+elif [ "$OS" == "ubuntu" ]; then
+    MIRRORSITE="http://no.archive.ubuntu.com/ubuntu/"
+    COMPONENTS="main restricted universe multiverse"
+    DEBOOTSTRAPOPTS=("${DEBOOTSTRAPOPTS[@]}"
+        "--keyring=/usr/share/keyrings/ubuntu-archive-keyring.gpg")
+else
+    echo "Unknown OS: $OS"
+    exit 1
+fi
+
+if [ "$DIST" == "" ]; then
+    echo "DIST is not set"
+    exit 1
+fi
+
+if [ "$ARCH" == "" ]; then
+    echo "ARCH is not set"
+    exit 1
+fi
+
+NAME="$DIST-$ARCH"
+
+DEBOOTSTRAPOPTS=("${DEBOOTSTRAPOPTS[@]}" "--arch=$ARCH")
+BASETGZ="/var/cache/pbuilder/$NAME-base.tgz"
+DISTRIBUTION="$DIST"
+BUILDRESULT="/var/cache/pbuilder/$NAME/result/"
+APTCACHE="/var/cache/pbuilder/$NAME/aptcache/"
+BUILDPLACE="/var/cache/pbuilder/build"
+HOOKDIR="/var/cache/pbuilder/hook.d/"
+------------ CUT

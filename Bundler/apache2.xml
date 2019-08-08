@@ -20,11 +20,19 @@
         <Package name='php-mysql'/>
         <Package name='php-readline'/>
         <Package name='php-mbstring'/>
-        <Package name='libapache2-mod-php7.0'/>
+        <Group name='ubuntu-xenial'>
+            <Package name='libapache2-mod-php7.0'/>
+        </Group>
+        <Group name='ubuntu-xenial' negate='true'>
+            <Package name='libapache2-mod-php7.2'/>
+        </Group>
         <Package name='subversion'/>
         <Path name='/etc/php/7.0/apache2/conf.d/99-upload-filesize.ini'/>
         <Package name='fonts-dejavu-core'/>
         <Path name='/etc/apache2/mods-enabled/rewrite.load'/>
+        <Group name='ubuntu-xenial' negate='true'>
+            <Service name='phpsessionclean.timer'/>
+        </Group>
     </Group>
 </Group>
 <!-- process local configuration -->

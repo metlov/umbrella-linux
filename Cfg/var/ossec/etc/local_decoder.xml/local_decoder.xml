@@ -8,33 +8,6 @@
   <order>srcip, srcport</order>
 </decoder>
 
-<!-- Backport the commit da43bbdd5862465624bd9648a0ea13fcea1ae16b -->
-<!-- to the current stable ossec-hids 2.8.3-4                     -->
-<!-- should be removed in the next stable version of OSSEC        -->
-<decoder name="ssh-exceed">
-  <parent>sshd</parent>
-  <prematch> exceeded for </prematch>
-  <regex offset="after_prematch">^(\S+) from (\S+) port (\d+) </regex>
-  <order>user, srcip, srcport</order>
-</decoder>
-
-<!-- Backport the commit 43a9a279ac103001aedb49e7ed1d19b5ca646740 -->
-<!-- to the current stable ossec-hids 2.8.3-4                     -->
-<!-- should be removed in the next stable version of OSSEC        -->
-<decoder name="sshd-negotiate">
-  <parent>sshd</parent>
-  <prematch offset="after_parent">fatal: Unable to negotiate with </prematch>
-  <regex offset="after_prematch">^(\S+) port (\d+): |^(\S+): </regex>
-  <order>srcip, srcport</order>
-</decoder>
-
-<decoder name="sshd-pam-host-user">
-  <parent>sshd</parent>
-  <prematch>rhost=\S+\s+user=\S+</prematch>
-  <regex>rhost=(\S+)\s+user=(\S+)</regex>
-  <order>srcip, user</order>
-</decoder>
-
 <!-- decode (to be able to ignore) the colord messages -->
 <decoder name="colord">
   <program_name>^colord</program_name>

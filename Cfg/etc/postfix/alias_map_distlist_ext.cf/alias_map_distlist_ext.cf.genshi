@@ -5,7 +5,9 @@ execfile(repo+'/Python/10_funchosts.py')
 %}\
 server_host = ${' '.join(ldap_URIs)}
 search_base = ${ldap_root}
+{% if 'ubuntu-xenial' in metadata.groups %}\
 search_timeout = 30
+{% end %}\
 scope = sub
 bind = no
 domain = ${', '.join(domain_names)}
