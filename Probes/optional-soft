@@ -28,8 +28,19 @@ if [ -e /usr/bin/skypeforlinux ]; then
     echo group:skype
 fi
 
+if [ -e /usr/bin/acroread ]; then
+    echo group:adobe-reader
+fi
+
 if ls /boot/vmlinuz-*-generic.efi.signed 1> /dev/null 2>&1; then
     echo group:kernel-signed
+fi
+
+# detect if other OS are installed
+if [ -e /usr/bin/os-prober ]; then
+    if [ -n "$(os-prober)" ]; then
+        echo group:other-OS
+    fi
 fi
 
 # detect if lxd containers are defined on this host

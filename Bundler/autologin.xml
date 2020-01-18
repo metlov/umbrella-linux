@@ -1,0 +1,9 @@
+<Bundle>
+<Group name='ubuntu'>
+    <BoundPOSIXUser name="local-guest" home="/home/guest" shell="/bin/bash" gecos="Local Umbrella Guest" uid="999" group="nopasswdlogin">
+        <MemberOf group="nopasswdlogin"/>
+    </BoundPOSIXUser>
+    <Path name="/etc/pam.d/common-session"/>    <!-- make homedir -->
+    <Path name="/etc/lightdm/lightdm.conf.d/60-disable-guest.conf"/>
+</Group>
+</Bundle>

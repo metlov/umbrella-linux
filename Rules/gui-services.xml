@@ -3,6 +3,7 @@
     <Service name='accounts-daemon' status='ignore' type='systemd'/>
     <Service name='anacron-resume' status='ignore' type='systemd'/>
     <Service name='anacron' status='ignore' type='systemd'/>
+    <Service name='anacron.timer' status='ignore' type='systemd'/>
     <Service name='apport-autoreport.path' status='ignore' type='systemd'/>
     <Service name='bluetooth' status='ignore' type='systemd'/>
     <Service name='cups' status='ignore' type='systemd'/>
@@ -17,6 +18,7 @@
     <Service name='ofono' status='ignore' type='systemd'/>
     <Service name='pppd-dns' status='ignore' type='systemd'/>
     <Service name='schroot' status='ignore' type='systemd'/>
+    <Service name='spice-vdagentd' status='ignore' type='systemd'/>
     <Service name='stunnel4' status='on' type='systemd'/>
     <Service name='systemd-networkd-wait-online' status='ignore' type='systemd'/>
     <Service name='tftpd-hpa' status='on' type='systemd'/>

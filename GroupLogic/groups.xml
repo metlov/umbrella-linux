@@ -54,6 +54,12 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
     </py:if>
     <!-- x2go thin clients have root on NFS -->
     <Group name='nfs-server'/>
+    <py:if test="'virt-lxc' not in metadata.groups">
+        <!-- Needed because the conditon at near the end of this file -->
+        <!-- for assigning 'nfs-common' membership does not sense the -->
+        <!-- above-assigned 'nfs-server' group yet.                   -->
+        <Group name='nfs-common'/>
+    </py:if>
 </py:if>
 <py:if test="'nfs' in metadata.groups">
     <!-- nfs will initiate the public_html replication -->
@@ -118,6 +124,10 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 <py:if test="'server' in metadata.groups and 'physical' in metadata.groups">
     <Group name='physical-server'/>
 </py:if>
+<!-- www-autoconfig on www server if the exernal acces to mail is enabled -->
+<py:if test="smtps_imaps_to_mail and 'DMZwww' in metadata.groups">
+    <Group name='www-autoconfig'/>
+</py:if>
 <!-- Kerberos 5 authentication is everywhere except the DMZ.  -->
 <!-- But even then, once the access to the authentication is  -->
 <!-- enabled in firewall, the kerberos/LDAP auth is installed -->
@@ -140,6 +150,9 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
             <Group name='ups-slave'/>
         </py:if>
     </py:if>
+</py:if>
+<py:if test="'network-fs' in metadata.groups or 'nfs-server' in metadata.groups">
+    <Group name='nfs-common'/>
 </py:if>
 <py:if test="True">
     <!-- Groups, corresponding to supported languages. -->

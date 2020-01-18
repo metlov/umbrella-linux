@@ -3,7 +3,10 @@ import ipcalc
 import socket
 
 # get current host IP address
-ip_addr=socket.gethostbyname(metadata.hostname)
+try:
+  ip_addr=socket.gethostbyname(metadata.hostname)
+except socket.error:
+  ip_addr=None
 
 # the whole network from umbrella.xml
 wholenet = ipcalc.Network(metadata.Properties['umbrella.xml'].xdata.find('net').text)

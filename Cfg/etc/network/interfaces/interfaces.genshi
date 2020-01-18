@@ -93,7 +93,7 @@ if DNScache is None:
 {%     end %}\
 {% end %}\
     dns-search ${domain_name}
-{%     if 'vm' in metadata.groups %}\
+{%     if 'vm' in metadata.groups and ('virt-lxc' not in metadata.groups or 'nfs' in metadata.groups)%}\
     post-up /sbin/ifconfig ${netdev} txqueuelen 4
 {%     end %}\
 {% end %}\

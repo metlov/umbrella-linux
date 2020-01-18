@@ -19,6 +19,12 @@
                       <!-- log in, but, if SSH is served by the LTSP   -->
                       <!-- server, everybody with POSIX account will   -->
                       <!-- be able to do so.                           -->
+    <!-- <forward_smtps_imaps_to_mail/> --> <!-- as the nams says, this -->
+                      <!-- enables forwarding of the incoming SMTPS and -->
+                      <!-- IMAPS connections from the external interface-->
+                      <!-- to the mail server in pub. It also enables   -->
+                      <!-- Outlook and Thunderbird autodiscover on the  -->
+                      <!-- external interface.                          -->
     <!-- <auth_in_DMZ> --> <!-- enables access to LDAP and Kerberos from    -->
                            <!-- within DMZ. May be useful if the WEB server -->
                            <!-- needs to authenticate users.                -->

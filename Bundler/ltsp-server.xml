@@ -45,6 +45,7 @@
     <Path name='/etc/x2go/x2gothinclient_settings'/>
     <!-- add tmpfs mounts to permit Jessy booting -->
     <Path name='/opt/x2gothinclient/chroot/etc/fstab'/>
+    <Package name='fakeroot'/>
     <Action name='update-tftpboot'/>
 <!--    <Path name='/etc/xinetd.d/nbdrootd'/>
     <Path name='/etc/xinetd.d/nbdswapd'/> -->

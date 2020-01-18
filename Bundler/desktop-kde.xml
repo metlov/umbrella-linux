@@ -1,6 +1,6 @@
 <Bundle independent="true">
 <!-- KDE desktop environment  -->
-<Group name='ubuntu'>
+<Group name='desktop-kde'>
     <Group name='ubuntu-xenial'>
         <!-- here we put the dependencies of kubuntu-desktop manually -->
         <!-- except for xorg, which conflicts with -hwe-16.04 -->
@@ -15,6 +15,7 @@
         <Package name='dolphin'/>
         <Package name='fonts-dejavu-core'/>
         <Package name='fonts-freefont-ttf'/>
+        <Package name='fonts-thai-tlwg'/>
         <Package name='foomatic-db-compressed-ppds'/>
         <Package name='genisoimage'/>
         <Package name='ghostscript-x'/>
@@ -53,6 +54,7 @@
     </Group>
     <Group name='ubuntu-xenial' negate='true'>
         <Package name='kubuntu-desktop'/>
+        <Package name='ntrack-module-libnl-0'/>
     </Group>
     <Package name='amarok'/>
     <Group name='ltsp' negate='true'>
@@ -80,7 +82,6 @@
     <Package name='fonts-sil-abyssinica'/>
     <Package name='fonts-sil-padauk'/>
     <Package name='fonts-takao-pgothic'/>
-    <Package name='fonts-thai-tlwg'/>
     <Package name='fonts-tibetan-machine'/>
     <Package name='frameworkintegration'/>
     <Package name='fwupd'/>
@@ -107,7 +108,9 @@
     <Package name='kde-telepathy'/>
     <Package name='kdeconnect-plasma'/>
     <Package name='kimageformat-plugins'/>
-    <Package name='kio-mtp'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='kio-mtp'/>
+    </Group>
     <Package name='konsole'/>
     <Package name='konversation'/>
     <Package name='krdc'/>
@@ -170,6 +173,8 @@
     <Package name='udisks2'/>
     <Group name='ubuntu-xenial' negate='true'>
         <Service name='udisks2'/>
+        <Service name='anacron.timer'/>
+        <Service name='spice-vdagentd'/>
     </Group>
     <Package name='upower'/>
     <Package name='xdg-utils'/>

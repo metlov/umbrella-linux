@@ -6,6 +6,8 @@ ssh_from_ext = metadata.Properties['firewall.xml'].xdata.find('ssh_from_ext') is
 ssh_from_int = metadata.Properties['firewall.xml'].xdata.find('ssh_from_int') is not None
 forward_ssh_to_ltsp = metadata.Properties['firewall.xml'].xdata.find('forward_ssh_to_ltsp') is not None
 ssh_to_ltsp=forward_ssh_to_ltsp and ('ltsp' in funchosts)
+forward_smtps_imaps_to_mail = metadata.Properties['firewall.xml'].xdata.find('forward_smtps_imaps_to_mail') is not None
+smtps_imaps_to_mail=forward_smtps_imaps_to_mail and ('mail' in funchosts)
 # whether SSH connections are served by the router
 ssh_to_router = (ssh_from_ext or ssh_from_int) and not ssh_to_ltsp
 # whether SSH connections are served by the terminal server
@@ -61,8 +63,7 @@ if mail_in_DMZ:
       for suffix in ml_suffixes:
         noteaddr(mailing_list_name+'-'+suffix,addr)
     else:
-      name=robot.find('name').text.strip()
-      noteaddr(name,addr)
+      noteaddr(robot.find('name').text.strip(),addr)
   robot_addresses=robot_addrs       # move to global scope
   robot_servers = [None] * len(address_numbering)
   for addr, num in address_numbering.iteritems():
@@ -74,11 +75,16 @@ if mail_in_DMZ:
 # here we parse DNS whitelists and blacklists for SMTP hosts
 dns_smtp_whitelists = []
 dns_smtp_blacklists = []
+def cacheDNSListItem(item, DNSList):
+  itemName=item.text.strip()
+  recordMatch=item.get('recordMatch')
+  DNSList.append((itemName,recordMatch))
+
 dns_smtp_lists=metadata.Properties['firewall.xml'].xdata.find('DNS_SMTP_lists')
 if dns_smtp_lists is not None:
   for dnsname in dns_smtp_lists.findall('whitelist'):
-    dns_smtp_whitelists.append(dnsname.text.strip())
+    cacheDNSListItem(dnsname, dns_smtp_whitelists)
   for dnsname in dns_smtp_lists.findall('blacklist'):
-    dns_smtp_blacklists.append(dnsname.text.strip())
+    cacheDNSListItem(dnsname, dns_smtp_blacklists)
 del dnsname
 del dns_smtp_lists

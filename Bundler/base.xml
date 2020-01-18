@@ -7,6 +7,9 @@
       <Package name='language-pack-en'/>
       <Package name='language-pack-ru'/>
    </Group>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Path name='/usr/bin/ubuntu-advantage'/> <!-- Rule disables "execute" bit -->
+   </Group>
    <Package name='apparmor'/>
    <Group name='ubuntu-xenial' negate='true'>
       <Service name='apparmor'/>
@@ -106,6 +109,9 @@
       <Package name='friendly-recovery'/>
       <Package name='busybox-static'/>
       <Package name='irqbalance'/>
+      <Group name='ubuntu-xenial' negate='true'>
+          <Service name='irqbalance'/>
+      </Group>
       <Package name='isc-dhcp-common'/>
       <Package name='cpu-checker'/>
       <Package name='dmidecode'/>
@@ -174,13 +180,13 @@
    <Service name='ureadahead'/>
    <Service name='uuidd.socket'/>
 
+   <!-- disable motd-news -->
+   <Path name='/etc/default/motd-news'/>
+   <Service name='motd-news.timer'/>
+
    <Group name='ubuntu-xenial' negate='true'>
        <Service name='ondemand'/>
        <Service name='fstrim.timer'/>
-
-       <!-- disable motd-news -->
-       <Path name='/etc/default/motd-news'/>
-       <Service name='motd-news.timer'/>
 
        <Group name='ntp-server' negate='true'>
           <Group name='ntp-client' negate='true'>

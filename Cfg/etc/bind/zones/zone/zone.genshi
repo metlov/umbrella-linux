@@ -11,6 +11,7 @@ import datetime
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
 execfile(repo+'/Python/30_networking.py')
 execfile(repo+'/Python/32_zone_timestamp.py')
 
@@ -69,6 +70,17 @@ ${ext_domain}.      IN SOA  ${CANONICAL_FQHN}. itadmins.${domain_name}. (
 mail._domainkey IN      TXT     "k=rsa; t=s; p=${metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMpubkey').text}"
 {% if ext_domain==CANONICAL_domain and CANONICAL_hostname %}\
 ${CANONICAL_hostname.ljust(15)} IN      A       ${ip_address}
+{% end %}\
+{% if internal_domain %}\
+${'autoconfig'.ljust(15)} IN      CNAME   ${funchosts['config']}.
+{% end %}\
+{% if (not internal_domain) and smtps_imaps_to_mail and 'DMZwww' in funchosts %}\
+${'autoconfig'.ljust(15)} IN      CNAME   ${funchosts['DMZwww']}.
+{% end %}\
+{% if not internal_domain %}\
+{%   if smtps_imaps_to_mail and ((ext_domain not in hostname_aliases) or (funchostsshort['mail'] not in hostname_aliases[ext_domain])) %}\
+${funchostsshort['mail'].ljust(15)} IN      A       ${ip_address}
+{%   end %}\
 {% end %}\
 {% if 'DMZwww' in funchosts %}\
 {%   if internal_domain %}\

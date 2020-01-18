@@ -29,6 +29,11 @@
         <Package name='bsd-mailx'/>
       </Group>
       <Package name='monitoring-plugins'/>
+      <Package name='nagios-snmp-plugins'/>
+      <Package name='libcrypt-des-perl'/> <!-- support SNMPv3 in perl -->
+      <Package name='libdigest-hmac-perl'/> <!-- support SHA auth in perl -->
+      <Package name='libcrypt-rijndael-perl'/> <!-- support AES encryption in perl -->
+      <Path name='/etc/nagios3/conf.d/snmp_commands.cfg'/>
       <Package name='libapache2-mod-authz-unixgroup'/>
       <Path name='/etc/apache2/sites-available/default-ssl.conf'/>
       <Path name='/etc/apache2/sites-enabled/000-default.conf'/>

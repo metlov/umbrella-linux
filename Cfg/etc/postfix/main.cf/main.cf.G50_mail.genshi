@@ -167,7 +167,8 @@ acceptor_smtpd_client_restrictions = check_client_access texthash:/etc/postfix/D
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
 # These are map targets in for handling outgoing messages from robots
 # (delivery to robots is handled via the transport map).
-smtpd_restriction_classes = ${', '.join(("from_robot_%03d" % (i,)) for i in range(len(robot_servers)) )}
+smtpd_restriction_classes = from_adm_hosts, ${', '.join(("from_robot_%03d" % (i,)) for i in range(len(robot_servers)) )}
+from_adm_hosts = check_client_access inline:{${funcifs['config']}=OK}, reject
 {% for i in range(len(robot_servers)) %}\
 ${"from_robot_%03d" % (i,)} = check_client_access inline:{${str(robot_servers[i])}=OK}, reject
 {% end %}\
@@ -178,15 +179,16 @@ ${"from_robot_%03d" % (i,)} = check_client_access inline:{${str(robot_servers[i]
 # The mail is going to be signed by DKIM.
 system_smtpd_recipient_restrictions =  permit_mynetworks,
     check_recipient_access texthash:/etc/postfix/admin_recipients,
+    check_sender_access inline:{itadmins@${domain_name}=from_adm_hosts},
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
-    check_sender_access inline:{${', '.join(('%s@=from_robot_%03d' % (n,i)) for n,i in robot_addresses.iteritems())}},
+    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_addresses.iteritems() for d in domain_names)}},
 {% end %}\
     reject
 system_smtpd_client_restrictions = check_client_access texthash:/etc/postfix/local_clients,
     reject
 system_smtpd_relay_restrictions =  permit_mynetworks,
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
-    check_sender_access inline:{${', '.join(('%s@=from_robot_%03d' % (n,i)) for n,i in robot_addresses.iteritems())}},
+    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_addresses.iteritems() for d in domain_names)}},
 {% end %}\
     permit_sasl_authenticated,
     defer_unauth_destination

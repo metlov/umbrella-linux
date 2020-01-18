@@ -5,6 +5,9 @@
         <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/bin/false" gecos="dnsmasq,,," uid="644" group="nogroup"/>
     </Group>
     <BoundPOSIXUser name="festival" home="/home/festival" shell="/bin/false" gecos="" uid="641" group="audio"/>
+    <Group name="ubuntu-xenial" negate='true'>
+        <BoundPOSIXUser name="geoclue" home="/var/lib/geoclue" shell="/usr/sbin/nologin" gecos="" uid="673" group="geoclue"/>
+    </Group>
     <BoundPOSIXUser name="hplip" home="/var/run/hplip" shell="/bin/false" gecos="HPLIP system user,,," uid="642" group="lp"/>
     <BoundPOSIXUser name="lightdm" home="/var/lib/lightdm" shell="/bin/false" gecos="Light Display Manager" uid="633" group="lightdm"/>
     <BoundPOSIXGroup name="lightdm" gid="633"/>
@@ -25,4 +28,7 @@
     <BoundPOSIXGroup name="rtkit" gid="643"/>
     <BoundPOSIXGroup name="saned" gid="645"/>
     <BoundPOSIXGroup name="bluetooth" gid="648"/>
+    <Group name="ubuntu-xenial" negate='true'>
+        <BoundPOSIXGroup name="geoclue" gid="673"/>
+    </Group>
 </Bundle>

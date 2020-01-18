@@ -68,6 +68,7 @@
   owner /media/**  rw,
   owner @{HOME}/.local/share/gvfs-metadata/** l,
   owner /{,var/}run/user/*/gvfs-metadata/** lrw,
+  owner /{,var/}run/user/*/gvfs-metadata/**/ rw,
 
   owner @{HOME}/.gnome2/evince/*       rwl,
   owner @{HOME}/.gnome2/accels/        rw,

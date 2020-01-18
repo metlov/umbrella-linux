@@ -6,6 +6,11 @@ execfile(repo+'/Python/20_networks.py')
 execfile(repo+'/Python/25_firewall.py')
 execfile(repo+'/Python/30_networking.py')
 
+for clientname in set(metadata.query.names_by_profiles(funchostdesc.keys())).difference(set(metadata.query.names_by_groups(['virt-lxc']))):
+    print clientname
+
+print len(metadata.query.names_by_groups(['lxd-containers-host']))>0
+
 mailing_lists=[]
 if mail_in_DMZ and 'mailman-server' in metadata.groups:
     robots=metadata.Properties['firewall.xml'].xdata.find('mail_in_DMZ').findall('robot')

@@ -180,3 +180,119 @@
     <options>no_email_alert</options>
   </rule>
 </group> <!-- SYSTEMD -->
+
+<!-- do not alert on multiple SPAM attempts, they are handled by  -->
+<!-- active response anyway                                       -->
+<group name="syslog,postfix,">
+  <rule id="100016" level="1">
+    <if_group>multiple_spam</if_group>
+    <description>Suppress email about multipls SPAM attempts</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, POSTFIX -->
+
+<!-- do not send E-mails about bad incoming packets to openvpn    -->
+<group name="syslog,openvpn,">
+  <rule id="100017" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>openvpn</decoded_as>
+    <match>^TLS Error: cannot locate HMAC in incoming packet</match>
+    <description>Suppress E-mail about absence of HMAC in incoming packet</description>
+    <options>no_email_alert</options>
+  </rule>
+  <rule id="100018" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>openvpn</decoded_as>
+    <match>^TLS Error: incoming packet authentication failed</match>
+    <description>Suppress E-mail about failed incoming packet authentication</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, POSTFIX -->
+
+<!-- do not send E-mails about missing pipefs files in rpc.gssd -->
+<group name="syslog,rpcgssd,">
+  <rule id="100019" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>rpc.gssd</decoded_as>
+    <match>^ERROR: can't open /run/rpc_pipefs/nfs/</match>
+    <description>Suppress E-mail about missing pipefs file</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, RPCGSSD -->
+
+<!-- do not send E-mails about missing org.a11y.Bus in org.gnome.keyring.SystemPrompter -->
+<group name="syslog,gnomekeyring,">
+  <rule id="100020" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>org.gnome.keyring.SystemPrompter</decoded_as>
+    <match>Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files</match>
+    <description>Suppress E-mail about missing org.a11y.Bus</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, GNOMEKEYRING -->
+
+<!-- do not send E-mails about ThreadPoolSingl int3 trap in chromium-browser -->
+<group name="syslog,trap,">
+  <rule id="100021" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>iptables</decoded_as>
+    <regex>traps: ThreadPoolSingl\S+ trap int3 ip:\S+ sp:\S+ error:0 in chromium-browser</regex>
+    <description>Suppress E-mail about int3 trap in chromium-browser</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, TRAP -->
+
+<!-- do not send E-mails about no directory monitor on SMB -->
+<group name="syslog,gtkvfs,">
+  <rule id="100022" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>org.gtk.vfs.Daemon</decoded_as>
+    <match>WARNING **: Couldn't create directory monitor on smb:</match>
+    <description>Suppress E-mail about no directory monitor on SMB</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, GTKVFS -->
+
+<!-- do not send E-mails about no PulseAudio daemon -->
+<group name="syslog,gtksound,">
+  <rule id="100023" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>com.canonical.indicator.sound-gtk2</decoded_as>
+    <match>WARNING **: PA_CONTEXT_FAILED - Is PulseAudio Daemon running ?</match>
+    <description>Suppress E-mail about no PulseAudio daemon</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, GTKSOUND -->
+
+<!-- do not send E-mails about missing exit.target in systemd -->
+<group name="syslog,systemd,">
+  <rule id="100024" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>systemd</decoded_as>
+    <match>Failed to enqueue exit.target job: Unit exit.target not found.</match>
+    <description>Suppress E-mail about missing exit.target in systemd</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, SYSTEMD -->
+
+<!-- do not send E-mails about failure to set up mount unit -->
+<group name="syslog,systemd,">
+  <rule id="100025" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>systemd</decoded_as>
+    <match>Failed to set up mount unit: Device or resource busy</match>
+    <description>Suppress E-mail about failure to set up mount unit</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, SYSTEMD -->
+
+<!-- do not send E-mails about assertion failure in com.canonical.indicator -->
+<group name="syslog,systemd,">
+  <rule id="100026" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>com.canonical.indicator.application</decoded_as>
+    <match>libindicator-CRITICAL **: try_and_get_name_lost_cb: assertion 'connection != NULL' failed</match>
+    <description>Suppress E-mail about assertion failure in com.canonical.indicator</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, SYSTEMD -->

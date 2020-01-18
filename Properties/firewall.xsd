@@ -13,6 +13,10 @@
       <xsd:sequence/>
     </xsd:complexType>
 
+    <xsd:complexType name="forward_SMTPS_IMAPS_to_MAIL_type">
+      <xsd:sequence/>
+    </xsd:complexType>
+
     <xsd:complexType name="WWWHomes">
       <xsd:sequence/>
     </xsd:complexType>
@@ -43,10 +47,22 @@
       <xsd:sequence/>
     </xsd:complexType>
 
+    <xsd:complexType name="DNSlist">
+      <xsd:simpleContent>
+        <xsd:extension base="FQDN">
+          <xsd:attribute name="recordMatch">
+            <xsd:simpleType>
+              <xsd:restriction base="xsd:string"/> <!-- TODO: check the value -->
+            </xsd:simpleType>
+          </xsd:attribute>
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
+
     <xsd:complexType name="DNSlists">
         <xsd:sequence>
-            <xsd:element name="whitelist" type="FQDN" minOccurs="0" maxOccurs="999"/>
-            <xsd:element name="blacklist" type="FQDN" minOccurs="0" maxOccurs="999"/>
+            <xsd:element name="whitelist" type="DNSlist" minOccurs="0" maxOccurs="999"/>
+            <xsd:element name="blacklist" type="DNSlist" minOccurs="0" maxOccurs="999"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -84,6 +100,7 @@
                 <xsd:element name="ssh_from_ext" type="SSHfromEXTtype" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="ssh_from_int" type="SSHfromINTtype" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="forward_ssh_to_ltsp" type="forwardSSHtoLTSPtype" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="forward_smtps_imaps_to_mail" type="forward_SMTPS_IMAPS_to_MAIL_type" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="auth_in_DMZ" type="AUTHinDMZ" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="mail_in_DMZ" type="MAILinDMZ" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="admin_from_VPN" type="ADMINfromVPN" minOccurs="0" maxOccurs="1"/>

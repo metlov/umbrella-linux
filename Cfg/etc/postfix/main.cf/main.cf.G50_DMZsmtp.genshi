@@ -55,11 +55,21 @@ smtpd_client_restrictions =
     permit_mynetworks,
     check_client_access texthash:/etc/postfix/client_restrictions,
     reject_unknown_client_hostname,
-{% for dnsname in dns_smtp_whitelists %}\
+{% for dnsname,code in dns_smtp_whitelists %}\
+{%   if code is None %}\
     permit_dnswl_client ${dnsname},
+{%   end %}\
+{%   if code is not None %}\
+    permit_dnswl_client ${dnsname}=${code},
+{%   end %}\
 {% end %}\
-{% for dnsname in dns_smtp_blacklists %}\
+{% for dnsname,code in dns_smtp_blacklists %}\
+{%   if code is None %}\
     reject_rbl_client ${dnsname},
+{%   end %}\
+{%   if code is not None %}\
+    reject_rbl_client ${dnsname}=${dns_smtp_blacklist_codes[dnsname]},
+{%   end %}\
 {% end %}\
     permit
 

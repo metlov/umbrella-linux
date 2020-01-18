@@ -1,0 +1,21 @@
+[Unit]
+Description=UNFS3 Server
+Requires=network.target rpcbind.target
+ConditionPathExists=/etc/exports
+
+After= network.target rpcbind.target
+Wants= rpcbind.service
+After= rpcbind.service
+
+[Service]
+Type=forking
+EnvironmentFile=/etc/default/unfs3
+RemainAfterExit=yes
+Restart=on-failure
+ExecStart=/usr/sbin/unfsd -i /run/unfsd.pid
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+PIDFile=/run/unfsd.pid
+
+[Install]
+WantedBy=multi-user.target

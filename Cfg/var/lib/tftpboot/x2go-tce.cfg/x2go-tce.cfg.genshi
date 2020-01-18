@@ -15,5 +15,5 @@ anything on this computer's hard drive. You will need to have an account
 itadmins@${domain_name} to get one.
 ENDTEXT
         KERNEL vmlinuz.486
-        APPEND initrd=initrd.img.486 nfsroot=${funcifs['ltsp']}:/opt/x2gothinclient/chroot boot=nfs ro quiet nomodeset splash
+        APPEND initrd=initrd.img.486 nfsroot=${funcifs['ltsp']}:/opt/x2gothinclient/chroot,v3 boot=nfs ro quiet nomodeset splash
         IPAPPEND 3

@@ -96,6 +96,7 @@
     <Package name='pulseaudio'/>
     <Group name='ubuntu-xenial'>
         <Package name='pulseaudio-module-x11'/>
+        <Package name='libsnapd-glib1'/>
     </Group>
     <Package name='pulseaudio-utils'/>
     <Package name='rtkit'/>
@@ -191,6 +192,10 @@
     <Package name='libasound2-plugins'/>
     <Package name='libp11-kit-gnome-keyring'/>
     <Package name='ttf-mscorefonts-installer'/>
+    <!-- disable "execute" bit to silence the release upgrade motd and other notifications -->
+    <!-- this is here because ubuntu-release upgrader is a dependence of ttf-mscorefonts-installer -->
+    <Path name='/usr/lib/ubuntu-release-upgrader/release-upgrade-motd'/>
+
     <Group name='ubuntu-xenial' negate='true'>
         <Package name='python3-debconf'/>
         <Package name='python3-cffi-backend'/>

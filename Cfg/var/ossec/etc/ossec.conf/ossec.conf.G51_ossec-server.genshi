@@ -96,6 +96,8 @@ netset |= set(netclasses.iterkeys())
     <directories check_all="yes">${','.join(dir_list)}</directories>
 
     <!-- Files/directories to ignore -->
+    <ignore>/etc/cups/subscriptions.conf</ignore>
+    <ignore>/etc/cups/subscriptions.conf.O</ignore>
 {%for pathname in path_list %}\
     <ignore>${pathname}</ignore>
 {% end %}\

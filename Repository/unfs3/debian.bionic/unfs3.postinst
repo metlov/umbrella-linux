@@ -1,0 +1,30 @@
+#!/bin/sh
+
+set -e
+
+case "${1}" in
+	configure)
+		if [ ! -f /etc/exports ]
+		then
+
+cat > /etc/exports << EOF
+# /etc/exports: the access control list for filesystems which may be exported
+#               to NFS clients.  See unfsd(8).
+EOF
+
+		fi
+		;;
+
+	abort-upgrade|abort-remove|abort-deconfigure)
+
+		;;
+
+	*)
+		echo "postinst called with unknown argument \`${1}'" >&2
+		exit 1
+		;;
+esac
+
+#DEBHELPER#
+
+exit 0

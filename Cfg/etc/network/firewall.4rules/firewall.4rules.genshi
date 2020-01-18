@@ -68,6 +68,27 @@ ${REJECT_INTERNAL_INPUT_ON_IF('INPUT', INTIF)}
 {% end %}\
 
 {% end %}\
+{% if smtps_imaps_to_mail %}\
+{% if extif_enabled %}\
+# External interface, SMTPS and IMAP traffic to MAIL server in PUB
+-A FORWARD -i ${EXTIF} -o ${IFPUB} -d ${PUB_SMTPS_IP} -p tcp --dport 465 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${EXTIF} -s ${PUB_SMTPS_IP} -p tcp --sport 465 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${EXTIF} -o ${IFPUB} -d ${PUB_SMTPS_IP} -p tcp --dport 587 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${EXTIF} -s ${PUB_SMTPS_IP} -p tcp --sport 587 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${EXTIF} -o ${IFPUB} -d ${PUB_IMAPS_IP} -p tcp --dport 993 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${EXTIF} -s ${PUB_IMAPS_IP} -p tcp --sport 993 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+# Intranet interface, SMTPS and IMAP traffic to MAIL server in PUB
+-A FORWARD -i ${INTIF} -o ${IFPUB} -d ${PUB_SMTPS_IP} -p tcp --dport 465 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${INTIF} -s ${PUB_SMTPS_IP} -p tcp --sport 465 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${INTIF} -o ${IFPUB} -d ${PUB_SMTPS_IP} -p tcp --dport 587 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${INTIF} -s ${PUB_SMTPS_IP} -p tcp --sport 587 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${INTIF} -o ${IFPUB} -d ${PUB_IMAPS_IP} -p tcp --dport 993 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${INTIF} -s ${PUB_IMAPS_IP} -p tcp --sport 993 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+
+{% end %}\
 {% if 'DMZwww' in funchosts %}\
 {% if extif_enabled %}\
 # External interface, HTTP/HTTPS traffic to DMZ
@@ -639,6 +660,25 @@ COMMIT
 {%   if intif_enabled %}\
 # NAT intranet SSH requests to LTSP
 -A PREROUTING -p tcp -d ${INTIP} --dport 22 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_LTSP_IP}:22
+{%   end %}\
+
+{% end %}\
+{% if smtps_imaps_to_mail %}\
+{%   if extif_enabled %}\
+# NAT external SMTPS requests to MAIL
+-A PREROUTING -p tcp -d ${EXTIP} --dport 465 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_SMTPS_IP}:465
+-A PREROUTING -p tcp -d ${EXTIP} --dport 587 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_SMTPS_IP}:587
+
+# NAT external IMAPS requests to MAIL
+-A PREROUTING -p tcp -d ${EXTIP} --dport 993 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_IMAPS_IP}:993
+{%   end %}\
+{%   if intif_enabled %}\
+# NAT intranet SMTPS requests to MAIL
+-A PREROUTING -p tcp -d ${INTIP} --dport 465 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_SMTPS_IP}:465
+-A PREROUTING -p tcp -d ${INTIP} --dport 587 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_SMTPS_IP}:587
+
+# NAT intranet IMAPS requests to MAIL
+-A PREROUTING -p tcp -d ${INTIP} --dport 993 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${PUB_IMAPS_IP}:993
 {%   end %}\
 
 {% end %}\

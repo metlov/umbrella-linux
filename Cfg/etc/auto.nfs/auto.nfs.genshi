@@ -20,12 +20,12 @@ if not 'local-fs' in metadata.groups:
 %}\
 #!/bin/bash
 {% if nfs_server is None %}\
-if [ "$1" = "${system_name}" ]; then
+if [ "$$1" = "${system_name}" ]; then
     echo "-fstype=bind :/home"
 fi
 {% end %}\
 {% if nfs_server is not None %}\
-if [ "$1" = "${system_name}" ]; then
+if [ "$$1" = "${system_name}" ]; then
     echo "-fstype=nfs4,sec=${nfs_sec},fsc   ${nfs_server}:${nfs_path}"
 fi
 {% end %}\

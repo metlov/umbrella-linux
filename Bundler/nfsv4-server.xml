@@ -1,9 +1,35 @@
 <Bundle>
 <Group name='ubuntu'>
-    <Package name='nfs-kernel-server'/>
-    <Path name='/etc/default/nfs-kernel-server'/>
-    <Service name='nfs-kernel-server'/>
-    <Path name='/etc/exports'/>
+    <Group name='virt-lxc' negate='true'>
+        <!-- on non-lxc platform we just use the kernel nfs server -->
+        <Package name='nfs-kernel-server'/>
+        <Path name='/etc/default/nfs-kernel-server'/>
+        <Service name='nfs-kernel-server'/>
+        <Path name='/etc/exports'/>
+    </Group>
+    <Group name='virt-lxc'>
+        <!-- on lxc we install different nfs servers on different hosts -->
+        <Group name='ltsp'>
+            <!-- here we install unfs3 -->
+            <Path name='/etc/exports'/>
+            <Path name='/etc/default/unfs3'/>
+            <Package name='unfs3'/>
+            <Service name='unfs3'/>
+            <Group name='ubuntu-xenial' negate='true'>
+               <Service name='rpcbind'/>
+            </Group>
+            <Service name='rpcbind.socket'/>
+        </Group>
+        <Group name='ltsp' negate='true'>
+            <!-- other nfs servers use the kernel server as well -->
+            <Package name='nfs-kernel-server'/>
+            <Path name='/etc/default/nfs-kernel-server'/>
+            <Service name='nfs-kernel-server'/>
+            <Service name='nfs-server'/>
+            <Path name='/etc/exports'/>
+        </Group>
+    </Group>
+    <!-- directory to hold user homes -->
     <Group name='nfs-home-server'>
         <Path name='/export'/>
         <Path name='/export/home'/>

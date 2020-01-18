@@ -56,7 +56,9 @@ def interface_stanza( interface, networks, domain_name, metadata, routerifs, fun
     if nameserver is not None:
       r+='    dns-nameservers '+nameserver+'\n'
       r+='    dns-search '+domain_name+'\n'
-    r+='    post-up /sbin/ifconfig '+dev+' txqueuelen 4'+'\n'
+    if 'virt-lxc' not in metadata.groups or 'nfs' in metadata.groups:
+      # except for unprivileged lxc containers
+      r+='    post-up /sbin/ifconfig '+dev+' txqueuelen 4'+'\n'
     for option in interface.findall('option'):
       r+= '    ' +option.text+'\n'
     for up in interface.findall('up'):

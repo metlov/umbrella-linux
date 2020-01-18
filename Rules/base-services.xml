@@ -64,8 +64,13 @@
   <Service name='netfilter-persistent' status='ignore' type='systemd'/>
   <Service name='networking' status='on' type='systemd'/>
   <Service name='nfs-client.target' status='ignore' type='systemd'/>
+  <Group name='virt-lxc'>
+    <Service name='nfs-ganesha' status='on' type='systemd'/>
+    <Service name='nfs-ganesha-lock' status='on' type='systemd'/>
+  </Group>
   <Service name='nfs-server' status='on' type='systemd'/>
   <Service name='nfs-kernel-server' status='on' type='systemd'/>
+  <Service name='unfs3' status='on' type='systemd'/>
   <Service name='nscd' status='on' type='systemd'/>
   <Service name='ntp' status='on' type='systemd'/>
   <Service name='ondemand' status='ignore' type='systemd'/>

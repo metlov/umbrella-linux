@@ -1,10 +1,14 @@
 <Bundle>
     <Package name='apache2'/>
+    <!-- E-mail autoconfig -->
     <Path name='/etc/apache2/sites-available/autoconfig'/>
     <Path name='/etc/apache2/sites-enabled/autoconfig.conf'/>
     <Path name='/var/www/autoconfig/mail/config-v1.1.xml'/>
-    <Path name='/var/www/autoconfig/install/preseed.cfg'/>
-    <Path name='/var/www/html/wpad.dat'/>
-    <Path name='/var/www/autoconfig/install/bcfg2ca.crt' altsrc='/usr/local/share/ca-certificates/bcfg2ca.crt'/>
+    <Group name='config'>
+        <!-- install autoconfig -->
+        <Path name='/var/www/autoconfig/install/preseed.cfg'/>
+        <Path name='/var/www/html/wpad.dat'/>
+        <Path name='/var/www/autoconfig/install/bcfg2ca.crt' altsrc='/usr/local/share/ca-certificates/bcfg2ca.crt'/>
+    </Group>
     <Service name='apache2'/>
 </Bundle>

@@ -2,6 +2,10 @@
 from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
+
+# whether this Umbrella Linux system is hosted in a set of LXD containers
+umbrella_lxd=\
+  (len(metadata.query.names_by_groups(['vmhost','lxd-containers-defined']))>0)
 %}\
 #################################################
 # rsnapshot.conf - rsnapshot configuration file #
@@ -150,7 +154,12 @@ ssh_args	-i /root/.ssh/id_rsa
 # backup point. This essentially passes the -x option to rsync.
 # The default is 0 (off).
 #
+{% if not umbrella_lxd %}\
 #one_fs		0
+{% end %}\
+{% if umbrella_lxd %}\
+one_fs		0
+{% end %}\
 
 # The include and exclude parameters, if enabled, simply get passed directly
 # to rsync. If you have multiple include/exclude patterns, put each one on a
@@ -160,6 +169,7 @@ ssh_args	-i /root/.ssh/id_rsa
 #include	???
 #include	???
 exclude		/backups
+{% if not umbrella_lxd %}\
 exclude		/boot
 exclude		/home
 exclude		/nfs
@@ -189,14 +199,30 @@ exclude		/export/home/*/Desktop/BitTorrent?Downloads
 exclude		/export/home/*/.unison/backup
 exclude		/export/home/*/.bittorrent
 exclude		/export/home/*/.wine
-exclude		/vm/*.raw
-exclude		/vm/backups/*.raw
-exclude		/vm/tmp
 exclude		/dev
 exclude		/proc
 exclude		/sys
 exclude		/cgroup
 exclude		/afs
+{% end %}\
+{% if umbrella_lxd %}\
+exclude		export/home/*/.googleearth/Cache
+exclude		export/home/*/.mozilla/firefox/**/Cache
+exclude		export/home/*/.thumbnails
+exclude		export/home/*/.ies4linux
+exclude		export/home/*/.cache
+exclude		export/home/*/.local/share/Trash
+exclude		export/home/*/Downloads
+exclude		export/home/*/temp
+exclude		export/apt-cacher-ng
+exclude		export/home/*/Desktop/BitTorrent?Downloads
+exclude		export/home/*/.unison/backup
+exclude		export/home/*/.bittorrent
+exclude		export/home/*/.wine
+{% end %}\
+exclude		/vm/*.raw
+exclude		/vm/backups/*.raw
+exclude		/vm/tmp
 
 # The include_file and exclude_file parameters, if enabled, simply get
 # passed directly to rsync. Please look up the --include-from and
@@ -229,11 +255,12 @@ link_dest	1
 ###############################
 ### BACKUP POINTS / SCRIPTS ###
 ###############################
-{% for func, funchost in funchostsshort.iteritems() %}\
-{%     if metadata.hostname != funchosts[func] %}\
+{% for clientname in set(metadata.query.names_by_profiles(funchostdesc.keys())).difference(set(metadata.query.names_by_groups(['virt-lxc']))) %}\
+{%     if metadata.hostname != clientname %}\
+{% python   funchost=clientname.split('.')[0] #  extract hostname %}
 backup	root@${funchost}:/	${funchost}/	+rsync_long_args=--exclude=/nfs/
 {%     end %}\
-{%     if metadata.hostname == funchosts[func] %}\
+{%     if metadata.hostname == clientname %}\
 backup	/	${funchost}/	+rsync_long_args=--exclude=/nfs/
 {%     end %}\
 {% end %}

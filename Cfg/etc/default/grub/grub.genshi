@@ -3,7 +3,12 @@
 # For full documentation of the options in this file, see:
 #   info -f grub -n 'Simple configuration'
 
+{% if 'other-OS' not in metadata.groups %}\
 GRUB_DEFAULT=0
+{% end %}\
+{% if 'other-OS' in metadata.groups %}\
+GRUB_DEFAULT=5
+{% end %}\
 GRUB_HIDDEN_TIMEOUT=10
 GRUB_HIDDEN_TIMEOUT_QUIET=false
 GRUB_TIMEOUT=0

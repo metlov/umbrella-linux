@@ -5,7 +5,8 @@
       <Group name='ldap-master'/>
       <Group name='www-server-ssl'/>
       <Group name='database-server'/>
-      <Bundle name='www-autoconfig'/>
+      <Group name='www-autoconfig'/>
+      
       <Bundle name='sysadm-scripts'/>
       <Bundle name='directory'/>
    </Group>
@@ -94,8 +95,8 @@
    <Group profile='true' name='ltsp'>
       <Group name='workstation'/>
       <Group name='nagios'/>
+      <Group name='ossec'/>
       <Bundle name='ltsp-server'/>
-      <Bundle name='ossec'/>
    </Group>
    <Group profile='true' name='monitor'>
       <Group name='pubserver'/>
@@ -179,6 +180,16 @@
       <!-- VM host, which is based on LXD -->
       <Group name='acpid'/>
       <Bundle name='lxd'/>
+      <Group name='network-fs' negate='true'/>
+   </Group>
+   <Group name='virt-lxc'>
+      <Group name='network-fs'>
+         <Group name='network-fs' negate='true'/>
+         <Group name='autofs' negate='true'/>
+      </Group>
+      <Group name='local-fs'>
+         <Group name='autofs' negate='true'/>
+      </Group>
    </Group>
    <Group name='libvirt-host'>
       <!-- VM host, which is based on Libvirt -->
@@ -233,6 +244,10 @@
    </Group>
    <Group name='auth'>
    </Group>
+   <Group name='autologin'>
+      <!-- enables gui workstation autologin to a local guest user -->
+      <Bundle name='autologin'/>
+   </Group>
    <Group name='vncserver'>
       <Bundle name='vncserver'/>
    </Group>
@@ -251,23 +266,28 @@
       <Bundle name='ntp'/>
    </Group>
    <Group name='network-fs'>
-      <Bundle name='autofs'/>
+      <Group name='autofs'/>
       <Bundle name='nfsv4'/>
    </Group>
    <Group name='cachefilesd'>
          <Bundle name='cachefilesd'/>
    </Group>
    <Group name='local-fs'>
-      <Bundle name='autofs'/>
+      <Group name='autofs'/>
       <Group name='network-fs' negate='true'/>
+   </Group>
+   <Group name='autofs'>
+      <Bundle name='autofs'/>
    </Group>
    <Group name='pubserver'>
       <Bundle name='zabbix'/>
       <Group name='server'/>
+      <Group name='network-fs'/>
    </Group>
    <Group name='secserver'>
       <Bundle name='zabbix'/>
       <Group name='server'/>
+      <Group name='network-fs'/>
    </Group>
    <Group name='DMZserver'>
       <Group name='server'/>
@@ -275,10 +295,9 @@
    </Group>
    <Group name='server'>
       <Group name='auth'/>
-      <Group name='network-fs'/>
       <Group name='nagios'/>
+      <Group name='ossec'/>
       <Group name='networking-networkd'/>
-      <Bundle name='ossec'/>
    </Group>
    <Group name='lvm'>
       <Bundle name='lvm'/>
@@ -329,11 +348,17 @@
    <Group name='nagios'>
       <Bundle name='nagios'/>
    </Group>
+   <Group name='ossec'>
+      <Bundle name='ossec'/>
+   </Group>
    <Group name='www-server-ssl'>
       <Group name='www-server'/>
    </Group>
    <Group name='www-server'>
       <Bundle name='apache2'/>
+   </Group>
+   <Group name='www-autoconfig'>
+      <Bundle name='www-autoconfig'/>
    </Group>
    <Group name='squirrelmail'>
       <Bundle name='squirrelmail'/>

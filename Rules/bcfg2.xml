@@ -4,11 +4,11 @@
     <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.conf' to='../mods-available/ssl.conf'/>
     <Path type='symlink' name='/etc/apache2/mods-enabled/ssl.load' to='../mods-available/ssl.load'/>
 </Group>
+<Path type='symlink' name='/etc/apache2/sites-enabled/autoconfig.conf' to='../sites-available/autoconfig'/>
 <Group name='config'>
     <Service name='bcfg2-server' status='on' type='systemd'/>
     <Path type='directory' name="/var/run/bcfg2-server" mode='755' owner='bcfg2' group='bcfg2'/>
     <Path type='symlink' name='/etc/apache2/conf-enabled/bcfg2.conf' to='../conf-available/bcfg2.conf'/>
-    <Path type='symlink' name='/etc/apache2/sites-enabled/autoconfig.conf' to='../sites-available/autoconfig'/>
     <Path type='symlink' name='/etc/apache2/sites-enabled/packages.conf' to='../sites-available/packages'/>
 
     <!-- actions to compile python files -->

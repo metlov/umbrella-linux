@@ -1,0 +1,6 @@
+[SeatDefaults]
+allow-guest=false
+{% if 'autologin' in metadata.groups %}\
+autologin-user=local-guest
+autologin-user-timeout=0
+{% end %}\

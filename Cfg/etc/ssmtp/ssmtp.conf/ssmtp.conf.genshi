@@ -28,4 +28,9 @@ mailhub=${metadata.Properties['umbrella.xml'].xdata.find('SMTP_outbound_relay').
 # Are users allowed to set their own From: address?
 # YES - Allow the user to specify their own From: address
 # NO - Use the system generated From: address
+{% if not 'config' in metadata.groups %}\
 #FromLineOverride=YES
+{% end %}\
+{% if 'config' in metadata.groups %}\
+FromLineOverride=YES
+{% end %}\

@@ -6,6 +6,7 @@ execfile(repo+'/Python/00_baseparams.py')
 	default_realm = ${realm_name}
 	dns_lookup_kdc = false
 	dns_lookup_realm = false
+	kuserok = SIMPLE
 
 # The following krb5.conf variables are only for MIT Kerberos.
 	krb4_config = /etc/krb.conf

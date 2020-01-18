@@ -33,7 +33,7 @@ view ${iface}net {
 include "/etc/bind/named.conf.default-zones";
 
 {% if ('mail' in funchosts) and \
-      ('list.dnswl.org' in dns_smtp_whitelists) and \
+      ('list.dnswl.org' in [i[0] for i in dns_smtp_whitelists]) and \
       (DNScache is not None ) %}\
 // Disable forwarders for DNSWL requests (you will need to register
 // the external IP ${ext_address} with DNSWL.org service).

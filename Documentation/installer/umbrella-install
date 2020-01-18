@@ -348,6 +348,11 @@ create_vm() {
         lxc config set ${vm_hostname} volatile.eth1.hwaddr "${e_mac}"
     fi
 
+    if [ "$1" == "nfs" ]; then
+        # nfs is the only privileged container
+        lxc config set ${vm_hostname} security.privileged true
+    fi
+
     lxc config set ${vm_hostname} boot.autostart 1
     lxc config set ${vm_hostname} boot.autostart.delay 30
     lxc config set ${vm_hostname} boot.autostart.priority ${priorities[$1]}
@@ -453,6 +458,10 @@ objectClass: top
 objectClass: goServer
 objectClass: GOhard
 EOF
+            # update static part of zone files
+            lxc exec ${router_hostname} -- /bin/bash -c \
+                "${BCFG2} -qQv -b bind"
+            sleep 10
             # regenerate DNS
             lxc exec ${router_hostname} -- /bin/su -s /bin/bash - bind -c \
                 "/usr/local/bin/umbrella-ldap2zone"
@@ -612,10 +621,13 @@ configure_quirks_x2go() {
 configure_quirks_ejabberd() {
   # this will delete mnesia database to be recreated after reboot
   # with proper erlang node name.
-  lxc exec $1 -- /bin/bash -c \
-    "systemctl stop ejabberd-gssapi"
-  lxc exec $1 -- /bin/bash -c \
-    "find /var/lib/ejabberd -maxdepth 1 -type f -delete"
+  if lxc exec $1 -- /bin/bash -c \
+    "[ -e /var/lib/ejabberd ]" ; then
+    lxc exec $1 -- /bin/bash -c \
+      "systemctl stop ejabberd-gssapi"
+    lxc exec $1 -- /bin/bash -c \
+      "find /var/lib/ejabberd -maxdepth 1 -type f -delete"
+  fi
 }
 
 
@@ -751,6 +763,7 @@ if grep -q '^uuidd:' /etc/passwd ; then
     usermod -u "$UID_messagebus" messagebus
   fi
   getent passwd sshd &>/dev/null && usermod -u "$UID_ssh" sshd
+  getent passwd sshd &>/dev/null || useradd -d /run/sshd -g nogroup -M -s /usr/sbin/nologin -u ${UID_ssh} sshd
   exit 0
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
@@ -1170,36 +1183,8 @@ if ! grep -q '^lxd:' /etc/passwd; then
     # not xenial
   fi
 # allow more mounting possibilities
-  cat >/etc/apparmor.d/lxc/lxc-default-with-mounting <<EOF
-# Do not load this file.  Rather, load /etc/apparmor.d/lxc-containers, which
-# will source all profiles under /etc/apparmor.d/lxc
-
-profile lxc-container-default-with-mounting flags=(attach_disconnected,mediate_deleted) {
-  #include <abstractions/lxc/container-base>
-
-# allow standard blockdevtypes.
-# The concern here is in-kernel superblock parsers bringing down the
-# host with bad data.  However, we continue to disallow proc, sys, securityfs,
-# etc to nonstandard locations.
-  mount fstype=ext*,
-  mount fstype=xfs,
-  mount fstype=btrfs,
-
-# KLM: for autofs and nfs
-  mount fstype=nfs,
-  mount fstype=autofs,
-  mount fstype=nfs4,
-  mount fstype=rpc_pipefs,
-  mount fstype=nfsd,
-  mount options=(rw, bind, ro, rslave, nosuid, nodev, noexec),
-
-# KLM: for proc mounting inside by X2GO thin client
-#      these can be commented out after the installation is complete
-#      for increased security
-  mount fstype=proc -> /opt/x2gothinclient/chroot/proc/,
-  mount fstype=sysfs -> /opt/x2gothinclient/chroot/sys/,
-}
-EOF
+  cp /tmp/bcfg2/Cfg/etc/apparmor.d/lxc/lxc-umbrella-server/lxc-umbrella-server \
+     /etc/apparmor.d/lxc/lxc-umbrella-server
   systemctl reload apparmor.service
   if [ "$DISTRIB_CODENAME" = "xenial" ]; then
     # xenial
@@ -1215,12 +1200,8 @@ EOF
   else
     # not xenial
     # root needs to have assigned subuid and subgid ranges
-    cat >/etc/subuid <<EOF
-root:100000:65536
-EOF
-    cat >/etc/subgid <<EOF
-root:100000:65536
-EOF
+    cp /tmp/bcfg2/Cfg/etc/subuid/subuid /etc/subuid
+    cp /tmp/bcfg2/Cfg/etc/subgid/subgid /etc/subgid
     # we also disable and mask waiting for network devices to become online
     rm -f /etc/systemd/system/systemd-networkd-wait-online.service
     ln -s /dev/null /etc/systemd/system/systemd-networkd-wait-online.service
@@ -1250,8 +1231,9 @@ if [[ ! $(lxc profile list) =~ "router" ]]; then
   lxc network attach-profile ${pub_br} router ${router_pub_dev}
   lxc network attach-profile ${sec_br} router ${router_sec_dev}
   lxc network attach-profile ${DMZ_br} router ${router_DMZ_dev}
-  lxc profile set router raw.lxc lxc.apparmor.profile=lxc-container-default-with-mounting
-  lxc profile set router security.privileged true
+  lxc profile set router raw.lxc lxc.apparmor.profile=lxc-umbrella-server
+  lxc profile set router security.privileged false
+  lxc profile set router raw.idmap 'both 1000-50999 1000-50999'
   ) 2>&1 | cat >/var/log/umbrella-install.log
   if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok
@@ -1927,8 +1909,11 @@ create_profile() {
     lxc profile create ${subnet}srv
     lxc profile device add ${subnet}srv root disk path=/ pool=default
     lxc network attach-profile ${bridge} ${subnet}srv eth0
-    lxc profile set ${subnet}srv raw.lxc lxc.apparmor.profile=lxc-container-default-with-mounting
-    lxc profile set ${subnet}srv security.privileged true
+    lxc profile set ${subnet}srv raw.lxc lxc.apparmor.profile=lxc-umbrella-server
+    lxc profile set ${subnet}srv security.privileged false
+    if [[ "${subnet}" = "pub" ]]; then
+      lxc profile set ${subnet}srv raw.idmap 'both 1000-50999 1000-50999'
+    fi
     ) 2>&1 | cat >/var/log/umbrella-install.log
     if [ ${PIPESTATUS[0]} -eq 0 ]; then
       echo ok
@@ -2690,7 +2675,7 @@ pull_umbrella_keys_data
 fi
 
 # proceed with other VMs
-create_vm proxy configure_quirks_init_krb5_ldap
+create_vm proxy configure_quirks_init_krb5_ldap configure_quirks_ejabberd
 
 # after "proxy" is configured, reenable APT proxy on "config"
 lxc exec ${config_hostname} -- /bin/bash -c \
@@ -2769,6 +2754,9 @@ if lxc exec ${ltsp_hostname} -- /bin/bash -c \
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
     "rm -rf /opt/x2gothinclient/chroot"
+
+  lxc exec ${ltsp_hostname} -- /bin/bash -c \
+    "${APT_GET_INSTALL} fakeroot"
 
   lxc exec ${ltsp_hostname} -- /bin/bash -c \
     "env TC_NONINTERACTIVE=yes x2gothinclient_create"

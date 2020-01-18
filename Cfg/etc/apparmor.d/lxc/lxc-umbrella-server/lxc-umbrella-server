@@ -1,0 +1,15 @@
+# Do not load this file.  Rather, load /etc/apparmor.d/lxc-containers, which
+# will source all profiles under /etc/apparmor.d/lxc
+
+profile lxc-umbrella-server flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/lxc/container-base>
+  #include <abstractions/lxc/start-container>
+
+  # for systemd to start
+  mount fstype=cgroup options=(rw,bind,nosuid,nodev,noexec) -> /sys/fs/cgroup/**,
+  mount fstype=cgroup2 options=(rw,bind,nosuid,nodev,noexec) -> /sys/fs/cgroup/**,
+
+  # for proc mounting inside by X2GO thin client
+  mount fstype=proc options=ro -> /opt/x2gothinclient/chroot/proc/,
+  mount fstype=sysfs options=ro -> /opt/x2gothinclient/chroot/sys/,
+}

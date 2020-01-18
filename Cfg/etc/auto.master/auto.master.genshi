@@ -1,0 +1,16 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+servers_with_nfs=['router','config','proxy','mail','monitor','nfs','ltsp']
+%}\
++auto.master
+{% if not 'lxd-containers-host' in metadata.groups %}\
+/nfs   /etc/auto.nfs  --timeout=60
+{% end %}\
+{% if 'lxd-containers-host' in metadata.groups %}\
+/nfs   /etc/auto.bind  --timeout=60
+{%     for server in servers_with_nfs %}\
+/var/lib/lxd/storage-pools/default/containers/${funchostsshort[server]}/rootfs/nfs /etc/auto.bind --timeout=60
+{%     end %}\
+{% end %}\

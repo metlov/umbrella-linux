@@ -19,6 +19,12 @@
                       <!-- log in, but, if SSH is served by the LTSP   -->
                       <!-- server, everybody with POSIX account will   -->
                       <!-- be able to do so.                           -->
+    <!-- <forward_smtps_imaps_to_mail/> --> <!-- as the nams says, this -->
+                      <!-- enables forwarding of the incoming SMTPS and -->
+                      <!-- IMAPS connections from the external interface-->
+                      <!-- to the mail server in pub. It also enables   -->
+                      <!-- Outlook and Thunderbird autodiscover on the  -->
+                      <!-- external interface.                          -->
     <!-- <auth_in_DMZ> --> <!-- enables access to LDAP and Kerberos from    -->
                            <!-- within DMZ. May be useful if the WEB server -->
                            <!-- needs to authenticate users.                -->
@@ -48,7 +54,7 @@
                                <!-- features from VPN. Most notably to the  -->
                                <!-- directory service and ssh ports in pub. -->
     <DNS_SMTP_lists>
-        <whitelist>list.dnswl.org</whitelist>
+        <whitelist recordMatch="127.0.[0..255].[1..3]">list.dnswl.org</whitelist>
         <blacklist>b.barracudacentral.org</blacklist>
         <blacklist>zen.spamhaus.org</blacklist>
         <blacklist>cbl.abuseat.org</blacklist>

@@ -39,7 +39,7 @@ session required        pam_encfs.so
 session optional                        pam_ldap.so
 {% end %}\
 session optional                        pam_ck_connector.so nox11
-{% if 'local-fs' in metadata.groups %}\
+{% if 'local-fs' in metadata.groups or 'autologin' in metadata.groups %}\
 {%   if 'DMZwww' in metadata.groups %}\
 session required pam_mkhomedir.so
 {%   end %}\

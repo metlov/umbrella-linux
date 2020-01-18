@@ -1,11 +1,20 @@
 <Bundle>
 <Group name='ubuntu'>
-    <!-- starting with Precise homes are mounted via autofs    -->
-    <!-- this works even if no nfs server is defined, in which -->
-    <!-- case they are bound to local /home                    -->
-    <Path name='/etc/auto.master'/>
-    <Path name='/etc/auto.nfs'/>
-    <Package name='autofs'/>
-    <Service name='autofs'/>
+    <Group name='autofs'>
+        <!-- homes are mounted via autofs                          -->
+        <!-- this works even if no nfs server is defined, in which -->
+        <!-- case they are bound to local /home                    -->
+        <Path name='/etc/auto.master'/>
+        <Group name='lxd-containers-host' negate='true'>
+            <!-- host mounts /nfs from via nfs -->
+            <Path name='/etc/auto.nfs'/>
+        </Group>
+        <Group name='lxd-containers-host'>
+            <!-- host mounts /nfs for itself and for defined VMs via bind -->
+            <Path name='/etc/auto.bind'/>
+        </Group>
+        <Package name='autofs'/>
+        <Service name='autofs'/>
+    </Group>
 </Group>
 </Bundle>

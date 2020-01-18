@@ -44,6 +44,7 @@
         <Package name='cracklib-runtime'/>
         <Action name='update-cracklib'/>
         <Package name='sudo'/>
+        <Package name='sssd-tools'/>
     </Group>
     <!-- login configuration -->
     <Path name='/etc/pam.d/common-account'/>

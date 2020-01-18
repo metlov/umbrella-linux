@@ -81,3 +81,51 @@
   <regex offset="after_prematch">^(\S+): </regex>
   <order>extra_data</order>
 </decoder>
+
+<!-- decode OpenVPN messages -->
+<decoder name="openvpn">
+  <program_name>^ovpn-server</program_name>
+</decoder>
+<decoder name="openvpn-cannot-locate-HMAC">
+  <parent>openvpn</parent>
+  <prematch offset="after_parent">^TLS Error: cannot locate HMAC in incoming packet from </prematch>
+  <regex offset="after_prematch">(\d+.\d+.\d+.\d+):</regex>
+  <order>srcip</order>
+</decoder>
+<decoder name="openvpn-incoming-packet-auth-failed">
+  <parent>openvpn</parent>
+  <prematch offset="after_parent">^TLS Error: incoming packet authentication failed from </prematch>
+  <regex offset="after_prematch">(\d+.\d+.\d+.\d+):</regex>
+  <order>srcip</order>
+</decoder>
+
+<!-- decode rpc.gssd messages -->
+<decoder name="rpc.gssd">
+  <program_name>^rpc.gssd</program_name>
+</decoder>
+<decoder name="rpc.gssd-cant-open-pipefs">
+  <parent>rpc.gssd</parent>
+  <prematch offset="after_parent">^ERROR: can't open /run/rpc_pipefs/nfs/</prematch>
+  <regex offset="after_prematch">(\S+): No such file or directory</regex>
+  <order>extra_data</order>
+</decoder>
+
+<!-- decode org.gnome.keyring.SystemPrompter messages -->
+<decoder name="org.gnome.keyring.SystemPrompter">
+  <program_name>^org.gnome.keyring.SystemPrompter</program_name>
+</decoder>
+
+<!-- decode org.gtk.vfs.Daemon messages -->
+<decoder name="org.gtk.vfs.Daemon">
+  <program_name>^org.gtk.vfs.Daemon</program_name>
+</decoder>
+
+<!-- decode com.canonical.indicator.sound-gtk2 messages -->
+<decoder name="com.canonical.indicator.sound-gtk2">
+  <program_name>^com.canonical.indicator.sound-gtk2</program_name>
+</decoder>
+
+<!-- decode com.canonical.indicator.application messages -->
+<decoder name="com.canonical.indicator.application">
+  <program_name>^com.canonical.indicator.application</program_name>
+</decoder>

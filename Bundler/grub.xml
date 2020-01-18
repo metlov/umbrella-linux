@@ -17,6 +17,9 @@
     <Group name='physical'>
         <Package name='memtest86+'/>
     </Group>
+    <Group name='other-OS'>
+        <Package name='os-prober'/>
+    </Group>
     <Action name='update-grub'/>
 </Group>
 </Bundle>

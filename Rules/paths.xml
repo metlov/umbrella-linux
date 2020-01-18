@@ -64,6 +64,10 @@
 
 <Path type='nonexistent' name='/etc/apt/apt.conf'/>
 
+<!-- disable "execute" bit -->
+<Path type='permissions' name='/usr/bin/ubuntu-advantage' mode='644' owner='root' group='root'/>
+<Path type='permissions' name='/usr/lib/ubuntu-release-upgrader/release-upgrade-motd' mode='644' owner='root' group='root'/>
+
 <!-- auto-pruned zone file directory -->
 <Path type='directory' name='/etc/bind/zones' owner='root' group='root' mode='0755' prune='true'/>
 </Rules>

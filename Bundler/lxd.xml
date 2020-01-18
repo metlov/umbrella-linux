@@ -15,6 +15,9 @@
     <Package name='libxml2-utils'/>        <!-- for the maintenance mode  -->
                                            <!-- of the Umbrella Installer -->
 
+    <!-- apparmor profile for umbrella server containers -->
+    <Path name='/etc/apparmor.d/lxc/lxc-umbrella-server'/>
+
     <Path name='/etc/rc.local'/>            <!-- bufferbloat fix -->
 
     <Service name='lxcfs'/>

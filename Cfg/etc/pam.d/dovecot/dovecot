@@ -1,11 +1,11 @@
 #%PAM-1.0
 
 #@include common-auth
-auth    sufficient pam_krb5.so minimum_uid=1100 defer_pwchange
+auth    sufficient pam_krb5.so minimum_uid=1100 defer_pwchange ignore_k5login
 auth    required   pam_deny.so
 
 #@include common-account
-account sufficient pam_krb5.so minimum_uid=1100
+account sufficient pam_krb5.so minimum_uid=1100 ignore_k5login
 account required   pam_deny.so
 
 #@include common-session

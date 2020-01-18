@@ -16,7 +16,12 @@ execfile(repo+'/Python/10_funchosts.py')
          <port>143</port>
          <socketType>SSL</socketType>
          <username>%EMAILLOCALPART%</username>
+{% if 'config' in metadata.groups %}\
          <authentication>GSSAPI</authentication>
+{% end %}\
+{% if 'DMZwww' in metadata.groups %}\
+         <authentication>password-cleartext</authentication>
+{% end %}\
       </incomingServer>
 
       <outgoingServer type="smtp">
@@ -24,7 +29,12 @@ execfile(repo+'/Python/10_funchosts.py')
          <port>587</port>
          <socketType>STARTTLS</socketType> <!-- see above -->
          <username>%EMAILLOCALPART%</username>
+{% if 'config' in metadata.groups %}\
          <authentication>GSSAPI</authentication>
+{% end %}\
+{% if 'DMZwww' in metadata.groups %}\
+         <authentication>password-cleartext</authentication>
+{% end %}\
          <!-- remove the following and leave to client/user? -->
          <addThisServer>true</addThisServer>
          <useGlobalPreferredServer>true</useGlobalPreferredServer>
