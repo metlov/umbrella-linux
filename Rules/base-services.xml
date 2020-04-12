@@ -110,5 +110,13 @@
   <Service name='ufw' status='on' type='systemd'/>
   <Service name='nut-server' status='on' type='systemd'/>
   <Service name='nut-client' status='on' type='systemd'/>
+
+  <!-- extra services, integrated in complex bundles -->
+  <Group name='DMZvidconf'>
+    <Service name='coturn' status='on' type='systemd'/>
+    <Service name='kurento-media-server' status='on' restart='true' type='systemd'/>
+    <Service name='openmeetings' status='on' type='systemd'/>
+  </Group>
+
 </Group>
 </Rules>

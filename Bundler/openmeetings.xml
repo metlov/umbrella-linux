@@ -1,0 +1,304 @@
+<Bundle>
+<Group name='ubuntu'>
+    <!-- This bundle installs OpenMeetings 5.0.0-M3 semi-automatically,    -->
+    <!-- requiring a manual compilation of ffmpeg (necessary for licensing -->
+    <!-- reasons), manual download and unpacking of openmeetings binary -->
+    <!-- from https://www.apache.org/openmeetings/5.0.0-M3/bin/apache-openmeetings-5.0.0-M3.tar.gz -->
+    <!-- into /opt/open503 and manual database creation. -->
+    <!-- -->
+    <!-- Database can be created by logging into the local (on DMZvidconf) -->
+    <!-- mysql database as root with -->
+    <!-- # mysql -u root -p -->
+    <!-- using MySQLbackuppass from umbrella_keys.xml . -->
+    <!-- Then running the following commands: -->
+    <!-- CREATE DATABASE openmeetings DEFAULT CHARACTER SET 'utf8'; -->
+    <!-- GRANT ALL PRIVILEGES ON openmeetings.* TO 'openmeetings'@'localhost' IDENTIFIED BY '<random password>' WITH GRANT OPTION; -->
+    <!-- Database name, user name and the password should then be provided to -->
+    <!-- openmeetings installation script through the web interface.       -->
+    <!-- -->
+    <!-- The interface itself can be attached to the main web site (served -->
+    <!-- by DMZwww server) by appending the following to the ssl-protected -->
+    <!-- config (needs mod_rewrite, mod_proxy, mod_proxy_http and -->
+    <!-- mod_proxy_wstunnel enabled): -->
+    <!--
+	# proxy open meetings
+	ProxyPreserveHost On
+	ProxyRequests Off
+
+	RewriteEngine on
+	RewriteCond %{HTTP:UPGRADE} ^WebSocket$ [NC]
+	RewriteCond %{HTTP:CONNECTION} ^Upgrade$ [NC]
+	RewriteRule .* ws://<hostname.of.DMZvidconf>:5080%{REQUEST_URI} [P]
+
+	ProxyPass /openmeetings/wicket/websocket ws://<hostname.of.DMZvidconf>:5080/openmeetings/wicket/websocket
+	ProxyPassReverse /openmeetings/wicket/websocket ws://<hostname.of.DMZvidconf>:5080/openmeetings/wicket/websocket
+	ProxyPass /openmeetings http://<hostname.of.DMZvidconf>:5080/openmeetings
+	ProxyPassReverse /openmeetingst http://<hostname.of.DMZvidconf>:5080/openmeetings
+    -->
+
+    <!-- The rest of configuration and maintenance should be automatic. -->
+    <!-- LDAP authentication can be enabled in OpenMeetings using provided -->
+    <!-- om_umbrella_ldap.cfg -->
+    <!-- -->
+    <!-- Please also note that the turn server secret is going to be        -->
+    <!-- regenerated during bcfg2 client run if it is older than a day, which -->
+    <!-- will incur a (rather lengthy) tomcat server restart and openmeetings -->
+    <!-- application redeploymend. Please use this as a feature (a convenient -->
+    <!-- way to refresh the turn server password when no conference is running) -->
+    <!-- rather than a bug, which can disrupt a running conference by -->
+    <!-- openmeetings server restart. -->
+
+    <!-- openjdk 11 -->
+    <Package name='openjdk-11-jdk'/>
+    <Package name='openjdk-11-jdk-headless'/>
+    <Package name='default-jdk-headless'/>
+    <Package name='default-jdk-headless'/>
+    <Package name='fonts-dejavu-core'/>
+
+    <!-- libreoffice and related -->
+    <Package name='libreoffice'/>
+    <Package name='dconf-gsettings-backend'/>
+    <Package name='dconf-service'/>
+    <Package name='humanity-icon-theme'/>
+    <Package name='ubuntu-mono'/>
+
+    <!-- imagemagick -->
+    <Package name='imagemagick'/>
+    <Path name='/etc/ImageMagick-6/policy.xml'/>
+    <Package name='libjpeg62'/>
+
+    <!-- ghostscript -->
+    <Package name='ghostscript'/>
+    <Package name='gsfonts'/>
+    <Package name='poppler-utils'/>
+
+    <!-- sox -->
+    <Package name='sox'/>
+    <Package name='libsox-fmt-alsa'/>
+
+    <!-- development libraties for compiling ffmpeg -->
+    <Package name='zlib1g-dev'/>
+    <Package name='autoconf'/>
+    <Package name='automake'/>
+    <Package name='build-essential'/>
+    <Package name='libass-dev'/>
+    <Package name='libfreetype6-dev'/>
+    <Package name='libgpac-dev'/>
+    <Package name='libsdl1.2-dev'/>
+    <Package name='libtheora-dev'/>
+    <Package name='libtool'/>
+    <Package name='libva-dev'/>
+    <Package name='libvdpau-dev'/>
+    <Package name='libvorbis-dev'/>
+    <Package name='libxcb1-dev'/>
+    <Package name='libxcb-shm0-dev'/>
+    <Package name='libxcb-xfixes0-dev'/>
+    <Package name='pkg-config'/>
+    <Package name='texi2html'/>
+    <Package name='zlib1g-dev'/>
+    <Package name='nasm'/>
+    <Package name='libx264-dev'/>
+    <Package name='cmake'/>
+    <Package name='mercurial'/>
+    <Package name='libopus-dev'/>
+    <Package name='curl'/>
+    <Package name='git'/>
+    <Package name='vlc'/>
+    <Package name='unzip'/>
+    <Package name='make'/>
+    <Package name='build-essential'/>
+    <Package name='wget'/>
+    <Package name='nmap'/>
+    <Package name='mesa-common-dev'/>
+    <Package name='libgl1-mesa-dev'/>
+    <Package name='libglu1-mesa-dev'/>
+    <Package name='libglvnd-dev'/>
+    <Package name='x11proto-core-dev'/>
+    <Package name='x11proto-damage-dev'/>
+    <Package name='x11proto-fixes-dev'/>
+    <Package name='x11proto-input-dev'/>
+    <Package name='x11proto-kb-dev'/>
+    <Package name='x11proto-xext-dev'/>
+    <Package name='x11proto-xf86vidmode-dev'/>
+    <Package name='libavcodec57'/>
+    <Package name='libblas3'/>
+    <Package name='libfdk-aac-dev'/>
+    <Package name='libmp3lame-dev'/>
+    <Package name='libvpx-dev'/>
+
+    <!-- ffmpeg compilation script. Run it manually as root once.    -->
+    <!-- You will need to download sources manually and copy them    -->
+    <!-- into /root/ffmpeg_sources on the DMZvidconf server in DMZ -->
+    <Path name='/usr/local/bin/ffmpeg-compile.sh'/>
+
+    <!-- Kurento media server and its dependencies -->
+    <!-- Of course packages plugin could have handled these dependencies -->
+    <!-- automatically, but let us avoid modifying Packages/sources.xml  -->
+    <!-- for now. -->
+    <BoundPOSIXGroup name="rdma" gid="674"/>
+    <BoundPOSIXGroup name="kurento" gid="999"/>
+    <BoundPOSIXUser name="kurento" home="/var/lib/kurento" shell="/bin/sh" gecos="" uid="999" group="kurento"/>
+    <Path name='/etc/apt/sources.list.d/kurento.list'/>
+    <Path name='/etc/apt/trusted.gpg.d/kurento.gpg'/>
+    <Package name='kurento-media-server'/>
+    <Package name='kurento-media-server-dev'/>
+    <Package name='kurento-module-creator'/>
+    <Package name='gstreamer1.5-libav'/>
+    <Package name='gstreamer1.5-nice'/>
+    <Package name='gstreamer1.5-plugins-bad'/>
+    <Package name='gstreamer1.5-plugins-base'/>
+    <Package name='gstreamer1.5-plugins-good'/>
+    <Package name='gstreamer1.5-plugins-ugly'/>
+    <Package name='gstreamer1.5-pulseaudio'/>
+    <Package name='libgstreamer-plugins-bad1.5-0'/>
+    <Package name='libgstreamer-plugins-base1.5-0'/>
+    <Package name='libgstreamer-plugins-base1.5-dev'/>
+    <Package name='libgstreamer1.5-0'/>
+    <Package name='libgstreamer1.5-dev'/>
+    <Package name='kms-cmake-utils'/>
+    <Package name='kms-core'/>
+    <Package name='kms-core-dev'/>
+    <Package name='kms-elements'/>
+    <Package name='kms-elements-dev'/>
+    <Package name='kms-filters'/>
+    <Package name='kms-filters-dev'/>
+    <Package name='kms-jsonrpc'/>
+    <Package name='kms-jsonrpc-dev'/>
+    <Package name='kmsjsoncpp'/>
+    <Package name='kmsjsoncpp-dev'/>
+    <Package name='libopencv3.2-jni'/>
+    <Package name='libopencv3.2-java'/>
+    <Package name='libopencv-viz-dev'/>
+    <Package name='libboost-dev'/>
+    <Package name='libboost-atomic1.65-dev'/>
+    <Package name='libboost-chrono1.65-dev'/>
+    <Package name='libboost-date-time1.65-dev'/>
+    <Package name='libboost-filesystem-dev'/>
+    <Package name='libboost-filesystem1.65-dev'/>
+    <Package name='libboost-log-dev'/>
+    <Package name='libboost-log1.65-dev'/>
+    <Package name='libboost-program-options-dev'/>
+    <Package name='libboost-program-options1.65-dev'/>
+    <Package name='libboost-regex-dev'/>
+    <Package name='libboost-regex1.65-dev'/>
+    <Package name='libboost-serialization1.65-dev'/>
+    <Package name='libboost-system-dev'/>
+    <Package name='libboost-system1.65-dev'/>
+    <Package name='libboost-test-dev'/>
+    <Package name='libboost-test1.65-dev'/>
+    <Package name='libboost-thread-dev'/>
+    <Package name='libboost-thread1.65-dev'/>
+    <Package name='libaopalliance-java'/>
+    <Package name='libavutil-dev'/>
+    <Package name='libavcodec-dev'/>
+    <Package name='libavformat-dev'/>
+    <Package name='libavresample-dev'/>
+    <Package name='libavutil-dev'/>
+    <Package name='gir1.2-freedesktop'/>
+    <Package name='gir1.2-gssdp-1.0'/>
+    <Package name='gir1.2-gst-plugins-base-1.5'/>
+    <Package name='gir1.2-gstreamer-1.5'/>
+    <Package name='gir1.2-gupnp-1.0'/>
+    <Package name='gir1.2-gupnpigd-1.0'/>
+    <Package name='gir1.2-nice-0.1'/>
+    <Package name='gir1.2-soup-2.4'/>
+    <Package name='libapache-pom-java'/>
+    <Package name='libatinject-jsr330-api-java'/>
+    <Package name='libopencv-dev'/>
+    <Package name='libopenexr-dev'/>
+    <Package name='libp11-kit-dev'/>
+    <Package name='libplexus-cipher-java'/>
+    <Package name='libplexus-classworlds-java'/>
+    <Package name='libplexus-component-annotations-java'/>
+    <Package name='libplexus-interpolation-java'/>
+    <Package name='libplexus-sec-dispatcher-java'/>
+    <Package name='libplexus-utils2-java'/>
+    <Package name='libguava-java'/>
+    <Package name='libguice-java'/>
+    <Package name='libidn2-dev'/>
+    <Package name='libjansi-native-java'/>
+    <Package name='libjsr305-java'/>
+    <Package name='libmaven-parent-java'/>
+    <Package name='libmaven-resolver-java'/>
+    <Package name='libmaven-shared-utils-java'/>
+    <Package name='libmaven3-core-java'/>
+    <Package name='maven'/>
+    <Package name='nettle-dev'/>
+    <Package name='openh264'/>
+    <Package name='openh264-gst-plugins-bad-1.5'/>
+    <Package name='openwebrtc-gst-plugins'/>
+    <Package name='openwebrtc-gst-plugins-dev'/>
+    <Package name='libxml2-dev'/>
+    <Package name='uuid-dev'/>
+    <Package name='opencv-data'/>
+    <Package name='ocl-icd-libopencl1'/>
+    <Package name='libzbar0'/>
+    <Package name='libwildmidi2'/>
+    <Package name='libwildmidi-config'/>
+    <Package name='libvo-aacenc0'/>
+    <Package name='libvo-amrwbenc0'/>
+    <Package name='libbs2b0'/>
+    <Package name='libcdio17'/>
+    <Package name='libcdparanoia0'/>
+    <Package name='libde265-0'/>
+    <Package name='libdv4'/>
+    <Package name='libevent-2.1-6'/>
+    <Package name='libevent-dev'/>
+    <Package name='libevent-extra-2.1-6'/>
+    <Package name='libevent-openssl-2.1-6'/>
+    <Package name='libevent-pthreads-2.1-6'/>
+    <Package name='libfreemarker-java'/>
+    <Package name='libglibmm-2.4-dev'/>
+    <Package name='libgnutls28-dev'/>
+    <Package name='libgssdp-1.0-dev'/>
+    <Package name='libgupnp-1.0-dev'/>
+    <Package name='libgupnp-igd-1.0-dev'/>
+    <Package name='libidn2-0-dev'/>
+    <Package name='libnice-dev'/>
+    <Package name='libsigc++-2.0-dev'/>
+    <Package name='libsoup2.4-dev'/>
+    <Package name='libssl1.0-dev'/>
+    <Package name='libtasn1-6-dev'/>
+    <Package name='libflite1'/>
+    <Package name='libfluidsynth1'/>
+    <Package name='libgoogle-gson-java'/>
+    <Package name='libiec61883-0'/>
+    <Package name='libjack-jackd2-0'/>
+    <Package name='liblapack3'/>
+    <Package name='libmimic0'/>
+    <Package name='libmjpegutils-2.1-0'/>
+    <Package name='libmms0'/>
+    <Package name='libmodplug1'/>
+    <Package name='libmpeg2encpp-2.1-0'/>
+    <Package name='libmplex2-2.1-0'/>
+    <Package name='libofa0'/>
+    <Package name='libopenal-data'/>
+    <Package name='libopenal1'/>
+    <Package name='libsbc1'/>
+    <Package name='libsidplay1v5'/>
+    <Package name='libsoundtouch1'/>
+    <Package name='libspandsp2'/>
+    <Package name='libsrtp0'/>
+    <Package name='libusrsctp'/>
+    <Package name='libvisual-0.4-0'/>
+    <Path name='/etc/default/kurento-media-server'/>
+    <Service name='kurento-media-server'/>
+
+    <Path name='/opt/open503/webapps/openmeetings/data/conf/om_umbrella_ldap.cfg'/>
+    <Path name='/opt/open503/conf/server.xml'/>
+    <Action name='maintain-umbrella-CA-jks'/> <!-- maintain /etc/ssl/umbrella_CA.jks -->
+    <Path name='/opt/open503/bin/setenv.sh'/>
+    <Path name='/etc/systemd/system/openmeetings.service'/>
+    <Service name='openmeetings'/>
+
+    <!-- coturn for NAT traversal -->
+    <BoundPOSIXGroup name="turnserver" gid="675"/>
+    <BoundPOSIXUser name="turnserver" home="/" shell="/bin/false" gecos="turnserver daemon" uid="675" group="turnserver"/>
+    <Package name='coturn'/>
+    <Package name='telnet'/>
+    <Path name='/etc/turnserver.conf'/>
+    <Path name='/opt/open503/webapps/openmeetings/WEB-INF/classes/applicationContext.xml'/>
+    <Service name='coturn'/>
+
+</Group>
+</Bundle>

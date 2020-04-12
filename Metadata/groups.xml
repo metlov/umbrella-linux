@@ -61,6 +61,11 @@
       <Bundle name='redis'/>
       <Bundle name='invenio'/>
    </Group>
+   <Group profile='true' name='DMZvidconf'>  <!-- videoconference server -->
+      <Group name='DMZserver'/>
+      <Group name='database-server'/>
+      <Bundle name='openmeetings'/>
+   </Group>
    <Group profile='true' name='nfs'>
       <Group name='pubserver'/>
       <Group name='nfs-home-server'/>

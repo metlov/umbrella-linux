@@ -1,0 +1,2 @@
+# Kurento Media Server - Release packages
+deb [arch=amd64] http://ubuntu.openvidu.io/6.13.0 bionic kms6

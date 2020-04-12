@@ -117,6 +117,9 @@ if 'DMZpbx' in funchosts:
 if 'DMZvpn' in funchosts:
   DMZ_VPN_IP=funcifs['DMZvpn']       # address of the VPN server in DMZ
 
+if 'DMZvidconf' in funchosts:
+  DMZ_VIDCONF_IP=funcifs['DMZvidconf']  # address of the Video Conferences server in DMZ
+
 if 'monitor' in funchosts:
   PUB_MONITOR_IP=funcifs['monitor'] # address of the monitoring server in Public net
 

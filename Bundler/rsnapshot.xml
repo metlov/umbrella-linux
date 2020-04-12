@@ -19,6 +19,9 @@ execfile(repo+'/Python/10_funchosts.py')
     <py:if test="'DMZlib' in funchosts">
         <Path name='/etc/rsnapshot_dump_mysql_DMZlib' altsrc='/etc/rsnapshot_dump_mysql_funchost'/>
     </py:if>
+    <py:if test="'DMZvidconf' in funchosts">
+        <Path name='/etc/rsnapshot_dump_mysql_DMZvidconf' altsrc='/etc/rsnapshot_dump_mysql_funchost'/>
+    </py:if>
     <Path name='/etc/rsnapshot_dump_LDAP'/>
     <Path name='/root/.my.cnf'/>           <!-- needed for mysql backups -->
     <Package name='mysql-client'/>         <!-- needed for mysql backups -->

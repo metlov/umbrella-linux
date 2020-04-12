@@ -160,6 +160,49 @@ ${REJECT_INTERNAL_INPUT_ON_IF('INPUT', INTIF)}
 {% end %}\
 
 {% end %}\
+{% if 'DMZvidconf' in funchosts %}\
+{%   if extif_enabled %}\
+# External interface, incoming coturn connections (TCP IN, UDP IN/OUT)
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p tcp --dport 3478 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_VIDCONF_IP} -p tcp --sport 3478 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p udp --dport 3478 -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_VIDCONF_IP} -p udp --sport 3478 -j ACCEPT
+# External interface, coturn connections (UDP IN/OUT)
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p udp -m udp --dport 49152:65535 -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_VIDCONF_IP} -p udp -j ACCEPT
+
+# External interface, incoming kurento connections (TCP IN)
+-A FORWARD -i ${EXTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p tcp --dport 8888 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${EXTIF} -s ${DMZ_VIDCONF_IP} -p tcp --sport 8888 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{%   if intif_enabled %}\
+# Intranet interface, incoming coturn connections (TCP IN, UDP IN/OUT)
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p tcp --dport 3478 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_VIDCONF_IP} -p tcp --sport 3478 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p udp --dport 3478 -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_VIDCONF_IP} -p udp --sport 3478 -j ACCEPT
+# Intranet interface, coturn connections (UDP IN/OUT)
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p udp -m udp --dport 49152:65535 -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_VIDCONF_IP} -p udp -j ACCEPT
+
+# Intranet interface, incoming kurento connections (TCP IN)
+-A FORWARD -i ${INTIF} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p tcp --dport 8888 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${INTIF} -s ${DMZ_VIDCONF_IP} -p tcp --sport 8888 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+# coturn connections from pub (TCP IN, UDP IN/OUT)
+-A FORWARD -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p tcp --dport 3478 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_VIDCONF_IP} -p tcp --sport 3478 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p udp --dport 3478 -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_VIDCONF_IP} -p udp --sport 3478 -j ACCEPT
+# coturn connections from pub (UDP IN/OUT)
+-A FORWARD -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p udp -m udp --dport 49152:65535 -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_VIDCONF_IP} -p udp -j ACCEPT
+
+# kurento connections from pub (TCP IN)
+-A FORWARD -i ${IFPUB} -o ${IFDMZ} -d ${DMZ_VIDCONF_IP} -p tcp --dport 8888 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i ${IFDMZ} -o ${IFPUB} -s ${DMZ_VIDCONF_IP} -p tcp --sport 8888 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+{% end %}\
 {# The next block must match a similar block (below) of NAT rules #}\
 {% if ('mail' in funchosts) %}\
 {%     if ('DMZsmtp' in funchosts) %}\
@@ -437,6 +480,16 @@ ${ACCEPT_AUTH_FROM_IF('FORWARD', IFDMZ)}\
 # which are accessible via http at the configuration server.
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -d ${PUB_BCFG2_IP} --dport 80 -j ACCEPT
 {% end %}\
+{% if 'vpnif' in networks and 'DMZvpn' in funchosts %}\
+# allow pings between VPN and PUB and to the INTERNET
+-A FORWARD -p icmp -i ${IFDMZ} -o ${IFPUB} -s ${NETVPN} -d ${NETPUB} -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+{% if extif_enabled %}\
+-A FORWARD -p icmp -i ${IFDMZ} -o ${EXTIF} -s ${NETVPN} -d ${UNIVERSE} -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% if intif_enabled %}\
+-A FORWARD -p icmp -i ${IFDMZ} -o ${INTIF} -s ${NETVPN} -d ${UNIVERSE} -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+{% end %}\
+{% end %}\
 {% if admin_from_VPN and 'vpnif' in networks %}\
 # from VPN: access to gosa (fusion directory)
 -A FORWARD -p tcp -i ${IFDMZ} -o ${IFPUB} -s ${NETVPN} -d ${PUB_BCFG2_IP} --dport 443 -j ACCEPT
@@ -584,6 +637,32 @@ COMMIT
 {% end %}\
 {% if extif_enabled and not intif_enabled %}\
 -A PREROUTING -p tcp -d ${EXTIP} --dport 5061 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_PBX_IP}:5061
+{% end %}\
+
+{% end %}\
+{% if 'DMZvidconf' in funchosts %}\
+#Forward incoming packets (TCP/UDP) on port 3478 to DMZvidconf (coturn)
+{% if intif_enabled and not extif_enabled %}\
+-A PREROUTING -p tcp -d ${INTIP} --dport 3478 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VIDCONF_IP}:3478
+-A PREROUTING -p udp -d ${INTIP} --dport 3478 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VIDCONF_IP}:3478
+{% end %}\
+{% if extif_enabled and not intif_enabled %}\
+-A PREROUTING -p tcp -d ${EXTIP} --dport 3478 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VIDCONF_IP}:3478
+-A PREROUTING -p udp -d ${EXTIP} --dport 3478 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VIDCONF_IP}:3478
+{% end %}\
+#Forward incoming packets (UDP) on ports 49152-65535 to DMZvidconf (coturn)
+{% if intif_enabled and not extif_enabled %}\
+-A PREROUTING -d ${INTIP} -p udp -m udp --dport 49152:65535 -j DNAT --to-destination ${DMZ_VIDCONF_IP}
+{% end %}\
+{% if extif_enabled and not intif_enabled %}\
+-A PREROUTING -d ${EXTIP} -p udp -m udp --dport 49152:65535 -j DNAT --to-destination ${DMZ_VIDCONF_IP}
+{% end %}\
+#Forward incoming packets (TCP) on port 8888 to DMZvidconf (kurento)
+{% if intif_enabled and not extif_enabled %}\
+-A PREROUTING -p tcp -d ${INTIP} --dport 8888 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VIDCONF_IP}:8888
+{% end %}\
+{% if extif_enabled and not intif_enabled %}\
+-A PREROUTING -p tcp -d ${EXTIP} --dport 8888 -m conntrack --ctstate NEW,ESTABLISHED,RELATED -j DNAT --to ${DMZ_VIDCONF_IP}:8888
 {% end %}\
 
 {% end %}\

@@ -19,6 +19,9 @@ Cfg/etc/bind/zones/zone/zone.H_dummy.sequence
 Cfg/etc/nut/upsd.users/upsd.users.H_master.dummy.pass
 Cfg/etc/nut/upsd.users/upsd.users.H_slave.dummy.pass
 
+# Ingnore generated and stored TURN server secret
+Cfg/etc/turnserver.conf/turnserver.conf.H_staticsecret.dummy.pass
+
 # Ignore ta.key storage file
 Cfg/etc/openvpn/ta.key/ta.key.H_dummy.host
 

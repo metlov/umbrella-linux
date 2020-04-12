@@ -1,0 +1,9 @@
+START_DAEMON="true"    # If not "true", the daemon will refuse to load
+DAEMON_ARGS=""         # Passed directly to the kurento-media-server executable
+DAEMON_USER="kurento"   # User as whom Kurento Media Server will run
+DAEMON_LOG_DIR="/var/log/kurento-media-server"  # Where to store daemon logs
+export GST_DEBUG="3,Kurento*:4,kms*:4,sdp*:4,webrtc*:4,*rtpendpoint:4,rtp*handler:4,rtpsynchronizer:4,agnosticbin:4"
+export GST_DEBUG_NO_COLOR=1
+export KURENTO_LOGS_PATH="$DAEMON_LOG_DIR"
+unset GST_PLUGIN_PATH
+DAEMON_MAX_FILES="$(( ($(cat /proc/sys/fs/file-max) * 50) / 100 ))"

@@ -276,5 +276,8 @@ backup_script	/etc/rsnapshot_dump_mysql_DMZwww	_databases_${funchostsshort['DMZw
 {% if 'DMZlib' in funchosts %}\
 backup_script	/etc/rsnapshot_dump_mysql_DMZlib	_databases_${funchostsshort['DMZlib']}/
 {% end %}\
+{% if 'DMZvidconf' in funchosts %}\
+backup_script	/etc/rsnapshot_dump_mysql_DMZvidconf	_databases_${funchostsshort['DMZvidconf']}/
+{% end %}\
 backup_script	/etc/rsnapshot_dump_LDAP	_LDAP/
 #backup_script	/etc/rsnapshot_dump_svn	_subversion/

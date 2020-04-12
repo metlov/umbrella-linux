@@ -30,6 +30,7 @@ funchostdesc={ \
     'DMZpbx': 'PBX (telephony) server in DMZ.', \
     'DMZvpn': 'VPN server in DMZ.', \
     'DMZlib': 'Library (Invenio) server in DMZ.', \
+    'DMZvidconf': 'Video-conference server in DMZ.', \
   }
 
 # determine the mail servers

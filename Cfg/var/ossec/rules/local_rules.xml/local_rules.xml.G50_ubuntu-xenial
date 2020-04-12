@@ -287,7 +287,7 @@
 </group> <!-- SYSLOG, SYSTEMD -->
 
 <!-- do not send E-mails about assertion failure in com.canonical.indicator -->
-<group name="syslog,systemd,">
+<group name="syslog,indicator,">
   <rule id="100026" level="1">
     <if_sid>1002</if_sid>
     <decoded_as>com.canonical.indicator.application</decoded_as>
@@ -295,4 +295,22 @@
     <description>Suppress E-mail about assertion failure in com.canonical.indicator</description>
     <options>no_email_alert</options>
   </rule>
-</group> <!-- SYSLOG, SYSTEMD -->
+  <rule id="100027" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>com.canonical.indicator.sound-gtk2</decoded_as>
+    <match>libindicator-CRITICAL **: try_and_get_name_lost_cb: assertion 'connection != NULL' failed</match>
+    <description>Suppress E-mail about assertion failure in com.canonical.indicator.sound-gtk2</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, INDICATOR -->
+
+<!-- do not send E-mails about packet authentication errors    -->
+<group name="syslog,openvpn,">
+  <rule id="100028" level="1">
+    <if_sid>1002</if_sid>
+    <decoded_as>openvpn</decoded_as>
+    <match>^Authenticate/Decrypt packet error: packet HMAC authentication failed</match>
+    <description>Suppress E-mail about packet authentication error</description>
+    <options>no_email_alert</options>
+  </rule>
+</group> <!-- SYSLOG, POSTFIX -->

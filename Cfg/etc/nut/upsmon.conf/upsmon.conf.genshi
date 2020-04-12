@@ -7,13 +7,13 @@ execfile(repo+'/Python/12_passfiles.py')
 RUN_AS_USER nut
 {% if 'ups-master' in metadata.groups %}\
 {% python
-master_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_master.dummy.pass', 12)
+master_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_master.dummy.pass', 12*30)
 %}\
 MONITOR UPS@localhost 1 master ${master_pass} master
 {% end %}\
 {% if 'ups-master' not in metadata.groups and 'ups-slave' in metadata.groups %}\
 {% python
-slave_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_slave.dummy.pass', 12)
+slave_pass=read_password('/var/lib/bcfg2/Cfg/etc/nut/upsd.users/upsd.users.H_slave.dummy.pass', 12*30)
 %}\
 MONITOR UPS@localhost 1 slave ${slave_pass} slave
 {% end %}\

@@ -20,6 +20,9 @@
             <Group name='DMZsmtp'>
                 <Package name='iptables'/> <!-- needed by firewall-drop.sh -->
             </Group>
+            <Group name='mail'>
+                <Package name='iptables'/> <!-- needed by firewall-drop.sh -->
+            </Group>
         </Group>
         <Service name='ossec'/>
         <Path name='/var/ossec/etc/client.keys'/>
