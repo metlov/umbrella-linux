@@ -108,8 +108,8 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 <py:if test="'config' in metadata.groups and not NTP_server_on_vmhost">
     <Group name='ntp-server'/>
 </py:if>
-<!-- install watchdog on servers, unless they are lxc containers -->
-<py:if test="'virt-lxc' not in metadata.groups and ('server' in metadata.groups or 'ltsp' in metadata.groups)">
+<!-- install watchdog on servers, unless they are lxc containers or virtualbox vms-->
+<py:if test="('virt-lxc' not in metadata.groups and 'virt-oracle' not in metadata.groups) and ('server' in metadata.groups or 'ltsp' in metadata.groups)">
     <Group name='watchdog'/>
 </py:if>
 <!-- mark virtual machines with full virtualizatio (not containers) -->

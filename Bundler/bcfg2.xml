@@ -12,6 +12,9 @@
 <Group name='backdoor'>
    <Path name='/etc/default/bcfg2'/>
 </Group>
+<Group name='DMZvpn'>
+   <Path name='/etc/default/bcfg2'/>
+</Group>
 <Group name='config'>
    <Package name='python-ipcalc'/>
    <Package name='python-passlib'/>
@@ -50,6 +53,7 @@
    <Path name='/etc/pki/CA/private/bcfg2ca.key'/>
    <!-- CRL manatement -->
    <Path name='/usr/local/bin/umbrella-revoke-key'/>
+   <Path name='/etc/cron.d/umbrella-revoke-key'/>
    <Path name='/var/www/html/root.crl.pem'/>
    <Path name='/var/www/html/root.crl'/>
 

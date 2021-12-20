@@ -8,9 +8,6 @@ try:
 except socket.error:
   ip_addr=None
 
-# the whole network from umbrella.xml
-wholenet = ipcalc.Network(metadata.Properties['umbrella.xml'].xdata.find('net').text)
-
 # all networks from umbrella.xml
 networks = { \
 'pubif':ipcalc.Network(metadata.Properties['umbrella.xml'].xdata.find('pubnet').text), \
@@ -42,14 +39,13 @@ for ifname, ifnet in intnets.iteritems():
 # internal network interface names tuple
 intnet_ifs = tuple(intnets.iterkeys())
 
-# check that all the internal networks are part of the whole network
-intnets_copy=intnets
-intnets_copy.pop("vpnif", None)
-for network in intnets_copy.itervalues():
-  if not network in wholenet:
-    raise TemplateError('The network '+str(network)+'/'+str(network.mask)+\
-                        ' is not part of the whole network '+str(wholenet)+\
-                        '/'+str(network.mask)+' .')
+# check that internal networks do not intersect
+for T1, N1 in intnets.items():
+  for T2, N2 in intnets.items():
+    if N2 is not N1 and N2 in N1:
+      raise TemplateError('The \"'+T1[:-2]+'\" network '+str(N1)+' intersects '\
+                          ' the \"'+T2[:-2]+'\" network '+str(N2)+\
+                          ', which is not allowed .')
 
 # retrieve dhcp ranges
 pub_dhcp = metadata.Properties['umbrella.xml'].xdata.find('pub_dhcp')
@@ -62,7 +58,3 @@ if pub_dhcp is not None:
 DNScache=None
 if metadata.Properties['umbrella.xml'].xdata.find('DNScache') is not None:
   DNScache=[cache.text for cache in metadata.Properties['umbrella.xml'].xdata.findall('DNScache')]
-# transition code for the case when DMZsmtp was specified as DNS cache
-if DNScache is not None:
-  DNScache=[ ip for ip in DNScache if ipcalc.IP(ip) not in wholenet ]
-  if len(DNScache)==0: DNScache=None

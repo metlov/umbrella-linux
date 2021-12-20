@@ -1,21 +1,25 @@
-This is the source code of an Umbrella Linux Metadistribution and its
+This is the source code of an Umbrella Linux metadistribution and its
 configuration repository.
 
-The Umbrella Linux is a metadistribution for a cluster of Unix servers and
-workstations. It is a metadistribution, since the Linux packages themselves,
-which are used by Umbrella come from other Linux distributions (mostly from
-Ubuntu). The Umbrella Linux is a systems integration project for these
-packages, which organizes them into a coherent globally parametrized
-system of virtual servers and services. It allows to deploy on a couple
-of physical servers and a pile of network-installable workstations
-a complete computing and office environment for an organization.
+The Umbrella Linux is a scripted configuration for a cluster of Unix
+servers and workstations. It is a metadistribution in a sense that the
+Linux packages themselves, which are managed by Umbrella, come from
+other Linux distributions (most notably from Ubuntu). Under Umbrella
+these packages are used to create an integrated globally parametrized
+system of virtual servers and services. This system can be deployed on
+a single Umnbrella-managed physical server as a set of KVM/QEMU virtial
+machines, onto a third party virtualization platform or even into a single
+virtial machine as a set of Umbrella-managed LXD containers. Deployed
+Umbrella system can be used as a source for further automated network
+deployment of workstations and servers, creating a centrally-managed
+complete computing and office environment for an organization.
 
 At the heart of the Umbrella is the BCFG2 configuration management system,
-developed by Argonne National Laboratory. The Umbrella Linux itself is
+developed at Argonne National Laboratory. The Umbrella Linux itself is
 mainly a set of configuration files and scripts.
 
-The Umbrella Linux Metadistribution is provided to you under the terms 
-of the GNU General Public License version 3. The full authoritative text 
+The Umbrella Linux Metadistribution is provided to you under the terms
+of the GNU General Public License version 3. The full authoritative text
 of the license is contained in the LICENSE file at the root of this source
 tree (in the same directory as this README file). The files, referred by
 the Umbrella Linux Metadistribution (such as Ubuntu packages it is based on),
@@ -25,6 +29,6 @@ packages for details.
 Please note that Umbrella Linux comes with ABSOLUTELY NO WARRANTY. See the
 full text of the license for the details.
 
-Umbrella Linux (c) 2015 Konstantin L. Metlov <metlov@fti.dn.ua> and other
+Umbrella Linux (c) 2015-2021 Konstantin L. Metlov <metlov@fti.dn.ua> and other
 contributors. The contributors are listed in the copyright notices of
 the files they have authored.

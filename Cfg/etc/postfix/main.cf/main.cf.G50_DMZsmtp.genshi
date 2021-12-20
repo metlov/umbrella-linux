@@ -68,7 +68,7 @@ smtpd_client_restrictions =
     reject_rbl_client ${dnsname},
 {%   end %}\
 {%   if code is not None %}\
-    reject_rbl_client ${dnsname}=${dns_smtp_blacklist_codes[dnsname]},
+    reject_rbl_client ${dnsname}=${code},
 {%   end %}\
 {% end %}\
     permit

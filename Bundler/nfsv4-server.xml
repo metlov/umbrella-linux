@@ -18,6 +18,7 @@
             <Group name='ubuntu-xenial' negate='true'>
                <Service name='rpcbind'/>
             </Group>
+            <Service name='rpcbind'/>
             <Service name='rpcbind.socket'/>
         </Group>
         <Group name='ltsp' negate='true'>

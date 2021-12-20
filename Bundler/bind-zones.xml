@@ -1,0 +1,51 @@
+<Bundle xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+import socket
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/21_revzones.py')
+execfile(repo+'/Python/30_networking.py')
+?>
+<Group name='ubuntu'>
+    <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="108" group="bind"/>
+    <BoundPOSIXGroup name="bind" gid="113"/>
+    <Service name='bind9'/>
+    <Path name='/etc/bind/named.conf'/>
+    <Path name='/etc/bind/named.conf.local'/>
+    <Path name='/etc/bind/named.conf.options'/>
+    <Group name='DMZsmtp' negate='true'>
+        <Path name='/etc/bind'/> <!-- make writable for bind user -->
+        <Path name="/var/cache/bind"/>
+        <Path name='/etc/cron.d/ldap2zone'/> <!-- runs as bind user -->
+        <Path name='/etc/bind/named.conf.ldap2zone'/>
+        <Path name='/usr/local/bin/umbrella-ldap2zone'/>
+        <!-- headers for the main forward and reverse zones -->
+        <Path name='/etc/bind/zones/mainzone'/>
+        <py:for each="i in range(len(linkingclassfulnets))">
+            <Path name='/etc/bind/zones/link_${str(i)}_mainzone.rev' altsrc='/etc/bind/zones/mainzone.rev'/>
+        </py:for>
+        <py:for each="T,N in networks.items()">
+            <py:if test="T not in set(['extif','intif','vpnif'])">
+                <Path name='/etc/bind/zones/${T[:-2]}_mainzone.rev' altsrc='/etc/bind/zones/mainzone.rev'/>
+            </py:if>
+        </py:for>
+        <!-- statically define the internal versions of served zones -->
+        <Path name='/etc/bind/zones'/>
+        <py:for each="iface in ['pub','sec','DMZ']">
+            <py:for each="i in range(len(domain_names_list))">
+                <py:if test="domain_names_list[i]!=domain_name">
+                <Path name='/etc/bind/zones/${iface}_zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
+                </py:if>
+            </py:for>
+        </py:for>
+    </Group>
+    <Group name='DMZsmtp'>
+        <Path name='/etc/bind/zones'/>
+        <py:for each="i in range(len(domain_names_list))">
+            <Path name='/etc/bind/zones/zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
+        </py:for>
+    </Group>
+</Group>
+</Bundle>

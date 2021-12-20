@@ -11,7 +11,7 @@ localrobots=[]
 if ip_addr in robot_servers:
     # this host serves robots
     local_robot_number=robot_servers.index(ip_addr)
-    for name, num in robot_addresses.iteritems():
+    for name, num in robot_incoming_addresses.iteritems():
         if num==local_robot_number:
             localrobots.append(name)
 

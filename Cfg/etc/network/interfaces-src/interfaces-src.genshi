@@ -1,0 +1,116 @@
+{% python
+import socket
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+if (entry is not None) and \
+     (entry.find('function').text in ['router','vmhost','backdoor']):
+  type='multiif'
+else:
+  netdev='eth0'
+  # either a workstation or a single-interface server
+  if entry is not None:
+    # single-interface server (we take the IP addr from umbrella.xml)
+    # check that indeed a single interface is declared
+    if not len(ifs) ==1:
+      raise TemplateError('Too many interfaces are declared in umbrella.xml for '+metadata.hostname+' .')
+    interface, ip_addr = ifs.popitem()
+    interface, netdev = ifdevs.popitem()
+    # determine the subnet
+    subnet=networks[interface]
+    if subnet is None:
+      raise TemplateError('No defined subnet for '+str(interface))
+    # check if the address indeed belongs to the subnet
+    if not ip_addr in subnet:
+      raise TemplateError('The address for '+metadata.hostname+' ('+str(ip_addr)+')is not in subnet '+str(subnet)+' .')
+  else:
+    if organization_host:
+      # a workstation in a subnet, defined in the organization.xml file
+      interface=None
+      subnet = ipcalc.Network(ws_org_network)
+    else:
+      # a workstation in one of the standard subnets (pub, sec, etc)
+      # find the subnet
+      subnet=None
+      for iface, net in networks.iteritems():
+        if ip_addr in net:
+          subnet=net
+          interface=iface
+      if subnet is None:
+        raise TemplateError('The address '+ip_addr+' for '+metadata.hostname+' belongs to unknown subnet.')
+  if interface is not None and not interface in routerifs:
+    raise TemplateError('No route is defined for the subnet '+str(subnet)+' .')
+  type='singleif'
+%}\
+{% if type == 'singleif' %}\
+auto lo
+iface lo inet loopback
+
+auto ${netdev}
+iface ${netdev} inet static
+    address ${ip_addr}
+    netmask ${subnet.netmask()}
+    network ${subnet.network()}
+{% if organization_host %}\
+    gateway ${ws_org_gateway}
+{% if 'net-pub' in metadata.groups %}\
+    dns-nameservers ${routerifs['pubif']}
+{% end %}\
+{% if 'net-sec' in metadata.groups %}\
+    dns-nameservers ${routerifs['secif']}
+{% end %}\
+{% end %}\
+{% if not organization_host %}\
+    gateway ${routerifs[interface]}
+{% end %}\
+{% if not organization_host and interface != 'DMZif' %}\
+    dns-nameservers ${routerifs[interface]}
+{% end %}\
+{% if not organization_host and interface == 'DMZif' %}\
+{%     if 'DMZsmtp' in funchosts %}\
+{% python
+# find DMZ interface of DMZsmtp
+dmzip=None
+for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
+  if server.find('function').text=='DMZsmtp':
+    interface = server.find('DMZif')
+    t = interface.find('ip')
+    if (t is not None) and t.text.strip():
+      dmzip=ipcalc.IP(t.text.strip())
+%}\
+{%         if dmzip is not None %}\
+    dns-nameservers ${dmzip}
+{%         end %}\
+{%     end %}\
+{%     if 'DMZsmtp' not in funchosts %}\
+{% python
+if DNScache is None:
+  DNScache= [ str(routerifs['DMZif']) ]
+%}\
+    dns-nameservers ${' '.join(DNScache)}
+{%     end %}\
+{% end %}\
+    dns-search ${domain_name}
+{% if interface and (interface in static_routes) %}\
+{%   for static_route in static_routes[interface]%}\
+    up ip route add ${str(static_route[0])} via ${str(static_route[1])} || true
+    down ip route delete ${str(static_route[0])} via ${str(static_route[1])} || true
+{%   end %}\
+{% end %}\
+{%     if 'vm' in metadata.groups and ('virt-lxc' not in metadata.groups or 'nfs' in metadata.groups)%}\
+    post-up /sbin/ifconfig ${netdev} txqueuelen 4
+{%     end %}\
+{% end %}\
+{% if type == 'multiif' %}\
+auto lo
+iface lo inet loopback
+
+{%   for interface in iftypes %}\
+{%     if entry.find(interface) is not None %}\
+${interface_stanza( entry.find(interface), networks, domain_name, metadata, routerifs, funcifs, static_routes )}
+{%     end %}\
+{%   end %}\
+{% end %}\

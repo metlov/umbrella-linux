@@ -26,14 +26,14 @@ Type=forking
 RuntimeDirectory=openmeetings
 RuntimeDirectoryMode=0775
 Environment=CATALINA_PID=/var/run/openmeetings/openmeetings.pid
-WorkingDirectory=/opt/open503
-Environment=CATALINA_HOME=/opt/open503
-Environment=CATALINA_BASE=/opt/open503
+WorkingDirectory=/opt/open501
+Environment=CATALINA_HOME=/opt/open501
+Environment=CATALINA_BASE=/opt/open501
 Environment='CATALINA_OPTS=-Xms1G -Xmx3G -server -XX:+UseParallelGC'
 Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
 
-ExecStart=/opt/open503/bin/startup.sh
-ExecStop=/opt/open503/bin/shutdown.sh
+ExecStart=/opt/open501/bin/startup.sh
+ExecStop=/opt/open501/bin/shutdown.sh
 
 User=kurento
 Group=kurento

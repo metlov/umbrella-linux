@@ -1,0 +1,39 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+<?php
+$$conf['accounts']['params']['basedn'] = '${ldap_root}';
+$$conf['accounts']['params']['scope'] = 'sub';
+$$conf['accounts']['params']['attr'] = 'uid';
+$$conf['accounts']['params']['strip'] = true;
+$$conf['accounts']['params']['driverconfig'] = 'horde';
+$$conf['accounts']['driver'] = 'ldap';
+
+$$conf['auth']['admins'] = array(${','.join('\''+a+'\'' for a in admins)});
+$$conf['auth']['resetpassword'] = false;
+
+$$conf['fortune']['exec_path'] = '/usr/games/fortune';
+
+$$conf['ldap']['useldap'] = true;
+$$conf['ldap']['hostspec'] = 'ldap1.${domain_name}';
+$$conf['ldap']['tls'] = true;
+$$conf['ldap']['timeout'] = 5;
+$$conf['ldap']['version'] = 3;
+$$conf['ldap']['user']['basedn'] = '${ldap_root}';
+$$conf['ldap']['user']['uid'] = 'uid';
+$$conf['ldap']['user']['objectclass'] = array('*');
+$$conf['ldap']['user']['filter_type'] = 'objectclass';
+$$conf['ldap']['bindas'] = 'anon';
+
+$$conf['mailer']['params']['host'] = '${funchosts['mail']}';
+$$conf['mailer']['params']['port'] = 587;
+$$conf['mailer']['params']['secure'] = 'tls';
+$$conf['mailer']['params']['username_auth'] = true;
+$$conf['mailer']['params']['password_auth'] = true;
+$$conf['mailer']['params']['auth'] = true;
+$$conf['mailer']['params']['lmtp'] = false;
+$$conf['mailer']['type'] = 'smtp';
+
+$$conf['use_ssl'] = 1;

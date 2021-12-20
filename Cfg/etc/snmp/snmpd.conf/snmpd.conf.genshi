@@ -39,9 +39,15 @@ ignoreDisk /sys/*
 ignoreDisk /sys/kernel/debug/tracing
 ignoreDisk /dev/*
 ignoreDisk /var/lib/nfs/rpc_pipefs
+ignoreDisk /tmp/.x2go*
+ignoreDisk /run/user
+ignoreDisk /run/user/*
 ignoreDisk /nfs/${system_name}
 skipNFSInHostResources true
 includeAllDisks  10%
 
 #  System Load Monitoring
 load   12 10 5
+
+# Stop the annoying "Connection from UDP: " messages in syslog.
+dontLogTCPWrappersConnects yes

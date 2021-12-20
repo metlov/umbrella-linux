@@ -3,6 +3,8 @@
 if hash lspci 2>/dev/null; then
     if lspci | grep -q 'VGA compatible controller: NVIDIA Corporation C61'; then
         echo group:nvidia-304
+    elif lspci | grep -q 'VGA compatible controller: NVIDIA Corporation GT2'; then
+        echo group:nvidia-304
     elif lspci | grep -q 'VGA compatible controller: NVIDIA Corporation C77'; then
         # use nouveau driver (nvidia-340 does not work well)
         echo -n ""

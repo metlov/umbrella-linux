@@ -11,4 +11,7 @@
    <!-- copy the files to tftpd chroot -->
    <Action name='update-tftpboot' timing='post' when='modified' command='umbrella-update-tftpboot' status='ignore'/>
    <Action name='update-cracklib' timing='post' when='modified' command='update-cracklib' status='ignore'/>
+   <!-- horde fixes -->
+   <Action name='fix-horde-form-type-country' timing='post' when='modified' command="sed -i -e 's/function init($prompt = null)/function init($values = null, $prompt = null)/' -e 's/parent::init(Horde_Nls::getCountryISO(), $prompt);/parent::init(Horde_Nls::getCountryISO(), $values);/' /usr/share/php/Horde/Form/Type.php" status='ignore'/>
+   <Action name='patch-horde-with-logo' timing='post' when='modified' command="sed -i -e 's|body.modal-form {|body.modal-form{background-image: url(/logo/logo-320x240.png);background-size: 320px;background-repeat: no-repeat;|' /usr/share/horde/themes/default/screen.css" status='ignore'/>
 </Rules>

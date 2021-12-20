@@ -15,6 +15,8 @@ STATIC_PATHS = ['installer']
 OUTPUT_PATH = 'output/umbrella-linux'
 TIMEZONE = 'Europe/Moscow'
 
+PORT = 8001
+
 DEFAULT_LANG = u'en'
 
 THEME = 'themes/umbrella/'
@@ -56,6 +58,10 @@ JINJA_ENVIRONMENT = {'extensions': ['jinja2.ext.i18n']}
 JINJA_FILTERS = {
     'lookup_lang_name': lookup_lang_name,
     }
+
+MARKDOWN = {
+    'extensions' : ['markdown.extensions.smarty'],
+}
 
 # Feed generation is usually not desired when developing
 FEED_ALL_ATOM = None

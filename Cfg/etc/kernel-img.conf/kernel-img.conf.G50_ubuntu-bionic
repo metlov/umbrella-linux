@@ -1,0 +1,4 @@
+do_symlinks = yes
+do_initrd = yes
+link_in_boot = no
+do_bootloader = no

@@ -1,0 +1,19 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+<?php
+$$backends['imap']['disabled'] = true;
+
+$$backends['sieve']['disabled'] = false;
+$$backends['sieve']['transport'][Ingo::RULE_ALL]['driver'] = 'timsieved';
+$$backends['sieve']['transport'][Ingo::RULE_ALL]['params']['hostspec'] = '${funchosts['mail']}';
+$$backends['sieve']['transport'][Ingo::RULE_ALL]['params']['logintype'] = 'PLAIN';
+$$backends['sieve']['transport'][Ingo::RULE_ALL]['params']['usetls'] = true;
+$$backends['sieve']['transport'][Ingo::RULE_ALL]['params']['port'] = 4190;
+$$backends['sieve']['transport'][Ingo::RULE_ALL]['params']['scriptname'] = 'ingo';
+$$backends['sieve']['transport'][Ingo::RULE_ALL]['params']['debug'] = false;
+$$backends['sieve']['script'][Ingo::RULE_ALL]['driver'] = 'sieve';
+$$backends['sieve']['script'][Ingo::RULE_ALL]['params']['utf8'] = true;
+$$backends['sieve']['shares'] = false;

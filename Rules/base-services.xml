@@ -9,6 +9,7 @@
   <Service name='acpid.path' status='ignore' type='systemd'/>
   <Service name='acpid.socket' status='ignore' type='systemd'/>
   <Service name='apache2' status='on' type='systemd'/>
+  <Service name='apache-htcacheclean' status='on' type='systemd'/>
   <Service name='apparmor' status='ignore' type='systemd'/>
   <Service name='apport-forward.socket' status='ignore' type='systemd'/>
   <Service name='apt-cacher-ng' status='on' type='systemd'/>
@@ -57,6 +58,7 @@
   <Service name='lxcfs' status='ignore' type='systemd'/>
   <Service name='lxd-containers' status='ignore' type='systemd'/>
   <Service name='lxd.socket' status='ignore' type='systemd'/>
+  <Service name='mailman' status='on' type='systemd'/>
   <Service name='mdadm' status='ignore' type='systemd'/>
   <Service name='motd-news.timer' status='ignore' type='systemd'/>
   <Service name='mysql' status='on' type='systemd'/>
@@ -75,6 +77,7 @@
   <Service name='ntp' status='on' type='systemd'/>
   <Service name='ondemand' status='ignore' type='systemd'/>
   <Service name='open-iscsi' status='ignore' type='systemd'/>
+  <Service name='iscsid.socket' status='ignore' type='systemd'/>
   <Service name='ossec' status='on' type='systemd'/>
   <Service name='phpsessionclean.timer' status='ignore' type='systemd'/>
   <Service name='pollinate' status='ignore' type='systemd'/>
@@ -86,6 +89,12 @@
   <Service name='rcDCC' status='on' type='systemd'/>
   <Service name='rpcbind' status='on' type='systemd'/>
   <Service name='rpcbind.socket' status='ignore' type='systemd'/>
+  <Group name='nfs' negate='true'>
+    <Service name='rpc-gssd' status='on' type='systemd'/>
+  </Group>
+  <Group name='nfs'>
+    <Service name='rpc-gssd' status='ignore' type='systemd'/>
+  </Group>
   <Service name='rsync' status='ignore' type='systemd'/>
   <Service name='rsyslog' status='on' type='systemd'/>
   <Service name='saslauthd' status='on' type='systemd'/>
@@ -110,6 +119,10 @@
   <Service name='ufw' status='on' type='systemd'/>
   <Service name='nut-server' status='on' type='systemd'/>
   <Service name='nut-client' status='on' type='systemd'/>
+  <Group name='ubuntu-xenial' negate='true'>
+    <Service name='nut-monitor.service' status='ignore' type='systemd'/>
+  </Group>
+
 
   <!-- extra services, integrated in complex bundles -->
   <Group name='DMZvidconf'>
@@ -117,6 +130,12 @@
     <Service name='kurento-media-server' status='on' restart='true' type='systemd'/>
     <Service name='openmeetings' status='on' type='systemd'/>
   </Group>
+
+  <!-- Ubuntu advantage services (may be worthwhile to disable them later) -->
+  <Service name='ua-messaging.timer' status='ignore' type='systemd'/>
+  <Service name='ua-reboot-cmds' status='ignore' type='systemd'/>
+   <Service name='ua-license-check.path' status='ignore' type='systemd'/>
+   <Service name='ua-timer.timer' status='ignore' type='systemd'/>
 
 </Group>
 </Rules>

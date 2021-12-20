@@ -44,8 +44,12 @@
     <!-- Note that only the name portion of E-mail (before the '@' symbol) -->
     <!-- is specified for each robot here. The domain part comes from the  -->
     <!-- Umbrella Linux configuration.                                     -->
-    <!-- <robot><name>robot-responder</name><ip>172.17.3.5</ip></robot> -->
-    
+    <!-- <robot flow="sendrecv"><name>robot-responder</name><ip>172.17.3.5</ip></robot> -->
+
+    <!-- Optional "flow" attribute specifies allowed direction of E-mail   -->
+    <!-- flow. It takes one of three values: "sendrecv", "sendonly",       -->
+    <!-- "recvonly". If the "flow" tag is absent the default is "sendrecv".-->
+
     <!-- There is also a shorthand notation to specify all the addresses of-->
     <!-- a mailing list, such as mailman-confirm, mailman-join, etc.       -->
     <!--   <robot><list_name>mailman</list_name><ip>172.17.3.5</ip></robot> -->
@@ -86,6 +90,14 @@
     <!--                              ...                          -->
     <!-- <trusted_CA> ... LITERAL CERTIFICATE n DATA </trusted_CA> -->
 
+    <!-- static routes -->
+    <!-- <static_route_pub><network>192.168.2.0/24</network><via>172.17.128.17</via></static_route_pub> -->
+    <!-- Tags <static_route_NET>, where NET is one of "ext", "int", "pub",   -->
+    <!-- "sec", "DMZ" in order, define static routes for all Umbrella-managed-->
+    <!-- interfaces in the NET network. The network NET must be declared in  -->
+    <!-- umbrella.xml. The tag specifies the target network and the correspon-->
+    <!-- ding router to send the packets via. The specified router's IP must -->
+    <!-- belong to NET.                                                      -->
 
     <!--additional rules to be injected into IPv4 firewall -->
 

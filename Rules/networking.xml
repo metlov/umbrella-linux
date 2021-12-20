@@ -12,5 +12,6 @@
   <Path type='directory' name='/etc/networkd-dispatcher/routable.d' owner='root' group='root' mode='0755' prune='true'/>
   <Path type='directory' name='/etc/netplan/' owner='root' group='root' mode='0755' prune='true'/>
   <Action name='apply-netplan' timing='post' when='modified' shell='true' command='netplan apply' status='ignore'/>
+  <Path type='nonexistent' name='/etc/network/interfaces'/>
 </Group>
 </Rules>

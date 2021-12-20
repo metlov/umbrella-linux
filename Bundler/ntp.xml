@@ -12,7 +12,6 @@
     <Group name='ubuntu-xenial' negate='true'>
         <Service name='systemd-timesyncd'/>
         <Group name='ntp-server' negate='true'>
-            <!-- on bionic and higher we use systemd-timesyncd on clients -->
             <Path name='/etc/systemd/timesyncd.conf'/>
             <Action name='enable-systemd-NTP-sync'/>
         </Group>
@@ -22,6 +21,7 @@
             <BoundPOSIXGroup name="_chrony" gid="672"/>
             <Package name='chrony'/>
             <Service name='chrony'/>
+            <Path name='/etc/chrony/chrony.conf'/>
         </Group>
     </Group>
 </Group>

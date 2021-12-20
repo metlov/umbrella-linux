@@ -1,10 +1,10 @@
 <Bundle>
 <Group name='ubuntu'>
-    <!-- This bundle installs OpenMeetings 5.0.0-M3 semi-automatically,    -->
+    <!-- This bundle installs OpenMeetings 5.0.1 semi-automatically,       -->
     <!-- requiring a manual compilation of ffmpeg (necessary for licensing -->
     <!-- reasons), manual download and unpacking of openmeetings binary -->
     <!-- from https://www.apache.org/openmeetings/5.0.0-M3/bin/apache-openmeetings-5.0.0-M3.tar.gz -->
-    <!-- into /opt/open503 and manual database creation. -->
+    <!-- into /opt/open501 and manual database creation. -->
     <!-- -->
     <!-- Database can be created by logging into the local (on DMZvidconf) -->
     <!-- mysql database as root with -->
@@ -61,6 +61,7 @@
     <Package name='dconf-service'/>
     <Package name='humanity-icon-theme'/>
     <Package name='ubuntu-mono'/>
+    <Path name='/etc/apparmor.d/usr.lib.libreoffice.program.soffice.bin'/>
 
     <!-- imagemagick -->
     <Package name='imagemagick'/>
@@ -142,6 +143,7 @@
     <Path name='/etc/apt/trusted.gpg.d/kurento.gpg'/>
     <Package name='kurento-media-server'/>
     <Package name='kurento-media-server-dev'/>
+    <Package name='libwebsocketpp-dev'/>
     <Package name='kurento-module-creator'/>
     <Package name='gstreamer1.5-libav'/>
     <Package name='gstreamer1.5-nice'/>
@@ -284,10 +286,10 @@
     <Path name='/etc/default/kurento-media-server'/>
     <Service name='kurento-media-server'/>
 
-    <Path name='/opt/open503/webapps/openmeetings/data/conf/om_umbrella_ldap.cfg'/>
-    <Path name='/opt/open503/conf/server.xml'/>
+    <Path name='/opt/open501/webapps/openmeetings/data/conf/om_umbrella_ldap.cfg'/>
+    <Path name='/opt/open501/conf/server.xml'/>
     <Action name='maintain-umbrella-CA-jks'/> <!-- maintain /etc/ssl/umbrella_CA.jks -->
-    <Path name='/opt/open503/bin/setenv.sh'/>
+    <Path name='/opt/open501/bin/setenv.sh'/>
     <Path name='/etc/systemd/system/openmeetings.service'/>
     <Service name='openmeetings'/>
 
@@ -297,7 +299,7 @@
     <Package name='coturn'/>
     <Package name='telnet'/>
     <Path name='/etc/turnserver.conf'/>
-    <Path name='/opt/open503/webapps/openmeetings/WEB-INF/classes/applicationContext.xml'/>
+    <Path name='/opt/open501/webapps/openmeetings/WEB-INF/classes/applicationContext.xml'/>
     <Service name='coturn'/>
 
 </Group>

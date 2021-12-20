@@ -3,6 +3,9 @@
     <Package name='libaprutil1-dbd-sqlite3'/>
     <Package name='apache2'/>
     <Service name='apache2'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='apache-htcacheclean'/>
+    </Group>
     <Group name='www-server-ssl'>
         <Path name='/etc/apache2/mods-enabled/ssl.conf'/>
         <Path name='/etc/apache2/mods-enabled/ssl.load'/>
@@ -22,12 +25,13 @@
         <Package name='php-mbstring'/>
         <Group name='ubuntu-xenial'>
             <Package name='libapache2-mod-php7.0'/>
+            <Path name='/etc/php/7.0/apache2/conf.d/90-upload-filesize.ini' altsrc='/etc/php/7.2/apache2/conf.d/90-upload-filesize.ini'/>
         </Group>
         <Group name='ubuntu-xenial' negate='true'>
             <Package name='libapache2-mod-php7.2'/>
+            <Path name='/etc/php/7.2/apache2/conf.d/90-upload-filesize.ini'/>
         </Group>
         <Package name='subversion'/>
-        <Path name='/etc/php/7.0/apache2/conf.d/99-upload-filesize.ini'/>
         <Package name='fonts-dejavu-core'/>
         <Path name='/etc/apache2/mods-enabled/rewrite.load'/>
         <Group name='ubuntu-xenial' negate='true'>

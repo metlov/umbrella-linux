@@ -1,0 +1,12 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+<?php
+# $$_prefs['initial_application']['value'] = 'imp';
+$$_prefs['language']['value'] = '${language}';
+
+# Enable hooks to set the address and the full name from LDAP
+$$_prefs['from_addr']['hook'] = true;
+$$_prefs['fullname']['hook'] = true;

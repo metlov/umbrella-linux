@@ -1,0 +1,6 @@
+# WORKAROUND: give TCP/UDP network access for NFS to work around the bug that
+# NFS access is treated by the apparmor as a network access
+  network inet stream,
+  network inet6 stream,
+  network inet dgram,
+  network inet6 dgram,

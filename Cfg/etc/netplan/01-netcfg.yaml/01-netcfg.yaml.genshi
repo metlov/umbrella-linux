@@ -4,6 +4,7 @@ from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
 execfile(repo+'/Python/30_networking.py')
 if (entry is not None) and \
      (entry.find('function').text in ['router','vmhost','backdoor']):
@@ -108,7 +109,14 @@ if DNScache is None:
 {%                  end %}\
 {%              end %}\
 {%         end %}\
-{%     end %}\
+{% if interface and (interface in static_routes) %}\
+      routes:
+{%   for static_route in static_routes[interface]%}\
+        - to: ${str(static_route[0])}
+          via: ${str(static_route[1])}
+{%   end %}\
+{% end %}\
+{%     end if not organization_host %}\
 {% end %}\
 {% if type == 'multiif' %}\
 {% python
@@ -180,11 +188,19 @@ for interfaceType in iftypes:
        ('DMZvpn' in funchosts) and ('router' in metadata.groups):
       # when VPN is configured router needs a route into VPN through DMZvpn
       routes = ( (networks['vpnif'],funcifs['DMZvpn']), )
-    tuple=(dev, ip, tag, gateway, nameserver, bridgeddev, None, None, routes)
+    # append static routes
+    if interface.tag in static_routes:
+      if routes:
+        routes_arr=list(routes)
+      else:
+        routes_arr=[]
+      routes_arr.extend(static_routes[interface.tag])
+      routes=tuple(routes_arr)
+    iftuple=(dev, ip, tag, gateway, nameserver, bridgeddev, None, None, routes)
     if bridgeddev is not None:
-      bridges.add(tuple)
+      bridges.add(iftuple)
     else:
-      ethers.add(tuple)
+      ethers.add(iftuple)
 print bridges
 print ethers
 %}\

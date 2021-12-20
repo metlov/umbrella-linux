@@ -27,6 +27,15 @@
       </xsd:sequence>
     </xsd:complexType>
 
+    <!-- direction of information flow -->
+    <xsd:simpleType name="flowType">
+      <xsd:restriction base="xsd:string">
+        <xsd:enumeration value="sendrecv" />
+        <xsd:enumeration value="sendonly" />
+        <xsd:enumeration value="recvonly" />
+      </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:complexType name="MAILatIP">
         <xsd:sequence>
             <xsd:choice>
@@ -34,6 +43,14 @@
                 <xsd:element name="list_name" type="EMAILlocalpart"/>
             </xsd:choice>
             <xsd:element name="ip" type="IPaddressType" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+        <xsd:attribute name="flow" type="flowType" default="sendrecv"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="routeType">
+        <xsd:sequence>
+            <xsd:element name="network" type="NetworkType"/>
+            <xsd:element name="via" type="IPaddressType"/>
         </xsd:sequence>
     </xsd:complexType>
 
@@ -113,6 +130,11 @@
                 <xsd:element name="transparent_proxy" type="TransparentProxyType" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="slow_down_dynamic_hosts" type="SlowDownDynamicHostsType" minOccurs="0" maxOccurs="1"/>
                 <xsd:element name="trusted_CA" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="static_route_ext" type="routeType" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="static_route_int" type="routeType" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="static_route_pub" type="routeType" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="static_route_sec" type="routeType" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element name="static_route_DMZ" type="routeType" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="input" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="output" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
                 <xsd:element name="forward" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>

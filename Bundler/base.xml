@@ -25,6 +25,12 @@
 
       <!-- in bionic needs to be explicitly installed -->
       <Package name='rsyslog'/>
+      <Path name='/etc/rsyslog.d/040-snmp-statfs.conf'/>
+   </Group>
+   <Group name='virt-lxc'>
+      <!-- log cleanup -->
+      <Path name='/etc/rsyslog.d/040-lxd-container.conf'/>
+      <Path name='/etc/rsyslog.d/040-lxd-container-krnl.conf'/>
    </Group>
    <Package name='dnsutils'/>
    <Package name='bind9-host'/>
@@ -83,6 +89,7 @@
           </Group>
           <Group name='ubuntu-xenial' negate='true'>
               <Package name='linux-image-virtual'/>
+              <Path name='/etc/kernel-img.conf'/>
           </Group>
       </Group>
    </Group>
@@ -92,6 +99,7 @@
           </Group>
           <Group name='ubuntu-xenial' negate='true'>
               <Package name='linux-image-generic'/>
+              <Path name='/etc/kernel-img.conf'/>
           </Group>
       <Group name='kernel-signed'>
           <Group name='ubuntu-xenial'>
@@ -99,6 +107,7 @@
           </Group>
           <Group name='ubuntu-xenial' negate='true'>
               <Package name='linux-signed-image-generic'/>
+              <Path name='/etc/kernel-img.conf'/>
           </Group>
       </Group>
       <Package name='at'/>
@@ -124,8 +133,14 @@
          <Package name='byobu'/>
          <Package name='python3-newt'/>
          <Service name='apport-forward.socket'/>
+         <Group name='ubuntu-xenial' negate='true'>
+            <Service name='apport-autoreport.path'/>
+            <Package name='python3-debconf'/>
+            <Package name='libfile-fcntllock-perl'/>
+         </Group>
          <Service name='iscsid'/>
          <Service name='open-iscsi'/>
+         <Service name='iscsid.socket'/>
       </Group>
    </Group>
 
@@ -170,6 +185,10 @@
       <!-- on xenial we need access to /etc/ldap/ldap.conf too -->
       <Path name='/etc/apparmor.d/abstractions/ldapclient'/>
    </Group>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Path name='/etc/apparmor.d/local/usr.bin.man'/>
+   </Group>
+
 
    <!-- remove cloud image motd if installed -->
    <Group name='virt-lxc'>
@@ -183,6 +202,12 @@
    <!-- disable motd-news -->
    <Path name='/etc/default/motd-news'/>
    <Service name='motd-news.timer'/>
+
+   <!-- Ubuntu advantage services -->
+   <Service name='ua-messaging.timer'/>
+   <Service name='ua-reboot-cmds'/>
+   <Service name='ua-license-check.path'/>
+   <Service name='ua-timer.timer'/>
 
    <Group name='ubuntu-xenial' negate='true'>
        <Service name='ondemand'/>
@@ -204,4 +229,15 @@
    <Service name='getty@tty6'/>
    <Service name='getty@tty7'/>
    <Service name='getty@tty8'/>
+
+   <!-- upgrade scripts -->
+   <Group name='ubuntu-xenial'>
+      <Package name='ubuntu-release-upgrader-core'/>
+      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre' altsrc='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre-src'/>
+      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-post' altsrc='/usr/local/bin/umbrella-upgrade-U1604-U1804-post-src'/>
+   </Group>
+   <Group name='ubuntu-xenial' negate='true'>
+      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre'/>
+      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-post'/>
+   </Group>
 </Bundle>

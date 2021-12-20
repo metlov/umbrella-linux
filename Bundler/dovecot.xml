@@ -14,6 +14,7 @@
     <Package name='dovecot-ldap'/>
     <Path name='/etc/dovecot/dovecot-ldap.conf'/>
     <!-- to enable plain logins of virtual mailbox users -->
+    <Package name='libpam-krb5'/>
     <Path name='/etc/pam.d/dovecot'/>
     <!-- we also use the antispam and sieve plugins -->
     <Package name='dovecot-antispam'/>

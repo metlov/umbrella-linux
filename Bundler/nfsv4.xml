@@ -9,14 +9,17 @@
         <Group name='ubuntu-xenial'>
             <!-- use an old semantic of returning EACCESS instead of EKEYEXPIRED -->
             <!-- some useful programs still don't understand EKEYEXPIRED and hang-->
-            <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
+            <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf' altsrc='/etc/systemd/system/rpc-gssd.service.d/override.conf-src'/>
             <!-- on bionic the rpc.gssd does not support the '-e' option anymore-->
             <!-- hopefully, the ticket renewal witth sssd will avoid the key    -->
             <!-- expiration issues -->
         </Group>
         <Group name='ubuntu-xenial' negate='true'>
-            <Service name='rpcbind'/>
+            <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
+            <Path name='/etc/systemd/system/rpc-gssd.service.d'/>
+            <Service name='rpc-gssd'/>
         </Group>
+        <Service name='rpcbind'/>
         <Service name='rpcbind.socket'/>
         <Service name='nfs-client.target'/>
     </Group>

@@ -3,13 +3,30 @@ from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
-splitnet=str(wholenet).split('.')
+execfile(repo+'/Python/21_revzones.py')
 %}\
-zone "${splitnet[1]}.${splitnet[0]}.in-addr.arpa." {
-	type master;
-	file "/var/cache/bind/mainzone.rev";
-};
+// forward resolution zone for the main domain
 zone "${domain_name}." {
 	type master;
 	file "/var/cache/bind/mainzone";
 };
+{% if len(linkingclassfulnets)>0 %}\
+
+// linking classful zones for reverse resolution
+{%   for i in range(len(linkingclassfulnets)) %}\
+zone "${networkZoneName(linkingclassfulnets[i],linkingclassfulnets[i],classlessShortName)}." {
+	type master;
+	file "/etc/bind/zones/link_${str(i)}_mainzone.rev";
+};
+{%   end %}\
+{% end %}\
+
+// zones for Umbrella networks
+{% for T,N in networks.items() %}\
+{%   if T not in set(['extif','intif','vpnif']) %}\
+zone "${networkZoneName(N,findClassful(N,classfulnets),classlessShortName)}." {
+	type master;
+	file "/var/cache/bind/${T[:-2]}_mainzone.rev";
+};
+{%   end %}\
+{% end %}\

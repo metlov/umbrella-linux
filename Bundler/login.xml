@@ -22,11 +22,11 @@
             <!-- may be I just need to disable PK on these servers for users     -->
             <!-- somehow -->
             <!-- automatically renew Kerberos tickets -->
-            <Path name='/etc/profile.d/krenew.sh'/>
-            <Path name='/etc/profile.d/krenew.csh'/>
+            <Path name='/etc/profile.d/krenew.sh' altsrc="/etc/profile.d/krenew.sh-src"/>
+            <Path name='/etc/profile.d/krenew.csh' altsrc="/etc/profile.d/krenew.csh-src"/>
             <!-- the following script stops krenew on logout in bash -->
             <!-- TODO: need the equivalent scripts for other shells -->
-            <Path name='/etc/bash.bash_logout'/>
+            <Path name='/etc/bash.bash_logout' altsrc='/etc/bash.bash_logout-src'/>
         </Group>
     </Group>
     <Group name='ubuntu-xenial' negate='true'>
@@ -39,12 +39,18 @@
         <Package name='libsss-sudo'/>
         <Package name='sssd-krb5'/>
         <Package name='sssd-ldap'/>
+        <Path name='/etc/apparmor.d/local/usr.sbin.sssd'/>
+        <Path name='/etc/rsyslog.d/040-apparmor-sssd-cache.conf'/>
         <Path name='/etc/sssd/sssd.conf'/>
         <!-- for password quality check -->
         <Package name='cracklib-runtime'/>
         <Action name='update-cracklib'/>
         <Package name='sudo'/>
         <Package name='sssd-tools'/>
+        <!-- clean up krenew scripts -->
+        <Path name='/etc/profile.d/krenew.sh'/>
+        <Path name='/etc/profile.d/krenew.csh'/>
+        <Path name='/etc/bash.bash_logout'/>
     </Group>
     <!-- login configuration -->
     <Path name='/etc/pam.d/common-account'/>

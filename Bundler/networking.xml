@@ -5,7 +5,7 @@
         <Path name='/etc/resolvconf/resolv.conf.d/original'/>
         <Service name='resolvconf'/>
         <Group name='roaming' negate='true'>
-            <Path name='/etc/network/interfaces'/>
+            <Path name='/etc/network/interfaces' altsrc='/etc/network/interfaces-src'/>
         </Group>
        <Service name='networking'/>
     </Group>
@@ -14,6 +14,7 @@
             <Path name='/etc/netplan/01-netcfg.yaml'/>
             <Path name='/etc/netplan'/>
             <Action name='apply-netplan'/>
+            <Path name='/etc/network/interfaces'/>  <!-- this removes /etc/network/interfaces -->
             <Group name='networking-networkd'>
                 <!-- make network dispatcher process 'carrier' and 'degraded' states -->
                 <Action name='fix_networkd_dispatcher'/>
@@ -32,12 +33,6 @@
                 <Path name='/etc/networkd-dispatcher/routable.d'/>
                 <!-- disable network waitonline -->
                 <Path name='/etc/systemd/system/systemd-networkd-wait-online.service'/>
-            </Group>
-            <Group name='vm'>
-                <Group name='vmhost' negate='true'>
-                    <!-- disable waiting for online service -->
-
-                </Group>
             </Group>
         </Group>
         <Service name='systemd-networkd'/>

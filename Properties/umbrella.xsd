@@ -130,7 +130,6 @@
                 <xsd:element name="language" type="xsd:string"/>
                 <xsd:element name="timezone" type="xsd:string"/>
                 <xsd:element name="domain" type="DomainType" maxOccurs="unbounded" minOccurs="1"/>
-                <xsd:element name="net" type="classCNetworkType"/>
                 <xsd:element name="extnet" type="NetworkType" minOccurs="0"/>
                 <xsd:element name="intnet" type="NetworkType" minOccurs="0"/>
                 <xsd:element name="pubnet" type="NetworkType"/>

@@ -1,0 +1,22 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+<?php
+$$cfgSources['localldap']['disabled'] = false;
+$$cfgSources['localldap']['title'] = '${system_name_local}';
+$$cfgSources['localldap']['params']['server'] = 'ldap1.${domain_name}';
+$$cfgSources['localldap']['params']['tls'] = true;
+$$cfgSources['localldap']['params']['root'] = '${ldap_root}';
+$$cfgSources['localldap']['params']['bind_dn'] = '';
+$$cfgSources['localldap']['params']['bind_password'] = '';
+$$cfgSources['localldap']['params']['objectclass'] = array('gosaMailAccount');
+$$cfgSources['localldap']['params']['scope'] = 'sub';
+$$cfgSources['localldap']['map']['firstname'] = 'givenName';
+$$cfgSources['localldap']['map']['lastname'] = 'sn';
+$$cfgSources['localldap']['map']['name'] = array (
+    'fields' => array('lastname', 'firstname'),
+    'format' => '%s, %s'
+    );
+$$cfgSources['localldap']['readonly'] = true;

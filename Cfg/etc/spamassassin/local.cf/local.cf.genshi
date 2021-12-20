@@ -203,10 +203,10 @@ header __L_FROM_MAILRU From:addr =~ /[\@.]mail\.ru$$/mi
 meta     L_NOTVALID_MAILRU !DKIM_VERIFIED && __L_FROM_MAILRU
 score    L_NOTVALID_MAILRU 6
 
-# rambler
-header __L_FROM_RAMBLER From:addr =~ /[\@.]rambler\.ru$$/mi
-meta     L_NOTVALID_RAMBLER !DKIM_VERIFIED && __L_FROM_RAMBLER
-score    L_NOTVALID_RAMBLER 6
+# rambler (since summer 2021 stopped signing their mail with DKIM)
+#header __L_FROM_RAMBLER From:addr =~ /[\@.]rambler\.ru$$/mi
+#meta     L_NOTVALID_RAMBLER !DKIM_VERIFIED && __L_FROM_RAMBLER
+#score    L_NOTVALID_RAMBLER 6
 
 # our domains
 header __L_FROM_US From:addr =~ /[\@.](${'|'.join(domain_names_escaped)})$$/mi

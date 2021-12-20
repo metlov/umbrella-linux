@@ -7,7 +7,7 @@ from genshi.template import TemplateError
 # renders (as a string) /etc/network/interfaces stanza for a given interface
 # TODO: this function gets uglier and uglier with each iteration
 #       interface generation needs to be done better
-def interface_stanza( interface, networks, domain_name, metadata, routerifs, funcifs ):
+def interface_stanza( interface, networks, domain_name, metadata, routerifs, funcifs, static_routes ):
   netnames = {
     'extif':'External network (accesible from Internet directly)',
     'intif':"Legacy organization's intranet",
@@ -77,6 +77,13 @@ def interface_stanza( interface, networks, domain_name, metadata, routerifs, fun
     vpnet_str=str(networks['vpnif'].network())+'/'+str(networks['vpnif'].mask)
     r+= '    up ip route add '+vpnet_str+' via '+str(funcifs['DMZvpn'])+' || true \n'
     r+= '    down ip route delete '+vpnet_str+' via '+str(funcifs['DMZvpn'])+' || true \n'
+
+  if interface.tag in static_routes:
+    for static_route in static_routes[interface.tag]:
+      route_net_str=str(static_route[0])
+      route_via_str=str(static_route[1])
+      r+= '    up ip route add '+route_net_str+' via '+route_via_str+' || true \n'
+      r+= '    down ip route delete '+route_net_str+' via '+route_via_str+' || true \n'
   return r
 
 def accumulate_tags(element, ip, name):

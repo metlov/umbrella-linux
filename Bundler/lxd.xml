@@ -20,6 +20,10 @@
 
     <Path name='/etc/rc.local'/>            <!-- bufferbloat fix -->
 
+    <!-- log cleanup -->
+    <Path name='/etc/rsyslog.d/040-lxd-container-host.conf'/>
+    <Path name='/etc/rsyslog.d/040-lxd-container-krnl.conf'/>
+
     <Service name='lxcfs'/>
     <Service name='lxd-containers'/>
     <Service name='lxd.socket'/>

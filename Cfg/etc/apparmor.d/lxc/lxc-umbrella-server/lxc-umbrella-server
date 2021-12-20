@@ -12,4 +12,17 @@ profile lxc-umbrella-server flags=(attach_disconnected,mediate_deleted) {
   # for proc mounting inside by X2GO thin client
   mount fstype=proc options=ro -> /opt/x2gothinclient/chroot/proc/,
   mount fstype=sysfs options=ro -> /opt/x2gothinclient/chroot/sys/,
+
+  # allow bind-mounts of anything except /, /dev, /proc and /sys
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /[^spd]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /d[^e]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /de[^v]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /dev?*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /p[^r]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /pr[^o]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /pro[^c]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /proc?*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /s[^y]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /sy[^s]*{,/**},
+  mount options=(rw,rbind,ro,bind,nosuid,nodev,remount,rshared) /sys?*{,/**},
 }

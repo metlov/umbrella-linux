@@ -82,6 +82,7 @@
 		/etc/ejabberd**					r,
 		/etc/gss/mech.d**				r,
 		/var/tmp/systemd-private-*-ejabberd-gssapi.service-*/tmp/xmpp_*	rw,
+		/usr/lib/i386-linux-gnu/krb5/plugins/authdata/sssd_pac_plugin.so	rm,
 		# in principle it should use the private /var/tmp only,
 		# but it does not
 		/var/tmp/xmpp_*					rw,

@@ -6,4 +6,4 @@ export GST_DEBUG="3,Kurento*:4,kms*:4,sdp*:4,webrtc*:4,*rtpendpoint:4,rtp*handle
 export GST_DEBUG_NO_COLOR=1
 export KURENTO_LOGS_PATH="$DAEMON_LOG_DIR"
 unset GST_PLUGIN_PATH
-DAEMON_MAX_FILES="$(( ($(cat /proc/sys/fs/file-max) * 50) / 100 ))"
+DAEMON_MAX_FILES="$(( $(cat /proc/sys/fs/file-max) / 2 ))"

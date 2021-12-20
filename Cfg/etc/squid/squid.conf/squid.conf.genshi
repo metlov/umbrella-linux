@@ -44,7 +44,7 @@ http_port 3129 transparent
 cache_mgr itadmin@${domain_name}
 coredump_dir /var/spool/squid3
 
-cache_mem 800 MB
+cache_mem 350 MB
 
 # disable ipv6
 dns_v4_first on

@@ -27,7 +27,7 @@ session optional                        pam_umask.so
 session optional                        pam_krb5.so minimum_uid=1100
 {% end %}\
 session required        pam_unix.so
-{% if 'ubuntu-xenial' in metadata.groups and not 'vmhost' in metadata.groups %}\
+{% if 'ubuntu-xenial' in metadata.groups and not ('vmhost' in metadata.groups or 'backdoor' in metadata.groups) %}\
 session required        pam_loginuid.so
 session required        pam_systemd.so
 {% end %}\

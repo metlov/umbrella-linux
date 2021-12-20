@@ -63,13 +63,6 @@
     <!--    <master>1.1.1.3</master> --> <!-- ip address of the master DNS server for acme.org -->
     <!-- </domain> -->
 
-    <!-- wrapper subnet -->
-    <!-- The class B network, which wraps all the internal subnets (pubnet,-->
-    <!-- secnet, DMZnet, winnet, but not extnet), defined below. It is an  -->
-    <!-- error if the internal subnets are not contained within this network.-->
-    <!-- It is used in reverse DNS zone generation and some other places. -->
-    <net>172.17.0.0/16</net>
-
     <!-- subnet definitions -->
     <!-- <extnet>192.168.0.0/17</extnet> -->    <!-- external network (outside world), if present -->
     <extnet>10.0.2.0/24</extnet>       <!-- KLM: umbrella-lxd in virtualbox -->

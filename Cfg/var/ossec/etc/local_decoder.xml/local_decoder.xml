@@ -75,16 +75,22 @@
 <decoder name="systemd">
   <program_name>^systemd</program_name>
 </decoder>
-<decoder name="systemd-failed-to-reset-devices-list">
+<decoder name="systemd-failed-to-reset-devices-list-on">
   <parent>systemd</parent>
   <prematch offset="after_parent">^Failed to reset devices.list on </prematch>
   <regex offset="after_prematch">^(\S+): </regex>
   <order>extra_data</order>
 </decoder>
+<decoder name="systemd-failed-to-reset-devices-list">
+  <parent>systemd</parent>
+  <prematch offset="after_parent">^user.slice: Failed to reset devices.list: </prematch>
+  <regex offset="after_prematch">^(\.+)$</regex>
+  <order>extra_data</order>
+</decoder>
 
 <!-- decode OpenVPN messages -->
 <decoder name="openvpn">
-  <program_name>^ovpn-server</program_name>
+  <program_name>^openvpn</program_name>
 </decoder>
 <decoder name="openvpn-cannot-locate-HMAC">
   <parent>openvpn</parent>

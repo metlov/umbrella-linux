@@ -1,9 +1,7 @@
 {% python
 # This template can be instantiated using altsrc under the names in the form
-# [<net>_]zone<num> where <net> is the network name and num is the external
-# domain name. The <net>_ part is optional. For example, instantiating it
-# under /etc/bind/zones/pub_zone0 will produce zone file for the 0th
-# domain served to a pub subnet.
+# <net>_mainzone.rev or link_<num>_mainzone.rev, where <net> is the network
+# name and num is the number of the classful "link" zone file.
 
 from genshi.template import TemplateError
 import os
@@ -11,29 +9,54 @@ import datetime
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/21_revzones.py')
 execfile(repo+'/Python/30_networking.py')
 execfile(repo+'/Python/32_zone_timestamp.py')
 
-ip_address=routerifs['pubif']
-ext_domain=domain_name
+zonefilename=name.split('/')[-1]
+
+filenametail='_mainzone.rev'
+if not zonefilename.endswith(filenametail):
+  raise TemplateError('Reverse zone file name "'+zonefilename+'" must end with "'+filenametail+'".')
+
+
+params=zonefilename[:-len(filenametail)]
+if params.startswith('link_'):
+  # linking zone
+  numclassful=int(params[len(params.rstrip('0123456789')):])
+  if numclassful<0 or numclassful>=len(linkingclassfulnets):
+    raise TemplateError('Classful zone number "'+str(numclassful)+'" out of range [0,'+str(len(linkingclassfulnets)-1)+'].')
+  NET=linkingclassfulnets[numclassful]
+else:
+  # served by router on the IP, corresponding to the specified subnet
+  ifname=params+'if'
+  if ifname not in networks:
+    raise TemplateError('Requested to generate internal zone for an unknown subnet "'+params+'".')
+  NET=networks[ifname]
+NETC=findClassful(NET,classfulnets)
+zonename=networkZoneName(NET,NETC,classlessShortName)
+
 c1width=35
-splitnet=str(wholenet).split('.')
-zonename=str(splitnet[1])+'.'+str(splitnet[0])+'.in-addr.arpa'
 %}\
 ;-------------------------------------------------------------------------
 ;
 ; Umbrella Linux
 ;
-;                (c) 2015-2018 by Konstantin L. Metlov <metlov@fti.dn.ua>
+;                (c) 2015-2020 by Konstantin L. Metlov <metlov@fti.dn.ua>
 ;                                 and other listed contributors
 ;
 ;
-; This is the header file for the primary domain's reverse zone file
-; of this. Umbrella Linux installation. It gets supplemented (every
-; 5 minutes) by a live list of workstations from LDAP with a help of
-; a cron job, running the umbrella-ldap2zone script. The resulting
-; completed zone file is then (re)loaded into the local bind.
+{% if params.startswith('link_') %}\
+; This is the linking file for "${str(NET)}" network reverse zone file.
 
+{% end if params.startswith('link_') %}\
+{% if not params.startswith('link_') %}\
+; This is the header file for "${params}" network reverse zone file.
+; It gets supplemented (every 5 minutes) by a live list of hosts from
+; LDAP with a help of a cron job, running the umbrella-ldap2zone script.
+; The resulting completed zone file is then (re)loaded into the local bind.
+
+{% end if not params.startswith('link_') %}\
 $$ORIGIN ${zonename}.
 $$TTL 500
 @  500  IN  SOA ${funchosts['router']}. itadmins.${domain_name}. (
@@ -43,11 +66,21 @@ $$TTL 500
                                           720000     ; expire
                                           6400       ; minimum TTL
                                           )
-${"".ljust(c1width)}    NS  ${funchosts['router']}.
-{% for host in funchosts %}\
-{% python
-splitip=str(funcifs[host]).split('.')
-srvlasttwo=str(splitip[3])+'.'+str(splitip[2])
-%}\
-${srvlasttwo.ljust(c1width)} IN PTR ${funchosts[host]}.
-{% end %}\
+${"".ljust(c1width)}    NS ${funchosts['router']}.
+{% if params.startswith('link_') %}\
+{%   for N in networks.values() %}\
+{%     if N in NET and N.size()<NET.size() %}\
+${classlessShortName(N,NET).ljust(c1width)}    NS ${funchosts['router']}.
+{%       for IP in N %}\
+${hostRevIP(IP,NETC).ljust(c1width)}    CNAME ${hostRevIP(IP,N)}.${classlessShortName(N,NET)}
+{%       end %}\
+{%     end %}\
+{%   end %}\
+{% end if params.startswith('link_') %}\
+{% if not params.startswith('link_') %}\
+{%   for host in funchosts %}\
+{%     if funcifs[host] in NET %}\
+${hostRevIP(funcifs[host],NET).ljust(c1width)}    IN PTR ${funchosts[host]}.
+{%     end %}\
+{%   end %}\
+{% end if not params.startswith('link_') %}\

@@ -3,6 +3,9 @@ from genshi.template import TemplateError
 execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
-splitnet=str(wholenet).split('.')
 %}\
-${splitnet[0]}.${splitnet[1]} OK
+{% for T,N in networks.items() %}\
+{%   if T not in set(['extif','intif']) %}\
+${str(N)} OK
+{%   end %}\
+{% end %}\

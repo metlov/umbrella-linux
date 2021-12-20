@@ -7,4 +7,8 @@
     <Service name='qemu-kvm' status='on' type='systemd'/>
     <Service name='virtlockd.socket' status='ignore' type='systemd'/>
     <Service name='virtlogd.socket' status='ignore' type='systemd'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='libvirtd' status='ignore' type='systemd'/>
+        <Service name='ebtables.service' status='ignore' type='systemd'/>
+    </Group>
 </Rules>

@@ -99,7 +99,9 @@
         <Package name='libsnapd-glib1'/>
     </Group>
     <Package name='pulseaudio-utils'/>
-    <Package name='rtkit'/>
+    <Group name='virt-lxc' negate='true'>
+        <Package name='rtkit'/>
+    </Group>
     <Package name='system-config-printer-udev'/>
     <Package name='smbclient'/>
     <Package name='ttf-dejavu-core'/>
@@ -282,5 +284,9 @@
         <Path name='/etc/xdg/autostart/conky.desktop'/>
         <Package name='rdesktop'/>
     </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Path name='/etc/rsyslog.d/040-dbus-screensaver-getactive.conf'/>
+    </Group>
+
     <xi:include href="../Local/Bundler/gui.xml"><xi:fallback/></xi:include>
 </Bundle>

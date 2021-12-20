@@ -3,16 +3,21 @@
     <Group name='ubuntu-xenial'>
         <Package name='libnss-ldap'/>
         <Service name='libnss-ldap'/>
-        <Path name='/etc/nsswitch.conf'/>
         <!-- cache user database for offline use -->
         <Package name='libnss-db'/>
         <Package name='nss-updatedb'/>
+        <Path name='/etc/cron.hourly/nssupdate' altsrc='/etc/cron.hourly/nssupdate-src'/>
+        <Path name='/etc/ldap.conf' altsrc='/etc/ldap.conf-src'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
         <Path name='/etc/cron.hourly/nssupdate'/>
+        <Path name='/etc/ldap.conf'/>
     </Group>
     <Package name='libsasl2-modules'/>
     <Package name='libsasl2-modules-gssapi-mit'/>
     <Package name='ldap-utils'/>  <!-- not obligatory, but convenient -->
-    <Path name='/etc/ldap.conf'/>
+
     <Path name='/etc/ldap/ldap.conf'/>
+    <Path name='/etc/nsswitch.conf'/>
 </Group>
 </Bundle>

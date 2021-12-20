@@ -1,0 +1,35 @@
+Umbrella Linux version 0.4.3 allows to upgrade your running system
+from Ubuntu 16.04 Xenial to Ubuntu 16.04 Bionic. This release supports
+both these versions of Ubuntu and on Xenial systems installs the scripts
+for an atomatic (mostly) upgrade to Bionic.
+
+For each the VM/CONTAINER do the following (don't forget to back it up first).
+
+1. Fully upgrade the Ubuntu and Umbrella by doing
+   on config: # bcfg2-admin xcmd Packages.Refresh
+   # bcfg2 -qvk
+
+2. Run the pre-upgrade script
+   # umbrella-upgrade-U1604-U1804-pre
+
+3. Do the uprgade (omit "eatmydata" if you are careful and not on UPS)
+   # eatmydata do-release-upgrade
+   [reboot, as part of the upgrade script]
+4. On VM host check that all the CONTAINERS/VMs are up after reboot.
+   On LXD system host you might need to perform a UID/GID remap in the
+   containers as described in the pre-upgrade script.
+   Run the post-uprgade script.
+   # umbrella-upgrade-U1604-U1804-post
+5. Fully update the new system (both Ubuntu and Umbrella configuration).
+   # eatmydata bcfg2 -qvk
+   # eatmydata bcfg2 -qv
+   [reboot]
+6. After reboot the system will be upgraded. If ossec agent does not start,
+   you may need to do
+   # chgrp -R 651 /var/ossec
+
+The Umbrella cluster should work well as a mixed environment, when some of the
+VMs/CONTAINERs/WORKSTATIONs are running under Ubuntu Xenial and some under
+Ubuntu Bionic. Nevertheless it is recommended to upgrade all your Umbrella
+cluster to Ubuntu Bionic, because the next version of the Umbrella Linux will
+drop support for Ubuntu 16.04 Xenial.

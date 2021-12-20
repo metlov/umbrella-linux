@@ -181,14 +181,14 @@ system_smtpd_recipient_restrictions =  permit_mynetworks,
     check_recipient_access texthash:/etc/postfix/admin_recipients,
     check_sender_access inline:{itadmins@${domain_name}=from_adm_hosts},
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
-    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_addresses.iteritems() for d in domain_names)}},
+    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_outgoing_addresses.iteritems() for d in domain_names)}},
 {% end %}\
     reject
-system_smtpd_client_restrictions = check_client_access texthash:/etc/postfix/local_clients,
+system_smtpd_client_restrictions = check_client_access cidr:/etc/postfix/local_clients,
     reject
 system_smtpd_relay_restrictions =  permit_mynetworks,
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
-    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_addresses.iteritems() for d in domain_names)}},
+    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_outgoing_addresses.iteritems() for d in domain_names)}},
 {% end %}\
     permit_sasl_authenticated,
     defer_unauth_destination

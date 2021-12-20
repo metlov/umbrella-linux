@@ -33,6 +33,15 @@ execfile(repo+'/Python/45_ossec.py')
     <!-- Files/directories to ignore -->
     <ignore>/etc/cups/subscriptions.conf</ignore>
     <ignore>/etc/cups/subscriptions.conf.O</ignore>
+{%if 'router' in metadata.groups %}\
+    <ignore>/etc/dhcp/dhcpd.conf</ignore>
+{% end %}\
+{%if 'config' in metadata.groups %}\
+    <ignore>/etc/pki/CA/crlnumber</ignore>
+    <ignore>/etc/pki/CA/crlnumber.old</ignore>
+    <ignore>/etc/pki/CA/crl/root.crl.pem</ignore>
+    <ignore>/etc/pki/CA/crl/root.crl</ignore>
+{% end %}\
 {%for pathname in path_list %}\
     <ignore>${pathname}</ignore>
 {% end %}\

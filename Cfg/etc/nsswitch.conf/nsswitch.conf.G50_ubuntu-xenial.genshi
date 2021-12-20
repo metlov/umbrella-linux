@@ -1,0 +1,30 @@
+{% python
+if ('local-fs' in metadata.groups) and not ('auth-krb5' in metadata.groups):
+    # mostly offline system
+    account_DBs='files db'
+    sudoer_DBs='files ldap'
+else:
+    # mostly online system
+    account_DBs='files ldap [NOTFOUND=return] db'
+    sudoer_DBs='ldap files'
+%}\
+# /etc/nsswitch.conf
+#
+# Example configuration of GNU Name Service Switch functionality.
+# If you have the `glibc-doc-reference' and `info' packages installed, try:
+# `info libc "Name Service Switch"' for information about this file.
+
+passwd:         ${account_DBs}
+group:          ${account_DBs}
+shadow:         files
+
+hosts:          files dns
+networks:       files
+
+protocols:      db files
+services:       db files
+ethers:         db files
+rpc:            db files
+
+netgroup:       nis
+sudoers:        ${sudoer_DBs}

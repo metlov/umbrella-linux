@@ -15,6 +15,7 @@
       <Group name='ulog'/>
       <Bundle name='router'/>
       <Bundle name='bind'/>
+      <Bundle name='bind-zones'/>
       <Bundle name='dhcp-server'/>
       <Bundle name='arpwatch'/>
    </Group>
@@ -26,6 +27,7 @@
    <Group profile='true' name='DMZsmtp'>
       <Group name='DMZserver'/>
       <Bundle name='bind'/>
+      <Bundle name='bind-zones'/>
       <Bundle name='postfix'/>
    </Group>
    <Group profile='true' name='DMZxmpp'>
@@ -108,6 +110,7 @@
       <Group name='nagios-server'/>
       <Group name='www-server-ssl'/>
       <Group name='database'/>
+      <Bundle name='mrtg'/>
    </Group>
    <Group profile='true' name='accounting'>
       <Group name='secserver'/>

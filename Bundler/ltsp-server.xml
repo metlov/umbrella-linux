@@ -30,7 +30,12 @@
     <Package name='cups-x2go'/>
     <Package name='sshfs'/>
     <Package name='x11-xfs-utils'/>
-    <Path name="/etc/X11/Xsession.d/90krenew" altsrc="/etc/profile.d/krenew.sh"/>
+    <Group name='ubuntu-xenial'>
+        <Path name="/etc/X11/Xsession.d/90krenew" altsrc="/etc/profile.d/krenew.sh-src"/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Path name="/etc/X11/Xsession.d/90krenew"/>
+    </Group>
     <Path name="/etc/x2go/x2go_logout.d/020_killall.sh"/>
     <Path name="/usr/local/bin/umbrella-session"/>
     <Path name="/opt/x2gothinclient/etc/x2gothinclient-displaymanager_start"/>

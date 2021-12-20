@@ -1,0 +1,116 @@
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+    echo "This script must be run as root" 1>&2
+    exit 99
+fi
+
+cat <<EOF
+This script will finalize the system upgrade of an Umbrella machine from Ubuntu 16.04 "Xenial"
+to  Ubuntu 18.04 "Bionic".
+
+It needs after "do-release-upgrade" (preceeded by the script "umbrella-upgrade-U1604-U1804-pre") and
+followed by "bcfg2 -qvk -r packages".
+
+EOF
+read -r -p "Now please type \"yes\" if you just rebooted after \"do-release-upgrade\" and want to finalize the Umbrella upgrade: " response
+response=${response,,}    # tolower
+if [[ ! $response =~ ^(yes)$ ]]; then
+   echo "Upgrade finalization aborted..."
+   exit 9
+fi
+
+if [[ `lsb_release -rs` != "18.04" ]]; then
+   echo "The script must be run on Ubuntu 18.04 \"Bionic\"."
+   exit 9
+fi
+
+if [[ ! -f /etc/umbrella.conf ]]; then
+   echo "The script must be run on an Umbrella Linux system."
+   exit 9
+fi
+
+source /etc/umbrella.conf
+
+echo "Finalizing the system."
+
+set -e
+set -o xtrace
+
+# reenable Umbrella repository
+echo "deb http://www.donfti.ru/umbrella/repository/ bionic main" >/etc/apt/sources.list.d/umbrella.list
+apt-get update
+apt-get -y upgrade
+
+systemctl stop systemd-timesyncd
+getent passwd systemd-timesync &>/dev/null && userdel systemd-timesync
+getent group systemd-timesync &>/dev/null && groupdel systemd-timesync
+systemctl stop systemd-networkd
+groupmod -g 102 systemd-network
+usermod -u 100 systemd-network
+usermod --shell /usr/sbin/nologin systemd-network
+systemctl start systemd-networkd
+systemctl stop systemd-resolved
+groupmod -g 103 systemd-resolve
+usermod -u 101 systemd-resolve
+usermod --shell /usr/sbin/nologin systemd-resolve
+systemctl start systemd-resolved
+getent passwd snmp &>/dev/null && userdel snmp
+getent group snmp &>/dev/null && groupdel snmp
+systemctl stop snmpd
+find / -xdev -gid 105 | xargs -r chgrp 647
+find / -xdev -uid 103 | xargs -r chown 647
+groupmod -g 647 Debian-snmp
+usermod -u 647 Debian-snmp
+usermod --shell /usr/sbin/nologin Debian-snmp
+systemctl stop snmpd
+groupmod -g 104 input
+groupmod -g 105 crontab
+groupmod -g 107 messagebus
+perl -pi -e 's|messagebus:x:106:107::/var/run/dbus:/bin/false|messagebus:x:103:107::/nonexistent:/usr/sbin/nologin|' /etc/passwd
+groupmod -g 670 netdev
+groupmod -g 110 ssh
+chgrp ssh /usr/bin/ssh-agent
+chmod g+s /usr/bin/ssh-agent
+usermod --shell /usr/sbin/nologin uuidd
+usermod -u 106 sshd
+perl -pi -e 's|sshd:x:106:65534::/var/run/sshd|sshd:x:106:65534::/run/sshd|' /etc/passwd
+groupmod -g 106 syslog
+perl -pi -e 's|syslog:x:104:106::/home/syslog:/bin/false|syslog:x:102:106::/home/syslog:/usr/sbin/nologin|' /etc/passwd
+find / -xdev -gid 108 | xargs -r chgrp 106
+find / -xdev -uid 104 | xargs -r chown 102
+usermod -u 104 _apt
+find / -xdev -uid 105 | xargs -r chown 104
+usermod --shell /usr/sbin/nologin _apt
+chgrp -R 651 /var/ossec
+set +o xtrace
+
+# check the machine class and back up databases accordingly
+if [[ $BCFG2_GROUPS == *" config "* ]]; then
+   echo "Finalizing upgrade of the \"config\" server."
+
+   echo "Reenabling and starting bcfg2-server"
+   set -o xtrace
+   apt-get -y install python-django python-genshi python-pyinotify python-passlib python-ipcalc python-pymysql python-six
+   systemctl start bcfg2-server
+   set +o xtrace
+fi
+
+if [[ "$BCFG2_GROUPS" == *" ldap-master "* || "$BCFG2_GROUPS" == *" ldap-slave "* ]]; then
+
+   if [[ "$BCFG2_GROUPS" == *" ldap-master "* && \
+         ! -f /var/backups/umbrella-upgrade-U1604-U1804.ldif ]]; then
+      echo "LDAP database backup does not exist. Aborting..."
+      exit 9
+   fi
+
+   echo "Running ldap-umbrella-init."
+   set -o xtrace
+   systemctl stop slapd
+   rm -rf /var/lib/ldap/*
+   echo 'yes' | ldap-umbrella-init
+   set +o xtrace
+
+fi
+
+echo "Upgrade finalized. Now reboot the system and run \"bcfg2 -qvk -r packages\"".

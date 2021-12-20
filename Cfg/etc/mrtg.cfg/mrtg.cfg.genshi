@@ -1,0 +1,59 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+nagios_pass=metadata.Properties['umbrella_keys.xml'].xdata.find('snmp_nagios_pass').text
+%}\
+### Global Defaults
+
+EnableIPv6: no
+WorkDir: /var/www/mrtg
+Options[_]: bits,growright
+WithPeak[_]: ymwd
+
+### External interface of the main Umbrella router
+
+Target[${funchosts['router']}_${routerifdevs['extif']}]: #${routerifdevs['extif']}:public@${funchosts['router']}:::::3
+SnmpOptions[${funchosts['router']}_${routerifdevs['extif']}]: privprotocol=>'aes',authpassword=>'${nagios_pass}',privpassword=>'${nagios_pass}',username=>'nagios',authprotocol=>'sha'
+noHC[${funchosts['router']}_${routerifdevs['extif']}]: yes
+SetEnv[${funchosts['router']}_${routerifdevs['extif']}]: MRTG_INT_IP="${routerifs['extif']}" MRTG_INT_DESCR="No-Description"
+MaxBytes[${funchosts['router']}_${routerifdevs['extif']}]: 12500000
+Title[${funchosts['router']}_${routerifdevs['extif']}]: ${routerifdevs['extif']} -- router
+PageTop[${funchosts['router']}_${routerifdevs['extif']}]: <h1>${routerifdevs['extif']} -- router</h1>
+		<div id="sysdetails">
+			<table>
+				<tr>
+					<td>System:</td>
+					<td>${funchosts['router']}</td>
+				</tr>
+				<tr>
+					<td>Maintainer:</td>
+					<td>itadmins@${domain_name}</td>
+				</tr>
+				<tr>
+					<td>Description:</td>
+					<td>No-Description  </td>
+				</tr>
+				<tr>
+					<td>ifType:</td>
+					<td>ethernetCsmacd (6)</td>
+				</tr>
+				<tr>
+					<td>ifName:</td>
+					<td>${routerifdevs['extif']}</td>
+				</tr>
+				<tr>
+					<td>Max Speed:</td>
+					<td>100.0 Mbits/s</td>
+				</tr>
+				<tr>
+					<td>Ip:</td>
+					<td>${routerifs['extif']}</td>
+				</tr>
+			</table>
+		</div>
+
+enablesnmpv3: yes

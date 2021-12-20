@@ -1,0 +1,10 @@
+<Bundle>
+  <Group name='ubuntu'>
+    <Package name='mrtg'/>
+    <Path name='/etc/mrtg.cfg'/>
+    <Path name='/var/www/mrtg'/>
+    <Path name='/etc/apache2/conf-available/mrtg.conf'/>
+    <Path name='/etc/apache2/conf-enabled/mrtg.conf'/>
+    <Action name='update-mrtg-index'/>
+  </Group>
+</Bundle>

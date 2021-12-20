@@ -6,4 +6,8 @@
     <Path name='/etc/apache2/mods-enabled/cgid.load'/>
     <Path name='/etc/mailman/mm_cfg.py'/>
     <Service name='postfix'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Service name='mailman'/>
+        <Path name='/etc/systemd/system/mailman.service.d/override.conf'/>
+    </Group>
 </Bundle>

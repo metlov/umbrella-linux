@@ -9,6 +9,12 @@ execfile(repo+'/Python/25_firewall.py')
 {% for domain in domain_names %}\
 postmaster@${domain} OK
 {% end %}\
+{% for domain in domain_names %}\
+itadmins@${domain} OK
+{% end %}\
+{% for domain in domain_names %}\
+itadmin@${domain} OK
+{% end %}\
 {% python
 aliases = metadata.Properties['mailaliases.xml'].xdata.findall('mailalias')
 %}\
@@ -19,11 +25,11 @@ aliases = metadata.Properties['mailaliases.xml'].xdata.findall('mailalias')
 ${alias.find('alias').text} OK
 {% end %}\
 {% if mail_in_DMZ %}\
-{%   if len(robot_addresses)>0 %}\
+{%   if len(robot_incoming_addresses)>0 %}\
 # permit mail forwarding to robots
 {%   end %}\
 {%   for domain in domain_names %}\
-{%     for addr in robot_addresses.iterkeys() %}\
+{%     for addr in robot_incoming_addresses.iterkeys() %}\
 ${addr}@${domain} OK
 {%     end %}\
 {%   end %}\

@@ -1,0 +1,11 @@
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+%}\
+<?php
+$$servers['imap']['disabled'] = false;
+$$servers['imap']['hostspec'] = '${funchosts['mail']}';
+$$servers['imap']['port'] = 993;
+$$servers['imap']['maildomain'] = '${domain_name}';
+$$servers['imap']['secure'] = 'ssl';

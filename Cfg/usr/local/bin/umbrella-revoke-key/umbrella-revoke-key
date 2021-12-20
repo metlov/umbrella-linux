@@ -36,10 +36,10 @@ fi
 
 # we regenerate the CRL in any case (even if no certificate was specified for
 # revocation)
-echo "Regenerating the CRL..."
 cd /etc/pki/CA
 openssl ca -config ../openssl.cnf -gencrl \
-         -passin file:<( echo -n "$passphrase" ) -out crl/root.crl.pem.tmp
+         -passin file:<( echo -n "$passphrase" ) -out crl/root.crl.pem.tmp 2>&1 |\
+    grep -v 'Using configuration from' || :
 openssl crl -inform PEM -in crl/root.crl.pem.tmp -outform DER -out crl/root.crl.tmp
 mv crl/root.crl.pem.tmp crl/root.crl.pem
 mv crl/root.crl.tmp crl/root.crl

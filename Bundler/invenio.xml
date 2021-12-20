@@ -17,10 +17,17 @@
     <Package name='libmysqlclient-dev'/>
     <Package name='libapache2-mod-wsgi'/>
     <Package name='python-pip'/> <!-- install missing python packages in pip -->
+    <Package name='python-setuptools'/>
+    <Package name='python-wheel'/>
     <Package name='python-mysqldb'/>
     <Package name='python-simplejson'/>
     <Package name='gnuplot'/>
-    <Package name='gnuplot5-nox'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='gnuplot5-nox'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='gnuplot-nox'/>
+    </Group>
     <Package name='poppler-utils'/>
     <Package name='poppler-data'/>
     <Package name='clisp'/>
@@ -34,7 +41,9 @@
     <Package name='liblapack3'/>
     <Package name='libblas3'/>
     <Package name='python-magic'/>
-    <Package name='pdftk'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='pdftk'/>
+    </Group>
     <Package name='html2text'/>
     <Package name='libtiff-tools'/>
     <Package name='imagemagick'/>
@@ -63,8 +72,17 @@
     <!-- ffmpeg -->
     <Package name='ffmpeg'/>
     <Package name='libjack-jackd2-0'/>
-    <Package name='libavcodec-ffmpeg56'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='libavcodec-ffmpeg56'/>
+    </Group>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='libavcodec57'/>
+        <Package name='libavfilter6'/>
+        <Package name='libwayland-egl1'/>
+        <Package name='libwayland-egl1-mesa'/>
+    </Group>
     <Package name='libgl1-mesa-glx'/>
+
 
     <!-- extras -->
     <Package name='sbcl'/>
@@ -74,6 +92,9 @@
     <Package name='python-epydoc'/>
     <Package name='libapache2-mod-xsendfile'/>
     <Package name='python-utidylib'/>
+    <Group name='ubuntu-xenial' negate='true'>
+        <Package name='libtidy5'/>
+    </Group>
     <Package name='python-beautifulsoup'/>
     <Package name='libhdf5-dev'/>
     <Package name='git'/>
@@ -154,7 +175,9 @@
     <Package name='texlive-lang-cyrillic'/>
     <Package name='texlive-lang-english'/>
     <Package name='texlive-latex-extra'/>
-    <Package name='texlive-math-extra'/>
+    <Group name='ubuntu-xenial'>
+        <Package name='texlive-math-extra'/>
+    </Group>
     <Package name='texlive-metapost'/>
     <Package name='texlive-publishers'/>
     <Package name='texlive-science'/>
@@ -164,5 +187,8 @@
     <Path name='/etc/apache2/sites-available/invenio-ssl.conf'/>
     <Path name='/etc/apache2/sites-enabled/invenio.conf'/>
     <Path name='/etc/apache2/sites-enabled/invenio-ssl.conf'/>
+
+    <!-- relax SQL mode to allow some of the Invenio queries (most notably webcoll) -->
+    <Path name='/etc/mysql/mysql.conf.d/sql_mode.cnf'/>
 </Group>
 </Bundle>

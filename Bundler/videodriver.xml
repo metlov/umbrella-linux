@@ -1,14 +1,38 @@
 <Bundle>
 <Group name='ubuntu'>
     <Group name='nvidia-304'>
-       <Package name='nvidia-304'/>
-       <BoundPOSIXUser name="nvidia-persistenced" home="/" shell="/sbin/nologin" gecos="NVIDIA Persistence Daemon,,," uid="109" group="nvidia-persistenced"/>
-       <BoundPOSIXGroup name="nvidia-persistenced" gid="125"/>
+       <Group name='ubuntu-xenial'>
+          <Package name='nvidia-304'/>
+          <BoundPOSIXUser name="nvidia-persistenced" home="/" shell="/sbin/nologin" gecos="NVIDIA Persistence Daemon,,," uid="109" group="nvidia-persistenced"/>
+          <BoundPOSIXGroup name="nvidia-persistenced" gid="125"/>
+       </Group>
     </Group>
     <Group name='nvidia'>
-       <Package name='nvidia-340'/>
-       <BoundPOSIXUser name="nvidia-persistenced" home="/" shell="/sbin/nologin" gecos="NVIDIA Persistence Daemon,,," uid="109" group="nvidia-persistenced"/>
-       <BoundPOSIXGroup name="nvidia-persistenced" gid="125"/>
+       <Group name='ubuntu-xenial'>
+         <Package name='nvidia-340'/>
+         <BoundPOSIXUser name="nvidia-persistenced" home="/" shell="/sbin/nologin" gecos="NVIDIA Persistence Daemon,,," uid="109" group="nvidia-persistenced"/>
+         <BoundPOSIXGroup name="nvidia-persistenced" gid="125"/>
+       </Group>
+       <Group name='ubuntu-xenial' negate='true'>
+         <Package name='nvidia-driver-460'/>
+         <Package name='nvidia-compute-utils-460'/>
+         <Package name='nvidia-dkms-460'/>
+         <Package name='nvidia-utils-460'/>
+         <Package name='nvidia-kernel-source-460'/>
+         <Package name='nvidia-kernel-common-460'/>
+         <Package name='libnvidia-compute-460'/>
+         <Package name='libnvidia-cfg1-460'/>
+         <Package name='libnvidia-common-460'/>
+         <Package name='libnvidia-decode-460'/>
+         <Package name='libnvidia-encode-460'/>
+         <Package name='libnvidia-extra-460'/>
+         <Package name='libnvidia-fbc1-460'/>
+         <Package name='libnvidia-gl-460'/>
+         <Package name='libnvidia-ifr1-460'/>
+         <Package name='xserver-xorg-video-nvidia-460'/>
+         <BoundPOSIXUser name="nvidia-persistenced" home="/" shell="/sbin/nologin" gecos="NVIDIA Persistence Daemon,,," uid="109" group="nvidia-persistenced"/>
+         <BoundPOSIXGroup name="nvidia-persistenced" gid="125"/>
+       </Group>
     </Group>
 </Group>
 </Bundle>

@@ -1,0 +1,61 @@
+
+# Welcome to the chrony configuration file. See chrony.conf(5) for more
+{% python
+from genshi.template import TemplateError
+execfile(repo+'/Python/00_baseparams.py')
+execfile(repo+'/Python/10_funchosts.py')
+execfile(repo+'/Python/20_networks.py')
+execfile(repo+'/Python/25_firewall.py')
+execfile(repo+'/Python/30_networking.py')
+execfile(repo+'/Python/35_organization.py')
+%}\
+
+# NTP servers
+{% if metadata.Properties['umbrella.xml'].xdata.find('ntpserver') is not None %}\
+{% for ntpserver in metadata.Properties['umbrella.xml'].xdata.findall('ntpserver') %}\
+server ${ntpserver.text} {%if ntpserver.get('option') is not None%}\
+${ntpserver.get('option')}{% end %}
+{% end %}\
+{% end %}\
+
+# This directive specify the location of the file containing ID/key pairs for
+# NTP authentication.
+keyfile /etc/chrony/chrony.keys
+
+# This directive specify the file into which chronyd will store the rate
+# information.
+driftfile /var/lib/chrony/chrony.drift
+
+# Uncomment the following line to turn logging on.
+#log tracking measurements statistics
+
+# Log files location.
+logdir /var/log/chrony
+
+# Stop bad estimates upsetting machine clock.
+maxupdateskew 100.0
+
+# This directive enables kernel synchronisation (every 11 minutes) of the
+# real-time clock. Note that it can’t be used along with the 'rtcfile' directive.
+rtcsync
+
+# Step the system clock instead of slewing it if the adjustment is larger than
+# one second, but only in the first three clock updates.
+makestep 1 3
+
+# listen for connections on all interfaces
+bindaddress 0.0.0.0
+port 123
+
+# Allow time synchronization from our subnets
+{% python
+networks.pop('extif', None)    # not from external network
+if not auth_in_DMZ:
+    networks.pop('DMZif', None)    # not from DMZ unless auth is enabled there
+%}\
+{% for network in networks.values() %}\
+allow ${str(network)}
+{% end %}\
+{% for network in netclasses.iterkeys() %}\
+allow ${str(network)}
+{% end %}\

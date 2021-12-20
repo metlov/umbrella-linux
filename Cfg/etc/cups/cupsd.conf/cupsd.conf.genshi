@@ -9,7 +9,7 @@ execfile(repo+'/Python/00_baseparams.py')
 execfile(repo+'/Python/10_funchosts.py')
 execfile(repo+'/Python/20_networks.py')
 pubnet=networks['pubif']
-pubnetstr=str(pubnet)+'/'+str(pubnet.mask)
+pubnetstr=str(pubnet.network())+'/'+str(pubnet.mask)
 %}\
 ServerAdmin itadmins@${domain_name}
 

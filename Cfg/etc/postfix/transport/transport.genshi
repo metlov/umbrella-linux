@@ -11,7 +11,7 @@ local_robots=[]
 if ip_addr in robot_servers:
     # this host serves robots
     local_robot_number=robot_servers.index(ip_addr)
-    for name, num in robot_addresses.iteritems():
+    for name, num in robot_incoming_addresses.iteritems():
         if num==local_robot_number:
             local_robots.append(name)
 
@@ -33,10 +33,10 @@ local_transport=os.path.isfile(repo+'/Local/Cfg/etc/postfix/transport/transport.
 {% include ${repo+'/Local/Cfg/etc/postfix/transport/transport.genshi'} %}\
 {% end %}\
 {% if 'DMZsmtp' in metadata.groups %}\
-{% if len(robot_addresses)>0 %}\
+{% if len(robot_incoming_addresses)>0 %}\
 # relay to robots directly in DMZ not touching the internal mail server in PUB
 {%   for domain in domain_names %}\
-{%     for name, num in robot_addresses.iteritems() %}\
+{%     for name, num in robot_incoming_addresses.iteritems() %}\
 ${name}@${domain} smtp:[${str(robot_servers[num])}]
 {%     end %}\
 {%   end %}\
@@ -53,7 +53,7 @@ ${name} smtp:[${str(funcifs['mail'])}]:10025
 {% if 'mail' in metadata.groups %}\
 # relay mail to robots defined in firewall.xml
 {%   for domain in domain_names %}\
-{%     for robot_name,num in robot_addresses.iteritems() %}\
+{%     for robot_name,num in robot_incoming_addresses.iteritems() %}\
 ${robot_name}@${domain} smtp:[${str(robot_servers[num])}]
 {%     end %}\
 {%   end %}\

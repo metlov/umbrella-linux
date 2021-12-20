@@ -21,6 +21,7 @@
 <Path type='symlink' name='/etc/apache2/mods-enabled/proxy_http.load' to='../mods-available/proxy_http.load'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/rewrite.load' to='../mods-available/rewrite.load'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/proxy.load' to='../mods-available/proxy.load'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/proxy_wstunnel.load' to='../mods-available/proxy_wstunnel.load'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/cgid.conf' to='../mods-available/cgid.conf'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/cgid.load' to='../mods-available/cgid.load'/>
 <Path type='symlink' name='/etc/apache2/sites-enabled/packages.conf' to='../sites-available/packages'/>
@@ -70,4 +71,33 @@
 
 <!-- auto-pruned zone file directory -->
 <Path type='directory' name='/etc/bind/zones' owner='root' group='root' mode='0755' prune='true'/>
+
+<!-- for MRTG -->
+<Path type='directory' name="/var/www/mrtg" mode='755' owner='root' group='root'/>
+<Path type='symlink' name='/etc/apache2/conf-enabled/mrtg.conf' to='../conf-available/mrtg.conf'/>
+<Action name='update-mrtg-index' timing='post' when='modified' shell='true' command="indexmaker /etc/mrtg.cfg &gt; /var/www/mrtg/index.html" status='ignore'/>
+
+<!-- upgrade scripts -->
+<Group name='ubuntu-xenial' negate='true'>
+    <Path type='nonexistent' name='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre'/>
+    <Path type='nonexistent' name='/usr/local/bin/umbrella-upgrade-U1604-U1804-post'/>
+</Group>
+
+<!-- krenew clean up after Xenial -->
+<Group name='ubuntu-xenial' negate='true'>
+    <Path type='nonexistent' name='/etc/profile.d/krenew.sh'/>
+    <Path type='nonexistent' name='/etc/profile.d/krenew.csh'/>
+    <Path type='nonexistent' name='/etc/bash.bash_logout'/>
+    <Path type='nonexistent' name="/etc/X11/Xsession.d/90krenew"/>
+</Group>
+
+<!-- other Xenial leftovers -->
+<Group name='ubuntu-xenial' negate='true'>
+    <Path type='nonexistent' name='/etc/cron.hourly/nssupdate'/>
+    <Path type='nonexistent' name='/etc/ldap.conf'/>
+    <Path type='nonexistent' name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
+    <Path type='nonexistent' name='/etc/systemd/system/rpc-gssd.service.d'/>
+    <Path type='nonexistent' name='/etc/default/snmpd'/>
+</Group>
+
 </Rules>

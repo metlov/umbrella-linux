@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
 
-execfile("./pelicanconf.py")
+conffile="./pelicanconf.py"
+with open(conffile, "rb") as source_file:
+    code = compile(source_file.read(), conffile, "exec")
+exec(code)
 
-SITEURL = u'http://localhost:8000/umbrella-linux'
+SITEURL = u'http://localhost:8001'
