@@ -1,24 +1,24 @@
 {% python
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 %}\
 {% if 'router' in metadata.groups %}\
 {% for iface in ['pub','sec','DMZ'] %}\
 
-acl ${iface}net { ${intnets_str[iface+'if']};${' localhost;' if iface=='pub' else ''} };
+acl ${iface}net { ${intnets[iface+'if'].with_prefixlen};${' localhost;' if iface=='pub' else ''} };
 view ${iface}net {
     match-clients { ${iface}net; };
     allow-recursion { any; };
     attach-cache "common-cache";
     include "/etc/bind/named.conf.default-zones";
     include "/etc/bind/named.conf.ldap2zone";
-{%   for i in range(len(domain_names_list)) %}\
-{%     if domain_names_list[i] != domain_name %}\
+{%   for i in range(len(domain_names)) %}\
+{%     if domain_names[i] != domain_name %}\
 
-    zone "${domain_names_list[i]}" {
+    zone "${domain_names[i]}" {
         type master;
         file "/etc/bind/zones/${iface}_zone${int(i)}";
         allow-update { none; };
@@ -48,14 +48,32 @@ zone "dnswl.org" {
 
 {% end %}\
 // zones for which we answer authoritatively
-{%   for i in range(len(domain_names_list)) %}\
-zone "${domain_names_list[i]}" {
+{%   for i in range(len(domain_names)) %}\
+zone "${domain_names[i]}" {
     type master;
     file "/etc/bind/zones/zone${int(i)}";
     allow-update { none; };
-{%       if domain_names_list[i] in domain_notifies %}\
-    allow-transfer { ${"; ".join(domain_notifies[domain_names_list[i]])+"; "}};
-    also-notify { ${"; ".join(domain_notifies[domain_names_list[i]])+"; "}};
+{% python
+if domain_names[i] in domain_AXFR:
+  notallowed=domain_AXFR[domain_names[i]][:]
+else:
+  notallowed=[]
+# finding the notify addresses, which were not allowed
+# via the explicitly specified AXFR networks
+if domain_names[i] in domain_notifies:
+  for addr in domain_notifies[domain_names[i]]:
+    allowed = False
+    if domain_names[i] in domain_AXFR:
+      for AXFRnet in domain_AXFR[domain_names[i]]:
+        allowed = allowed or (ipaddress.ip_address(addr) in ipaddress.ip_network(AXFRnet))
+    if not allowed:
+      notallowed.append(addr)
+%}\
+{%       if len(notallowed)>0 %}\
+    allow-transfer { ${"; ".join(notallowed)+"; "}};
+{%       end %}\
+{%       if domain_names[i] in domain_notifies %}\
+    also-notify { ${"; ".join(domain_notifies[domain_names[i]])+"; "}};
 {%       end %}\
     notify yes;
 };

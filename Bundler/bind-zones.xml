@@ -2,16 +2,23 @@
 <?python
 from genshi.template import TemplateError
 import socket
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/21_revzones.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/21_revzones.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 ?>
 <Group name='ubuntu'>
-    <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="108" group="bind"/>
-    <BoundPOSIXGroup name="bind" gid="113"/>
-    <Service name='bind9'/>
+    <Group name='ubuntu-bionic'>
+        <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="108" group="bind"/>
+        <BoundPOSIXGroup name="bind" gid="113"/>
+        <Service name='bind9'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <BoundPOSIXUser name="bind" home="/var/cache/bind" shell="/bin/false" gecos="" uid="682" group="bind"/>
+        <BoundPOSIXGroup name="bind" gid="682"/>
+        <Service name='named'/>
+    </Group>
     <Path name='/etc/bind/named.conf'/>
     <Path name='/etc/bind/named.conf.local'/>
     <Path name='/etc/bind/named.conf.options'/>
@@ -34,8 +41,8 @@ execfile(repo+'/Python/30_networking.py')
         <!-- statically define the internal versions of served zones -->
         <Path name='/etc/bind/zones'/>
         <py:for each="iface in ['pub','sec','DMZ']">
-            <py:for each="i in range(len(domain_names_list))">
-                <py:if test="domain_names_list[i]!=domain_name">
+            <py:for each="i in range(len(domain_names))">
+                <py:if test="domain_names[i]!=domain_name">
                 <Path name='/etc/bind/zones/${iface}_zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
                 </py:if>
             </py:for>
@@ -43,7 +50,7 @@ execfile(repo+'/Python/30_networking.py')
     </Group>
     <Group name='DMZsmtp'>
         <Path name='/etc/bind/zones'/>
-        <py:for each="i in range(len(domain_names_list))">
+        <py:for each="i in range(len(domain_names))">
             <Path name='/etc/bind/zones/zone${str(i)}' altsrc="/etc/bind/zones/zone"/>
         </py:for>
     </Group>

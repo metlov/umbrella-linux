@@ -1,8 +1,8 @@
 #!/bin/bash
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 %}\
 # takes three parameters: keytab_path principal1 [principal 2 ...]
 function make_keytab {
@@ -54,7 +54,7 @@ make_keytab /etc/ejabberd/xmpp.keytab/xmpp.keytab.H_${funchosts['proxy']} xmpp/$
 {% if 'DMZxmpp' in funchosts %}\
 make_keytab /etc/ejabberd/xmpp.keytab/xmpp.keytab.H_${funchosts['DMZxmpp']} xmpp/${funchosts['DMZxmpp']}
 {% end %}\
-{% for host in funchosts.itervalues() %}\
+{% for host in sorted(funchosts.values()) %}\
 {% python
 principals="host/"+host
 if 'nfs' in funchosts:

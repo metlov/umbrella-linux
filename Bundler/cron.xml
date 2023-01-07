@@ -4,7 +4,9 @@
     <Service name='cron'/>
     <Path name='/etc/crontab'/>
     <Path name='/etc/cron.deny'/>
-    <Package name='at'/>
-    <Service name='atd'/>
+    <Group name='ubuntu-bionic'>
+        <Package name='at'/>
+        <Service name='atd'/>
+    </Group>
 </Group>
 </Bundle>

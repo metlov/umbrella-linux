@@ -1,5 +1,5 @@
 {% python
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 <VirtualHost _default_:80>
         ServerName gosa.${domain_name}

@@ -3,4 +3,9 @@
     <Path name='/etc/initramfs-tools/conf.d/mdadm'/>
     <Path name='/etc/sysctl.d/90-raid.conf'/>
     <Service name='mdadm'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Service name='mdcheck_continue.timer'/>
+        <Service name='mdcheck_start.timer'/>
+        <Service name='mdmonitor-oneshot.timer'/>
+    </Group>
 </Bundle>

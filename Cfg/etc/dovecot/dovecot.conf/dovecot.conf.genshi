@@ -1,6 +1,6 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 auth_default_realm = ${realm_name}
 auth_mechanisms = plain login gssapi
@@ -81,6 +81,18 @@ plugin {
     #antispam_verbose_debug = 1
 }
 
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+# permit stats access to lda
+service stats {
+    unix_listener stats-reader {
+        user = vmail
+    }
+    unix_listener stats-writer {
+        user = vmail
+    }
+}
+
+{% end %}\
 # managesieve configuration
 service managesieve-login {
   inet_listener sieve {

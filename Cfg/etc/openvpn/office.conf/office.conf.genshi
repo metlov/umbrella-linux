@@ -1,10 +1,10 @@
 {% python
 from genshi.template import TemplateError
 import lxml
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 
 if int_address is not None and int_address.strip():
   ip_address=int_address

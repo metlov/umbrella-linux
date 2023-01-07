@@ -1,0 +1,28 @@
+#!/bin/bash
+PGREP="/bin/grep"
+PLDAPSEARCH="/usr/bin/ldapsearch"
+PSED="/bin/sed"
+source /etc/umbrella.conf
+
+GROUPS_FILE=/etc/prosody/sharedgroups.txt
+
+GRPS_Q="(&(objectClass=PosixGroup)(cn=*))"
+GRPS=`${PLDAPSEARCH} -x "${GRPS_Q}" cn | ${PGREP} '^cn:' | ${PSED} -e 's/^[cC][nN]: //g'`
+echo "[+All]" >${GROUPS_FILE}
+ALL_Q="(&(objectClass=PosixAccount)(uid=*))"
+ALL=`${PLDAPSEARCH} -x "${ALL_Q}" uid | ${PGREP} -i '^uid:' | ${PSED} -e 's/^[uU][iI][dD]: //g'`
+for user in ${ALL}; do
+    echo "${user}@${DOMAIN_NAME}=${user}" >>${GROUPS_FILE}
+done
+echo >>${GROUPS_FILE}
+for grp in ${GRPS}; do
+    echo "[+${grp}]" >>${GROUPS_FILE}
+    MMBRS_Q="(&(objectClass=PosixGroup)(cn=${grp}))"
+    MMBRS=`${PLDAPSEARCH} -x "${MMBRS_Q}" memberuid | ${PGREP} -i '^memberUid:' | ${PSED} -e 's/^[mM][eE][mM][bB][eE][rR][uU][iI][dD]: //g'`
+    for user in ${MMBRS}; do
+        echo "${user}@${DOMAIN_NAME}=${user}" >>${GROUPS_FILE}
+    done
+    echo >>${GROUPS_FILE}
+done
+
+/usr/bin/systemctl reload prosody

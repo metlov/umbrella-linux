@@ -1,0 +1,35 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+%}\
+set timeout=30
+
+loadfont unicode
+
+set menu_color_normal=white/black
+set menu_color_highlight=black/light-gray
+
+set superusers="format"
+password format c:
+password rescue me
+
+menuentry "Thin client (terminal mode)" --unrestricted {
+        set gfxpayload=keep
+        linux   /boot/x2go/vmlinuz.amd64 nfsroot=${funcifs['ltsp']}:/opt/x2gothinclient/chroot,v3 boot=nfs ro quiet nomodeset splash
+        initrd  /boot/x2go/initrd.img.amd64
+}
+
+menuentry "Install Umbrella Workstation (THIS WILL ERASE ALL FILES ON YOUR HARD DRIVE !!! Login \"format\" password \"c:\")" --users "format" {
+        set gfxpayload=keep
+        linux   /boot/installer/vmlinuz ip=dhcp cloud-config-url=/dev/null url=http://autoconfig.${domain_name}/install/ubuntu-live-installer.iso autoinstall ds="nocloud-net;s=http://autoconfig.${domain_name}/install/"
+        initrd  /boot/installer/initrd
+}
+
+menuentry "Run a rescue live system (THIS CAN POTENTIALLY ERASE ALL FILES ON YOUR HARD DRIVE !!! Login \"rescue\" password \"me\")" --users "rescue" {
+        set gfxpayload=keep
+        linux   /boot/installer/vmlinuz ip=dhcp cloud-config-url=/dev/null url=http://autoconfig.${domain_name}/install/ubuntu-live-installer.iso
+        initrd  /boot/installer/initrd
+}

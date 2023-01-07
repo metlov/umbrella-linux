@@ -1,8 +1,10 @@
 <Bundle>
 <Group name='ubuntu'>
     <Package name='iptables'/>
-    <Package name='irqbalance'/>
-    <Service name='irqbalance'/>
+    <Group name='virt-lxc' negate='true'>
+        <Package name='irqbalance'/>
+        <Service name='irqbalance'/>
+    </Group>
     <Package name='xauth'/> <!-- to enable X11 forwarding -->
     <Path name='/etc/dhcp/dhclient.conf'/> <!-- override DHCP-supplied DNS -->
     <Path name='/usr/local/bin/umbrella.sh'/>
@@ -20,5 +22,8 @@
     <!-- some utilities for troubleshooting -->
     <Package name='arping'/>
     <Package name='tcpdump'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <BoundPOSIXUser name="tcpdump" home="/nonexistent" shell="/usr/sbin/nologin" gecos="" uid="683" group="tcpdump"/>
+    </Group>
 </Group>
 </Bundle>

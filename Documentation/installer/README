@@ -1,7 +1,7 @@
 This is the base Umbrella system configuration and the installer, which
-will turn a recent (16.04 or 18.04 at the moment of writing) "mini" or
-"server" installation of Ubuntu LTS with default settings into a fully-
-functional Umbrella Linux server.
+will turn a recent (22.04 at the moment of writing) minimal "server"
+installation of Ubuntu LTS with default settings into a fully functional
+Umbrella Linux server.
 
 
          INSTALLING THE SERVER INTO THE VIRTUALBOX
@@ -86,7 +86,7 @@ and create a new session with
 
 Starting this session with X2Go should bring you inside the ltsp server of
 your Umbrella Linux in graphical mode. You can start then the web browser
-and visit "gosa.umbrella-inc.ru" to define the users and the workstations.
+and visit "config.umbrella-inc.ru" to define the users and the workstations.
 
 It is also convenient to create an ssh key for your admin user ("putin" by
 default or any other you have defined in umbrella.xml) and pasting it's

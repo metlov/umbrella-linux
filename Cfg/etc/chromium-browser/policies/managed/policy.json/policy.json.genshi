@@ -1,6 +1,6 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 start_page=metadata.Properties['umbrella.xml'].xdata.find('start_pages')
 if start_page is not None:
   start_pages=start_page.findall('start_page')

@@ -1,11 +1,11 @@
 {% python
 import socket
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 
 import itertools
 
@@ -15,13 +15,13 @@ if external_vpn is not None:
   vpn_secnets={}
   i=1
   for net in external_vpn.findall('secnetwork'):
-    ipcalcnet=ipcalc.Network(net.text)
+    ipcalcnet=ipaddress.ip_network(net.text)
     vpn_secnets[i]=ipcalcnet
     i+=1
   vpn_pubnets={}
   i=1
   for net in external_vpn.findall('pubnetwork'):
-    ipcalcnet=ipcalc.Network(net.text)
+    ipcalcnet=ipaddress.ip_network(net.text)
     vpn_pubnets[i]=ipcalcnet
     i+=1
 
@@ -47,18 +47,18 @@ if intif_enabled:
 
 IFPUB=routerifdevs['pubif']
 IPPUB=str(routerifs['pubif'])+'/32'
-NETPUB=str(networks['pubif'].network())+'/'+str(networks['pubif'].mask)
+NETPUB=networks['pubif'].with_prefixlen
 
 IFSEC=routerifdevs['secif']
 IPSEC=str(routerifs['secif'])+'/32'
-NETSEC=str(networks['secif'].network())+'/'+str(networks['secif'].mask)
+NETSEC=networks['secif'].with_prefixlen
 
 IFDMZ=routerifdevs['DMZif']
 IPDMZ=str(routerifs['DMZif'])+'/32'
-NETDMZ=str(networks['DMZif'].network())+'/'+str(networks['DMZif'].mask)
+NETDMZ=networks['DMZif'].with_prefixlen
 
 if 'vpnif' in networks:
-    NETVPN=str(networks['vpnif'].network())+'/'+str(networks['vpnif'].mask)
+    NETVPN=networks['vpnif'].with_prefixlen
 
 if external_vpn is not None:
   IFEXTVPN=ext_vpn_dev            # network device for accessing the external
@@ -150,11 +150,11 @@ if 'glpi' in funchosts:
 -A ${chain} -i ${ifvar} -s ${NETDMZ} -d ${UNIVERSE} -j REJECT
 {%   end %}
 {%   if chain=='VPNINPUT' and external_vpn is not None %}\
-{%     for net in vpn_secnets.itervalues() %}\
--A ${chain} -i ${ifvar} -s ${str(net)}/${str(net.mask)} -d ${UNIVERSE} -j REJECT
+{%     for net in vpn_secnets.values() %}\
+-A ${chain} -i ${ifvar} -s ${net.with_prefixlen} -d ${UNIVERSE} -j REJECT
 {%     end %}\
-{%     for net in vpn_pubnets.itervalues() %}\
--A ${chain} -i ${ifvar} -s ${str(net)}/${str(net.mask)} -d ${UNIVERSE} -j REJECT
+{%     for net in vpn_pubnets.values() %}\
+-A ${chain} -i ${ifvar} -s ${net.with_prefixlen} -d ${UNIVERSE} -j REJECT
 {%     end %}\
 {%   end %}\
 {% end %}\
@@ -170,11 +170,11 @@ if 'glpi' in funchosts:
 -A ${chain} -o ${IFDMZ} -s ${ipvar} -d ${NETDMZ} -j ACCEPT
 {%   end %}\
 {%   if chain=='VPNOUTPUT' and external_vpn is not None %}\
-{%     for net in vpn_secnets.itervalues() %}\
--A ${chain} -o ${IFEXTVPN} -s ${ipvar} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%     for net in vpn_secnets.values() %}\
+-A ${chain} -o ${IFEXTVPN} -s ${ipvar} -d ${net.with_prefixlen} -j ACCEPT
 {%     end %}\
-{%     for net in vpn_pubnets.itervalues() %}\
--A ${chain} -o ${IFEXTVPN} -s ${ipvar} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%     for net in vpn_pubnets.values() %}\
+-A ${chain} -o ${IFEXTVPN} -s ${ipvar} -d ${net.with_prefixlen} -j ACCEPT
 {%     end %}\
 {%   end %}\
 {% end %}\
@@ -185,11 +185,11 @@ if 'glpi' in funchosts:
 -A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${NETDMZ} -j REJECT
 {%   end %}\
 {%   if chain=='VPNOUTPUT' and external_vpn is not None %}\
-{%     for net in vpn_secnets.itervalues() %}\
--A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${str(net)}/${str(net.mask)} -j REJECT
+{%     for net in vpn_secnets.values() %}\
+-A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${net.with_prefixlen} -j REJECT
 {%     end %}\
-{%     for net in vpn_pubnets.itervalues() %}\
--A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${str(net)}/${str(net.mask)} -j REJECT
+{%     for net in vpn_pubnets.values() %}\
+-A ${chain} -o ${ifvar} -s ${UNIVERSE} -d ${net.with_prefixlen} -j REJECT
 {%     end %}\
 {%   end %}\
 {% end %}\
@@ -202,8 +202,8 @@ if 'glpi' in funchosts:
 -A ${chain} -i ${ifvar} -o ${IFPUB} -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
 -A ${chain} -i ${ifvar} -o ${IFDMZ} -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
 {%   if external_vpn is not None %}\
-{%     for net in vpn_pubnets.itervalues() %}\
--A ${chain} -i ${ifvar} -o ${IFEXTVPN} -d ${str(net)}/${str(net.mask)} -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
+{%     for net in vpn_pubnets.values() %}\
+-A ${chain} -i ${ifvar} -o ${IFEXTVPN} -d ${net.with_prefixlen} -m conntrack --ctstate ESTABLISHED,RELATED  -j ACCEPT
 {%     end %}\
 {%   end %}\
 {% end %}\

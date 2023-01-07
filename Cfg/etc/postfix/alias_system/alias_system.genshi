@@ -1,6 +1,6 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 # This file is used instead of /etc/aliases to map the static addresses for
 # virtual alias domains.

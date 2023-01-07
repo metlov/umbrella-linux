@@ -1,36 +1,20 @@
 <Bundle independent="true" xmlns:xi="http://www.w3.org/2001/XInclude">
-    <Group name='ubuntu-xenial'>
-        <Package name='xserver-xorg-input-all-hwe-16.04'/>
-        <Package name='xserver-xorg-video-all-hwe-16.04'/>
-        <Package name='xserver-xorg-video-intel-hwe-16.04'/>
-
-        <!-- below are the dependencies of xorg, which was removed on xenial-->
-        <!-- due to incompatibility with -hwe-16.04 -->
-        <Package name='libglu1-mesa'/>
-        <Package name='xorg-docs-core'/>
-        <Package name='xinit'/>
-        <Package name='xinput'/>
-        <Package name='x11-apps'/>
-        <Package name='x11-session-utils'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='xserver-xorg-input-all'/>
+    <Package name='xserver-xorg-input-all'/>
+    <Group name='virt-lxc' negate='true'>
         <Package name='xserver-xorg-video-all'/>
+        <Package name='acpi-support'/>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Package name='firmware-sof-signed'/>
+        </Group>
     </Group>
-    <Package name='acpi-support'/>
     <Package name='colord'/>
     <Package name='cups-bsd'/>
     <Package name='desktop-base'/>
     <Package name='dconf-gsettings-backend'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='gstreamer1.0-pulseaudio'/>
-    </Group>
+    <Package name='gstreamer1.0-pulseaudio'/>
     <Package name='gstreamer1.0-plugins-base'/>
     <Package name='gstreamer1.0-plugins-good'/>
     <Package name='hplip'/>
-    <Package name='ibus-gtk'/>
-    <Package name='ibus-gtk3'/>
-    <Package name='ibus-qt4'/>
     <Package name='inkscape'/>
     <Package name='fonts-sil-abyssinica'/>
     <Package name='fonts-lklug-sinhala'/>
@@ -40,79 +24,56 @@
     <Package name='fonts-sil-padauk'/>
     <Package name='fonts-takao-pgothic'/>
     <Package name='fonts-tibetan-machine'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='fonts-thai-tlwg'/>
-        <Package name='fonts-tlwg-garuda-ttf'/>
-        <Package name='fonts-tlwg-kinnari-ttf'/>
-        <Package name='fonts-tlwg-laksaman-ttf'/>
-        <Package name='fonts-tlwg-loma-ttf'/>
-        <Package name='fonts-tlwg-mono-ttf'/>
-        <Package name='fonts-tlwg-norasi-ttf'/>
-        <Package name='fonts-tlwg-purisa-ttf'/>
-        <Package name='fonts-tlwg-sawasdee-ttf'/>
-        <Package name='fonts-tlwg-typewriter-ttf'/>
-        <Package name='fonts-tlwg-typist-ttf'/>
-        <Package name='fonts-tlwg-typo-ttf'/>
-        <Package name='fonts-tlwg-umpush-ttf'/>
-        <Package name='fonts-tlwg-waree-ttf'/>
-    </Group>
     <Package name='fonts-uralic'/>
     <Package name='humanity-icon-theme'/>
 <!--    <Package name='language-pack-ru'/> -->
     <Package name='libaacs0'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libavcodec-ffmpeg56'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='libavcodec57'/>
-    </Group>
     <Package name='libdvdnav4'/>
     <Package name='libgpod-common'/>
     <Package name='libegl1-mesa'/>
     <Package name='libgl1-mesa-glx'/>
     <Package name='libjack-jackd2-0'/>
     <Package name='libunity-scopes-json-def-desktop'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='mplayer2'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='mplayer'/>
-    </Group>
+    <Package name='mplayer'/>
     <Package name='notification-daemon'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='oxygen5-icon-theme'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='usbmuxd'/>
+        <Package name='usb.ids'/>
+        <Package name='publicsuffix'/>
     </Group>
     <Package name='policykit-1-gnome'/>
     <Package name='poppler-data'/>
-    <Package name='printer-driver-c2esp'/>
-    <Package name='printer-driver-foo2zjs'/>
-    <Package name='printer-driver-foo2zjs-common'/>
-    <Package name='printer-driver-hpcups'/>
-    <Package name='printer-driver-min12xxw'/>
-    <Package name='printer-driver-ptouch'/>
-    <Package name='printer-driver-pxljr'/>
-    <Package name='printer-driver-sag-gdi'/>
-    <Package name='printer-driver-splix'/>
-    <Package name='pulseaudio'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='pulseaudio-module-x11'/>
-        <Package name='libsnapd-glib1'/>
+    <Group name='ubuntu-bionic'>
+        <Package name='printer-driver-c2esp'/>
+        <Package name='printer-driver-foo2zjs'/>
+        <Package name='printer-driver-foo2zjs-common'/>
+        <Package name='printer-driver-hpcups'/>
+        <Package name='ibus-gtk'/>
+        <Package name='ibus-gtk3'/>
+        <Package name='ibus-qt4'/>
+        <Package name='printer-driver-min12xxw'/>
+        <Package name='printer-driver-ptouch'/>
+        <Package name='printer-driver-pxljr'/>
+        <Package name='printer-driver-sag-gdi'/>
+        <Package name='printer-driver-splix'/>
     </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='printer-driver-all-enforce'/>
+    </Group>
+    <Package name='pulseaudio'/>
     <Package name='pulseaudio-utils'/>
     <Group name='virt-lxc' negate='true'>
         <Package name='rtkit'/>
     </Group>
     <Package name='system-config-printer-udev'/>
     <Package name='smbclient'/>
-    <Package name='ttf-dejavu-core'/>
-    <Package name='ttf-dejavu-extra'/>
     <Package name='qpdf'/>
     <Package name='xfonts-100dpi'/>
     <Package name='xfonts-100dpi-transcoded'/>
     <Package name='xfonts-75dpi'/>
     <Package name='xfonts-75dpi-transcoded'/>
     <Package name='xfonts-scalable'/>
-    <Package name='xvt'/>
+
     <Package name='yelp'/>
     <Package name='zenity'/>
 
@@ -138,7 +99,6 @@
     <Package name='gimp-help-ru'/>
     <Package name='gimp-data-extras'/>
     <Package name='libblas3'/>
-    <Package name='libgfortran3'/>
     <Package name='liblapack3'/>
 
     <!-- Secure worstation do not have the necessary connectivity -->
@@ -151,10 +111,8 @@
              <Path name='/etc/hostname'/>
         </Group>
 
-        <Group name='ubuntu-xenial' negate='true'>
-            <Package name='language-pack-en'/>
-            <Package name='language-pack-ru'/>
-        </Group>
+        <Package name='language-pack-en'/>
+        <Package name='language-pack-ru'/>
 
 <!--        <Package name='google-earth-stable'/>
         <Package name='libc-dev-bin'/>
@@ -164,47 +122,45 @@
     <Group name='net-sec'>
         <Package name='surf'/>
     </Group>
-    <Group name='ubuntu-xenial'>
-        <Group name="i386">
-            <Package name='wine1.6'/>
-            <Package name='wine-gecko2.21'/>
-            <Package name='wine-mono0.0.8'/>
-            <Package name='winetricks'/>
-            <Package name='libosmesa6'/>
-            <Package name='ocl-icd-libopencl1'/>
-        </Group>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
+    <Group name='ubuntu-bionic'>
+        <Package name='gnome-exe-thumbnailer'/>
+        <Package name='libavcodec57'/>
+        <Package name='libgfortran3'/>
+        <Package name='libp11-kit-gnome-keyring'/>
         <Package name='wine1.6'/>
-        <Package name='winetricks'/>
-        <Package name='libosmesa6'/>
-        <Package name='ocl-icd-libopencl1'/>
-        <Group name="i386">
-            <Package name='wine32'/>
-        </Group>
-        <Group name="amd64">
-            <Package name='wine64'/>
-        </Group>
+        <Package name='ttf-dejavu-core'/>
+        <Package name='ttf-dejavu-extra'/>
+        <Package name='xvt'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='fonts-dejavu'/>
+        <Package name='cabextract'/>
+        <Package name='dbus-user-session'/>
+    </Group>
+    <Package name='winetricks'/>
+    <Package name='libosmesa6'/>
+    <Package name='ocl-icd-libopencl1'/>
+    <Group name="i386">
+        <Package name='wine32'/>
+    </Group>
+    <Group name="amd64">
+        <Package name='wine64'/>
     </Group>
 
     <Package name='fonts-horai-umefont'/>
     <Package name='fonts-unfonts-core'/>
     <Package name='fonts-wqy-microhei'/>
-    <Package name='gnome-exe-thumbnailer'/>
     <Package name='libasound2-plugins'/>
-    <Package name='libp11-kit-gnome-keyring'/>
-    <Package name='ttf-mscorefonts-installer'/>
+    <Group name='ubuntu-bionic'>
+        <!-- let's try to avoid using it in the next version of Umbrella -->
+        <Package name='ttf-mscorefonts-installer'/>
+    </Group>
     <!-- disable "execute" bit to silence the release upgrade motd and other notifications -->
     <!-- this is here because ubuntu-release upgrader is a dependence of ttf-mscorefonts-installer -->
     <Path name='/usr/lib/ubuntu-release-upgrader/release-upgrade-motd'/>
 
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='python3-debconf'/>
-        <Package name='python3-cffi-backend'/>
-    </Group>
-    <Group name='ubuntu-xenial'>
-        <Package name='ttf-wqy-microhei'/>
-    </Group>
+    <Package name='python3-debconf'/>
+    <Package name='python3-cffi-backend'/>
 
     <Package name='unixodbc'/>
 
@@ -243,50 +199,41 @@
     <Package name='aisleriot'/>
     <Package name='pinball'/>
     <Package name='chromium-bsu'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='libglu1-mesa'/> <!-- dep of blockout2 and chromium-bsu -->
-    </Group>
+    <Package name='libglu1-mesa'/> <!-- dep of blockout2 and chromium-bsu -->
 
     <Path name='/etc/xdg/autostart/update-notifier.desktop'/>
 
     <Group name='net-pub'>
         <Package name='pidgin'/>
-        <Package name='pidgin-libnotify'/>
-        <Package name='pidgin-festival'/>
-        <Group name='ubuntu-xenial'>
-            <Package name='gstreamer0.10-x'/>
-            <Package name='gstreamer0.10-alsa'/>
+        <Group name='ubuntu-bionic'>
+            <Package name='pidgin-libnotify'/>
         </Group>
+        <Package name='pidgin-festival'/>
         <Path name='/etc/xdg/autostart/pidgin.desktop'/>
     </Group>
 <!--    <Path name='/etc/default/whoopsie'/>
     <Path name='/usr/share/applications/sylpheed.desktop'/>
     <Path name='/etc/default/apport'/> -->
 
-    <Group name='ubuntu-xenial'>
-        <Package name='razorqt-lightdm-greeter'/>
-        <Package name='libqt4-svg'/>
-        <Package name='razorqt-power'/>
-<!--    <Path name='/usr/share/razor/graphics/rqt.svg'/>
-    <Path name='/usr/share/razor/graphics/rqt-2.svg'/> -->
-        <Path name='/etc/xdg/razor/razor.conf'/>
+    <Group name='ubuntu-bionic'>
+        <Path name='/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf'/>
+        <Path name='/etc/lightdm/lightdm.conf.d/50-disable-user-list.conf'/>
+        <Path name='/etc/lightdm/lightdm.conf.d/60-disable-guest.conf'/>
+        <Path name='/var/lib/lightdm'/>
+        <Path name='/etc/pam.d/lightdm'/>
+        <Path name='/etc/X11/Xreset.d/killall'/>
+        <Path name='/usr/share/applications/mc.desktop'/>
     </Group>
-    <Path name='/etc/lightdm/lightdm-gtk-greeter.conf.d/30_lubuntu.conf'/>
-    <Path name='/etc/lightdm/lightdm.conf.d/50-disable-user-list.conf'/>
-    <Path name='/etc/lightdm/lightdm.conf.d/60-disable-guest.conf'/>
-    <Path name='/var/lib/lightdm'/>
-    <Path name='/etc/pam.d/lightdm'/>
-    <Path name='/etc/X11/Xreset.d/killall'/>
-    <Path name='/usr/share/applications/mc.desktop'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Path name='/usr/share/sddm/themes/lubuntu/wall.png'/>
+    </Group>
     <Group name='physical'>
         <Package name='conky-all'/>
         <Path name='/etc/conky/conky.conf'/>
         <Path name='/etc/xdg/autostart/conky.desktop'/>
         <Package name='rdesktop'/>
     </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Path name='/etc/rsyslog.d/040-dbus-screensaver-getactive.conf'/>
-    </Group>
+    <Path name='/etc/rsyslog.d/040-dbus-screensaver-getactive.conf'/>
 
     <xi:include href="../Local/Bundler/gui.xml"><xi:fallback/></xi:include>
 </Bundle>

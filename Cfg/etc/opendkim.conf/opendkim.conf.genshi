@@ -1,0 +1,37 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+exec(open(repo+'/Python/35_organization.py').read())
+
+# internal networks and all the organization networks
+nets = intnets.values()
+nets |= netclasses.keys()
+localnets = cleanup_fully_contained(nets)
+%}\
+Syslog			yes
+SyslogSuccess		yes
+#LogWhy			no
+
+Canonicalization	relaxed/simple
+Mode			sv
+SubDomains		yes
+OversignHeaders		From
+
+Domain			${domain_name}
+Selector		mail
+KeyFile			/etc/dkimkeys/local.key.pem
+
+UserID			opendkim
+UMask			007
+
+Socket			local:/var/spool/postfix/opendkim/opendkim.sock
+
+PidFile			/run/opendkim/opendkim.pid
+
+InternalHosts		127.0.0.0/8, ${', '.join([n.with_prefixlen for n in sorted(localnets,key = lambda x: str(x))])}
+
+Nameservers		${routerifs['pubif']}

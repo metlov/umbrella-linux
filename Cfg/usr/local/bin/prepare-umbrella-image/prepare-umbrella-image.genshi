@@ -2,10 +2,10 @@
 {% python
 import socket
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 %}\
 
 # stop lightdm to prevent this script from being run in GUI session

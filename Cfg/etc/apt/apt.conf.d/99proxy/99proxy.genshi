@@ -1,9 +1,20 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 %}\
 {% if 'proxy' in funchosts %}\
 Acquire::http { Proxy "http://${funchosts['proxy']}:3142"; };
+{% if 'ubuntu-bionic' in metadata.groups %}\
 Acquire::https { Proxy false; };
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+{%     if 'net-DMZ' in metadata.groups %}\
+# in DMZ we need to pass the https connection through the proxy
+Acquire::https { Proxy "http://${funchosts['proxy']}:3142"; };
+{%     end %}\
+{%     if 'net-DMZ' not in metadata.groups %}\
+Acquire::https { Proxy false; };
+{%     end %}\
+{% end %}\
 {% end %}\

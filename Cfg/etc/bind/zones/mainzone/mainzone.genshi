@@ -8,12 +8,12 @@
 from genshi.template import TemplateError
 import os
 import datetime
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
-execfile(repo+'/Python/32_zone_timestamp.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+exec(open(repo+'/Python/32_zone_timestamp.py').read())
 
 ip_address=routerifs['pubif']
 ext_domain=domain_name
@@ -51,7 +51,7 @@ ${"mail._domainkey".ljust(c1width)} IN TXT   "k=rsa; t=s; p=${metadata.Propertie
 {% end %}\
 
 ; servers
-{% for host in funchosts %}\
+{% for host in sorted(funchosts) %}\
 ${funchostsshort[host].ljust(c1width)} IN A     ${funcifs[host]}
 {% if host=='router' %}\
 ${"ns1".ljust(c1width)} IN CNAME ${funchostsshort[host]}
@@ -104,7 +104,7 @@ ${(subdomain_FQDN+'.').ljust(c1width)}    NS    ${dns_name}.
 {%   end for DNS server %}\
 {%   if len(glues)>0 %}\
 ; glue records
-{%     for glue_dns_name, glue_dns_ip in glues.iteritems() %}\
+{%     for glue_dns_name, glue_dns_ip in glues.items() %}\
 ${(glue_dns_name+'.').ljust(c1width)} IN A     ${glue_dns_ip}
 {%     end for glues %}\
 {%   end if there are glues%}\

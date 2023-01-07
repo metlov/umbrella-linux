@@ -69,18 +69,24 @@ else:
 domain_name=metadata.Properties['umbrella.xml'].xdata.find('domain').find('name').text
 domain_name=domain_name.lower()
 # set of all the domain names for this Umbrella instance
-domain_names=set()
+domain_names=[]
 domain_notifies={}
+domain_AXFR={}
 for domain in metadata.Properties['umbrella.xml'].xdata.findall('domain'):
   if domain.find('master') is None:     # only if we are master of the domain
     d_name=domain.find('name').text
-    domain_names.add(d_name)
-    notifies=set()
+    domain_names.append(d_name)
+    notifies=list()
     for notify in domain.findall('notify'):
-      notifies.add(notify.text.strip())
+      notifies.append(notify.text.strip())
     if len(notifies)>0:
       domain_notifies[d_name]=notifies
-domain_names_list=list(domain_names)
+    AXFRs=list()
+    for AXFR in domain.findall('AXFRallow'):
+      AXFRs.append(AXFR.text.strip())
+    if len(AXFRs)>0:
+      domain_AXFR[d_name]=AXFRs
+domain_names=sorted(domain_names)
 realm_name=domain_name.upper()
 ldap_root=','.join([ 'dc='+dc for dc in domain_name.split('.') ])
 install_zabbix = metadata.Properties['umbrella.xml'].xdata.find('install_zabbix') is not None

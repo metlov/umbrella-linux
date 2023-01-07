@@ -6,10 +6,13 @@
         <Group name='ossec-server'>
             <BoundPOSIXUser name="ossecm" home="/var/ossec/" shell="/bin/false" gecos="" uid="652" group="ossec"/>
             <BoundPOSIXUser name="ossecr" home="/var/ossec/" shell="/bin/false" gecos="" uid="653" group="ossec"/>
-            <Package name='ossec-hids'/>
-            <Group name='ubuntu-xenial' negate='true'>
-                <Path name='/var/ossec/etc/hosts' altsrc='/etc/hosts'/>
+            <Group name='ubuntu-bionic'>
+                <Package name='ossec-hids'/>
             </Group>
+            <Group name='ubuntu-bionic' negate='true'>
+                <Package name='ossec-hids-server'/>
+            </Group>
+            <Path name='/var/ossec/etc/hosts' altsrc='/etc/hosts'/>
 
             <!-- install local rules and decoders -->
             <Path name='/var/ossec/etc/local_decoder.xml'/>
@@ -21,6 +24,9 @@
         <Group name='ossec-server' negate='true'>
             <Package name='ossec-hids-agent'/>
             <Group name='DMZsmtp'>
+                <Package name='iptables'/> <!-- needed by firewall-drop.sh -->
+            </Group>
+            <Group name='DMZwww'>
                 <Package name='iptables'/> <!-- needed by firewall-drop.sh -->
             </Group>
             <Group name='mail'>

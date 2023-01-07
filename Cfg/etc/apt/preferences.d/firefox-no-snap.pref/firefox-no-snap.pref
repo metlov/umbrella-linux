@@ -1,0 +1,5 @@
+# forbid the Ubuntu version of firefox package, which installs it via snap.
+
+Package: firefox*
+Pin: release o=Ubuntu*
+Pin-Priority: -1

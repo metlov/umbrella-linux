@@ -1,0 +1,5 @@
+# To prevent repository packages from triggering the installation of snap.
+
+Package: snapd
+Pin: release a=*
+Pin-Priority: -10

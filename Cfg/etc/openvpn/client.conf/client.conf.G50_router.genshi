@@ -1,7 +1,7 @@
 {% python
 from genshi.template import TemplateError
 import lxml
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 dev=external_vpn.find('dev').text
 config=external_vpn.find('config')

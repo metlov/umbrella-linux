@@ -32,6 +32,6 @@ if structures is not None:
       for dir in dir_list:
         if pathname.startswith(dir):
           path_list.append(path.get("name"))
-
+path_list.sort()
 # now path_list contains the pathnames from within the OSSEC-monitored
 # dir_list, which are managed by BCFG2 and should be ignored by the OSSEC

@@ -1,0 +1,243 @@
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+    echo "This script must be run as root" 1>&2
+    exit 99
+fi
+
+
+OPTIONS=l:d:i:h
+LONGOPTIONS=location:,description:,ipaddr:,help
+
+PARSED=$(getopt --options=$OPTIONS --longoptions=$LONGOPTIONS --name "$0" -- "$@")
+if [[ $? -ne 0 ]]; then
+    # error parsing options
+    exit 2
+fi
+# reread parsed options
+eval set -- "$PARSED"
+
+# set defaults
+h=""
+l="dummy"
+d="dummy"
+ip=""
+
+# dispatch normalized options until --
+while true; do
+    case "$1" in
+        -h|--help)
+            h=y
+            shift
+            ;;
+        -l|--location)
+            l="$2"
+            shift 2
+            ;;
+        -d|--description)
+            d="$2"
+            shift 2
+            ;;
+        -i|--ipaddr)
+            ip="$2"
+            shift 2
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Options error"
+            exit 3
+            ;;
+    esac
+done
+
+if [[ $# -ne 2 ]]; then
+    h=y
+fi
+
+if [ -n "$h" ]; then
+cat <<EOF
+Umbrella create workstation script.
+
+Registers a new worstation in LDAP with specified parameters.
+
+Usage:
+      $0 <organizational_unit_path>/<dns_name> <MAC_address> [options]
+
+Where <organizational_unit_path> specifies the organizational unit, where
+this workstation belongs as a path in the form "/OU1/OU2/OU3" with OU names
+corresponding to the ones, defined in the organization.xml ; <dns_name> is
+the new workstation's name and <MAC_address> is its physical address.
+
+The options specify the additional parameters:
+    -l <location> or --location <location>
+        specifies the location field for the newly created LDAP record. It can
+        be any short string except for the special keyword "roaming", reserved
+        for the roaming VPN-connected workstations.
+    -d <description> or --description <description>
+        specifies the description field for the newly created LDAP record.
+    -i <ip_address> or --ipaddr <ip_address>
+        the ip address for the newly created workstation. The address must be
+        free and must belong to the subnet of the specified Organizational
+        Unit. If this option is not specified, the address will be allocated
+        automatically.
+    -h or --help
+        prints this help message.
+
+Please wait for 5 minuted after the workstation is defined in LDAP for
+DHCP configuration and DNS zone to update. After this you can try to boot
+the new workstation via the PXE and will have an option to install the
+operating system there.
+EOF
+fi
+
+# handle positional arguments
+path=$1
+mac=$2
+
+# split the path
+OUpath=`dirname "$path"`
+dnsname=`basename "$path"`
+
+# assign/validate the IP
+if [ -n "$ip" ]; then
+    # validate the ip address
+    if expr "$ip" : '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$' >/dev/null; then
+        for i in 1 2 3 4; do
+            if [ $(echo "$ip" | cut -d. -f$i) -gt 255 ]; then
+                echo "Bad ip address specified: $ip"
+                exit 1
+            fi
+        done
+    else
+        echo "Bad ip address specified: $ip"
+        exit 5
+    fi
+    if ! umbrella-hosts "$OUpath" "$ip"; then
+        echo "IP address does not validate against the specified OU."
+        exit 9
+    fi
+else
+    # assign new ip address
+    ip=$(umbrella-hosts "$OUpath")
+    if [ $? -ne 0 ]; then
+        # OU path is wrong, umbrella-hosts already reported this error
+        exit 9
+    fi
+fi
+
+# validate MAC address
+if [[ ! "$mac" =~ ^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$ ]]; then
+    echo "Bad MAC address specified: $mac"
+    exit 6
+fi
+
+source /etc/umbrella.conf
+LDAP_URI=`xmllint --xpath 'string(//conf/main/location/referral/@URI)' /etc/fusiondirectory/fusiondirectory.conf`
+LDAP_ADMIN=`xmllint --xpath 'string(//conf/main/location/referral/@adminDn)' /etc/fusiondirectory/fusiondirectory.conf`
+LDAP_PASS=`xmllint --xpath 'string(//conf/main/location/referral/@adminPassword)' /etc/fusiondirectory/fusiondirectory.conf`
+
+function LDAP_has_LEAF {
+ldapsearch -b "$1" -LLL -x '(&(objectClass=organizationalUnit))' &>/dev/null
+case $? in
+0)
+    return 0
+;;
+32)
+    return 1
+;;
+*)
+    echo "LDAP error checking $1 existence."
+    exit 9
+esac
+}
+
+# Now let's find the LDAP base, where this object will be attached
+# we also create missing LDAP leaves in the process
+dn=$LDAP_ROOT
+OU=${OUpath%%/*}
+OUpath=${OUpath#*/}
+if [ "$OU" != "$OUpath" ]; then
+    OU=${OUpath%%/*}
+    OUpath=${OUpath#*/}
+    dn="o=$ORG_DESCRIPTION,$dn"
+    while [ "$OU" != "$OUpath" ]; do
+        # determine the DN of the path component
+        OU=${OUpath%%/*}
+        OUpath=${OUpath#*/}
+        dn="ou=$OU,$dn"
+        # check that the DN exists
+        if ! LDAP_has_LEAF "$dn"; then
+            # create the DN
+            ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+dn: ${dn}
+objectClass: organizationalUnit
+objectClass: top
+objectClass: gosaDepartment
+ou: ${OU}
+description: please add the description
+EOF
+        fi
+    done
+fi
+if ! LDAP_has_LEAF "$dn"; then
+    echo "LDAP error no OU to attach host."
+fi
+
+# check if ou=systems exists
+dn="ou=systems,$dn"
+if ! LDAP_has_LEAF "$dn"; then
+# create systems
+ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+dn: ${dn}
+objectClass: organizationalUnit
+ou: systems
+EOF
+fi
+
+# check if ou=workstations exists
+dn="ou=workstations,$dn"
+if ! LDAP_has_LEAF "$dn"; then
+# create systems
+ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+dn: ${dn}
+objectClass: organizationalUnit
+ou: workstations
+EOF
+fi
+
+if ! LDAP_has_LEAF "$dn"; then
+    echo "LDAP error no OU to attach host. $dn not found."
+    exit 9
+fi
+
+if LDAP_has_LEAF "cn=${dnsname},$dn"; then
+    echo "The host ${dnsname} is already defined in LDAP."
+    exit 11
+fi
+
+# now we have everything and just need to add the host
+ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+dn: cn=${dnsname},${dn}
+cn: ${dnsname}
+description: ${d}
+ipHostNumber: ${ip}
+macAddress: ${mac}
+gotoMode: active
+l: ${l}
+objectClass: top
+objectClass: gotoWorkstation
+objectClass: GOhard
+EOF
+
+if LDAP_has_LEAF "cn=${dnsname},$dn"; then
+    echo "The host ${dnsname} is registered."
+    echo "Now please wait 5 minutes before DNS and DHCP servers note the update."
+    echo "After that you can boot the host via PXE and will have an option to"
+    echo "initialize the new workstation."
+else
+    echo "The host ${dnsname} is not added due to errors."
+    exit 12
+fi

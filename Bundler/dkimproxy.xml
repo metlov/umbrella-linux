@@ -1,18 +1,31 @@
 <Bundle>
 <Group name='ubuntu'>
-    <Package name='dkimproxy'/>
-    <Package name='libcgi-pm-perl'/>
-    <BoundPOSIXUser name="dkimproxy" home="/var/lib/dkimproxy" shell="/bin/false" gecos="" uid="624" group="dkimproxy">
-        <MemberOf group="ssl-cert"/>
-    </BoundPOSIXUser>
-    <BoundPOSIXGroup name="dkimproxy" gid="624"/>
-    <Path name='/etc/dkimproxy/domain'/>
-    <Path name='/etc/dkimproxy/private.key'/>
+    <Group name='ubuntu-bionic'>
+        <Package name='dkimproxy'/>
+        <Package name='libcgi-pm-perl'/>
+        <BoundPOSIXUser name="dkimproxy" home="/var/lib/dkimproxy" shell="/bin/false" gecos="" uid="624" group="dkimproxy">
+            <MemberOf group="ssl-cert"/>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="dkimproxy" gid="624"/>
+        <Path name='/etc/dkimproxy/domain'/>
+        <Path name='/etc/dkimproxy/private.key'/>
 <!--    <Path name='/etc/dkimproxy/public.key'/>
     <Path name='/etc/init.d/dkimproxy'/> -->
-    <Path name='/etc/dkimproxy/dnsrecordTXT.txt'/>
-    <Path name='/etc/dkimproxy/dkimproxy_out.conf'/>
-    <Path name='/etc/default/dkimproxy'/>
-    <Service name='dkimproxy'/>
+        <Path name='/etc/dkimproxy/dnsrecordTXT.txt'/>
+        <Path name='/etc/dkimproxy/dkimproxy_out.conf'/>
+        <Path name='/etc/default/dkimproxy'/>
+        <Service name='dkimproxy'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <!-- On jammy we install opendkim. -->
+        <!-- TODO: rename the bundle once bionic support is removed. -->
+        <BoundPOSIXUser name="opendkim" home="/run/opendkim" shell="/usr/sbin/nologin" gecos="" uid="624" group="opendkim"/>
+        <BoundPOSIXGroup name="opendkim" gid="624"/>
+        <Package name='opendkim'/>
+        <Service name='opendkim'/>
+        <Path name='/etc/opendkim.conf'/>
+        <Path name='/etc/dkimkeys/local.key.pem'/>
+        <Path name='/var/spool/postfix/opendkim'/>
+    </Group>
 </Group>
 </Bundle>

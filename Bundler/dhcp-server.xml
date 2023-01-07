@@ -1,11 +1,18 @@
 <Bundle>
     <Package name='isc-dhcp-server'/>
-    <Package name='acl'/> <!-- needed to set /var/lib/dhcpd permissions -->
+    <Group name='ubuntu-bionic'>
+        <Package name='acl'/> <!-- needed to set /var/lib/dhcpd permissions -->
+    </Group>
     <Package name='isc-dhcp-server-ldap'/>
     <BoundPOSIXUser name="dhcpd" home="/var/run" shell="/bin/false" gecos="" uid="625" group="dhcpd"/>
     <BoundPOSIXGroup name="dhcpd" gid="625"/>
     <!-- restart dhcpd on failure (when e.g. LDAP is unavailable ) -->
-    <Path name='/lib/systemd/system/isc-dhcp-server.service'/>
+    <Group name='ubuntu-bionic'>
+        <Path name='/lib/systemd/system/isc-dhcp-server.service'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Path name='/etc/systemd/system/isc-dhcp-server.service.d/override.conf'/>
+    </Group>
     <Path name='/etc/dhcp/dhcpd.conf-head'/>
     <Path name='/usr/local/bin/umbrella-ldap2dhcp'/>
     <Path name='/etc/cron.d/ldap2dhcp'/>

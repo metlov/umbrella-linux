@@ -1,4 +1,0 @@
-# add multiverse
-deb http://archive.ubuntu.com/ubuntu xenial multiverse
-deb http://archive.ubuntu.com/ubuntu xenial-updates multiverse
-deb http://security.ubuntu.com/ubuntu xenial-security multiverse

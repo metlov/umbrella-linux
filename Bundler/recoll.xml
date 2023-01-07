@@ -5,13 +5,10 @@
     <Package name='catdoc'/>
     <Package name='libimage-exiftool-perl'/>
     <Package name='pstotext'/>
-    <Package name='python-chm'/>
-    <Package name='python-mutagen'/>
-    <Package name='xsltproc'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libqt5opengl5'/>
-        <Package name='libqt5gui5'/>
-        <Package name='libqt5quick5'/>
+    <Group name='ubuntu-bionic'>
+        <Package name='python-chm'/>
+        <Package name='python-mutagen'/>
     </Group>
+    <Package name='xsltproc'/>
 </Group>
 </Bundle>

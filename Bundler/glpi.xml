@@ -1,8 +1,8 @@
 <Bundle xmlns:py="http://genshi.edgewall.org/">
 <?python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 ?>
 <py:if test="'glpi' in funchosts">
     <Path name='/etc/fusioninventory/agent.cfg'/>

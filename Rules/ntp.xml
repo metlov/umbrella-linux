@@ -1,29 +1,22 @@
 <Rules priority="0">
 <Group name='ubuntu'>
-  <Group name='ubuntu-xenial'>
-    <!-- On Xenial we do not care about timesyncd -->
-    <Service name='systemd-timesyncd' status='ignore' type='systemd'/>
-  </Group>
-  <Group name='ubuntu-xenial' negate='true'>
-    <!-- On Bionic and up -->
-    <Service name='chrony' status='on' type='systemd'/>
-    <Action name='enable-systemd-NTP-sync' timing='post' when='modified' shell='true' command='timedatectl set-ntp true' status='ignore'/>
-    <Group name='ntp-client'>
-      <Group name='ntp-server'>
-        <!-- we don't care about timesyncd on ntp server -->
-        <Service name='systemd-timesyncd' status='ignore' type='systemd'/>
-      </Group>
-      <Group name='ntp-server' negate='true'>
-        <!-- but we ensure that timesyncd is up on ntp clients -->
-        <Service name='systemd-timesyncd' status='on' type='systemd'/>
-      </Group>
+  <Service name='chrony' status='on' type='systemd'/>
+  <Action name='enable-systemd-NTP-sync' timing='post' when='modified' shell='true' command='timedatectl set-ntp true' status='ignore'/>
+  <Group name='ntp-client'>
+    <Group name='ntp-server'>
+      <!-- we don't care about timesyncd on ntp server -->
+      <Service name='systemd-timesyncd' status='ignore' type='systemd'/>
     </Group>
     <Group name='ntp-server' negate='true'>
-      <Group name='ntp-client' negate='true'>
-        <!-- if the host is neither ntp client nor server (such as LXC -->
-        <!-- containers) we do not care too -->
-        <Service name='systemd-timesyncd' status='ignore' type='systemd'/>
-      </Group>
+      <!-- but we ensure that timesyncd is up on ntp clients -->
+      <Service name='systemd-timesyncd' status='on' type='systemd'/>
+    </Group>
+  </Group>
+  <Group name='ntp-server' negate='true'>
+    <Group name='ntp-client' negate='true'>
+      <!-- if the host is neither ntp client nor server (such as LXC -->
+      <!-- containers) we do not care too -->
+      <Service name='systemd-timesyncd' status='ignore' type='systemd'/>
     </Group>
   </Group>
 </Group>

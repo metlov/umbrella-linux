@@ -1,0 +1,61 @@
+Here one can set up a testing framework for Umbrella Linux development,
+which allows to track the configuration changes to the deployed Umbrella
+Linux configuration. It can help to ensure, in particular, that the newly
+developed features do not break the configuration of the deployed production
+system.
+
+To use it:
+
+1. Set up the current "testing" Umbrella Linux repository and the bcfg2 
+server on your testing machine.
+
+To install bcfg2-server you may install the corresponding Umbrella Linux
+packages locally on your testing machine. Or, if you also plan to do some
+bcfg2 development, you can check it out from git repository and install
+into a python's venv.
+
+Setting up of the testing repository requires to fill it with all the
+transient files, necessary to generate a production system configuration.
+These are Metadata/clients.xml with specified addresses for all the relevant
+servers, their ssl certificates and keys in /Cfg/etc/ssl/, Kerberos keys
+in Cfg/etc/krb5.keytab . These can be copied from production system. In fact,
+just copying the config.${your_domain}/var/lib/bcfg2 and editing its
+clients.xml to add the servers/hosts IP addresses is the simplest way to
+achieve this.
+
+You also need to copy the SSL CA data from config.${your_domain}/etc/pki and
+provide an openssl.cnf in the present directory with the paths, updated to
+point to this local copy. Finally, copy here the file /etc/bcfg2-server.conf
+from config.${your_domain} and edit the paths to point to the your testing
+repository and the local openssl.cnf .
+
+If this preparation is properly done, you will have a fully-functional
+"offline" installation of your production system's configuration repository,
+able to regenerate configuration for all of its hosts.
+
+As a check, run in this directory
+
+bcfg2-info -C ./bcfg2-server.conf buildall ./current <server1_FQDN> ...
+
+This should produce a set of xml files in the ./current/ subdirectory,
+one per each server you specify.
+
+2. Run the same bcfg2-info command on your production server (although
+specifying its real bcfg2-server.conf) and place the generated xml files
+into the ./original subdirectory of the present directory.
+
+3. Do the development work on the present Umbrella Linux configuration (or
+sync it with your development tree via git pull) and run the ./test_all 
+script, provided here. It will regenerate the ./current configuration
+and compare it against ./original, highlighting the changes.
+
+The ./test_all script also requires faketime to be installed to prevent
+SSL certificates and Packages cache expiry from influencing the test
+results.
+
+Do not forget to pay attention to the security, since the testing data
+might include real cryptographic keys and passwords from your production
+system. If you followed the suggested names of files and directories, your
+testing data and configs will be ignored by git and will not be committed
+into the Umbrella Linux repository. Consult .gitignore and check "git status"
+if necessary.

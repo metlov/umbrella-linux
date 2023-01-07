@@ -5,19 +5,20 @@
         <Package name='nfs-kernel-server'/>
         <Path name='/etc/default/nfs-kernel-server'/>
         <Service name='nfs-kernel-server'/>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Service name='nfs-blkmap'/>
+        </Group>
         <Path name='/etc/exports'/>
     </Group>
     <Group name='virt-lxc'>
         <!-- on lxc we install different nfs servers on different hosts -->
         <Group name='ltsp'>
             <!-- here we install unfs3 -->
+            <BoundPOSIXUser name="_rpc" home="/run/rpcbind" shell="/usr/sbin/nologin" gecos="" uid="685" group="nogroup"/>
             <Path name='/etc/exports'/>
             <Path name='/etc/default/unfs3'/>
             <Package name='unfs3'/>
             <Service name='unfs3'/>
-            <Group name='ubuntu-xenial' negate='true'>
-               <Service name='rpcbind'/>
-            </Group>
             <Service name='rpcbind'/>
             <Service name='rpcbind.socket'/>
         </Group>
@@ -27,6 +28,9 @@
             <Path name='/etc/default/nfs-kernel-server'/>
             <Service name='nfs-kernel-server'/>
             <Service name='nfs-server'/>
+            <Group name='ubuntu-bionic' negate='true'>
+                <Service name='nfs-blkmap'/>
+            </Group>
             <Path name='/etc/exports'/>
         </Group>
     </Group>

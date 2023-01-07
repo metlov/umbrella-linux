@@ -1,0 +1,24 @@
+{% python
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+%}\
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Monitoring Umbrella Linux at ${domain_name}</title>
+  </head>
+  <body>
+    <h2>Monitoring Umbrella Linux at ${domain_name}</h2>
+    <p>The following tools are currently available:
+    <dl>
+    <dt><a href="mrtg/">mrtg</a></dt>
+    <dd>for monitoring the traffic history on router external interface.</dd>
+    <dt><a href="https://${funchosts['monitor']}/nagios4">Nagios</a></dt>
+    <dd>for checking the overall health of the system.</dd>
+    <dt><a href="https://${funchosts['monitor']}/bcfg2">Bcfg2 reports</a></dt>
+    <dd>for examining the configuration of individual hosts.</dd>
+    </dl>
+    </p>
+  </body>
+</html>

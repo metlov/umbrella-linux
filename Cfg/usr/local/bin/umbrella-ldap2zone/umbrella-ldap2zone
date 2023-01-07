@@ -29,8 +29,9 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
         cat "$ZONE_HEADER_FILE" >>$ZONE_FILE_TMP
     fi
     echo -e "\n\n; workstations, terminals, etc from LDAP" >>$ZONE_FILE_TMP
+    touch "${REVZONE_HOSTLIST}"
 
-    ldapsearch -x -LLL -S 'cn' -o ldif-wrap=no '(|(&(|(objectClass=gotoTerminal)(objectClass=gotoWorkstation))(gotoMode=active))(objectClass=device))' cn ipHostNumber | \
+    ldapsearch -x -LLL -S 'cn' -o ldif-wrap=no '(&(|(objectClass=fdTerminal)(objectClass=fdWorkstation)(objectClass=fdPrinter))(objectClass=ipHost))' cn ipHostNumber | \
         while read line; do
             # Skip LDIF comments
             [ "${line:0:1}" == "#" ] && continue;

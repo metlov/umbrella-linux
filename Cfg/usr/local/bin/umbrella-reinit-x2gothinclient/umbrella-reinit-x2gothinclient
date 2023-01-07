@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+CONFSRCOPTS=""
+CONFFILE=/tmp/bcfg2conf.xml
+if [ -e "${CONFFILE}" -a -O "${CONFFILE}" -a "${CONFFILE}" ]; then
+    CONFSRCOPTS="-f ${CONFFILE}"
+fi
+
+umount /opt/x2gothinclient/chroot/dev/pts \
+       /opt/x2gothinclient/chroot/sys \
+       /opt/x2gothinclient/chroot/proc \
+       /opt/x2gothinclient/chroot/root
+rm -rf /opt/x2gothinclient/*
+yes | env DEBIAN_FRONTEND=noninteractive x2gothinclient_create
+echo -e "\n" x2gothinclient_shell passwd
+source /etc/x2go/x2gothinclient_settings;
+x2gothinclient_shell "echo \"deb ${TC_DEBMIRROR_URL} ${TC_DISTRO_CODENAME} contrib non-free\" > /etc/apt/sources.list.d/nonfree.list"
+x2gothinclient_shell apt-get update
+x2gothinclient_shell apt-get upgrade
+x2gothinclient_shell apt-get -y install firmware-linux-nonfree firmware-bnx2 \
+    firmware-bnx2x firmware-myricom firmware-netxen  firmware-qlogic\
+    firmware-ralink firmware-realtek intel-microcode amd64-microcode
+x2gothinclient_shell apt-get -y purge xserver-xorg-video-vmware
+bcfg2 -qv ${CONFSRCOPTS}
+umbrella-update-tftpboot
+exit 0

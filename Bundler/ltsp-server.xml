@@ -30,30 +30,42 @@
     <Package name='cups-x2go'/>
     <Package name='sshfs'/>
     <Package name='x11-xfs-utils'/>
-    <Group name='ubuntu-xenial'>
-        <Path name="/etc/X11/Xsession.d/90krenew" altsrc="/etc/profile.d/krenew.sh-src"/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Path name="/etc/X11/Xsession.d/90krenew"/>
-    </Group>
     <Path name="/etc/x2go/x2go_logout.d/020_killall.sh"/>
     <Path name="/usr/local/bin/umbrella-session"/>
     <Path name="/opt/x2gothinclient/etc/x2gothinclient-displaymanager_start"/>
     <Path name="/opt/x2gothinclient/etc/x2gothinclient_sessions"/>
     <Package name='pxelinux'/>
     <Path name='/usr/local/bin/umbrella-update-tftpboot'/>
-    <Path name='/var/lib/tftpboot/default.cfg'/>
-    <Path name='/var/lib/tftpboot/local-boot.cfg'/>
-    <Path name='/var/lib/tftpboot/memtest.cfg'/>
-    <Path name='/var/lib/tftpboot/netinstall.cfg'/>
-    <Path name='/var/lib/tftpboot/x2go-tce.cfg'/>
+    <Group name='ubuntu-bionic'>
+        <Path name='/var/lib/tftpboot/default.cfg' altsrc='/var/lib/tftpboot/boot/bios-default.cfg'/>
+        <Path name='/var/lib/tftpboot/local-boot.cfg' altsrc='/var/lib/tftpboot/boot/bios-local-boot.cfg'/>
+        <Path name='/var/lib/tftpboot/memtest.cfg' altsrc='/var/lib/tftpboot/boot/bios-memtest.cfg'/>
+        <Path name='/var/lib/tftpboot/netinstall.cfg' altsrc='/var/lib/tftpboot/boot/bios-netinstall.cfg'/>
+        <Path name='/var/lib/tftpboot/x2go-tce.cfg' altsrc='/var/lib/tftpboot/boot/bios-x2go-tce.cfg'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='grub-efi-amd64'/>
+        <Package name='grub-efi-amd64-signed'/>
+        <Service name='grub-common'/>
+        <Service name='grub-initrd-fallback'/>
+        <Path name='/var/lib/tftpboot/boot/grub/grub.cfg'/>
+        <Path name='/var/lib/tftpboot/boot/pxelinux.cfg'/>
+        <Path name='/var/lib/tftpboot/boot/pxelinux.cfg/default'/>
+        <Path name='/var/lib/tftpboot/boot/bios-default.cfg'/>
+        <Path name='/var/lib/tftpboot/boot/bios-local-boot.cfg'/>
+        <Path name='/var/lib/tftpboot/boot/bios-memtest.cfg'/>
+        <Path name='/var/lib/tftpboot/boot/bios-netinstall.cfg'/>
+        <Path name='/var/lib/tftpboot/boot/bios-x2go-tce.cfg'/>
+    </Group>
     <Path name='/etc/x2go/x2gothinclient_settings'/>
     <!-- add tmpfs mounts to permit Jessy booting -->
     <Path name='/opt/x2gothinclient/chroot/etc/fstab'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Path name='/opt/x2gothinclient/chroot/var/lib/alsa'/>
+        <Path name='/usr/local/bin/umbrella-reinit-x2gothinclient'/>
+    </Group>
     <Package name='fakeroot'/>
     <Action name='update-tftpboot'/>
-<!--    <Path name='/etc/xinetd.d/nbdrootd'/>
-    <Path name='/etc/xinetd.d/nbdswapd'/> -->
     <Path name='/etc/cron.hourly/killold'/>
     <Package name='unison'/>
     <Package name='unison-gtk'/>

@@ -3,9 +3,7 @@
     <Package name='libaprutil1-dbd-sqlite3'/>
     <Package name='apache2'/>
     <Service name='apache2'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Service name='apache-htcacheclean'/>
-    </Group>
+    <Service name='apache-htcacheclean'/>
     <Group name='www-server-ssl'>
         <Path name='/etc/apache2/mods-enabled/ssl.conf'/>
         <Path name='/etc/apache2/mods-enabled/ssl.load'/>
@@ -14,29 +12,40 @@
         <Path name='/etc/ssl/private/www.key'/>
     </Group>
     <Group name='DMZwww'>
-        <Package name='php'/>
-        <Package name='php-curl'/>
-        <Package name='php-gd'/>
-        <Group name='auth-krb5'>
-            <Package name='php-ldap'/>
-        </Group>
-        <Package name='php-mysql'/>
-        <Package name='php-readline'/>
-        <Package name='php-mbstring'/>
-        <Group name='ubuntu-xenial'>
-            <Package name='libapache2-mod-php7.0'/>
-            <Path name='/etc/php/7.0/apache2/conf.d/90-upload-filesize.ini' altsrc='/etc/php/7.2/apache2/conf.d/90-upload-filesize.ini'/>
-        </Group>
-        <Group name='ubuntu-xenial' negate='true'>
+        <Group name='ubuntu-bionic'>
+            <Package name='php'/>
+            <Package name='php-curl'/>
+            <Package name='php-gd'/>
+            <Group name='auth-krb5'>
+                <Package name='php-ldap'/>
+            </Group>
+            <Package name='php-mbstring'/>
+            <Package name='php-mysql'/>
+            <Package name='php-readline'/>
             <Package name='libapache2-mod-php7.2'/>
-            <Path name='/etc/php/7.2/apache2/conf.d/90-upload-filesize.ini'/>
+            <Path name='/etc/php/7.2/apache2/conf.d/90-upload-filesize.ini' altsrc='/etc/php/7.4/apache2/conf.d/90-upload-filesize.ini'/>
+        </Group>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Package name='php7.4'/>
+            <Package name='php7.4-cli'/>
+            <Package name='php7.4-common'/>
+            <Package name='php7.4-curl'/>
+            <Package name='php7.4-gd'/>
+            <Package name='php7.4-json'/>
+            <Group name='auth-krb5'>
+                <Package name='php7.4-ldap'/>
+            </Group>
+            <Package name='php7.4-mbstring'/>
+            <Package name='php7.4-mysql'/>
+            <Package name='php7.4-opcache'/>
+            <Package name='php7.4-readline'/>
+            <Package name='libapache2-mod-php7.4'/>
+            <Path name='/etc/php/7.4/apache2/conf.d/90-upload-filesize.ini'/>
         </Group>
         <Package name='subversion'/>
         <Package name='fonts-dejavu-core'/>
         <Path name='/etc/apache2/mods-enabled/rewrite.load'/>
-        <Group name='ubuntu-xenial' negate='true'>
-            <Service name='phpsessionclean.timer'/>
-        </Group>
+        <Service name='phpsessionclean.timer'/>
     </Group>
 </Group>
 <!-- process local configuration -->

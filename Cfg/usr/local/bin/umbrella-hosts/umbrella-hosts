@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #
 # This script prints the current address space usage in Umbrella Linux
@@ -6,11 +6,10 @@
 #
 # Umbrella Linux (c) 2015-2018 by Konstantin L. Metlov and other contributors.
 
-from __future__ import print_function
 import sys
 import lxml.etree
 import subprocess
-import ipcalc
+import ipaddress
 
 def load_organization():
     o_schema_filename="/var/lib/bcfg2/Properties/organization.xsd"
@@ -31,12 +30,12 @@ def load_all_IPs():
     u_xdata = lxml.etree.parse(u_filename)
     u_ipdata=u_xdata.xpath("//Properties/server/*[substring-after(name(), 'if') = '']/ip")
     for ip in u_ipdata:
-        ip_addresses.add(ipcalc.IP(ip.text))
+        ip_addresses.add(ipaddress.ip_address(ip.text))
 
     # load addresses from LDAP
-    ip_addresses_str = subprocess.check_output("ldapsearch -x -LLL '(ipHostNumber=*)' ipHostNumber | grep ipHostNumber: | sed -e 's/ipHostNumber: //g'", shell=True)
+    ip_addresses_str = subprocess.check_output("ldapsearch -x -LLL '(ipHostNumber=*)' ipHostNumber | grep ipHostNumber: | sed -e 's/ipHostNumber: //g'", shell=True).decode()
     for ip_address_str in ip_addresses_str.splitlines():
-        ip_addresses.add(ipcalc.IP(ip_address_str))
+        ip_addresses.add(ipaddress.ip_address(ip_address_str))
 
 def count_free_IPs(network):
     cnt=0
@@ -70,11 +69,11 @@ def print_tree(xdata,level):
         # determine the current network
         network=get_curr_network(xdata)
         if network is not None:
-            network=ipcalc.Network(network.text)
+            network=ipaddress.ip_network(network.text)
             count=count_free_IPs(network)
-            total=network.size()
+            total=network.num_addresses
             print(' ['+str(count)+'/'+str(total)+',', end='')
-            print(str(count*100/total)+'%]', end='')
+            print('%.2f%%' % (count*100/total), end='')
             # find some free IPs
             freeIPs=get_free_IPs(network,2)
             for freeIP in freeIPs:
@@ -117,7 +116,7 @@ if __name__ == '__main__':
                   "organization path, check it against your "+
                   "organization.xml.",file=sys.stderr)
             sys.exit(9)
-        network=ipcalc.Network(network_elem.text)
+        network=ipaddress.ip_network(network_elem.text)
         load_all_IPs()
         if len(sys.argv)==2:
             # find a free IP
@@ -130,7 +129,7 @@ if __name__ == '__main__':
             sys.exit(0)
         else:
             # check that an IP is free and in this network
-            IP=ipcalc.IP(sys.argv[2])
+            IP=ipaddress.ip_address(sys.argv[2])
             # check that IP is in subnet
             if not IP in network:
                 print("The address "+str(IP)+" does not belong to "+

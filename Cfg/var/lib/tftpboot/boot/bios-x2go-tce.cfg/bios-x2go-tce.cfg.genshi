@@ -1,0 +1,30 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+%}\
+{% if 'ubuntu-bionic' in metadata.groups %}\
+LABEL x2go-tce-486
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+LABEL x2go-tce
+{% end %}\
+        MENU LABEL  ^Thin Client (terminal mode)
+        MENU DEFAULT
+TEXT HELP
+Open the graphical interactive session to the server without changing
+anything on this computer's hard drive. You will need to have an account
+(login/password) in this system. Contact the system administrators at
+itadmins@${domain_name} to get one.
+ENDTEXT
+{% if 'ubuntu-bionic' in metadata.groups %}\
+        KERNEL vmlinuz.486
+        APPEND initrd=initrd.img.486 nfsroot=${funcifs['ltsp']}:/opt/x2gothinclient/chroot,v3 boot=nfs ro quiet nomodeset splash
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+        KERNEL x2go/vmlinuz.amd64
+        APPEND initrd=x2go/initrd.img.amd64 nfsroot=${funcifs['ltsp']}:/opt/x2gothinclient/chroot,v3 boot=nfs ro quiet nomodeset splash
+{% end %}\
+        IPAPPEND 3

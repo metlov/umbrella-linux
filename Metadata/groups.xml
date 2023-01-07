@@ -330,11 +330,6 @@
       <Bundle name='postfix'/>
       <Bundle name='mailman'/>
    </Group>
-   <Group name='ubuntu-xenial'>
-      <!-- these groups are not used on xenial -->
-      <Group name='networking-networkd' negate='true'/>
-      <Group name='networking-NetworkManager' negate='true'/>
-   </Group>
    <Group name='ubuntu'>
       <Bundle name='apt-sources'/>
       <Bundle name='base'/>
@@ -345,13 +340,15 @@
       <Bundle name='ca-certificates-umbrella'/>
       <Bundle name='console'/>
       <Bundle name='cron'/>
-      <Bundle name='nscd'/>
       <Bundle name='rsync'/>
       <Bundle name='snmp'/>
       <Bundle name='ssh'/>
       <Bundle name='timezone'/>
       <Bundle name='grub'/>
       <Bundle name='glpi'/>
+   </Group>
+   <Group name='ubuntu-bionic'>
+      <Bundle name='nscd'/>
    </Group>
    <Group name='nagios'>
       <Bundle name='nagios'/>
@@ -378,10 +375,6 @@
    <!-- local database -->
    <Group name='database'>
       <Bundle name='mysql-server'/>
-   </Group>
-   <!-- watchdog service to reboot in case of hangs -->
-   <Group name='watchdog'>
-      <Bundle name='watchdog'/>
    </Group>
    <Group name='acpid'>
       <Bundle name='acpid'/>

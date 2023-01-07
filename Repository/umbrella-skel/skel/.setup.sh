@@ -31,3 +31,8 @@ certutil -A -n ${REALM_NAME} -t "TC,C,T" -d sql:. -a -i /usr/local/share/ca-cert
 
 # restore the previous working directory
 popd >/dev/null
+
+# initialize keyboard layout switcher
+if [[ "${BCFG2_GROUPS}" == *\ lang-ru\ * ]]; then
+    sed -i -e 's/layout="us"/layout="us,ru"/g' .config/lxqt/session.conf
+fi

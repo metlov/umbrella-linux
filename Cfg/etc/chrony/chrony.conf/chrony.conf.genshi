@@ -1,13 +1,15 @@
+{% if 'ubuntu-bionic' in metadata.groups %}\
 
 # Welcome to the chrony configuration file. See chrony.conf(5) for more
+{% end %}\
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
-execfile(repo+'/Python/35_organization.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+exec(open(repo+'/Python/35_organization.py').read())
 %}\
 
 # NTP servers
@@ -53,9 +55,9 @@ networks.pop('extif', None)    # not from external network
 if not auth_in_DMZ:
     networks.pop('DMZif', None)    # not from DMZ unless auth is enabled there
 %}\
-{% for network in networks.values() %}\
+{% for network in sorted(networks.values(),key = lambda x: str(x)) %}\
 allow ${str(network)}
 {% end %}\
-{% for network in netclasses.iterkeys() %}\
+{% for network in sorted(netclasses.keys(),key = lambda x: str(x)) %}\
 allow ${str(network)}
 {% end %}\

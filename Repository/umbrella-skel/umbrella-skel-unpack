@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 if [ `whoami` != 'umbrella-skel' ]; then
     echo "This script must be run by an umbrella-skel user."
     exit 9
@@ -10,6 +8,11 @@ fi
 skelhome=/var/lib/umbrella-skel
 skel_archive=${skelhome}/skel.tar.gz
 skeldir=${skelhome}/unpacked
+if [ -e "$skeldir" ]; then
+    if [ x$(find "$skeldir" -prune -empty) = x"$skeldir" ]; then
+        rm -rf "$skeldir"
+    fi
+fi
 if [[ ! -d "${skeldir}" || ${skel_archive} -nt ${skeldir} ]]; then
     mkdir -p ${skeldir}
     if [ ! -w $skeldir ] ; then

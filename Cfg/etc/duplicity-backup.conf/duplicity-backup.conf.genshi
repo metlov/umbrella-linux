@@ -2,7 +2,7 @@
 {% python
 from genshi.template import TemplateError
 import socket
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 Dkeyid=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_keyid').text
 Dpass=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_passphrase').text
 Dopts=metadata.Properties['umbrella_keys.xml'].xdata.find('DUPLICITY_extra_options').text

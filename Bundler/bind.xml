@@ -6,12 +6,20 @@
     <Package name='bind9-host'/>
     <Group name='DMZsmtp' negate='true'>
         <Package name='grepcidr'/>
-        <Package name='libapp-daemon-perl'/>
-        <Package name='libhttp-daemon-perl'/>
-        <Package name='liblog-handler-perl'/>
+        <Group name='ubuntu-bionic'>
+            <Package name='libapp-daemon-perl'/>
+            <Package name='libhttp-daemon-perl'/>
+            <Package name='liblog-handler-perl'/>
+        </Group>
     </Group>
-    <Service name='bind9'/>
+    <Group name='ubuntu-bionic'>
+        <Path name='/etc/default/bind9' altsrc='/etc/default/named'/>
+        <Service name='bind9'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Path name='/etc/default/named'/>
+        <Service name='named'/>
+    </Group>
     <Package name='dns-root-data'/>
-    <Path name='/etc/default/bind9'/>
 </Group>
 </Bundle>

@@ -1,0 +1,128 @@
+{% python
+from genshi.template import TemplateError
+from passlib.hash import sha512_crypt as sha512
+import random
+import hashlib
+import string
+import base64
+
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+
+def choiceP2(seq):  # python2 compatible version of random.choice
+    return seq[int(random.random() * len(seq))]
+
+bcfg2pass=metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_pass').text
+# generate salt
+seed=metadata.hostname+metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text
+random.seed(int(hashlib.sha256(seed.encode()).hexdigest(),16),version=1)
+saltstr=''.join(choiceP2(string.ascii_letters+string.digits) for x in range(8))
+
+# encrypt password
+roothash=sha512.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('netinstall_root_pass').text, salt=saltstr, rounds=5000)
+
+def reindent(s, n):
+    s = s.split('\n')
+    s = [(n * ' ') + line.lstrip() for line in s]
+    if len(s[-1].strip()) == 0:
+        s.pop()
+    s = '\n'.join(s)
+    return s
+
+# render Umbrella gpg key as a base64 indented string
+with open(repo+'/Cfg/etc/apt/trusted.gpg.d/umbrella.gpg/umbrella.gpg', mode='rb') as umbrella_gpg_key:
+    gpg_key = umbrella_gpg_key.read()
+gpg_key = base64.encodebytes(gpg_key).decode('ascii')
+gpg_key = reindent(gpg_key,4)
+
+CA_pub = metadata.Properties['umbrella_keys.xml'].xdata.find('CA_pub').text
+CA_pub = reindent(CA_pub,4)
+%}\
+#cloud-config
+autoinstall:
+  identity:
+    hostname: jammy-desktop
+    password: ${roothash}
+    username: root
+{% if language == 'ru_RU' %}\
+  keyboard:
+    layout: en,ru
+    toggle: lctrl_lshift_toggle
+{% end %}
+  locale: en_US.UTF-8
+  storage:
+    config:
+# Partition table
+    - { ptable: gpt, path: /dev/sda, wipe: superblock, preserve: false, name: '', grub_device: false, type: disk, id: disk-sda }
+# EFI boot partition
+    - { device: disk-sda, size: 536870912, wipe: superblock, flag: boot, number: 1, preserve: false, grub_device: true, type: partition, id: partition-0 }
+    - { fstype: fat32, volume: partition-0, preserve: false, type: format, id: format-0 }
+# Linux boot partition
+    - { device: disk-sda, size: 1073741824, wipe: superblock, flag: '', number: 2, preserve: false, grub_device: false, type: partition, id: partition-1 }
+    - { fstype: ext4, volume: partition-1, preserve: false, type: format, id: format-1 }
+# Partition for LVM, VG
+    - { device: disk-sda, size: -1, wipe: superblock, flag: '', number: 3, preserve: false, grub_device: false, type: partition, id: partition-2 }
+    - { name: ubuntu-vg, devices: [ partition-2 ], preserve: false, type: lvm_volgroup, id: lvm_volgroup-0 }
+# LV for root
+    - { name: ubuntu-lv, volgroup: lvm_volgroup-0, size: -1, wipe: superblock, preserve: false, type: lvm_partition, id: lvm_partition-0 }
+    - { fstype: ext4, volume: lvm_partition-0, preserve: false, type: format, id: format-2 }
+# Mount points
+    - { path: /, device: format-2, type: mount, id: mount-2 }
+    - { path: /boot, device: format-1, type: mount, id: mount-1 }
+    - { path: /boot/efi, device: format-0, type: mount, id: mount-0 }
+# Swapfile on root volume
+    swap:
+      swap: 1G
+  apt:
+    primary:
+    - arches: [default]
+      uri: http://archive.ubuntu.com/ubuntu/
+  late-commands:
+  - |
+    sed -e "s/^[ \t]*//" \
+        >/target/usr/local/share/ca-certificates/bcfg2ca.crt <<EOF
+${CA_pub}
+    EOF
+  - curtin in-target --target=/target -- update-ca-certificates
+  - |
+    sed -e "s/^[ \t]*//" >/target/etc/apt/apt.conf.d/99proxy <<EOF
+    Acquire::http { Proxy "http://${funchosts['proxy']}:3142"; };
+    Acquire::https { Proxy "http://${funchosts['proxy']}:3142"; };
+    EOF
+    sed -e "s/^[ \t]*//" >/target/etc/apt/sources.list.d/umbrella.list <<EOF
+    deb http://www.donfti.ru/umbrella/repository/ jammy main
+    EOF
+    base64 -d >/target/etc/apt/trusted.gpg.d/umbrella.gpg <<EOF
+${gpg_key}
+    EOF
+  - curtin in-target --target=/target -- apt-get update
+  - curtin in-target --target=/target -- apt-get -y install bcfg2 wget mc aptitude
+  - |
+    sed -e "s/^[ \t]*//" >/target/etc/bcfg2.conf <<EOF
+    [client]
+    drivers=POSIXUsers,APT,VCS,Action,POSIX,Systemd
+
+    [POSIXUsers]
+    uid_blacklist=1000-
+    gid_blacklist=1000-
+
+    [communication]
+    protocol = xmlrpc/ssl
+    password = ${metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_pass').text}
+    ca = /etc/ssl/certs/bcfg2ca.pem
+
+    [components]
+    bcfg2 = https://${funchosts['config']}:6789
+    EOF
+  - curtin in-target --target=/target -- snap remove lxd
+  - curtin in-target --target=/target -- /bin/bash -c "getent group lxd &>/dev/null && groupdel lxd || true"
+  - curtin in-target --target=/target -- apt-get -y purge landscape-common
+  - curtin in-target --target=/target -- /bin/bash -c "getent passwd landscape &>/dev/null && deluser landscape || true"
+  - curtin in-target --target=/target -- env DEBIAN_FRONTEND=noninteractive bcfg2 -D POSIXUsers -qv
+  - curtin in-target --target=/target -- env DEBIAN_FRONTEND=noninteractive bcfg2 -b apt-sources -Qqv
+  - curtin in-target --target=/target -- env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 -b ssh:apt-sources:login:kerberos:ldap-auth:bcfg2 -Qqvk
+  - curtin in-target --target=/target -- env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 -s disabled -r packages -qvk
+  - curtin in-target --target=/target -- env DEBIAN_FRONTEND=noninteractive SUDO_FORCE_REMOVE=yes bcfg2 -s disabled -r packages -r users -qv
+  - curtin in-target --target=/target -- /bin/bash -c "getent passwd lxd &>/dev/null && deluser lxd || true"
+  - curtin in-target --target=/target -- /bin/bash -c "getent group lxd &>/dev/null && groupdel lxd || true"
+  version: 1

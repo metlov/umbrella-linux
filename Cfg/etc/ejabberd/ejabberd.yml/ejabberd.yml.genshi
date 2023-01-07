@@ -1,6 +1,6 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 short_hostname=metadata.hostname.split('.')[0]
 %}\
 ###

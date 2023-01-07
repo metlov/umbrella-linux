@@ -1,23 +1,18 @@
 <Bundle xmlns:py="http://genshi.edgewall.org/">
 <?python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 ?>
 <Group name='ubuntu'>
 <py:if test="'monitor' in funchosts">
-    <Group name='ubuntu-xenial'>
-        <BoundPOSIXUser name="snmp" home="/var/lib/snmp" gecos="" shell="/usr/sbin/nologin" uid="647" group="snmp"/>
-        <BoundPOSIXGroup name="snmp" gid="647"/>
-        <Path name='/etc/default/snmpd' altsrc='/etc/default/snmpd-src'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <BoundPOSIXUser name="Debian-snmp" home="/var/lib/snmp" gecos="" shell="/usr/sbin/nologin" uid="647" group="Debian-snmp"/>
-        <BoundPOSIXGroup name="Debian-snmp" gid="647"/>
-        <Path name='/etc/default/snmpd'/>
-    </Group>
+    <BoundPOSIXUser name="Debian-snmp" home="/var/lib/snmp" gecos="" shell="/usr/sbin/nologin" uid="647" group="Debian-snmp"/>
+    <BoundPOSIXGroup name="Debian-snmp" gid="647"/>
     <Path name='/etc/snmp/snmpd.conf'/>
     <Package name='snmpd'/>
+    <Group name='vmhost'>
+        <Path name='/etc/systemd/system/snmpd.service.d/override.conf'/>
+    </Group>
     <Service name='snmpd'/>
     <Group name='monitor'>
         <Package name='snmp'/>

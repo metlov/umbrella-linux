@@ -112,7 +112,7 @@ switches_cfg_dir="/var/lib/bcfg2/Local/Cfg/etc/nagios3/conf.d/switches.cfg"
 if not os.path.exists(switches_cfg_dir):
     os.makedirs(switches_cfg_dir)
 switches_cfg = open(switches_cfg_dir+"/switches.cfg","w")
-for switch, pings in switch_pings.iteritems():
+for switch, pings in switch_pings.items():
     print(switch+":"+str(pings))
     switches_cfg.write("define command {\n")
     switches_cfg.write("        command_name    check_switch_"+switch+"\n")

@@ -1,5 +1,5 @@
-# Copyright (C) 2010-2015 by X2Go project, http://wiki.x2go.org
-#       Oleksandr Shneyder <oleksandr.shneyder@obviously-nice.de>
+# Copyright (C) 2010-2019 by X2Go project, https://wiki.x2go.org
+#       Oleksandr Shneyder <o.shneyder@phoca-gmbh.de>
 #       Moritz 'Morty' Struebe <Moritz.Struebe@informatik.uni-erlangen.de>
 #       Mike Gabriel <mike.gabriel@das-netzwerkteam.de>
 
@@ -43,15 +43,17 @@ TC_SHELL="bash"
 TC_DEBMIRROR_URL="http://ftp.debian.org/debian"
 
 # Distro codename to use...
-#TC_DISTRO_CODENAME="wheezy"
-# or use older Debian squeeze...
-#TC_DISTRO_CODENAME="squeeze"
-TC_DISTRO_CODENAME="buster"
-TC_ARCH="i386"
+TC_DISTRO_CODENAME="bullseye"
+# or use older Debian ...
+#TC_DISTRO_CODENAME="buster"
+#TC_DISTRO_CODENAME="stretch"
+
+# Default architecture is "amd64"
+TC_ARCH="amd64"
+#TC_ARCH="i386"
 
 # Retrieve X2Go packages from this URL
-### FIXME: once we release this project, we have to remove the heuler area from the deburl below!!!! ###
-TC_X2GO_DEBURL="deb http://packages.x2go.org/debian $TC_DISTRO_CODENAME main heuler"
+TC_X2GO_DEBURL="deb http://packages.x2go.org/debian $TC_DISTRO_CODENAME extras main"
 
 # Use a http/ftp proxy during debootstrap (leave empty if direct connections to http/ftp are allowed)
 #TC_HTTP_PROXY="http://webcache.intern:3128"
@@ -65,7 +67,7 @@ TC_FTP_PROXY=""
 TC_MODULE_BLACKLIST="pcspkr"
 
 # tftp boot environment (PXE/syslinux files delivered via tftpd)
-TC_TFTP_BOOT="/var/lib/tftpboot"
+TC_TFTP_BOOT="/srv/tftp"
 
 # install non-interactively... uncomment it if needed...
 #TC_NONINTERACTIVE=yes
@@ -84,6 +86,7 @@ echo "TC_CONFIG=$TC_CONFIG"
 echo "TC_CHROOT=$TC_CHROOT"
 echo "TC_SHELL=$TC_SHELL"
 echo "TC_DISTRO_CODENAME=$TC_DISTRO_CODENAME"
+echo "TC_ARCH=$TC_ARCH"
 echo "TC_DEBMIRROR_URL=$TC_DEBMIRROR_URL"
 echo "TC_X2GO_DEBURL=$TC_X2GO_DEBURL"
 echo "TC_HTTP_PROXY=$TC_HTTP_PROXY"

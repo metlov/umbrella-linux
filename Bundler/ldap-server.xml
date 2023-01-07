@@ -13,12 +13,6 @@
     <Package name='fusiondirectory-plugin-systems-schema'/>
     <Package name='fusiondirectory-plugin-mail-schema'/>
     <Package name='fusiondirectory-plugin-alias-schema'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='fusiondirectory-plugin-puppet-schema'/>
-        <Package name='fusiondirectory-plugin-argonaut-schema'/>
-        <Package name='fusiondirectory-plugin-dhcp-schema'/>
-        <Package name='fusiondirectory-plugin-dns-schema'/>
-    </Group>
 
     <!-- data and script for LDAP initialization -->
     <Path name='/etc/ldap/umbrella/initial-config.ldif'/>
@@ -34,18 +28,22 @@
     <Path name='/etc/ssl/private/ldap.key'/>
 
     <!-- enable Kerberos authentication for LDAP users -->
+    <Path name='/etc/ldap/sasl2/slapd.conf'/>
+    <Path name='/etc/ldap/slapd.keytab'/>
+    <!-- it is worthwhile to refactor saslauthd, which is also used by prosody, -->
+    <!-- into a separate bundle after bionic support is removed                 -->
     <Package name='libsasl2-modules'/>
     <Package name='libsasl2-modules-gssapi-mit'/>
     <Package name='sasl2-bin'/>
-    <Path name='/etc/ldap/sasl2/slapd.conf'/>
-    <Path name='/etc/ldap/slapd.keytab'/>
     <Path name='/etc/default/saslauthd'/>
     <Service name='saslauthd'/>
 
     <!-- the server itself -->
     <Package name='slapd'/>
     <Package name='ldap-utils'/>
-    <Package name='libodbc1'/>
+    <Group name='ubuntu-bionic'>
+        <Package name='libodbc1'/>
+    </Group>
     <Path name='/etc/apparmor.d/local/usr.sbin.slapd'/>
     <Path name='/etc/default/slapd'/>
     <Service name='slapd'/>

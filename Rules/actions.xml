@@ -1,12 +1,12 @@
 <Rules priority="0">
-   <Action name='reconfigure-TZ' timing='post' when='modified' shell='true' command='timedatectl set-timezone `cat /etc/timezone`' status='ignore'/>
+   <Group name='ubuntu-bionic'>
+      <Action name='reconfigure-TZ' timing='post' when='modified' shell='true' command='timedatectl set-timezone `cat /etc/timezone`' status='ignore'/>
+   </Group>
    <Action name='systemctl-daemon-reload' timing='post' when='modified' command='systemctl daemon-reload' status='ignore'/>
    <Action name='ossec-reconfigure-TZ' timing='post' when='modified' command='cp /etc/localtime /var/ossec/etc/' status='ignore'/>
    <Action name='sieve-recompile-default' timing='post' when='modified' command='sievec /etc/sieve/default.sieve' status='check'/>
    <Action name='update-grub' timing='post' when='modified' command='update-grub' status='ignore'/>
    <Action name='newaliases' timing='post' when='modified' command='newaliases' status='ignore'/>
-   <Action name='fix_squirrelmail_charset_conversion' timing='post' when='modified' command="perl -pi -e 's/sm_encode_html_special_chars \(\$string\)/sm_encode_html_special_chars \(\$string,ENT_COMPAT \| ENT_HTML401,\$charset,true\)/g' /usr/share/squirrelmail/functions/i18n.php" status='ignore'/>
-   <Action name='fix_squirrelmail_spam_buttons' timing='post' when='modified' command="perl -pi -e 's|eregi\(\&quot;(.*)\&quot;,|preg_match\(\&quot;/$1/i\&quot;,|g' /usr/share/squirrelmail/plugins/spam_buttons/functions.php" status='ignore'/>
    <Action name='fix_fusion_warning_2538' timing='post' when='modified' command="perl -pi -e  's/\$ldap = new ldapMultiplexer\(new LDAP\((\$cfg.*)\)/\$ldapObj = new LDAP(\1;\n  \$ldap = new ldapMultiplexer(\$ldapObj)/g' /usr/share/fusiondirectory/include/functions.inc" status='ignore'/>
    <!-- copy the files to tftpd chroot -->
    <Action name='update-tftpboot' timing='post' when='modified' command='umbrella-update-tftpboot' status='ignore'/>
@@ -14,4 +14,8 @@
    <!-- horde fixes -->
    <Action name='fix-horde-form-type-country' timing='post' when='modified' command="sed -i -e 's/function init($prompt = null)/function init($values = null, $prompt = null)/' -e 's/parent::init(Horde_Nls::getCountryISO(), $prompt);/parent::init(Horde_Nls::getCountryISO(), $values);/' /usr/share/php/Horde/Form/Type.php" status='ignore'/>
    <Action name='patch-horde-with-logo' timing='post' when='modified' command="sed -i -e 's|body.modal-form {|body.modal-form{background-image: url(/logo/logo-320x240.png);background-size: 320px;background-repeat: no-repeat;|' /usr/share/horde/themes/default/screen.css" status='ignore'/>
+   <Group name='ubuntu-jammy'>
+       <!-- fusiondirectory fixes -->
+       <Action name='patch-smarty3-parser' timing='post' when='modified' command="sed -i -e 's|^0| 0; /* fixed */ |g' /usr/share/php/smarty3/sysplugins/smarty_internal_templateparser.php" status='ignore'/>
+   </Group>
 </Rules>

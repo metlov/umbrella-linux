@@ -1,6 +1,6 @@
 {% python
 from lxml import etree
-execfile(repo+'/Python/40_usbdev.py')
+exec(open(repo+'/Python/40_usbdev.py').read())
 %}\
 {% if not (haswhitelist and len(whitelistdevices)==0) %}\
 {% if hasblacklist %}\

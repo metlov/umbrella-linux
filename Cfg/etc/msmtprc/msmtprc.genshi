@@ -1,0 +1,13 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+%}\
+defaults
+set_from_header on
+
+account umbrella
+host ${funchosts['mail']}
+from %U@${metadata.hostname}
+
+account default: umbrella

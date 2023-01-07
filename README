@@ -18,17 +18,16 @@ At the heart of the Umbrella is the BCFG2 configuration management system,
 developed at Argonne National Laboratory. The Umbrella Linux itself is
 mainly a set of configuration files and scripts.
 
-The Umbrella Linux Metadistribution is provided to you under the terms
-of the GNU General Public License version 3. The full authoritative text
-of the license is contained in the LICENSE file at the root of this source
-tree (in the same directory as this README file). The files, referred by
-the Umbrella Linux Metadistribution (such as Ubuntu packages it is based on),
-come under their own license terms. Please see the descriptions of these
-packages for details.
+Umbrella Linux is provided to you under the terms of the GNU General Public
+License version 3. The full authoritative text ff the license is contained
+in the LICENSE file at the root of this source tree (in the same directory
+as this README file). The files, referred by the Umbrella Linux (such as 
+Ubuntu packages it is based on), come under their own license terms.
+Please see the descriptions of these packages for details.
 
 Please note that Umbrella Linux comes with ABSOLUTELY NO WARRANTY. See the
 full text of the license for the details.
 
-Umbrella Linux (c) 2015-2021 Konstantin L. Metlov <metlov@fti.dn.ua> and other
+Umbrella Linux (c) 2015-2023 Konstantin L. Metlov <metlov@fti.dn.ua> and other
 contributors. The contributors are listed in the copyright notices of
 the files they have authored.

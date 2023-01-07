@@ -6,108 +6,72 @@
         <Path name='/etc/apache2/conf-available/umbrella-logo.conf'/>
         <Path name='/etc/apache2/conf-enabled/umbrella-logo.conf'/>
 
-        <Group name='ubuntu-xenial'>
-            <Path name='/etc/squirrelmail/apache.conf'/>
-            <Path name='/etc/apache2/conf-available/squirrelmail.conf'/>
-            <Path name='/etc/apache2/conf-enabled/squirrelmail.conf'/>
+        <Package name='php-horde-webmail'/>
+        <Package name='javascript-common'/>
+        <Package name='php-apcu'/>
+        <Package name='php-bz2'/>
+        <Package name='php-console-table'/>
+        <Package name='php-geoip'/>
+        <Package name='php-horde-feed'/>
+        <Package name='php-horde-ldap'/>
+        <Package name='php-horde-lz4'/>
+        <Package name='php-horde-mapi'/>
+        <Package name='php-horde-passwd'/>
+        <Package name='php-horde-pdf'/>
+        <Package name='php-horde-service-facebook'/>
+        <Package name='php-horde-service-gravatar'/>
+        <Package name='php-horde-service-twitter'/>
+        <Package name='php-horde-service-weather'/>
+        <Package name='php-horde-syncml'/>
+        <Package name='php-igbinary'/>
+        <Package name='php-imagick'/>
+        <Package name='php-intl'/>
+        <Package name='php-msgpack'/>
+        <Package name='php-net-sieve'/>
+        <Package name='php-net-smtp'/>
+        <Package name='php-services-weather'/>
+        <Package name='php-text-figlet'/>
+        <Package name='php-text-languagedetect'/>
+        <Package name='php-tidy'/>
+        <Package name='php-xml-svg'/>
+        <Package name='php-horde-javascriptminify-jsmin'/>
+        <Package name='php-horde-text-filter-jsmin'/>
 
-            <!-- serve javascript libraries via apache -->
-            <Package name='javascript-common'/>
+        <!-- some untracked dependencies -->
+        <Package name='fontconfig'/>
+        <Package name='geoip-database'/>
+        <Package name='ttf-dejavu-core'/>
+        <Package name='libpangocairo-1.0-0'/>
+        <Package name='libdjvulibre21'/>
+        <Package name='php-auth-sasl'/>
+        <Package name='libmagickcore-6.q16-3-extra'/>
 
-            <!-- squirrelmail itself and its main config -->
-            <Package name='squirrelmail'/>
-            <Path name='/etc/squirrelmail/apache.conf'/>
-            <Path name='/etc/squirrelmail/config.php'/>
-            <!-- the fix is needed to properly display the message list when -->
-            <!-- "from" or "subject" fields have charset embedded in them        -->
-            <Action name='fix_squirrelmail_charset_conversion'/>
-            <!-- this replaces PHP 5 eregi function with preg_match -->
-            <Action name='fix_squirrelmail_spam_buttons'/>
+        <!-- internationalization support -->
+        <Package name='gettext'/>
+        <Package name='language-pack-ru'/>
+        <Package name='php-php-gettext'/>
 
-            <!-- standard Ubuntu plugins -->
-            <Package name='avelsieve'/>
-            <Path name='/etc/squirrelmail/avelsieve-config.php'/>
-            <Package name='squirrelmail-locales'/>
-            <Package name='squirrelmail-quicksave'/>
-            <Package name='squirrelmail-secure-login'/>
-            <Package name='squirrelmail-sent-confirmation'/>
-            <Package name='squirrelmail-spam-buttons'/>
-            <Path name='/etc/squirrelmail/spam-buttons-config.php'/>
-            <Package name='squirrelmail-viewashtml'/>
-
-            <!-- Umbrella-specific plugins -->
-            <Package name='squirrelmail-retrieveuserdata'/>
-            <Path name='/etc/squirrelmail/retrieveuserdata_config.php'/>
-            <Package name='squirrelmail-autocomplete'/>
-            <Package name='squirrelmail-compose-extras'/>
-            <Package name='squirrelmail-folder-sizes'/>
-            <Package name='squirrelmail-change-pass'/>
-            <Path name='/etc/squirrelmail/config_change_pass.php'/>
+        <!-- configs -->
+        <Group name='ubuntu-bionic'>
+            <Path name='/etc/php/7.2/apache2/conf.d/91-horde.ini' altsrc='/etc/php/7.4/apache2/conf.d/91-horde.ini'/>
         </Group>
-        <Group name='ubuntu-xenial' negate='true'>
-            <!-- on Bionic and up we install Horde -->
-            <Package name='php-horde-webmail'/>
-            <Package name='javascript-common'/>
-            <Package name='php-apcu'/>
-            <Package name='php-bz2'/>
-            <Package name='php-console-table'/>
-            <Package name='php-geoip'/>
-            <Package name='php-horde-feed'/>
-            <Package name='php-horde-ldap'/>
-            <Package name='php-horde-lz4'/>
-            <Package name='php-horde-mapi'/>
-            <Package name='php-horde-passwd'/>
-            <Package name='php-horde-pdf'/>
-            <Package name='php-horde-service-facebook'/>
-            <Package name='php-horde-service-gravatar'/>
-            <Package name='php-horde-service-twitter'/>
-            <Package name='php-horde-service-weather'/>
-            <Package name='php-horde-syncml'/>
-            <Package name='php-igbinary'/>
-            <Package name='php-imagick'/>
-            <Package name='php-intl'/>
-            <Package name='php-msgpack'/>
-            <Package name='php-net-sieve'/>
-            <Package name='php-net-smtp'/>
-            <Package name='php-services-weather'/>
-            <Package name='php-text-figlet'/>
-            <Package name='php-text-languagedetect'/>
-            <Package name='php-tidy'/>
-            <Package name='php-xml-svg'/>
-            <Package name='php-horde-javascriptminify-jsmin'/>
-            <Package name='php-horde-text-filter-jsmin'/>
-
-            <!-- some untracked dependencies -->
-            <Package name='fontconfig'/>
-            <Package name='geoip-database'/>
-            <Package name='ttf-dejavu-core'/>
-            <Package name='libpangocairo-1.0-0'/>
-            <Package name='libdjvulibre21'/>
-            <Package name='php-auth-sasl'/>
-            <Package name='libmagickcore-6.q16-3-extra'/>
-
-            <!-- internationalization support -->
-            <Package name='gettext'/>
-            <Package name='language-pack-ru'/>
-            <Package name='php-php-gettext'/>
-
-            <!-- configs -->
-            <Path name='/etc/php/7.2/apache2/conf.d/91-horde.ini'/>
-            <Path name='/etc/horde/horde/conf.d/10-umbrella.php'/>
-            <Path name='/etc/horde/horde/prefs.d/10-umbrella.php'/>
-            <Path name='/etc/horde/horde/hooks.php'/>
-            <Path name='/etc/horde/imp/backends.d/10-umbrella.php'/>
-            <Path name='/etc/horde/imp/prefs.d/10-umbrella.php'/>
-            <Path name='/etc/horde/imp/mime_drivers.d/10-umbrella.php'/>
-            <Path name='/etc/horde/ingo/backends.d/10-umbrella.php'/>
-            <Path name='/etc/horde/passwd/backends.d/10-umbrella.php'/>
-            <Path name='/etc/horde/passwd/conf.php'/>
-            <Path name='/etc/horde/turba/backends.d/10-umbrella.php'/>
-
-            <!-- hotfixes -->
-            <Action name='fix-horde-form-type-country'/>
-            <Action name='patch-horde-with-logo'/>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Path name='/etc/php/7.4/apache2/conf.d/91-horde.ini'/>
         </Group>
+        <Path name='/etc/horde/horde/conf.d/10-umbrella.php'/>
+        <Path name='/etc/horde/horde/prefs.d/10-umbrella.php'/>
+        <Path name='/etc/horde/horde/hooks.php'/>
+        <Path name='/etc/horde/imp/backends.d/10-umbrella.php'/>
+        <Path name='/etc/horde/imp/prefs.d/10-umbrella.php'/>
+        <Path name='/etc/horde/imp/mime_drivers.d/10-umbrella.php'/>
+        <Path name='/etc/horde/ingo/backends.d/10-umbrella.php'/>
+        <Path name='/etc/horde/passwd/backends.d/10-umbrella.php'/>
+        <Path name='/etc/horde/passwd/conf.php'/>
+        <Path name='/etc/horde/turba/backends.d/10-umbrella.php'/>
+
+        <!-- hotfixes -->
+        <Action name='fix-horde-form-type-country'/>
+        <Action name='patch-horde-with-logo'/>
 
         <Package name='kpoppassd'/>
         <Package name='openbsd-inetd'/>

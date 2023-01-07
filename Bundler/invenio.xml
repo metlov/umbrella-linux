@@ -15,19 +15,19 @@
     <Package name='python-dev'/>
     <Package name='mysql-client'/>
     <Package name='libmysqlclient-dev'/>
-    <Package name='libapache2-mod-wsgi'/>
+    <Group name='ubuntu-bionic'>
+        <Package name='libapache2-mod-wsgi'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='libapache2-mod-wsgi-py3'/>
+    </Group>
     <Package name='python-pip'/> <!-- install missing python packages in pip -->
     <Package name='python-setuptools'/>
     <Package name='python-wheel'/>
     <Package name='python-mysqldb'/>
     <Package name='python-simplejson'/>
     <Package name='gnuplot'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='gnuplot5-nox'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='gnuplot-nox'/>
-    </Group>
+    <Package name='gnuplot-nox'/>
     <Package name='poppler-utils'/>
     <Package name='poppler-data'/>
     <Package name='clisp'/>
@@ -41,9 +41,6 @@
     <Package name='liblapack3'/>
     <Package name='libblas3'/>
     <Package name='python-magic'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='pdftk'/>
-    </Group>
     <Package name='html2text'/>
     <Package name='libtiff-tools'/>
     <Package name='imagemagick'/>
@@ -72,15 +69,10 @@
     <!-- ffmpeg -->
     <Package name='ffmpeg'/>
     <Package name='libjack-jackd2-0'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libavcodec-ffmpeg56'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='libavcodec57'/>
-        <Package name='libavfilter6'/>
-        <Package name='libwayland-egl1'/>
-        <Package name='libwayland-egl1-mesa'/>
-    </Group>
+    <Package name='libavcodec57'/>
+    <Package name='libavfilter6'/>
+    <Package name='libwayland-egl1'/>
+    <Package name='libwayland-egl1-mesa'/>
     <Package name='libgl1-mesa-glx'/>
 
 
@@ -92,9 +84,7 @@
     <Package name='python-epydoc'/>
     <Package name='libapache2-mod-xsendfile'/>
     <Package name='python-utidylib'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='libtidy5'/>
-    </Group>
+    <Package name='libtidy5'/>
     <Package name='python-beautifulsoup'/>
     <Package name='libhdf5-dev'/>
     <Package name='git'/>
@@ -108,18 +98,6 @@
     <!-- libreoffice -->
     <!-- Libreoffice does not work with invenio -->
     <!-- Need to install OpenOffice manually to /opt before configuring -->
-<!--    <Package name='libreoffice'/>
-    <Package name='libnss3'/>
-    <Package name='libwayland-egl1-mesa'/>
-    <Package name='libgl1-mesa-dri'/>
-    <Package name='libgl1-mesa-glx'/>
-    <Package name='libglapi-mesa'/>
-    <Package name='libreoffice-style-elementary'/>
-    <Package name='libreoffice-style-galaxy'/>
-    <Package name='libreoffice-script-provider-python'/>
-    <Package name='dconf-service'/>
-    <Package name='dconf-gsettings-backend'/>
-    <Package name='ubuntu-mono'/> -->
     <!-- openoffice -->
     <Package name='openoffice'/>
     <Package name='openoffice-base'/>
@@ -175,9 +153,6 @@
     <Package name='texlive-lang-cyrillic'/>
     <Package name='texlive-lang-english'/>
     <Package name='texlive-latex-extra'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='texlive-math-extra'/>
-    </Group>
     <Package name='texlive-metapost'/>
     <Package name='texlive-publishers'/>
     <Package name='texlive-science'/>

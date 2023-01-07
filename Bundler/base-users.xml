@@ -17,34 +17,31 @@
   <BoundPOSIXUser name="irc" home="/var/run/ircd" shell="/usr/sbin/nologin" gecos="ircd" uid="39" group="irc"/>
   <BoundPOSIXUser name="gnats" home="/var/lib/gnats" shell="/usr/sbin/nologin" gecos="Gnats Bug-Reporting System (admin)" uid="41" group="gnats"/>
   <BoundPOSIXUser name="nobody" home="/nonexistent" shell="/usr/sbin/nologin" gecos="nobody" uid="65534" group="nogroup"/>
-  <Group name="ubuntu-xenial">
-    <BoundPOSIXUser name="uuidd" home="/run/uuidd" shell="/bin/false" gecos="" uid="617" group="uuidd"/>
-    <BoundPOSIXUser name="syslog" home="/home/syslog" shell="/bin/false" gecos="" uid="104" group="syslog">
-        <MemberOf group="adm"/>
-    </BoundPOSIXUser>
-    <BoundPOSIXUser name="systemd-timesync" home="/run/systemd" shell="/bin/false" gecos="systemd Time Synchronization,,," uid="100" group="systemd-timesync"/>
-    <BoundPOSIXUser name="systemd-network" home="/run/systemd/netif" shell="/bin/false" gecos="systemd Network Management,,," uid="101" group="systemd-network"/>
-    <BoundPOSIXUser name="systemd-resolve" home="/run/systemd/resolve" shell="/bin/false" gecos="systemd Resolver,,," uid="102" group="systemd-resolve"/>
-    <BoundPOSIXUser name="systemd-bus-proxy" home="/run/systemd" shell="/bin/false" gecos="systemd Bus Proxy,,," uid="103" group="systemd-bus-proxy"/>
-    <BoundPOSIXUser name="_apt" home="/nonexistent" shell="/bin/false" gecos="" uid="105" group="nogroup"/>
-    <BoundPOSIXUser name="messagebus" home="/var/run/dbus" shell="/bin/false" gecos="" uid="106" group="messagebus"/>
-    <BoundPOSIXUser name="sshd" home="/var/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="107" group="nogroup"/>
-  </Group>
-  <Group name="ubuntu-xenial" negate="true">
-    <BoundPOSIXUser name="systemd-network" home="/run/systemd/netif" shell="/usr/sbin/nologin" gecos="systemd Network Management,,," uid="100" group="systemd-network"/>
-    <BoundPOSIXUser name="systemd-resolve" home="/run/systemd/resolve" shell="/usr/sbin/nologin" gecos="systemd Resolver,,," uid="101" group="systemd-resolve"/>
+  <BoundPOSIXUser name="systemd-network" home="/run/systemd/netif" shell="/usr/sbin/nologin" gecos="systemd Network Management,,," uid="100" group="systemd-network"/>
+  <BoundPOSIXUser name="systemd-resolve" home="/run/systemd/resolve" shell="/usr/sbin/nologin" gecos="systemd Resolver,,," uid="101" group="systemd-resolve"/>
+  <Group name='ubuntu-bionic'>
     <BoundPOSIXUser name="syslog" home="/home/syslog" shell="/usr/sbin/nologin" gecos="" uid="102" group="syslog">
-        <MemberOf group="adm"/>
+     <MemberOf group="adm"/>
     </BoundPOSIXUser>
     <BoundPOSIXUser name="messagebus" home="/nonexistent" shell="/usr/sbin/nologin" gecos="" uid="103" group="messagebus"/>
     <BoundPOSIXUser name="_apt" home="/nonexistent" shell="/usr/sbin/nologin" gecos="" uid="104" group="nogroup"/>
-    <!-- The users below change their numbers between the minimal and server -->
-    <!-- version (due to LXD being installed) on server. The variant of the  -->
-    <!-- UIDs from minimal CD is used below (/etc/passwd needs to be fixed if-->
-    <!-- installing on top of the server version. -->
-    <BoundPOSIXUser name="uuidd" home="/run/uuidd" shell="/usr/sbin/nologin" gecos="" uid="617" group="uuidd"/>
     <BoundPOSIXUser name="sshd" home="/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="106" group="nogroup"/>
   </Group>
+  <Group name='ubuntu-bionic' negate='true'>
+    <BoundPOSIXUser name="systemd-timesync" home="/run/systemd" shell="/usr/sbin/nologin" gecos="systemd Time Synchronization,,," uid="680" group="systemd-timesync"/>
+    <BoundPOSIXUser name="syslog" home="/home/syslog" shell="/usr/sbin/nologin" gecos="" uid="105" group="syslog">
+      <MemberOf group="adm"/>
+      <MemberOf group="tty"/>
+    </BoundPOSIXUser>
+    <BoundPOSIXUser name="_apt" home="/nonexistent" shell="/usr/sbin/nologin" gecos="" uid="104" group="nogroup"/>
+    <BoundPOSIXUser name="sshd" home="/run/sshd" shell="/usr/sbin/nologin" gecos="" uid="676" group="nogroup"/>
+    <BoundPOSIXUser name="messagebus" home="/nonexistent" shell="/usr/sbin/nologin" gecos="" uid="677" group="messagebus"/>
+  </Group>
+  <!-- The users below change their numbers between the minimal and server -->
+  <!-- version (due to LXD being installed) on server. The variant of the  -->
+  <!-- UIDs from minimal CD is used below (/etc/passwd needs to be fixed if-->
+  <!-- installing on top of the server version. -->
+  <BoundPOSIXUser name="uuidd" home="/run/uuidd" shell="/usr/sbin/nologin" gecos="" uid="617" group="uuidd"/>
   <BoundPOSIXGroup name="root" gid="0"/>
   <BoundPOSIXGroup name="daemon" gid="1"/>
   <BoundPOSIXGroup name="bin" gid="2"/>
@@ -84,35 +81,36 @@
   <BoundPOSIXGroup name="games" gid="60"/>
   <BoundPOSIXGroup name="users" gid="100"/>
   <BoundPOSIXGroup name="nogroup" gid="65534"/>
-  <Group name="ubuntu-xenial">
-    <BoundPOSIXGroup name="systemd-journal" gid="101"/>
-    <BoundPOSIXGroup name="systemd-timesync" gid="102"/>
-    <BoundPOSIXGroup name="systemd-network" gid="103"/>
-    <BoundPOSIXGroup name="systemd-resolve" gid="104"/>
-    <BoundPOSIXGroup name="systemd-bus-proxy" gid="105"/>
-    <BoundPOSIXGroup name="input" gid="106"/>
-    <BoundPOSIXGroup name="crontab" gid="107"/>
-    <BoundPOSIXGroup name="syslog" gid="108"/>
-    <BoundPOSIXGroup name="netdev" gid="109"/>
-    <BoundPOSIXGroup name="messagebus" gid="110"/>
-    <BoundPOSIXGroup name="ssh" gid="111"/>
-    <BoundPOSIXGroup name="ssl-cert" gid="616"/>
-    <BoundPOSIXGroup name="uuidd" gid="617"/>
+  <BoundPOSIXGroup name="systemd-journal" gid="101"/>
+  <BoundPOSIXGroup name="systemd-network" gid="102"/>
+  <BoundPOSIXGroup name="systemd-resolve" gid="103"/>
+  <Group name='ubuntu-bionic'>
+  <BoundPOSIXGroup name="input" gid="104"/>
   </Group>
-  <Group name="ubuntu-xenial" negate="true">
-    <BoundPOSIXGroup name="systemd-journal" gid="101"/>
-    <BoundPOSIXGroup name="systemd-network" gid="102"/>
-    <BoundPOSIXGroup name="systemd-resolve" gid="103"/>
-    <BoundPOSIXGroup name="input" gid="104"/>
-    <BoundPOSIXGroup name="crontab" gid="105"/>
-    <BoundPOSIXGroup name="syslog" gid="106"/>
-    <BoundPOSIXGroup name="messagebus" gid="107"/>
-    <!-- in ubuntu server installs it is necessary to delete lxd mlocate and -->
-    <!-- reassign the gid of uuidd -->
-    <BoundPOSIXGroup name="ssh" gid="110"/>
-    <BoundPOSIXGroup name="ssl-cert" gid="616"/>
-    <BoundPOSIXGroup name="uuidd" gid="617"/>
-    <BoundPOSIXGroup name="netdev" gid="670"/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <BoundPOSIXGroup name="systemd-timesync" gid="680"/>
+    <BoundPOSIXGroup name="sgx" gid="681"/>
   </Group>
+  <BoundPOSIXGroup name="crontab" gid="105"/>
+  <Group name='ubuntu-bionic'>
+  <BoundPOSIXGroup name="syslog" gid="106"/>
+  <BoundPOSIXGroup name="messagebus" gid="107"/>
+  <!-- in ubuntu server installs it is necessary to delete lxd mlocate and -->
+  <!-- reassign the gid of uuidd -->
+  <BoundPOSIXGroup name="ssh" gid="110"/>
+  </Group>
+  <Group name='ubuntu-bionic' negate='true'>
+    <BoundPOSIXGroup name="messagebus" gid="677"/>
+    <BoundPOSIXGroup name="input" gid="107"/>
+    <BoundPOSIXGroup name="kvm" gid="117"/>
+    <BoundPOSIXGroup name="render" gid="109"/>
+    <BoundPOSIXGroup name="syslog" gid="110"/>
+    <BoundPOSIXGroup name="tss" gid="111"/>
+    <BoundPOSIXGroup name="tcpdump" gid="113"/>
+    <BoundPOSIXGroup name="_ssh" gid="676"/>
+  </Group>
+  <BoundPOSIXGroup name="ssl-cert" gid="616"/>
+  <BoundPOSIXGroup name="uuidd" gid="617"/>
+  <BoundPOSIXGroup name="netdev" gid="670"/>
 </Bundle>
 

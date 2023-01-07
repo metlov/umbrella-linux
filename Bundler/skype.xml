@@ -9,13 +9,5 @@
         <!-- workstation, in which case Skype will be installed       -->
         <!-- automatically.                                           -->
         <Package name='skypeforlinux'/>
-        <Group name='ubuntu-xenial'>
-            <!-- Since this package is not managed by the Packages    -->
-            <!-- plugin we need to note some of its dependencies here -->
-            <!-- manually. Most of the unnoted dependencies will be   -->
-            <!-- installed anyway as part of base system.             -->
-            <Package name='apt-transport-https'/>
-            <Package name='gconf-service'/>
-        </Group>
     </Group>
 </Bundle>

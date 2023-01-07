@@ -19,16 +19,39 @@
   <Service name='atd' status='on' type='systemd'/>
   <Service name='autofs' status='on' type='systemd'/>
   <Service name='asterisk' status='on' type='systemd'/>
-  <Service name='bind9' status='on' type='systemd'/>
+  <Group name='ubuntu-bionic'>
+    <Service name='bind9' status='on' type='systemd'/>
+    <Service name='ejabberd-gssapi' status='on' type='systemd'/>
+  </Group>
   <Service name='blk-availability' status='ignore' type='systemd'/>
   <Service name='cachefilesd' status='on' type='systemd'/>
   <Service name='console-setup' status='ignore' type='systemd'/>
   <Service name='cron' status='on' type='systemd'/>
-  <Service name='dkimproxy' status='on' type='systemd'/>
+  <Group name='ubuntu-bionic'>
+    <Service name='dkimproxy' status='on' type='systemd'/>
+  </Group>
   <Service name='dm-event.socket' status='ignore' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='dmesg' status='ignore' type='systemd'/>
+    <Service name='dpkg-db-backup.timer' status='ignore' type='systemd'/>
+    <Service name='finalrd' status='ignore' type='systemd'/>
+    <Service name='fwupd-refresh.timer' status='ignore' type='systemd'/>
+    <Service name='secureboot-db' status='ignore' type='systemd'/>
+    <Service name='thermald' status='ignore' type='systemd'/>
+    <Service name='logrotate.timer' status='ignore' type='systemd'/>
+    <Service name='remote-cryptsetup.target' status='ignore' type='systemd'/>
+    <Service name='remote-veritysetup.target' status='ignore' type='systemd'/>
+    <Service name='systemd-network-generator' status='ignore' type='systemd'/>
+    <Service name='systemd-pstore' status='ignore' type='systemd'/>
+    <Service name='systemd-sysext' status='ignore' type='systemd'/>
+  </Group>
+  <Service name='dnsmasq' status='ignore' type='systemd'/>
   <Service name='dovecot' status='on' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='e2scrub_all.timer' status='ignore' type='systemd'/>
+    <Service name='e2scrub_reap' status='ignore' type='systemd'/>
+  </Group>
   <Service name='ebtables' status='ignore' type='systemd'/>
-  <Service name='ejabberd-gssapi' status='on' type='systemd'/>
   <Service name='fstrim.timer' status='ignore' type='systemd'/>
   <Service name='fusioninventory-agent' status='on' type='systemd'/>
   <Service name='getty@tty1' status='ignore' type='systemd'/>
@@ -39,6 +62,10 @@
   <Service name='getty@tty6' status='ignore' type='systemd'/>
   <Service name='getty@tty7' status='ignore' type='systemd'/>
   <Service name='getty@tty8' status='ignore' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='grub-common' status='ignore' type='systemd'/>
+    <Service name='grub-initrd-fallback' status='ignore' type='systemd'/>
+  </Group>
   <Service name='gssd' status='on' type='systemd'/>
   <Service name='idmapd' status='on' type='systemd'/>
   <Service name='inetd' status='ignore' type='systemd'/>
@@ -60,9 +87,21 @@
   <Service name='lxd.socket' status='ignore' type='systemd'/>
   <Service name='mailman' status='on' type='systemd'/>
   <Service name='mdadm' status='ignore' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='mdcheck_continue.timer' status='ignore' type='systemd'/>
+    <Service name='mdcheck_start.timer' status='ignore' type='systemd'/>
+    <Service name='mdmonitor-oneshot.timer' status='ignore' type='systemd'/>
+  </Group>
   <Service name='motd-news.timer' status='ignore' type='systemd'/>
   <Service name='mysql' status='on' type='systemd'/>
-  <Service name='nagios3' status='on' type='systemd'/>
+  <Group name='ubuntu-bionic'>
+    <Service name='nagios3' status='on' type='systemd'/>
+  </Group>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='mrtg' status='ignore' type='systemd'/>
+    <Service name='nagios4' status='on' type='systemd'/>
+    <Service name='named' status='on' type='systemd'/>
+  </Group>
   <Service name='netfilter-persistent' status='ignore' type='systemd'/>
   <Service name='networking' status='on' type='systemd'/>
   <Service name='nfs-client.target' status='ignore' type='systemd'/>
@@ -72,16 +111,24 @@
   </Group>
   <Service name='nfs-server' status='on' type='systemd'/>
   <Service name='nfs-kernel-server' status='on' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='nfs-blkmap' status='ignore' type='systemd'/>
+  </Group>
   <Service name='unfs3' status='on' type='systemd'/>
   <Service name='nscd' status='on' type='systemd'/>
-  <Service name='ntp' status='on' type='systemd'/>
   <Service name='ondemand' status='ignore' type='systemd'/>
   <Service name='open-iscsi' status='ignore' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='opendkim' status='on' type='systemd'/>
+  </Group>
   <Service name='iscsid.socket' status='ignore' type='systemd'/>
   <Service name='ossec' status='on' type='systemd'/>
   <Service name='phpsessionclean.timer' status='ignore' type='systemd'/>
   <Service name='pollinate' status='ignore' type='systemd'/>
   <Service name='postfix' status='on' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='prosody' status='on' type='systemd'/>
+  </Group>
   <Service name='psad' status='on' type='systemd'/>
   <Service name='redis-server' status='ignore' type='systemd'/>
   <Service name='remote-fs.target' status='ignore' type='systemd'/>
@@ -105,6 +152,14 @@
   <Service name='ssh' status='on' type='systemd'/>
   <Service name='sssd' status='on' type='systemd'/>
   <Service name='sssd-secrets.socket' status='ignore' type='systemd'/>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Service name='sssd-autofs.socket' status='ignore' type='systemd'/>
+    <Service name='sssd-nss.socket' status='ignore' type='systemd'/>
+    <Service name='sssd-pam-priv.socket' status='ignore' type='systemd'/>
+    <Service name='sssd-pam.socket' status='ignore' type='systemd'/>
+    <Service name='sssd-ssh.socket' status='ignore' type='systemd'/>
+    <Service name='sssd-sudo.socket' status='ignore' type='systemd'/>
+  </Group>
   <Service name='squid' status='on' type='systemd'/>
   <Service name='systemd-networkd' status='on' type='systemd'/>
   <Service name='systemd-networkd.socket' status='ignore' type='systemd'/>
@@ -114,15 +169,11 @@
   <Service name='xinetd' status='on' type='systemd'/>
 
   <!-- extra services, having their own bundles -->
-  <Service name='watchdog' status='on' type='systemd'/>
   <Service name='ulogd2' status='on' type='systemd'/>
   <Service name='ufw' status='on' type='systemd'/>
   <Service name='nut-server' status='on' type='systemd'/>
   <Service name='nut-client' status='on' type='systemd'/>
-  <Group name='ubuntu-xenial' negate='true'>
-    <Service name='nut-monitor.service' status='ignore' type='systemd'/>
-  </Group>
-
+  <Service name='nut-monitor.service' status='ignore' type='systemd'/>
 
   <!-- extra services, integrated in complex bundles -->
   <Group name='DMZvidconf'>
@@ -136,6 +187,7 @@
   <Service name='ua-reboot-cmds' status='ignore' type='systemd'/>
    <Service name='ua-license-check.path' status='ignore' type='systemd'/>
    <Service name='ua-timer.timer' status='ignore' type='systemd'/>
+  <Service name='ubuntu-advantage.service' status='ignore' type='systemd'/>
 
 </Group>
 </Rules>

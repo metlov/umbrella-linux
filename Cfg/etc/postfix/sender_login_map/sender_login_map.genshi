@@ -1,6 +1,6 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 # Maps the addresses to the UIDs of who can send mail from them.
 {% for domain in domain_names %}\

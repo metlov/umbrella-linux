@@ -142,27 +142,19 @@ echo "ok"
 # check the distribution version
 source /etc/lsb-release
 echo -n "Checking the distribution version..."
-if [ "$DISTRIB_CODENAME" != "xenial" -a "$DISTRIB_CODENAME" != "bionic" ]; then
+if [ "$DISTRIB_CODENAME" != "bionic" ]; then
    echo "fail"
    exit 1
 fi
 echo "ok"
 
 # some distribution-dependent parameters
-if [ "$DISTRIB_CODENAME" = "xenial" ]; then
-  GID_messagebus=110
-  GID_ssh=111
-  UID_messagebus=106
-  UID_ssh=107
-  NETCONFFILE=/etc/network/interfaces
-else
-  # on bionic and, hopefully, up
-  GID_messagebus=107
-  GID_ssh=110
-  UID_messagebus=103
-  UID_ssh=106
-  NETCONFFILE=/etc/netplan/01-netcfg.yaml
-fi
+# on bionic and, hopefully, up
+GID_messagebus=107
+GID_ssh=110
+UID_messagebus=103
+UID_ssh=106
+NETCONFFILE=/etc/netplan/01-netcfg.yaml
 
 echo -n "Update the system to the MAX..."
 (
@@ -244,15 +236,7 @@ echo -n "Connecting to [ORG_DESCRIPTION] ..."
 (
     set -e
     set -o xtrace
-if [ "$DISTRIB_CODENAME" = "xenial" ]; then
-    # xenial
-    openvpn --daemon openvpn --config /etc/openvpn/office.conf
-    # xenial
-else
-    # not xenial
     systemctl start openvpn@office
-    # not xenial
-fi
     sleep 10
     ping -q -c5 [VPN_HOST] > /dev/null
 ) 2>&1 | cat >./umbrella-install.log
@@ -319,12 +303,6 @@ EOF
     bcfg2 -qvk -r packages
     # delete leftover group
     delgroup sambashare || true
-    if [ "$DISTRIB_CODENAME" = "xenial" ]; then
-      # xenial
-      # sync the user/group lists
-      /etc/cron.hourly/nssupdate
-      # xenial
-    fi
 ) 2>&1 | cat >./umbrella-install.log
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo ok

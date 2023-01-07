@@ -2,23 +2,14 @@
 <Group name='ubuntu'>
     <Group name='nfs-common'>
         <BoundPOSIXUser name="statd" home="/var/lib/nfs" shell="/bin/false" gecos="" uid="620" group="nogroup"/>
+        <Group name='ubuntu-bionic' negate='true'>
+            <BoundPOSIXUser name="_rpc" home="/run/rpcbind" shell="/usr/sbin/nologin" gecos="" uid="685" group="nogroup"/>
+        </Group>
         <Package name='nfs-common'/>
         <Package name='keyutils'/>
         <Path name='/etc/idmapd.conf'/>
         <Path name='/etc/default/nfs-common'/>
-        <Group name='ubuntu-xenial'>
-            <!-- use an old semantic of returning EACCESS instead of EKEYEXPIRED -->
-            <!-- some useful programs still don't understand EKEYEXPIRED and hang-->
-            <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf' altsrc='/etc/systemd/system/rpc-gssd.service.d/override.conf-src'/>
-            <!-- on bionic the rpc.gssd does not support the '-e' option anymore-->
-            <!-- hopefully, the ticket renewal witth sssd will avoid the key    -->
-            <!-- expiration issues -->
-        </Group>
-        <Group name='ubuntu-xenial' negate='true'>
-            <Path name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
-            <Path name='/etc/systemd/system/rpc-gssd.service.d'/>
-            <Service name='rpc-gssd'/>
-        </Group>
+        <Service name='rpc-gssd'/>
         <Service name='rpcbind'/>
         <Service name='rpcbind.socket'/>
         <Service name='nfs-client.target'/>
@@ -31,6 +22,9 @@
         <Path name='/etc/default/nfs-kernel-server'/>
         <Service name='nfs-kernel-server'/>
         <Service name='nfs-server'/>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Service name='nfs-blkmap'/>
+        </Group>
     </Group>
 </Group>
 </Bundle>

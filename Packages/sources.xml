@@ -1,35 +1,4 @@
 <Sources xmlns:xi="http://www.w3.org/2001/XInclude">
-  <Group name="ubuntu-xenial">
-    <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="xenial">
-      <Component>main</Component>
-      <Arch>i386</Arch>
-      <Arch>amd64</Arch>
-    </Source>
-    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="xenial-updates">
-      <Component>main</Component>
-      <Component>multiverse</Component>
-      <Component>restricted</Component>
-      <Component>universe</Component>
-      <Arch>i386</Arch>
-      <Arch>amd64</Arch>
-    </Source>
-    <Source type="apt" debsrc="true" url="http://security.ubuntu.com/ubuntu" version="xenial-security">
-      <Component>main</Component>
-      <Component>multiverse</Component>
-      <Component>restricted</Component>
-      <Component>universe</Component>
-      <Arch>i386</Arch>
-      <Arch>amd64</Arch>
-    </Source>
-    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="xenial">
-      <Component>main</Component>
-      <Component>multiverse</Component>
-      <Component>restricted</Component>
-      <Component>universe</Component>
-      <Arch>i386</Arch>
-      <Arch>amd64</Arch>
-    </Source>
-  </Group>
   <Group name="ubuntu-bionic">
     <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="bionic">
       <Component>main</Component>
@@ -62,6 +31,47 @@
     </Source>
     <Source type="apt" debsrc="true" url="http://deb.torproject.org/torproject.org" version="bionic">
       <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+  </Group>
+  <Group name="ubuntu-jammy">
+    <Source type="apt" debsrc="true" url="https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu" version="jammy">
+      <Component>main</Component>
+      <Arch>amd64</Arch>
+    </Source>
+    <Group name='www-server'>
+      <Source type="apt" debsrc="true" url="https://ppa.launchpadcontent.net/ondrej/php/ubuntu" version="jammy">
+        <Component>main</Component>
+        <Arch>amd64</Arch>
+      </Source>
+    </Group>
+    <Source type="apt" debsrc="true" url="http://www.donfti.ru/umbrella/repository/" version="jammy">
+      <Component>main</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="jammy-updates">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://security.ubuntu.com/ubuntu" version="jammy-security">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
+      <Arch>i386</Arch>
+      <Arch>amd64</Arch>
+    </Source>
+    <Source type="apt" debsrc="true" url="http://archive.ubuntu.com/ubuntu" version="jammy">
+      <Component>main</Component>
+      <Component>multiverse</Component>
+      <Component>restricted</Component>
+      <Component>universe</Component>
       <Arch>i386</Arch>
       <Arch>amd64</Arch>
     </Source>

@@ -8,13 +8,19 @@
         <Group name='lxd-containers-host' negate='true'>
             <!-- host mounts /nfs from via nfs -->
             <Path name='/etc/auto.nfs'/>
+            <Package name='autofs'/>
+            <Service name='autofs'/>
         </Group>
-        <Group name='lxd-containers-host'>
-            <!-- host mounts /nfs for itself and for defined VMs via bind -->
-            <Path name='/etc/auto.bind'/>
+        <Group name='ubuntu-bionic'>
+            <Group name='lxd-containers-host'>
+                <!-- on bionic lxd host we still mount homes via autofs   -->
+                <!-- TODO: once ubuntu-bionic stops being supported, this -->
+                <!--       should go away. -->
+                <Path name='/etc/auto.nfs'/>
+                <Package name='autofs'/>
+                <Service name='autofs'/>
+            </Group>
         </Group>
-        <Package name='autofs'/>
-        <Service name='autofs'/>
     </Group>
 </Group>
 </Bundle>

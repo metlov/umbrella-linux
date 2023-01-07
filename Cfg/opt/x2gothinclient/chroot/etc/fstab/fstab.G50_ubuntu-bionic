@@ -1,0 +1,14 @@
+proc	/proc			proc	defaults,noauto						0	0
+none	/dev/pts		devpts	gid=5,mode=620,noauto					0	0
+none	/tmp			tmpfs	size=50M,mode=1777					0	0
+none	/root			tmpfs	size=100M,mode=700					0	0
+none	/etc/udev/rules.d	tmpfs	size=50M,mode=755					0	0
+none	/var/log		tmpfs	size=50M,mode=755					0	0
+none	/var/lib/x2gothinclient	tmpfs	size=50M,mode=700,uid=x2gothinclient,gid=x2gothinclient	0	0
+none	/media			tmpfs	size=50M,mode=755					0	0
+none	/var/lib/nfs		tmpfs	size=50M,mode=755,uid=statd,gid=nogroup			0	0
+none	/var/lib/xkb		tmpfs	size=50M,mode=755					0	0
+none	/var/lib/dbus		tmpfs	size=50M,mode=755					0	0
+none	/var/lib/alsa		tmpfs	size=50M,mode=755					0	0
+none	/run			tmpfs	size=50M,mode=755					0	0
+none	/var/tmp		tmpfs	size=50M,mode=755					0	0

@@ -1,5 +1,5 @@
 {% python
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 #
 # OpenSSL example configuration file.
@@ -9,7 +9,12 @@ execfile(repo+'/Python/00_baseparams.py')
 # This definition stops the following lines choking if HOME isn't
 # defined.
 HOME			= /etc/pki
+{% if 'ubuntu-bionic' in metadata.groups %}\
 RANDFILE		= $$ENV::HOME/.rnd
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+RANDFILE		= /etc/pki/.rnd
+{% end %}\
 
 # Extra OBJECT IDENTIFIER info:
 #oid_file		= $$ENV::HOME/.oid

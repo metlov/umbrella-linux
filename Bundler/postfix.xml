@@ -3,6 +3,11 @@
     <Package name='postfix'/>
     <BoundPOSIXUser name="postfix" home="/var/spool/postfix" shell="/bin/false" gecos="" uid="628" group="postfix">
         <MemberOf>ssl-cert</MemberOf>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Group name='DMZsmtp' negate='true'>
+                <MemberOf>opendkim</MemberOf>
+            </Group>
+        </Group>
     </BoundPOSIXUser>
     <BoundPOSIXGroup name="postdrop" gid="627"/>
     <BoundPOSIXGroup name="postfix" gid="628"/>

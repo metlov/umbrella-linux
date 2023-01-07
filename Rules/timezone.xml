@@ -1,0 +1,7 @@
+<Rules priority="0" xmlns:py="http://genshi.edgewall.org/">
+<?python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+?>
+    <Path type='symlink' name='/etc/localtime' to='/usr/share/zoneinfo/${timezone}'/>
+</Rules>

@@ -6,7 +6,14 @@
     <Path name='/var/www/autoconfig/mail/config-v1.1.xml'/>
     <Group name='config'>
         <!-- install autoconfig -->
-        <Path name='/var/www/autoconfig/install/preseed.cfg'/>
+        <Group name='ubuntu-bionic'>
+            <Path name='/var/www/autoconfig/install/preseed.cfg'/>
+        </Group>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Path name='/usr/local/bin/umbrella-maintain-installer-image'/>
+            <Path name='/var/www/autoconfig/install/user-data'/>
+            <Path name='/var/www/autoconfig/install/meta-data'/>
+        </Group>
         <Path name='/var/www/html/wpad.dat'/>
         <Path name='/var/www/autoconfig/install/bcfg2ca.crt' altsrc='/usr/local/share/ca-certificates/bcfg2ca.crt'/>
     </Group>

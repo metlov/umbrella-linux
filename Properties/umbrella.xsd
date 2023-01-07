@@ -54,6 +54,7 @@
             <xsd:element name="alias" type="HostNameType" maxOccurs="unbounded" minOccurs="0"/>
             <xsd:element name="slave" type="FQDN" maxOccurs="unbounded" minOccurs="0"/>
             <xsd:element name="notify" type="IPaddressType" maxOccurs="unbounded" minOccurs="0"/>
+            <xsd:element name="AXFRallow" type="NetworkType" maxOccurs="unbounded" minOccurs="0"/>
             <xsd:element name="revDNS" type="HostNameEmptyType" maxOccurs="1" minOccurs="0"/>
             <xsd:element name="subdomain" type="SubdomainType" maxOccurs="unbounded" minOccurs="0"/>
           </xsd:sequence>

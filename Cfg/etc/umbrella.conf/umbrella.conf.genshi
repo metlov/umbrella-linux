@@ -1,15 +1,19 @@
 #!/bin/bash
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 
 description=long_name
 if dept_name is not None:
   description=dept_name
+
+# this makes enumerations below go in order of the server listing in umbrella.xml
+srvlist = [(server.find('name').text+'.'+domain_name, server.find('function').text)
+           for server in metadata.Properties['umbrella.xml'].xdata.findall('server')]
 %}\
 SYSTEM_NAME=${system_name}
 DOMAIN_NAME=${domain_name}
@@ -23,16 +27,16 @@ TRANSPARENT_PROXY=true
 
 {% end %}\
 # servers
-{% for name, func in hostfuncs.iteritems() %}\
+{% for name, func in srvlist %}\
 HOST_${func.upper()}=$name
 {% end %}\
 {% python
-servers=' '.join(hostfuncs.iterkeys())
+servers=' '.join(srv[0] for srv in srvlist)
 if auth_in_DMZ:
     serversWithKeytab=servers
 else:
     serversWithKeytabList=[]
-    for name, func in hostfuncs.iteritems():
+    for name, func in srvlist:
         if not func.startswith("DMZ"):
             serversWithKeytabList.append(name)
     serversWithKeytab=' '.join(serversWithKeytabList)
@@ -52,25 +56,25 @@ for interface in iftypes:
   if t is not None:
     t = t.find('ip')
     if t is not None and t.text is not None and t.text.strip():
-      srvifs[interface]=ipcalc.IP(t.text.strip())
-if ((srvfunc == 'router') or (srvfunc == 'vmhost')):
+      srvifs[interface]=ipaddress.ip_address(t.text.strip())
+if ((srvfunc == 'router') or (srvfunc == 'vmhost') or (srvfunc == 'backdoor')):
   addr=srvifs['pubif']
 else:
-  addr=srvifs.values()[0]
+  addr=list(srvifs.values())[0]
 %}\
 IP_${srvfunc.upper()}=${str(addr)}
 {% end %}\
 
 # networks
-{% for netname, net in networks.iteritems() %}\
-NET_${netname[:-2].upper()}="${str(net.network())+'/'+str(net.mask)}"
+{% for netname, net in sorted(networks.items(),key=lambda x: x[0]) %}\
+NET_${netname[:-2].upper()}="${net.with_prefixlen}"
 {% end %}\
 
 # Router interfaces and corresponding devices
-{% for ifname, addr in routerifs.iteritems() %}\
+{% for ifname, addr in sorted(routerifs.items(),key=lambda x: x[0]) %}\
 ROUTER_${ifname[:-2].upper()}="${str(addr)}"
 {% end %}\
-{% for ifname, dev in routerifdevs.iteritems() %}\
+{% for ifname, dev in sorted(routerifdevs.items(),key=lambda x: x[0]) %}\
 ROUTER_DEV_${ifname[:-2].upper()}="${dev}"
 {% end %}\
 

@@ -6,8 +6,9 @@
     <Service name='lvm2-lvmetad.socket'/>
     <Service name='lvm2-lvmpolld.socket'/>
     <Service name='lvm2-monitor.service'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Service name='blk-availability'/>
+    <Service name='blk-availability'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='thin-provisioning-tools'/>
     </Group>
 </Group>
 </Bundle>

@@ -1,6 +1,0 @@
-<Bundle>
-<Group name='ubuntu'>
-    <Package name='xinetd'/>
-    <Service name='xinetd'/>
-</Group>
-</Bundle>

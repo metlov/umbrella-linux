@@ -1,14 +1,13 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+%}\
 #!/bin/sh -e
 
 {% if 'lxd-containers-defined' in metadata.groups %}\
 # this is necessary for lxd containers to start after reboot
 # because lxd is socket-activated
-{% if 'ubuntu-xenial' in metadata.groups %}\
-echo -n "" | nc -U /var/lib/lxd/unix.socket
-{% end %}\
-{% if 'ubuntu-xenial' not in metadata.groups %}\
 echo -n "" | nc -UN /var/lib/lxd/unix.socket
-{% end %}\
 
 # this is necessary for router to function, since the LXD containers
 # can not load kernel modules by themseles.
@@ -21,6 +20,12 @@ modprobe nf_conntrack_irc
 modprobe nf_conntrack_tftp
 modprobe nf_conntrack_snmp
 modprobe ip6_tables
+{%     if 'ubuntu-bionic' not in metadata.groups %}\
+
+# bind home directories as they would be on automounted nfs
+mkdir -p /nfs/${system_name}
+mount -o bind /home /nfs/${system_name}
+{%     end %}\
 {% end %}\
 
 exit 0

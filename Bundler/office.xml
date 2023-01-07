@@ -3,10 +3,5 @@
     <Package name='libreoffice-l10n-ru'/>
     <Package name='libreoffice-style-galaxy'/>
     <Package name='libreoffice-style-elementary'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libreoffice-sdbc-hsqldb'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='libreoffice-sdbc-firebird'/>
-    </Group>
+    <Package name='libreoffice-sdbc-firebird'/>
 </Bundle>

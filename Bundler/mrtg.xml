@@ -1,10 +1,20 @@
 <Bundle>
   <Group name='ubuntu'>
     <Package name='mrtg'/>
-    <Path name='/etc/mrtg.cfg'/>
-    <Path name='/var/www/mrtg'/>
     <Path name='/etc/apache2/conf-available/mrtg.conf'/>
     <Path name='/etc/apache2/conf-enabled/mrtg.conf'/>
+    <Group name='ubuntu-bionic'>
+      <Path name='/etc/mrtg.cfg' altsrc='/etc/mrtg/mrtg.cfg'/>
+      <Path name='/var/www/mrtg'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+      <Path name='/etc/mrtg/mrtg.cfg'/>
+      <Path name='/var/www/html/mrtg'/>
+      <Path name='/var/www/html/index.html'/>
+      <BoundPOSIXUser name="mrtg" home="/var/lib/mrtg" shell="/bin/sh" gecos="" uid="690" group="mrtg"/>
+      <BoundPOSIXGroup name="mrtg" gid="690"/>
+      <Service name='mrtg'/>
+    </Group>
     <Action name='update-mrtg-index'/>
   </Group>
 </Bundle>

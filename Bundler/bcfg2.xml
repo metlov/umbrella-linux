@@ -1,10 +1,19 @@
 <Bundle>
 <Package name='bcfg2'/>
-<Group name='ubuntu-xenial' negate='true'>
-  <!-- required by gpg, required by python-apt, required by bcfg2 -->
-  <Package name='pinentry-curses'/>
+<!-- below are the bcfg2 deps, which should be automatically         -->
+<!-- set by Packages once the python3 version of bcfg2 makes into the-->
+<!-- Umbrella linux repository. TODO: remove them after that. -->
+<Package name='python3-lxml'/>
+<!-- end of the bcfg2 deps -->
+
+<Group name='ubuntu-bionic'>
+    <Package name='pinentry-curses'/>
 </Group>
 <Package name='debsums'/>
+<Group name='ubuntu-bionic' negate='true'>
+   <Package name='media-types'/>
+   <Service name='bcfg2'/>
+</Group>
 <Path name='/etc/bcfg2.conf'/>
 <Group name='workstation'>
    <Path name='/etc/default/bcfg2'/>
@@ -16,18 +25,26 @@
    <Path name='/etc/default/bcfg2'/>
 </Group>
 <Group name='config'>
-   <Package name='python-ipcalc'/>
-   <Package name='python-passlib'/>
-   <Package name='python-pyinotify'/>
-   <Package name='python-genshi'/>
-   <Package name='python-django'/>
-   <Package name='python-pymysql'/>
-   <Group name='ubuntu-xenial'>
-      <Package name='python-cheetah'/>
+   <Group name='ubuntu-bionic'>
+      <!-- some bcfg2-generated scripts still use ipcalc                -->
+      <!-- it might be possible to upgrade them now to python3 versions -->
+      <!-- from jammy -->
+      <Package name='python-ipcalc'/>
    </Group>
-   <Group name='ubuntu-xenial' negate='true'>
-      <Package name='python-six'/>
-   </Group>
+   <Package name='python3-django'/>
+   <Package name='python3-mysqldb'/>
+   <Package name='python3-passlib'/>
+   <Package name='python3-pymysql'/>
+   <Package name='python3-six'/>
+   <!-- below are the bcfg2-server deps, which should be automatically  -->
+   <!-- set by Packages once the python3 version of bcfg2 makes into the-->
+   <!-- Umbrella linux repository. TODO: remove them after that. -->
+   <Package name='python3-daemon'/>
+   <Package name='python3-genshi'/>
+   <Package name='python3-lxml'/>
+   <Package name='python3-pyinotify'/>
+   <!-- end of the bcfg2 deps -->
+
 
    <!-- purge old records from the reports database periodically -->
    <Path name='/etc/cron.daily/bcfg2-reports-purge'/>
@@ -57,7 +74,7 @@
    <Path name='/var/www/html/root.crl.pem'/>
    <Path name='/var/www/html/root.crl'/>
 
-   <BoundPOSIXUser name="bcfg2" home="/home/bcfg2" shell="/usr/sbin/nologin" gecos="Bcfg2 server user" uid="999" group="bcfg2">
+   <BoundPOSIXUser name="bcfg2" home="/var/cache/bcfg2" shell="/usr/sbin/nologin" gecos="Bcfg2 server user" uid="999" group="bcfg2">
       <MemberOf>ssl-cert</MemberOf>
    </BoundPOSIXUser>
    <BoundPOSIXGroup name="bcfg2" gid="999"/>
@@ -71,21 +88,28 @@
    <Path name='/etc/bcfg2-web.conf'/>
    <Path name='/etc/apache2/conf-available/bcfg2.conf'/>
    <Path name='/etc/apache2/conf-enabled/bcfg2.conf'/>
-   <Package name='python-pyinotify'/>
-   <Group name='ubuntu-xenial'>
-      <Package name='python-cheetah'/>
-      <Package name='python-django-south'/>
-   </Group>
-   <Package name='python-genshi'/>
-   <Package name='python-pymysql'/>
+   <Package name='python3-mysqldb'/>
+   <Package name='python3-pymysql'/>
+   <Package name='python3-pygments'/>
+   <!-- below are the bcfg2-server deps, which should be automatically  -->
+   <!-- set by Packages once the python3 version of bcfg2 makes into the-->
+   <!-- Umbrella linux repository. TODO: remove them after that. -->
+   <Package name='python3-daemon'/>
+   <Package name='python3-django'/>
+   <Package name='python3-genshi'/>
+   <Package name='python3-lxml'/>
+   <Package name='python3-pyinotify'/>
+   <!-- end of the bcfg2 deps -->
    <Path name='/etc/systemd/system/bcfg2-server.service'/>
    <Package name='bcfg2-server'/>
    <Path name='/etc/default/bcfg2-server'/>
    <Package name='bcfg2-web'/>
-   <Package name='python-pygments'/>
-   <Package name='libapache2-mod-wsgi'/>
+   <Package name='libapache2-mod-wsgi-py3'/>
    <Path name='/etc/apache2/mods-enabled/wsgi.conf'/>
    <Path name='/etc/apache2/mods-enabled/wsgi.load'/>
-   <Package name='python-mysqldb'/>
+   <BoundPOSIXUser name="bcfg2" home="/var/cache/bcfg2" shell="/usr/sbin/nologin" gecos="Bcfg2 server user" uid="999" group="bcfg2">
+      <MemberOf>ssl-cert</MemberOf>
+   </BoundPOSIXUser>
+   <BoundPOSIXGroup name="bcfg2" gid="999"/>
 </Group>
 </Bundle>

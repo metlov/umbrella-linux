@@ -1,0 +1,8 @@
+<FileInfo>
+  <Group name='ubuntu-bionic'>
+    <Info owner="root" group="root" mode="0640" sensitive="true"/>
+  </Group>
+  <Group name='ubuntu-bionic' negate='true'>
+    <Info owner="root" group="mrtg" mode="0640" sensitive="true"/>
+  </Group>
+</FileInfo>

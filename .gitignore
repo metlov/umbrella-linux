@@ -65,8 +65,16 @@ Cfg/etc/openvpn/ta.key/ta.key.H_dummy.host
 /Repository/*.tar.gz
 !/Repository/*.orig.tar.gz
 
+# allow for locally (inside the repository) stored crl files
+Cfg/etc/ssl/crl.pem/crl.pem_H_*
+
 # ignore python-compiled files
 /Documentation/website/**/*.pyc
 
 # permit Local host-specific app defaults
 /Cfg/etc/default/**/*.H_*
+
+# ignore testing data
+/Local/testing/bcfg2-server.conf
+/Local/testing/current
+/Local/testing/original

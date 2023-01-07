@@ -1,0 +1,72 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+%}\
+-- https_certificate = "/etc/ssl/prosody.pem"
+-- https_key = "/etc/ssl/private/prosody.key"
+VirtualHost "${domain_name}"
+	ssl = {
+		key = "/etc/ssl/private/prosody.key";
+		certificate = "/etc/ssl/prosody.pem";
+		capath = "/etc/ssl/certs-umbrella";
+	}
+	authentication = "cyrus"
+	sasl_backend = "cyrus"
+	cyrus_service_realm = "${realm_name}"
+	cyrus_server_fqdn = "${metadata.hostname}"
+	c2s_require_encryption = true
+	s2s_require_encryption = true
+	s2s_secure_auth = true
+
+{% if 'proxy' in metadata.groups %}\
+--      to have s2s, please enable a separate DMZxmpp server via umbrella.xml
+	modules_disabled = { "s2s" }
+{% end %}\
+
+	modules_enabled = {
+		"roster";
+		"tls";
+		"saslauth";
+{% if 'DMZxmpp' in metadata.groups %}\
+		"disco";
+		"dialback";
+{% end %}\
+		"carbons";
+		"pep";
+		"blocklist";
+		"vcard4";
+		"vcard_legacy";
+
+		"version";
+		"uptime";
+		"time";
+		"ping";
+		"mam";
+		"csi_simple";
+
+{% if 'DMZxmpp' in metadata.groups %}\
+		"bosh";
+		"websocket";
+		"proxy65";
+{% end %}\
+--		"http_files";
+--		"http_upload";
+		"groups";
+		"limits";
+		"announce";
+		"motd";
+
+-- TODO: still need to configure LDAP groups and vcards
+--		"mod_lib_ldap";
+	}
+
+	groups_file = "/etc/prosody/sharedgroups.txt"
+
+	storage = "sql"
+	sql = {
+		driver = "SQLite3";
+		database = "prosody.sqlite"
+	}
+	archive_expires_after = "1w"
+
+	http_upload_file_size_limit = 10485760

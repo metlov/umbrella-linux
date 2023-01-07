@@ -2,15 +2,20 @@
 from genshi.template import TemplateError
 from passlib.hash import sha512_crypt as sha512
 import random
+import hashlib
 import string
 
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+
+def choiceP2(seq):  # python2 compatible version of random.choice
+    return seq[int(random.random() * len(seq))]
 
 bcfg2pass=metadata.Properties['umbrella_keys.xml'].xdata.find('bcfg2_pass').text
 # generate salt
-random.seed(metadata.hostname+metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text)
-saltstr=''.join(random.choice(string.ascii_letters+string.digits) for x in range(8))
+seed=metadata.hostname+metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text
+random.seed(int(hashlib.sha256(seed.encode()).hexdigest(),16),version=1)
+saltstr=''.join(choiceP2(string.ascii_letters+string.digits) for x in range(8))
 
 # encrypt password
 roothash=sha512.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('netinstall_root_pass').text, salt=saltstr, rounds=5000)

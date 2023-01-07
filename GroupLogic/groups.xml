@@ -1,12 +1,13 @@
 <GroupLogic xmlns:py="http://genshi.edgewall.org/">
 <?python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
 external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 ?>
+<py:if test="ip_addr is not None">
 <py:if test="ip_addr in networks['pubif']">
     <Group name='net-pub'/>
 </py:if>
@@ -19,6 +20,7 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 </py:if>
 <py:if test="ip_addr in networks['DMZif']">
     <Group name='net-DMZ'/>
+</py:if>
 </py:if>
 <py:if test="'server' in metadata.groups">
     <!-- If mail server is configured and either the host is not in DMZ,  -->
@@ -39,12 +41,7 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 </py:if>
 <!-- www browser selection -->
 <py:if test="'gui' in metadata.groups">
-    <py:if test="'ubuntu-xenial' in metadata.groups">
-        <Group name='chromium-browser'/>
-    </py:if>
-    <py:if test="'ubuntu-xenial' not in metadata.groups">
-        <Group name='firefox-browser'/>
-    </py:if>
+    <Group name='firefox-browser'/>
 </py:if>
 <py:if test="'ltsp' in metadata.groups">
     <!-- terminal server also has ossec enabled (if it is enabled -->
@@ -107,10 +104,6 @@ external_vpn=metadata.Properties['vpn.xml'].xdata.find('external_vpn')
 </py:if>
 <py:if test="'config' in metadata.groups and not NTP_server_on_vmhost">
     <Group name='ntp-server'/>
-</py:if>
-<!-- install watchdog on servers, unless they are lxc containers or virtualbox vms-->
-<py:if test="('virt-lxc' not in metadata.groups and 'virt-oracle' not in metadata.groups) and ('server' in metadata.groups or 'ltsp' in metadata.groups)">
-    <Group name='watchdog'/>
 </py:if>
 <!-- mark virtual machines with full virtualizatio (not containers) -->
 <py:if test="'virt-lxc' not in metadata.groups and 'vm' in metadata.groups">

@@ -1,0 +1,16 @@
+{% python
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+%}\
+<VirtualHost *:80>
+	ServerAdmin itadmin@${domain_name}
+	DocumentRoot /var/www/html
+	ErrorLog $${APACHE_LOG_DIR}/error.log
+	CustomLog $${APACHE_LOG_DIR}/access.log combined
+{% if 'config' in metadata.groups %}\
+	# redirect to fusiondirectory
+	Redirect permanent / https://${funchosts['config']}/
+{% end %}\
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

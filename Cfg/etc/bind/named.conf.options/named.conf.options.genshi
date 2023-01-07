@@ -1,14 +1,19 @@
 {% python
 import socket
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/30_networking.py')
-execfile(repo+'/Python/35_organization.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+exec(open(repo+'/Python/35_organization.py').read())
 %}\
 {% if 'DMZsmtp' in metadata.groups %}\
-acl DMZ { ${str(networks['DMZif'].network())+"/"+str(networks['DMZif'].mask)}; 127.0.0.1/8;};
+{%     if 'ubuntu-bionic' in metadata.groups %}\
+acl DMZ { ${networks['DMZif'].with_prefixlen}; 127.0.0.1/8;};
+{%     end %}\
+{%     if 'ubuntu-bionic' not in metadata.groups %}\
+acl DMZ { ${networks['DMZif'].with_prefixlen}; 127.0.0.0/8;};
+{%     end %}\
 
 {% end %}\
 options {
@@ -26,17 +31,12 @@ options {
 # external interface is not served by DNS
 ifs.pop('extif', None)
 networks.pop('extif', None)
-strifaces=''
-for interface in ifs.values():
-  strifaces += str(interface) + '; '
-strnets=set()
-for network in networks.values():
-  strnets.add(str(network.network()) + '/' + str(network.mask))
-for net in netclasses.iterkeys():
-  strnets.add(net)
-strnets='; '.join(strnets)
+strifaces='; '.join(sorted([str(interface) for interface in ifs.values()]))
+strnets=[n.with_prefixlen for n in networks.values()]
+strnets.extend([n.with_prefixlen for n in netclasses.keys()])
+strnets='; '.join(sorted(strnets))
 %}\
-        listen-on { ${strifaces}127.0.0.1;};
+        listen-on { ${strifaces}; 127.0.0.1;};
         allow-recursion { ${strnets}; 127.0.0.0/24;};
         attach-cache "common-cache";
 {% end %}\
@@ -47,6 +47,9 @@ strnets='; '.join(strnets)
 {% end %}\
         auth-nxdomain no;    # conform to RFC1035
         listen-on-v6 { none; };
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+        dnssec-validation yes;
+{% end %}\
 };
 
 server 0.0.0.0/0 {

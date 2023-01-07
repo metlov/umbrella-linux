@@ -1,6 +1,6 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 <?xml version="1.0"?>
 <conf configVersion="7bee19d76eb2edf332b1f52a4aa6220f" 

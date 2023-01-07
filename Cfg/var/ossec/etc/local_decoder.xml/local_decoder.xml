@@ -135,3 +135,41 @@
 <decoder name="com.canonical.indicator.application">
   <program_name>^com.canonical.indicator.application</program_name>
 </decoder>
+
+<decoder name="horde_new">
+  <program_name>^HORDE</program_name>
+  <prematch>^[imp] |^[horde] </prematch>
+</decoder>
+
+<decoder name="horde_new_success">
+  <parent>horde_new</parent>
+  <prematch offset="after_parent">^Login success </prematch>
+  <regex offset="after_prematch">^for (\S+) to \S+ \((\S+)\) |^for (\S+) \((\S+)\)</regex>
+  <order>user, srcip</order>
+</decoder>
+
+<decoder name="horde_new_failed">
+  <parent>horde_new</parent>
+  <prematch offset="after_parent">^FAILED LOGIN</prematch>
+  <regex offset="after_prematch">^ for (\S+) to \S+ \((\S+)\) |^ for (\S+) \((\S+)\)</regex>
+  <order>user, srcip</order>.
+</decoder>
+
+<decoder name="auth_new_dovecot">
+  <program_name>^auth</program_name>
+  <prematch>^pam_krb5\(dovecot:auth\): </prematch>
+</decoder>
+
+<decoder name="auth_new_dovecot_success">
+  <parent>auth_new_dovecot</parent>
+  <prematch offset="after_parent">^user </prematch>
+  <regex offset="after_prematch">^(\S+) </regex>
+  <order>user</order>
+</decoder>
+
+<decoder name="auth_new_dovecot_failed">
+  <parent>auth_new_dovecot</parent>
+  <prematch offset="after_parent">^authentication failure; logname=</prematch>
+  <regex offset="after_prematch">^(\S+) uid=\d euid=\d tty=\S+ ruser=\S+ rhost=(\d+.\d+.\d+.\d+)</regex>
+  <order>user, srcip</order>
+</decoder>

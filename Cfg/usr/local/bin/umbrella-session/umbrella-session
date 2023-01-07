@@ -8,6 +8,6 @@
 if [ -n "$X2GO_SESSION" ]; then
     REMOTE=`x2golistsessions | grep $X2GO_SESSION | cut -d "|" -f 8`
     /usr/bin/sessreg -a -l $REMOTE $USER
-    ssh-agent lxsession -s Lubuntu -e LXDE
+    ssh-agent startlxqt
     /usr/bin/sessreg -d -l $REMOTE $USER
 fi

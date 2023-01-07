@@ -1,7 +1,7 @@
 # this file defines some basic networking variables for the host
 # and for the system as a whole
 
-import ipcalc
+import ipaddress
 from genshi.template import TemplateError
 
 # renders (as a string) /etc/network/interfaces stanza for a given interface
@@ -22,7 +22,7 @@ def interface_stanza( interface, networks, domain_name, metadata, routerifs, fun
   bridgeddev=None
   if bridged is not None:
     bridgeddev=bridged.text
-    if bridgeddev <> 'none':
+    if bridgeddev != 'none':
         r+='# bridged'+ ((' to '+netnames[interface.tag]) if (interface.tag in netnames) else '')+'\n'
         r+='auto '+bridgeddev+'\n'
         r+='iface '+bridgeddev+' inet manual\n'
@@ -40,7 +40,7 @@ def interface_stanza( interface, networks, domain_name, metadata, routerifs, fun
     r+= 'iface '+dev+' inet static\n'
     r+= '    address '+ip.text.strip()+'\n'
     r+= '    netmask '+str(networks[interface.tag].netmask())+'\n'
-    r+= '    network '+str(networks[interface.tag].network())+'\n'
+    r+= '    network '+networks[interface.tag].network_address+'\n'
     gateway=interface.find('gateway')
     if gateway is not None:
       r+= '    gateway '+gateway.text+'\n'
@@ -74,7 +74,7 @@ def interface_stanza( interface, networks, domain_name, metadata, routerifs, fun
     r+= '    vlan-raw-device ' +vlandev+'\n'
   if ('router' in metadata.groups) and (interface.tag == 'DMZif') and \
          ('DMZvpn' in funcifs) and ('vpnif' in networks):
-    vpnet_str=str(networks['vpnif'].network())+'/'+str(networks['vpnif'].mask)
+    vpnet_str=networks['vpnif'].with_prefixlen
     r+= '    up ip route add '+vpnet_str+' via '+str(funcifs['DMZvpn'])+' || true \n'
     r+= '    down ip route delete '+vpnet_str+' via '+str(funcifs['DMZvpn'])+' || true \n'
 
@@ -88,7 +88,7 @@ def interface_stanza( interface, networks, domain_name, metadata, routerifs, fun
 
 def accumulate_tags(element, ip, name):
   global accumulate_tags
-  global ipcalc
+  global ipaddress
   val = element.find(name)
   if val is not None:
     val = val.text
@@ -98,7 +98,7 @@ def accumulate_tags(element, ip, name):
   elif network.text is None or not network.text.strip():
     network=None
   if network is not None:
-    network=ipcalc.Network(network.text)
+    network=ipaddress.ip_network(network.text)
     if not ip in network:
       network = None
   if network is not None:
@@ -146,7 +146,7 @@ if router is None:
   # by taking the gateway ip address from the root entry in
   # organization.xml
   gw=metadata.Properties['organization.xml'].xdata.find('ou').find('gateway')
-  routerifs['pubif']=ipcalc.IP(gw.text.strip())
+  routerifs['pubif']=ipaddress.ip_address(gw.text.strip())
   routerifdevs['pubif']='eth0'
 else:
   # fetch router interfaces from xml (used to set default routes on
@@ -160,7 +160,7 @@ else:
       routerifmacs[interface]=t.find('mac').text
       t = t.find('ip')
       if (t is not None) and (t.text is not None and t.text.strip()):
-        routerifs[interface]=ipcalc.IP(t.text.strip())
+        routerifs[interface]=ipaddress.ip_address(t.text.strip())
   # Check if the external interfaces are enabled at router
   # and determine the external addresses they are visible at.
   # Basically, the external address is <ip> unless <nat_ip> is specified,
@@ -211,7 +211,7 @@ for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
     if t is not None:
       t = t.find('ip')
     if t is not None and t.text is not None and t.text.strip():
-      srvifs[interface]=ipcalc.IP(t.text.strip())
+      srvifs[interface]=ipaddress.ip_address(t.text.strip())
     t = tif
     if t is not None:
       t = t.find('mac')
@@ -222,8 +222,8 @@ for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
     ifaddr=srvifs['pubif']
     ifmac=srvmacs['pubif']
   else:
-    ifaddr=srvifs.values()[0]
-    ifmac=srvmacs.values()[0]
+    ifaddr=list(srvifs.values())[0]
+    ifmac=list(srvmacs.values())[0]
   funcifs[srvfunc]=ifaddr
   funcmacs[srvfunc]=ifmac
 
@@ -237,7 +237,7 @@ if entry is not None:
     if e is not None:
       t = e.find('ip')
       if t is not None and t.text is not None and t.text.strip():
-        ifs[interface]=ipcalc.IP(t.text.strip())
+        ifs[interface]=ipaddress.ip_address(t.text.strip())
     if e is not None:
       t = e.find('dev')
       if t is not None and t.text is not None and t.text.strip():
@@ -250,25 +250,25 @@ else:
   # for workstation determine network parameters from
   # organization.xml
   ws_org_network=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                 ipcalc.IP(ip_addr), 'network')
+                                 ip_addr, 'network')
   organization_host=ws_org_network[1]
   if ws_org_network[1]:
     ws_org_network=ws_org_network[0][0]
 
   ws_org_gateway=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                 ipcalc.IP(ip_addr), 'gateway')
+                                 ip_addr, 'gateway')
   if ws_org_gateway[1]:
     ws_org_gateway=ws_org_gateway[0][0]
 
   ws_org_users_group=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                     ipcalc.IP(ip_addr), 'users_group')
+                                     ip_addr, 'users_group')
   if ws_org_users_group[1]:
     ws_org_users_group=ws_org_users_group[0][0]
   else:
     ws_org_users_group=None
 
   ws_org_admin_group=accumulate_tags(metadata.Properties['organization.xml'].xdata.find('ou'),
-                                     ipcalc.IP(ip_addr), 'admin_group')
+                                     ip_addr, 'admin_group')
   if ws_org_admin_group[1]:
     ws_org_admin_group=ws_org_admin_group[0]
   else:

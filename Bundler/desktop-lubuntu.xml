@@ -3,136 +3,96 @@
 <Group name='ubuntu'>
     <Package name='audacious'/>
     <Package name='audacious-plugins'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='timgm6mb-soundfont'/>
+    </Group>
     <Package name='desktop-file-utils'/>
     <Package name='dmz-cursor-theme'/>
     <Package name='evince'/>
     <!-- backport some evince apparmor profile fixes from Utopic + some more -->
     <Path name='/etc/apparmor.d/usr.bin.evince'/>
     <Path name='/etc/apparmor.d/abstractions/evince'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libwayland-egl1-mesa'/>
-        <Package name='fcitx'/>
-        <Package name='fcitx-config-gtk2'/>
-        <Package name='fcitx-frontend-gtk2'/>
-        <Package name='fcitx-ui-classic'/>
-        <Package name='gksu'/>
-        <Package name='gnome-mplayer'/>
-        <Package name='gnome-time-admin'/>
-        <Package name='lubuntu-software-center'/>
-        <Package name='ubuntu-mono'/>
-    </Group>
     <Package name='ffmpegthumbnailer'/>
 <!--    <Package name='file-roller'/> -->
     <Package name='xarchiver'/>
 <!--    <Package name='firefox'/> -->
     <Package name='fonts-liberation'/>
     <Package name='fonts-nanum'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='fonts-noto-cjk'/>
-    </Group>
     <Package name='galculator'/>
     <Package name='gnome-accessibility-themes'/>
-    <Package name='gnome-icon-theme-symbolic'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='gnome-icon-theme'/>
-    </Group>
+    <Package name='gnome-icon-theme'/>
     <Package name='gnome-keyring'/>
     <Package name='gnome-system-tools'/>
     <Package name='gpicview'/>
     <Package name='gucharmap'/>
     <Package name='guvcview'/>
     <Package name='hardinfo'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Package name='libc6-dev'/> <!-- dependence of zlib1g-dev of hardinfo -->
-    </Group>
-    <Package name='ibus'/>
-    <Package name='indicator-application-gtk2'/>
+    <Package name='libc6-dev'/> <!-- dependence of zlib1g-dev of hardinfo -->
     <Package name='language-selector-gnome'/>
-    <Package name='leafpad'/>
     <Package name='libfm-modules'/>
-    <Package name='libgtk2-perl'/>
     <Package name='libmtp-runtime'/>
-    <Group name='ubuntu-xenial'>
-        <!-- here we put the dependencies of lubuntu-core manually -->
-        <!-- except for xorg, which conflicts with -hwe-16.04 -->
-        <Package name='alsa-base'/>
-        <Package name='alsa-utils'/>
-        <Package name='anacron'/>
-        <Package name='bc'/>
-        <Package name='ca-certificates'/>
-        <Package name='dbus-x11'/>
-        <Package name='fonts-dejavu-core'/>
-        <Package name='fonts-freefont-ttf'/>
-        <Package name='foomatic-db-compressed-ppds'/>
-        <Package name='genisoimage'/>
-        <Package name='ghostscript-x'/>
-        <Package name='inputattach'/>
-        <Package name='libsasl2-modules'/>
-        <Package name='lightdm'/>
-        <Package name='lightdm-gtk-greeter'/>
-        <Package name='lubuntu-artwork'/>
-        <Package name='lubuntu-default-settings'/>
-        <Package name='lxpanel'/>
-        <Package name='lxsession'/>
-        <Package name='memtest86+'/>
-        <Package name='openbox'/>
-        <Package name='openprinting-ppds'/>
-        <Package name='pcmanfm'/>
-        <Package name='plymouth-theme-lubuntu-logo'/>
-        <Package name='plymouth-theme-lubuntu-text'/>
-        <Package name='printer-driver-pnm2ppa'/>
-        <Package name='rfkill'/>
-        <Package name='ubuntu-drivers-common'/>
-        <Package name='unzip'/>
-        <Package name='wireless-tools'/>
-        <Package name='wpasupplicant'/>
-        <Package name='xkb-data'/>
-        <Package name='zip'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
+    <Group name='ubuntu-bionic'>
+        <Package name='gnome-icon-theme-symbolic'/>
+        <Package name='ibus'/>
+        <Package name='leafpad'/>
+        <Package name='libgtk2-perl'/>
+        <Package name='indicator-application-gtk2'/>
         <Package name='lubuntu-core'/>
+        <Package name='lubuntu-default-session'/>
+        <Package name='lxpanel-indicator-applet-plugin'/>
+        <Package name='lxshortcut'/>
+        <Package name='software-properties-gtk'/>
+        <Package name='system-config-printer-gnome'/>
     </Group>
-    <Package name='lubuntu-default-session'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='lubuntu-desktop'/>
+        <BoundPOSIXUser name="whoopsie" home="/nonexistent" shell="/bin/false" gecos="" uid="687" group="whoopsie"/>
+        <BoundPOSIXGroup name="whoopsie" gid="687"/>
+        <BoundPOSIXUser name="sddm" home="/var/lib/sddm" shell="/bin/false" gecos="Simple Desktop Display Manager" uid="688" group="sddm"/>
+        <BoundPOSIXGroup name="sddm" gid="688"/>
+        <Package name='gamin'/>
+        <Package name='gir1.2-gdkpixbuf-2.0'/>
+        <Package name='libqt5quick5'/>
+        <Service name='anacron.timer'/>
+        <Service name='bluetooth'/>
+        <Service name='man-db.timer'/>
+        <Service name='update-notifier-download.timer'/>
+        <Service name='update-notifier-motd.timer'/>
+        <Service name='whoopsie.path'/>
+    </Group>
     <Package name='lxappearance'/>
     <Package name='lxappearance-obconf'/>
     <Package name='lxinput'/>
     <Package name='lxlauncher'/>
-    <Package name='lxpanel-indicator-applet-plugin'/>
     <Package name='lxrandr'/>
     <Package name='lxsession-default-apps'/>
     <Package name='lxsession-logout'/>
-    <Package name='lxshortcut'/>
     <Package name='lxtask'/>
     <Package name='lxterminal'/>
     <Package name='mobile-broadband-provider-info'/>
     <Package name='modemmanager'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libqmi-glib1'/> <!-- unaccounted modemmanager dependency -->
-    </Group>
     <Package name='mtpaint'/>
     <Package name='network-manager-gnome'/>
     <Service name='ModemManager'/>
     <Service name='NetworkManager-wait-online'/>
     <Service name='NetworkManager'/>
     <Package name='obconf'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='pinentry-gtk2'/>
-        <Package name='python3-aptdaemon.pkcompat'/>
-    </Group>
     <Package name='pm-utils'/>
     <Package name='scrot'/>
     <Package name='simple-scan'/>
-    <Package name='software-properties-gtk'/>
     <Package name='synaptic'/>
-    <Package name='system-config-printer-gnome'/>
     <Group name='virt-lxc' negate='true'>
         <Package name='gnome-disk-utility'/>
-        <Group name='ubuntu-xenial' negate='true'>
-            <Service name='udisks2'/>
-        </Group>
         <Package name='gvfs-backends'/>
         <Package name='gvfs-fuse'/>
         <Package name='usb-creator-gtk'/>
+    </Group>
+    <Service name='udisks2'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='fdisk'/>
+        <Package name='lxqt-themes'/>
+        <Package name='mailcap'/>
+        <Package name='mime-support'/>
     </Group>
     <Group name='virt-lxc'>
         <!-- without usb creator we need to install these separately -->
@@ -145,13 +105,7 @@
     <Package name='xdg-user-dirs'/>
     <Package name='xdg-user-dirs-gtk'/>
     <Package name='xfburn'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='xfce4-notifyd'/>
-    </Group>
     <Package name='xfce4-power-manager'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='xfce4-power-manager-plugins'/>
-    </Group>
     <Package name='xpad'/>
     <Package name='xterm'/>
     <Package name='xul-ext-ubufox'/>

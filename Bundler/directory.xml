@@ -1,30 +1,39 @@
 <Bundle>
 <!-- This bundle describes the directory service frontend, used in Umbrella -->
-<!-- Before Ubuntu Xenial Gosa was used as a frontend, now Fusiondirectory  -->
-<!-- is used. -->
 <Group name='ubuntu'>
     <Package name='fusiondirectory'/>
     <Package name='fusiondirectory-plugin-systems'/>
     <Package name='fusiondirectory-plugin-sudo'/>
     <Package name='fusiondirectory-plugin-mail'/>
     <Package name='fusiondirectory-plugin-alias'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='fusiondirectory-plugin-argonaut'/>
-        <Package name='fusiondirectory-plugin-puppet'/>
-    </Group>
     <Package name='fonts-dejavu-core'/>
-    <Group name='ubuntu-xenial'>
-        <Package name='libapache2-mod-php7.0'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
+    <Group name='ubuntu-bionic'>
         <Package name='libapache2-mod-php7.2'/>
+        <Package name='php-mbstring'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <!-- on jammy we install php7.4 from PPA -->
+        <Package name='libapache2-mod-php7.4'/>
+        <Package name='php7.4'/>
+        <Package name='php7.4-cli'/>
+        <Package name='php7.4-common'/>
+        <Package name='php7.4-curl'/>
+        <Package name='php7.4-gd'/>
+        <Package name='php7.4-imagick'/>
+        <Package name='php7.4-imap'/>
+        <Package name='php7.4-json'/>
+        <Package name='php7.4-ldap'/>
+        <Package name='php7.4-mbstring'/>
+        <Package name='php7.4-opcache'/>
+        <Package name='php7.4-readline'/>
+        <Package name='php7.4-xml'/>
+        <Group name='ubuntu-jammy'>
+            <Action name='patch-smarty3-parser'/>
+        </Group>
     </Group>
     <Package name='libcrypt-rijndael-perl'/>
-    <Package name='php-mbstring'/>
     <Package name='php-cas'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Service name='phpsessionclean.timer'/>
-    </Group>
+    <Service name='phpsessionclean.timer'/>
     <!-- ensure the old config is not enabled -->
     <Path name='/etc/apache2/conf-enabled/fusiondirectory.conf'/>
     <!-- install and enable web site -->
@@ -32,6 +41,9 @@
     <Path name='/etc/apache2/sites-available/dir-ssl'/>
     <Path name='/etc/apache2/sites-enabled/dir.conf'/>
     <Path name='/etc/apache2/sites-enabled/dir-ssl.conf'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Path name='/etc/apache2/sites-available/000-default.conf'/>
+    </Group>
     <!-- enable authentication -->
     <Path name='/etc/fusiondirectory/fusiondirectory.secrets'/>
     <!-- configure -->

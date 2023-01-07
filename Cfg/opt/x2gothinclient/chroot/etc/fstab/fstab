@@ -11,4 +11,4 @@ none	/var/lib/xkb		tmpfs	size=50M,mode=755					0	0
 none	/var/lib/dbus		tmpfs	size=50M,mode=755					0	0
 none	/var/lib/alsa		tmpfs	size=50M,mode=755					0	0
 none	/run			tmpfs	size=50M,mode=755					0	0
-none	/var/tmp		tmpfs	size=50M,mode=755					0	0
+none	/var/tmp		tmpfs	size=50M,mode=1777					0	0

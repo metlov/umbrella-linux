@@ -1,5 +1,5 @@
 # here we define some parameters, extracted from firewall.xml
-import ipcalc
+import ipaddress
 
 # logic to determine who serves the SSH connections
 ssh_from_ext = metadata.Properties['firewall.xml'].xdata.find('ssh_from_ext') is not None
@@ -62,7 +62,7 @@ if mail_in_DMZ:
 
   for robot in robots:
     flow=robot.get("flow")
-    addr=ipcalc.IP(robot.find('ip').text.strip())
+    addr=ipaddress.ip_address(robot.find('ip').text.strip())
     mailing_list_name=robot.find('list_name')
     if mailing_list_name is not None:
       mailing_list_name=mailing_list_name.text
@@ -77,7 +77,7 @@ if mail_in_DMZ:
   robot_outgoing_addresses=robot_out_addrs
   robot_incoming_addresses=robot_inc_addrs
   robot_servers = [None] * len(address_numbering)
-  for addr, num in address_numbering.iteritems():
+  for addr, num in address_numbering.items():
     robot_servers[num]=addr
 
 # now the list robot_servers contains the numbered robot server addresses
@@ -108,8 +108,8 @@ for netif,netwrk in networks.items():
   routes_acc=[]
   routes_netif=metadata.Properties['firewall.xml'].xdata.findall('static_route_'+netif[:-2])
   for route_netif in routes_netif:
-    route_network=ipcalc.Network(route_netif.find('network').text.strip())
-    route_via=ipcalc.IP(route_netif.find('via').text.strip())
+    route_network=ipaddress.ip_network(route_netif.find('network').text.strip())
+    route_via=ipaddress.ip_address(route_netif.find('via').text.strip())
     if route_via not in netwrk:
       raise TemplateError("The static route on \""+netif[:-2]+"\" to "+str(route_network)+" points to a gateway "+str(route_via)+", which is not in \""+netif[:-2]+"\" network.")
     routes_acc.append((route_network,route_via))

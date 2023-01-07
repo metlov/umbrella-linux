@@ -1,0 +1,79 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+nagios_pass=metadata.Properties['umbrella_keys.xml'].xdata.find('snmp_nagios_pass').text
+%}\
+### Global Defaults
+
+EnableIPv6: no
+{% if 'ubuntu-bionic' in metadata.groups %}\
+WorkDir: /var/www/mrtg
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+WorkDir: /var/www/html/mrtg
+{% end %}\
+Options[_]: bits,growright
+WithPeak[_]: ymwd
+
+### External interface of the main Umbrella router
+
+Target[${funchosts['router']}_${routerifdevs['extif']}]: #${routerifdevs['extif']}:public@${funchosts['router']}:::::3
+SnmpOptions[${funchosts['router']}_${routerifdevs['extif']}]: privprotocol=>'aes',authpassword=>'${nagios_pass}',privpassword=>'${nagios_pass}',username=>'nagios',authprotocol=>'sha'
+noHC[${funchosts['router']}_${routerifdevs['extif']}]: yes
+SetEnv[${funchosts['router']}_${routerifdevs['extif']}]: MRTG_INT_IP="${routerifs['extif']}" MRTG_INT_DESCR="No-Description"
+MaxBytes[${funchosts['router']}_${routerifdevs['extif']}]: 12500000
+Title[${funchosts['router']}_${routerifdevs['extif']}]: ${routerifdevs['extif']} -- router
+PageTop[${funchosts['router']}_${routerifdevs['extif']}]: <h1>${routerifdevs['extif']} -- router</h1>
+		<div id="sysdetails">
+			<table>
+				<tr>
+					<td>System:</td>
+					<td>${funchosts['router']}</td>
+				</tr>
+				<tr>
+					<td>Maintainer:</td>
+					<td>itadmins@${domain_name}</td>
+				</tr>
+				<tr>
+					<td>Description:</td>
+{% if 'ubuntu-bionic' in metadata.groups %}\
+					<td>No-Description  </td>
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+					<td>Main external interface of this cluster.</td>
+{% end %}\
+				</tr>
+				<tr>
+					<td>ifType:</td>
+					<td>ethernetCsmacd (6)</td>
+				</tr>
+				<tr>
+					<td>ifName:</td>
+					<td>${routerifdevs['extif']}</td>
+				</tr>
+				<tr>
+					<td>Max Speed:</td>
+{% if 'ubuntu-bionic' in metadata.groups %}\
+					<td>100.0 Mbits/s</td>
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+					<td>1250.0 MBytes/s</td>
+{% end %}\
+				</tr>
+				<tr>
+					<td>Ip:</td>
+{% if 'ubuntu-bionic' in metadata.groups %}\
+					<td>${routerifs['extif']}</td>
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+					<td>${routerifs['extif']} (${domain_name}) </td>
+{% end %}\
+				</tr>
+			</table>
+		</div>
+
+enablesnmpv3: yes

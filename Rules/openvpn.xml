@@ -2,9 +2,5 @@
     <Service name='openvpn' status='on' type='systemd'/>
     <Action name='generateDHparams' timing='pre' shell='true' when='modified' command='[ -f /etc/ssl/dh2048.pem ] || openssl dhparam -out /etc/ssl/dh2048.pem 2048' status='ignore'/>
     <Path type='directory' name='/var/lib/openvpn' owner='root' group='openvpn' mode='0775'/>
-    <!-- Xenial leftovers -->
-    <Group name='ubuntu-xenial' negate='true'>
-        <Service name='openvpn-server@umbrella' status='on' type='systemd'/>
-        <Path type='nonexistent' name='/etc/openvpn/server.conf'/>
-    </Group>
+    <Service name='openvpn-server@umbrella' status='on' type='systemd'/>
 </Rules>

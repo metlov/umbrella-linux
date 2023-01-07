@@ -1,0 +1,39 @@
+#!/bin/bash
+
+IMGURL="https://releases.ubuntu.com/22.04.1/ubuntu-22.04.1-live-server-amd64.iso"
+SHA256_IMG="10f19c5b2b8d6db711582e0e27f5116296c34fe4b313ba45f9b201a5007056cb"
+
+INSTALLDIR=/var/www/autoconfig/install
+IMGNAME=ubuntu-live-installer.iso
+
+IMG="${INSTALLDIR}/${IMGNAME}"
+
+check_sha256() {
+    SHA256=`sha256sum "${IMG}" | cut -d' ' -f 1`
+    if [ ! "${SHA256}" = "${SHA256_IMG}" ]; then
+        rm -f "${IMG}"
+    fi
+}
+
+if [ -f "${IMG}" ]; then
+    check_sha256
+else
+    rm -f "${IMG}"
+fi
+
+if [ ! -f "${IMG}" ]; then
+    wget -q -O "${IMG}" "${IMGURL}"
+    check_sha256
+fi
+
+if [ ! -f "${IMG}" ]; then
+    echo "Can't download image from ${IMGURL}." >&2
+    exit 9
+fi
+
+# image is downloaded and checked. Now let's unpack it.
+pushd "${INSTALLDIR}" >/dev/null
+7z e "${IMG}" -aoa EFI/boot/bootx64.efi EFI/boot/grubx64.efi \
+                   boot/grub/fonts/unicode.pf2 casper/initrd casper/vmlinuz \
+                   >/dev/null
+popd >/dev/null

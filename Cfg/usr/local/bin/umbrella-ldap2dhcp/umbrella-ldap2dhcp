@@ -20,7 +20,7 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
     fi
     echo -e "\n\n# workstations, terminals, etc from LDAP\n" >>$DHCP_FILE_TMP
 
-    ldapsearch -x -LLL -S 'cn' -o ldif-wrap=no '(&(|(objectClass=gotoTerminal)(objectClass=gotoWorkstation)(objectClass=device))(macAddress=*))' cn ipHostNumber macAddress gotoMode | \
+    ldapsearch -x -LLL -S 'cn' -o ldif-wrap=no '(&(|(objectClass=fdTerminal)(objectClass=fdWorkstation)(objectClass=fdPrinter))(objectClass=ipHost)(macAddress=*))' cn ipHostNumber macAddress | \
     while read line; do
         # Skip LDIF comments
         [ "${line:0:1}" == "#" ] && continue;

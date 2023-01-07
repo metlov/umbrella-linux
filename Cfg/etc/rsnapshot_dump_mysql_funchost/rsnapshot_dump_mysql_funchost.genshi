@@ -1,7 +1,7 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 
 if not name.startswith('/etc/rsnapshot_dump_mysql_'):
     raise TemplateError('ERROR: Database dumper template should be instantiated at /etc/rsnapshot_dump_mysql_CLASS .')
@@ -50,7 +50,7 @@ for db in $$DB_LIST; do
         fi
 
         if [ "$$skip" == "0" ]; then
-                mysqldump --skip-lock-tables --events -h ${db_hostname_connect} $$db | gzip -9 > $$BACKUP_DIR/${db_hostname}_$$db.sql.gz
+                mysqldump --no-tablespaces --skip-lock-tables -h ${db_hostname_connect} $$db | gzip -9 > $$BACKUP_DIR/${db_hostname}_$$db.sql.gz
         fi
 
 done

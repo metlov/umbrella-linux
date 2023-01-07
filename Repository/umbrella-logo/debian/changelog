@@ -1,3 +1,9 @@
+umbrella-logo (0.3.1) jammy; urgency=medium
+
+  * Port to Ubuntu 22.04 "jammy".
+
+ -- Konstantin L. Metlov <metlov@donfti.ru>  Fri, 23 Dec 2022 21:33:14 +0300
+
 umbrella-logo (0.3) xenial; urgency=medium
 
   * Made logo image on 640x480-nw.png smaller.

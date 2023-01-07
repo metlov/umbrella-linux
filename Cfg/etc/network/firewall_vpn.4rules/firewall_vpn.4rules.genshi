@@ -36,11 +36,11 @@ ${ACCEPT_INTERNAL_OUTPUT_FROM_IP('VPNOUTPUT', INTIP)}
 
 # VPN interfaces, any source going to local net is valid
 {% if external_vpn is not None %}\
-{%   for net in vpn_secnets.itervalues() %}\
--A VPNOUTPUT -o ${IFEXTVPN} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%   for net in vpn_secnets.values() %}\
+-A VPNOUTPUT -o ${IFEXTVPN} -d ${net.with_prefixlen} -j ACCEPT
 {%   end %}\
-{%     for net in vpn_pubnets.itervalues() %}\
--A VPNOUTPUT -o ${IFEXTVPN} -d ${str(net)}/${str(net.mask)} -j ACCEPT
+{%     for net in vpn_pubnets.values() %}\
+-A VPNOUTPUT -o ${IFEXTVPN} -d ${net.with_prefixlen} -j ACCEPT
 {%   end %}\
 {% end %}\
 

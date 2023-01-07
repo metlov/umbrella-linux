@@ -14,11 +14,6 @@ upgrade_skel ()
     # prevent messing with the global scope
     source "/etc/umbrella.conf"
 
-    # TODO: remove once migration to Umbrella Linux 0.2 is complete
-    if [ -z "${XMPP_SERVER}" ]; then
-       XMPP_SERVER=${HOST_PROXY}
-    fi
-
     # skel exists, but may be we need to upgrade it
     # first we determine the version
     if [ ! -s "$HOME/.initialized" ]; then

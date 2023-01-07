@@ -1,6 +1,6 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 # Default settings for chromium-browser. This file is sourced by /bin/sh from
 # /usr/bin/chromium-browser

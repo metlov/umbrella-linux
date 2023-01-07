@@ -1,10 +1,19 @@
 <Bundle>
 <Group name='ubuntu'>
     <BoundPOSIXGroup name="lxd" gid="660"/>
-    <BoundPOSIXUser name="lxd" home="/var/lib/lxd/" shell="/bin/false" gecos="" uid="660" group="nogroup"/>
-
+    <Group name='ubuntu-bionic'>
+        <BoundPOSIXUser name="lxd" home="/var/lib/lxd/" shell="/bin/false" gecos="" uid="660" group="nogroup"/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <BoundPOSIXUser name="_lxd" home="/var/lib/lxd/" shell="/bin/false" gecos="" uid="660" group="lxd"/>
+    </Group>
+    <BoundPOSIXUser name="dnsmasq" home="/var/lib/misc" shell="/usr/sbin/nologin" gecos="dnsmasq,,," uid="689" group="nogroup"/>
     <Package name='lxd'/>
     <Package name='lxd-client'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='lxd-tools'/>
+        <Service name='dnsmasq'/>
+    </Group>
     <Package name='ebtables'/>
     <Service name='ebtables'/>
     <Package name='xdelta3'/>
@@ -27,5 +36,23 @@
     <Service name='lxcfs'/>
     <Service name='lxd-containers'/>
     <Service name='lxd.socket'/>
+
+    <Group name='installation-in-progress'>
+        <!-- these tools are only required on LXD vmhost during    -->
+        <!-- the Umbrella Linux installation and will be removed   -->
+        <!-- once the system is up to running its own bcfg2 probes.-->
+        <Package name='bcfg2-server'/>
+        <BoundPOSIXUser name="bcfg2" home="/home/bcfg2" shell="/usr/sbin/nologin" gecos="Bcfg2 server user" uid="999" group="bcfg2">
+            <MemberOf>ssl-cert</MemberOf>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="bcfg2" gid="999"/>
+        <Package name='git'/>
+        <Package name='gpm'/>
+        <Package name='mmdebstrap'/>
+        <Package name='python3-pymysql'/>
+        <Package name='python3-passlib'/>
+        <Service name='bcfg2-server'/>
+        <Service name='gpm'/>
+    </Group>
 </Group>
 </Bundle>

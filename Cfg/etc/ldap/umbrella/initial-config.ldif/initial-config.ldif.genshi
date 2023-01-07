@@ -2,7 +2,7 @@
 import socket
 from passlib.hash import ldap_salted_sha1 as lsm
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 dn: cn=config
 objectClass: olcGlobal
@@ -42,7 +42,12 @@ dn: cn=module{0},cn=config
 objectClass: olcModuleList
 cn: module{0}
 olcModulePath: /usr/lib/ldap
+{% if 'ubuntu-bionic' in metadata.groups %}\
 olcModuleLoad: {0}back_hdb
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+olcModuleLoad: {0}back_mdb
+{% end %}\
 olcModuleLoad: {1}syncprov
 
 dn: cn=schema,cn=config

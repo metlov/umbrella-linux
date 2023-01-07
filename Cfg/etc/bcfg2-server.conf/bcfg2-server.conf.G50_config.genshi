@@ -1,7 +1,7 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 %}\
 [server]
 repository = /var/lib/bcfg2
@@ -20,9 +20,6 @@ gid_blacklist=1000-
 sendmailpath = /usr/lib/sendmail
 #web_debug = False
 #time_zone =
-
-[reporting]
-transport = LocalFilesystem
 
 [communication]
 protocol = xmlrpc/ssl

@@ -2,8 +2,6 @@
 <Group name='ubuntu'>
     <Package name='nscd'/>
     <Service name='nscd'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Path name='/etc/nscd.conf'/>
-    </Group>
+    <Path name='/etc/nscd.conf'/>
 </Group>
 </Bundle>

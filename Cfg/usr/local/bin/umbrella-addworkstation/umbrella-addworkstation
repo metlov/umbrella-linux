@@ -171,7 +171,7 @@ if [ "$OU" != "$OUpath" ]; then
         # check that the DN exists
         if ! LDAP_has_LEAF "$dn"; then
             # create the DN
-            ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+            ldapadd -x -H ldap://localhost:389 -D "${LDAP_ADMIN}" -w "$LDAP_PASS" <<EOF
 dn: ${dn}
 objectClass: organizationalUnit
 objectClass: top
@@ -190,7 +190,7 @@ fi
 dn="ou=systems,$dn"
 if ! LDAP_has_LEAF "$dn"; then
 # create systems
-ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+ldapadd -x -H ldap://localhost:389 -D "${LDAP_ADMIN}" -w "$LDAP_PASS" <<EOF
 dn: ${dn}
 objectClass: organizationalUnit
 ou: systems
@@ -201,7 +201,7 @@ fi
 dn="ou=workstations,$dn"
 if ! LDAP_has_LEAF "$dn"; then
 # create systems
-ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+ldapadd -x -H ldap://localhost:389 -D "${LDAP_ADMIN}" -w "$LDAP_PASS" <<EOF
 dn: ${dn}
 objectClass: organizationalUnit
 ou: workstations
@@ -219,24 +219,24 @@ if LDAP_has_LEAF "cn=${dnsname},$dn"; then
 fi
 
 # now we have everything and just need to add the host
-ldapadd -x -h localhost -D "${LDAP_ADMIN}" "-w$LDAP_PASS" <<EOF
+ldapadd -x -H ldap://localhost:389 -D "${LDAP_ADMIN}" -w "$LDAP_PASS" <<EOF
 dn: cn=${dnsname},${dn}
 cn: ${dnsname}
 description: ${d}
 ipHostNumber: ${ip}
 macAddress: ${mac}
-gotoMode: active
 l: ${l}
-objectClass: top
-objectClass: gotoWorkstation
-objectClass: GOhard
+objectClass: ipHost
+objectClass: fdWorkstation
+objectClass: ieee802Device
 EOF
 
 if LDAP_has_LEAF "cn=${dnsname},$dn"; then
-    echo "The host ${dnsname} is registered."
-    echo "Now please wait 5 minutes before DNS and DHCP servers note the update."
-    echo "After that you can boot the host via PXE and will have an option to"
-    echo "initialize the new workstation."
+    fold -s -w 79 <<EOF
+The host ${dnsname} with MAC ${mac} and IP address ${ip} is registered.
+
+Now please wait 5 minutes before DNS and DHCP servers note the update. After that you can boot the host via PXE and will have an option to initialize the new workstation.
+EOF
 else
     echo "The host ${dnsname} is not added due to errors."
     exit 12

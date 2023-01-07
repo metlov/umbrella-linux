@@ -1,6 +1,7 @@
 {% python
 import random
-random.seed(metadata.hostname)
+import hashlib
+random.seed(int(hashlib.sha256(metadata.hostname.encode()).hexdigest(),16),version=1)
 %}\
 # /etc/crontab: system-wide crontab
 # Unlike any other crontab you don't have to run the `crontab'
@@ -12,8 +13,8 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # m h dom mon dow user  command
-${random.randrange(0,59)} *    * * *   root    cd / && run-parts --report /etc/cron.hourly
-${random.randrange(0,59)} ${random.randrange(0,6)}   * * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
-${random.randrange(0,59)} 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
-${random.randrange(0,59)} 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
+${int(random.random()*59)} *    * * *   root    cd / && run-parts --report /etc/cron.hourly
+${int(random.random()*59)} ${int(random.random()*7)}   * * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
+${int(random.random()*59)} 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
+${int(random.random()*59)} 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
 #

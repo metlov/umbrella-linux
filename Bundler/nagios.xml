@@ -5,35 +5,72 @@
       <BoundPOSIXUser name="nagios" home="/var/lib/nagios" shell="/bin/false" uid="646" group="nagios"/>
       <BoundPOSIXGroup name="nagios" gid="646"/>
       <Path name='/etc/monitoring-plugins.ini'/>
-      <Path name='/etc/nagios3/apache2.conf'/>
-      <Path name='/etc/nagios3/cgi.cfg'/>
-      <Path name='/etc/nagios3/conf.d/zzz_nagiosgen.cfg'
-                  altsrc='/etc/nagios/conf.d/bcfg2.cfg'/>
+      <Group name='ubuntu-bionic'>
+        <Path name='/etc/nagios3/apache2.conf' altsrc='/etc/nagios4/apache2.conf'/>
+        <Path name='/etc/nagios3/cgi.cfg' altsrc='/etc/nagios4/cgi.cfg'/>
+        <Path name='/etc/nagios3/conf.d/zzz_nagiosgen.cfg'
+                    altsrc='/etc/nagios/conf.d/bcfg2.cfg'/>
 
-      <!-- override the default Nagios configuration files -->
-      <Path name='/etc/nagios3/conf.d/contacts_nagios2.cfg'/>
-      <Path name='/etc/nagios3/conf.d/extinfo_nagios2.cfg'/>
-      <Path name='/etc/nagios3/conf.d/hostgroups_nagios2.cfg'/>
-      <Path name='/etc/nagios3/conf.d/localhost_nagios2.cfg'/>
-      <Path name='/etc/nagios3/conf.d/services_nagios2.cfg'/>
+        <!-- override the default Nagios configuration files -->
+        <Path name='/etc/nagios3/conf.d/contacts_nagios2.cfg'
+              altsrc='/etc/nagios4/objects/contacts.cfg'/>
+        <Path name='/etc/nagios3/conf.d/extinfo_nagios2.cfg'
+              altsrc='/etc/nagios4/objects/extinfo.cfg'/>
+        <Path name='/etc/nagios3/conf.d/hostgroups_nagios2.cfg'
+              altsrc='/etc/nagios4/objects/hostgroups.cfg'/>
+        <Path name='/etc/nagios3/conf.d/localhost_nagios2.cfg'
+              altsrc='/etc/nagios4/objects/empty.cfg'/>
+        <Path name='/etc/nagios3/conf.d/services_nagios2.cfg'
+              altsrc='/etc/nagios4/objects/empty.cfg'/>
+        <Path name='/etc/nagios3/conf.d/snmp_commands.cfg'
+              altsrc='/etc/nagios4/objects/localhost.cfg'/>
+      </Group>
 
-      <Package name='nagios3'/>
-      <Package name='nagios3-common'/>
+      <Group name='ubuntu-bionic' negate='true'>
+        <Path name='/etc/apache2/conf-available/nagios4-cgi.conf'
+              altsrc='/etc/nagios4/apache2.conf'/>
+        <Path name='/etc/nagios4/apache2.conf'/>
+        <!-- <Path name='/etc/nagios4/cgi.cfg'/> -->
+
+        <!-- enable CGI execution in apache2 -->
+        <Path name='/etc/apache2/mods-enabled/cgi.load'/>
+        <Path name='/etc/apache2/mods-enabled/cgid.conf'/>
+        <Path name='/etc/apache2/mods-enabled/cgid.load'/>
+
+        <Path name='/etc/nagios4/objects'/>
+        <Path name='/etc/nagios4/objects/templates.cfg'
+                    altsrc='/etc/nagios/conf.d/bcfg2.cfg'/>
+        <!-- override the default Nagios configuration files -->
+        <Path name='/etc/nagios4/objects/commands.cfg'/>
+        <Path name='/etc/nagios4/objects/contacts.cfg'/>
+        <Path name='/etc/nagios4/objects/extinfo.cfg'/>
+        <Path name='/etc/nagios4/objects/hostgroups.cfg'/>
+        <Path name='/etc/nagios4/objects/localhost.cfg'/>
+        <Path name='/etc/nagios4/objects/timeperiods.cfg'/>
+      </Group>
+
       <Package name='nagios-images'/>
       <Package name='fonts-dejavu-core'/>
-      <Service name='nagios3'/>
       <Service name='apache2'/>
-      <Package name='libapache2-mod-php'/>
-      <Group name='ubuntu-xenial' negate='true'>
-        <Service name='phpsessionclean.timer'/>
-        <Package name='bsd-mailx'/>
+      <Group name='ubuntu-bionic'>
+        <Package name='nagios3'/>
+        <Package name='nagios3-common'/>
+        <Service name='nagios3'/>
+        <Package name='libapache2-mod-php'/>
       </Group>
+      <Group name='ubuntu-bionic' negate='true'>
+        <Package name='nagios4'/>
+        <Package name='nagios4-common'/>
+        <Service name='nagios4'/>
+        <Package name='libapache2-mod-php8.1'/>
+      </Group>
+      <Service name='phpsessionclean.timer'/>
+      <Package name='bsd-mailx'/>
       <Package name='monitoring-plugins'/>
       <Package name='nagios-snmp-plugins'/>
       <Package name='libcrypt-des-perl'/> <!-- support SNMPv3 in perl -->
       <Package name='libdigest-hmac-perl'/> <!-- support SHA auth in perl -->
       <Package name='libcrypt-rijndael-perl'/> <!-- support AES encryption in perl -->
-      <Path name='/etc/nagios3/conf.d/snmp_commands.cfg'/>
       <Package name='libapache2-mod-authz-unixgroup'/>
       <Path name='/etc/apache2/sites-available/default-ssl.conf'/>
       <Path name='/etc/apache2/sites-enabled/000-default.conf'/>

@@ -1,7 +1,7 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 
 # whether this Umbrella Linux system is hosted in a set of LXD containers
 umbrella_lxd=\
@@ -255,7 +255,7 @@ link_dest	1
 ###############################
 ### BACKUP POINTS / SCRIPTS ###
 ###############################
-{% for clientname in set(metadata.query.names_by_profiles(funchostdesc.keys())).difference(set(metadata.query.names_by_groups(['virt-lxc']))) %}\
+{% for clientname in sorted(set(metadata.query.names_by_profiles(funchostdesc.keys())).difference(set(metadata.query.names_by_groups(['virt-lxc'])))) %}\
 {%     if metadata.hostname != clientname %}\
 {% python   funchost=clientname.split('.')[0] #  extract hostname %}
 backup	root@${funchost}:/	${funchost}/	+rsync_long_args=--exclude=/nfs/

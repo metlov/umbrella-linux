@@ -2,10 +2,6 @@
 <Group name='ubuntu'>
   <Package name='krb5-user'/>
   <Package name='krb5-locales'/>
-  <Group name='ubuntu-xenial'>
-    <Package name='kstart'/>
-    <Package name='libpam-krb5'/>
-  </Group>
   <Path name='/etc/krb5.conf'/>
   <Group name='roaming' negate='true'> <!-- no keytab on roaming hosts -->
     <Path name='/etc/krb5.keytab'/>

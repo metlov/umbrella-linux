@@ -1,32 +1,64 @@
 <Bundle independent="true">
    <Package name='ubuntu-minimal'/>
+   <Group name='ubuntu-bionic' negate='true'>
+      <Package name='usrmerge'/>
+      <Service name='e2scrub_all.timer'/>
+      <Service name='e2scrub_reap'/>
+      <Package name='iptables'/>
+
+      <Group name='virt-lxc' negate='true'>
+         <Service name='grub-common'/>
+         <Service name='grub-initrd-fallback'/>
+         <Package name='ethtool'/>
+         <Package name='hdparm'/>
+         <Package name='initramfs-tools'/>
+         <Package name='thermald'/>
+         <Service name='thermald'/>
+         <Package name='finalrd'/>
+         <Service name='finalrd'/>
+         <Package name='sg3-utils-udev'/>
+         <Package name='uuid-runtime'/>
+
+         <Package name='fwupd'/>
+         <Package name='fwupd-signed'/>
+         <BoundPOSIXUser name="fwupd-refresh" home="/run/systemd" shell="/usr/sbin/nologin" gecos="fwupd-refresh user,,," uid="691" group="fwupd-refresh"/>
+         <BoundPOSIXGroup name="fwupd-refresh" gid="691"/>
+         <Service name='fwupd-refresh.timer'/>
+
+         <Group name='uefi'>
+            <Package name='efibootmgr'/>
+            <Package name='grub-efi-amd64-signed'/>
+            <Package name='mokutil'/>
+            <Package name='shim-signed'/>
+            <Package name='secureboot-db'/>
+            <Service name='secureboot-db'/>
+         </Group>
+      </Group>
+
+      <Service name='dmesg'/>
+      <Service name='dpkg-db-backup.timer'/>
+      <Service name='logrotate.timer'/>
+      <Service name='remote-cryptsetup.target'/>
+      <Service name='remote-veritysetup.target'/>
+      <Service name='systemd-network-generator'/>
+      <Service name='systemd-pstore'/>
+      <Service name='systemd-sysext'/>
+   </Group>
    <Package name='aptitude'/>
-   <Group name='ubuntu-xenial'>
-      <Package name='libfile-fcntllock-perl'/>
-      <Package name='sysv-rc'/>
-      <Package name='language-pack-en'/>
-      <Package name='language-pack-ru'/>
-   </Group>
-   <Group name='ubuntu-xenial' negate='true'>
-      <Path name='/usr/bin/ubuntu-advantage'/> <!-- Rule disables "execute" bit -->
-   </Group>
+   <Path name='/usr/bin/ubuntu-advantage'/> <!-- Rule disables "execute" bit -->
+   <Service name='ubuntu-advantage.service'/>
    <Package name='apparmor'/>
-   <Group name='ubuntu-xenial' negate='true'>
-      <Service name='apparmor'/>
-   </Group>
-   <Package name='at'/>
+   <Service name='apparmor'/>
    <Package name='bc'/>
    <Package name='bsdmainutils'/>
-   <Group name='ubuntu-xenial' negate='true'>
-      <Package name='console-setup-linux'/>
-      <Service name='console-setup'/>
-      <Service name='keyboard-setup'/>
-      <Service name='setvtrgb'/>
+   <Package name='console-setup-linux'/>
+   <Service name='console-setup'/>
+   <Service name='keyboard-setup'/>
+   <Service name='setvtrgb'/>
 
-      <!-- in bionic needs to be explicitly installed -->
-      <Package name='rsyslog'/>
-      <Path name='/etc/rsyslog.d/040-snmp-statfs.conf'/>
-   </Group>
+   <!-- in bionic needs to be explicitly installed -->
+   <Package name='rsyslog'/>
+   <Path name='/etc/rsyslog.d/040-snmp-statfs.conf'/>
    <Group name='virt-lxc'>
       <!-- log cleanup -->
       <Path name='/etc/rsyslog.d/040-lxd-container.conf'/>
@@ -39,6 +71,10 @@
    <Package name='gawk'/>
    <Package name='bash-completion'/>
    <Package name='mc'/>
+   <Group name='ubuntu-bionic' negate='true'>
+      <Path name='/etc/mc/mc.ini'/>
+      <Path name='/etc/alternatives/editor'/>
+   </Group>
    <Package name='nano'/>
    <Group name='virt-lxc' negate='true'>
       <Package name='pm-utils'/>
@@ -49,68 +85,68 @@
    <Package name='logrotate'/>
    <Package name='p7zip-full'/>
    <Package name='patch'/>
-   <Package name='run-one'/>
    <Package name='tofrodos'/>
+   <Group name='ubuntu-bionic' negate='true'>
+      <Package name='bzip2'/>
+   </Group>
    <Package name='unzip'/>
    <Package name='unrar-free'/>
-   <Package name='uuid-runtime'/>
    <Package name='vim'/>
    <Package name='ssl-cert'/>
-   <Package name='xml-core'/>
+   <Group name='ubuntu-bionic'>
+      <Package name='at'/>
+      <Package name='uuid-runtime'/>
+      <Package name='run-one'/>
+      <Package name='xml-core'/>
+   </Group>
    <Package name='xz-utils'/>
-   <Package name='zerofree'/>
+   <Group name='virt-lxc' negate='true'>
+      <Package name='zerofree'/>
+   </Group>
    <Path name='/etc/ssl/private'/>
    <Service name='remote-fs.target'/>
-   <Group name='ubuntu-xenial'>
-      <Package name='systemd'/>
-      <Service name='systemd-timesyncd'/>
-      <Package name='systemd-sysv'/>
-      <Package name='dbus'/>
-      <!-- ensure permissions via rules -->
-      <Path name='/usr/lib/dbus-1.0/dbus-daemon-launch-helper'/>
-   </Group>
-   <Group name='ubuntu-xenial' negate='true'>
-      <Package name='libnss-systemd'/>
-   </Group>
+   <Package name='libnss-systemd'/>
    <Package name='tcpd'/>
-   <Group name='ubuntu-xenial' negate='true'>
-      <Group name='vmhost'>
-         <!-- control subuid and subgid ranges -->
-         <Path name='/etc/subuid'/>
-         <Path name='/etc/subgid'/>
-         <!-- disable waiting for online services -->
-         <Path name='/etc/systemd/system/systemd-networkd-wait-online.service'/>
-      </Group>
+   <Group name='vmhost'>
+      <!-- control subuid and subgid ranges -->
+      <Path name='/etc/subuid'/>
+      <Path name='/etc/subgid'/>
+      <!-- disable waiting for online services -->
+      <Path name='/etc/systemd/system/systemd-networkd-wait-online.service'/>
    </Group>
    <Group name='vm'>
       <Group name='virt-lxc' negate='true'>
-          <Group name='ubuntu-xenial'>
-              <Package name='linux-image-virtual-hwe-16.04'/>
-          </Group>
-          <Group name='ubuntu-xenial' negate='true'>
+          <Group name='ubuntu-bionic'>
               <Package name='linux-image-virtual'/>
               <Path name='/etc/kernel-img.conf'/>
+          </Group>
+          <Group name='ubuntu-bionic' negate='true'>
+              <Package name='linux-generic'/>
           </Group>
       </Group>
    </Group>
    <Group name='vm' negate='true'>
-          <Group name='ubuntu-xenial'>
-              <Package name='linux-image-generic-hwe-16.04'/>
-          </Group>
-          <Group name='ubuntu-xenial' negate='true'>
+      <Group name='kernel-signed' negate='true'>
+          <Group name='ubuntu-bionic'>
               <Package name='linux-image-generic'/>
               <Path name='/etc/kernel-img.conf'/>
           </Group>
-      <Group name='kernel-signed'>
-          <Group name='ubuntu-xenial'>
-              <Package name='linux-signed-image-generic-hwe-16.04'/>
+          <Group name='ubuntu-bionic' negate='true'>
+              <Package name='linux-generic'/>
           </Group>
-          <Group name='ubuntu-xenial' negate='true'>
+      </Group>
+      <Group name='kernel-signed'>
+          <Group name='ubuntu-bionic'>
               <Package name='linux-signed-image-generic'/>
               <Path name='/etc/kernel-img.conf'/>
           </Group>
+          <Group name='ubuntu-bionic'>
+              <Package name='linux-generic'/>
+          </Group>
       </Group>
-      <Package name='at'/>
+      <Group name='ubuntu-bionic'>
+          <Package name='at'/>
+      </Group>
       <Package name='crda'/>
       <Package name='dbus'/>
       <!-- ensure permissions via rules -->
@@ -118,9 +154,7 @@
       <Package name='friendly-recovery'/>
       <Package name='busybox-static'/>
       <Package name='irqbalance'/>
-      <Group name='ubuntu-xenial' negate='true'>
-          <Service name='irqbalance'/>
-      </Group>
+      <Service name='irqbalance'/>
       <Package name='isc-dhcp-common'/>
       <Package name='cpu-checker'/>
       <Package name='dmidecode'/>
@@ -133,11 +167,9 @@
          <Package name='byobu'/>
          <Package name='python3-newt'/>
          <Service name='apport-forward.socket'/>
-         <Group name='ubuntu-xenial' negate='true'>
-            <Service name='apport-autoreport.path'/>
-            <Package name='python3-debconf'/>
-            <Package name='libfile-fcntllock-perl'/>
-         </Group>
+         <Service name='apport-autoreport.path'/>
+         <Package name='python3-debconf'/>
+         <Package name='libfile-fcntllock-perl'/>
          <Service name='iscsid'/>
          <Service name='open-iscsi'/>
          <Service name='iscsid.socket'/>
@@ -162,11 +194,23 @@
    <!-- local mail delivery -->
    <Group name='DMZserver' negate='true'>
       <Group name='mail' negate='true'>
-         <Package name='ssmtp'/>
-         <Path name='/etc/ssmtp/ssmtp.conf'/>
+         <Group name='ubuntu-bionic'>
+            <Package name='ssmtp'/>
+            <Path name='/etc/ssmtp/ssmtp.conf'/>
+         </Group>
+         <Group name='ubuntu-bionic' negate='true'>
+            <!-- TODO: might consider creating a separate bundle -->
+            <BoundPOSIXUser name="msmtp" home="/var/lib/msmtp" shell="/usr/sbin/nologin" gecos="" uid="686" group="msmtp"/>
+            <BoundPOSIXGroup name="msmtp" gid="686"/>
+            <Package name='msmtp'/>
+            <Package name='msmtp-mta'/>
+            <Path name='/etc/msmtprc'/>
+         </Group>
       </Group>
       <Package name='s-nail'/>
-      <Path name='/etc/nail.rc'/>
+      <Path name='/etc/s-nail.rc'/>
+      <Path name='/usr/bin/mail'/>
+      <Path name='/usr/bin/mailx'/>
       <Path name='/usr/local/bin/ldapsanity.sh'/>
    </Group>
 
@@ -180,15 +224,10 @@
       <Path name='/etc/dhcp/dhclient.conf'/> <!-- undo dhcp nameserver override -->
    </Group>
 
-   <!-- global apparmor fixes -->
-   <Group name='ubuntu-xenial'>
-      <!-- on xenial we need access to /etc/ldap/ldap.conf too -->
-      <Path name='/etc/apparmor.d/abstractions/ldapclient'/>
-   </Group>
-   <Group name='ubuntu-xenial' negate='true'>
+   <Group name='ubuntu-bionic'>
+      <!-- global apparmor fixes -->
       <Path name='/etc/apparmor.d/local/usr.bin.man'/>
    </Group>
-
 
    <!-- remove cloud image motd if installed -->
    <Group name='virt-lxc'>
@@ -209,17 +248,15 @@
    <Service name='ua-license-check.path'/>
    <Service name='ua-timer.timer'/>
 
-   <Group name='ubuntu-xenial' negate='true'>
-       <Service name='ondemand'/>
-       <Service name='fstrim.timer'/>
+   <Service name='ondemand'/>
+   <Service name='fstrim.timer'/>
 
-       <Group name='ntp-server' negate='true'>
-          <Group name='ntp-client' negate='true'>
-              <!-- if the host is neither ntp client nor server (such as LXC -->
-              <!-- containers) we do not care about systemd-timesyncd -->
-              <Service name='systemd-timesyncd'/>
-          </Group>
-       </Group>
+   <Group name='ntp-server' negate='true'>
+      <Group name='ntp-client' negate='true'>
+          <!-- if the host is neither ntp client nor server (such as LXC -->
+          <!-- containers) we do not care about systemd-timesyncd -->
+          <Service name='systemd-timesyncd'/>
+      </Group>
    </Group>
    <Service name='getty@tty1'/>
    <Service name='getty@tty2'/>
@@ -230,14 +267,4 @@
    <Service name='getty@tty7'/>
    <Service name='getty@tty8'/>
 
-   <!-- upgrade scripts -->
-   <Group name='ubuntu-xenial'>
-      <Package name='ubuntu-release-upgrader-core'/>
-      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre' altsrc='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre-src'/>
-      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-post' altsrc='/usr/local/bin/umbrella-upgrade-U1604-U1804-post-src'/>
-   </Group>
-   <Group name='ubuntu-xenial' negate='true'>
-      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre'/>
-      <Path name='/usr/local/bin/umbrella-upgrade-U1604-U1804-post'/>
-   </Group>
 </Bundle>

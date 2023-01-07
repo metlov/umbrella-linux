@@ -11,6 +11,12 @@
     <Service name='cups.socket' status='ignore' type='systemd'/>
     <Service name='cups-browsed' status='on' type='systemd'/>
     <Service name='ccpd-start' status='ignore' type='systemd'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Service name='man-db.timer' status='ignore' type='systemd'/>
+        <Service name='update-notifier-download.timer' status='ignore' type='systemd'/>
+        <Service name='update-notifier-motd.timer' status='ignore' type='systemd'/>
+        <Service name='whoopsie.path' status='ignore' type='systemd'/>
+    </Group>
     <Service name='ModemManager' status='ignore' type='systemd'/>
     <Service name='NetworkManager-wait-online' status='ignore' type='systemd'/>
     <Service name='NetworkManager' status='ignore' type='systemd'/>

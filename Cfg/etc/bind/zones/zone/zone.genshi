@@ -8,15 +8,15 @@
 from genshi.template import TemplateError
 import os
 import datetime
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
-execfile(repo+'/Python/32_zone_timestamp.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+exec(open(repo+'/Python/32_zone_timestamp.py').read())
 
 ext_domain_index=int(name[len(name.rstrip('0123456789')):])
-ext_domain=domain_names_list[ext_domain_index]
+ext_domain=domain_names[ext_domain_index]
 
 zonefilename=name.split('/')[-1]
 if len(zonefilename)>4 and zonefilename[3]=='_':
@@ -55,7 +55,7 @@ ${ext_domain}.      IN SOA  ${CANONICAL_FQHN}. itadmins.${domain_name}. (
                                 )
                         NS      ${CANONICAL_FQHN}.
 {% if not internal_domain %}\
-{%   for secondaryDNS in secondaryNameservers[ext_domain] %}\
+{%   for secondaryDNS in sorted(secondaryNameservers[ext_domain]) %}\
                         NS      ${secondaryDNS}.
 {%   end %}\
 {% end %}\
@@ -99,7 +99,7 @@ ${funchostsshort['DMZvpn'].ljust(15)} IN      A       ${ip_address}
 {%   end %}\
 {% end %}\
 {% if hostname_aliases[ext_domain] is not None %}\
-{%   for name in hostname_aliases[ext_domain] %}\
+{%   for name in sorted(hostname_aliases[ext_domain]) %}\
 ${name.ljust(15)} IN      A       ${ip_address}
 {%   end for each alias %}\
 {% end if have aliases %}\
@@ -126,7 +126,7 @@ ${(subdomain_FQDN+'.').ljust(23)} NS      ${dns_name}.
 {%   end for DNS server %}\
 {%   if len(glues)>0 %}\
 ; glue records
-{%     for glue_dns_name, glue_dns_ip in glues.iteritems() %}\
+{%     for glue_dns_name, glue_dns_ip in glues.items() %}\
 ${(glue_dns_name+'.').ljust(23)} IN A ${glue_dns_ip}
 {%     end for glues %}\
 {%   end if there are glues%}\

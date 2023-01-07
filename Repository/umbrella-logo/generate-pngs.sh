@@ -17,15 +17,15 @@ fi
 
 # generate pre-rendered versions of the logo
 # 4:3
-rsvg -a -w  160 -h  120 "$SVG" logo-160x120.png
-rsvg -a -w  320 -h  240 "$SVG" logo-320x240.png
-rsvg -a -w  480 -h  360 "$SVG" logo-480x360.png
-rsvg -a -w  640 -h  480 "$SVG" logo-640x480.png
-rsvg -a -w  960 -h  720 "$SVG" logo-960x720.png
-rsvg -a -w 1024 -h  768 "$SVG" logo-1024x768.png
-rsvg -a -w 1920 -h 1440 "$SVG" logo-1920x1440.png
+rsvg-convert -a -w  160 -h  120 "$SVG" -o logo-160x120.png
+rsvg-convert -a -w  320 -h  240 "$SVG" -o logo-320x240.png
+rsvg-convert -a -w  480 -h  360 "$SVG" -o logo-480x360.png
+rsvg-convert -a -w  640 -h  480 "$SVG" -o logo-640x480.png
+rsvg-convert -a -w  960 -h  720 "$SVG" -o logo-960x720.png
+rsvg-convert -a -w 1024 -h  768 "$SVG" -o logo-1024x768.png
+rsvg-convert -a -w 1920 -h 1440 "$SVG" -o logo-1920x1440.png
 # 16:9
-rsvg -a -w 1920 -h 1080 "$SVG" logo-1920x1080.png
+rsvg-convert -a -w 1920 -h 1080 "$SVG" -o logo-1920x1080.png
 
 # generate backgrounds
 TEXT='Umbrella Linux'

@@ -4,18 +4,26 @@
    <Group name='roaming' negate='true'>  <!-- VPN hosts get packages directly-->
        <Path name='/etc/apt/apt.conf.d/99proxy'/>
    </Group>
+   <Package name='gpgv'/>
+   <Group name='ubuntu-bionic' negate='true'>
+      <Path name='/etc/apt/preferences.d/nosnap.pref'/>
+      <Group name='gui'>
+         <Path name='/etc/apt/sources.list.d/mozillateam-ubuntu-ppa.list'/>
+         <Path name='/etc/apt/trusted.gpg.d/mozillateam-ubuntu-ppa.gpg'/>
+         <Path name='/etc/apt/preferences.d/firefox-no-snap.pref'/>
+      </Group>
+      <Group name='www-server'>
+         <!-- get access to older PHP versions                               -->
+         <!-- at the moment php 7.4 is required by fusiondirectory and horde -->
+         <Path name='/etc/apt/sources.list.d/ondrej-ubuntu-php-jammy.list'/>
+         <Path name='/etc/apt/trusted.gpg.d/ondrej-ubuntu-php.gpg'/>
+      </Group>
+   </Group>
    <Path name='/etc/apt/apt.conf.d/90norecommends'/>
    <Path name='/etc/apt/sources.list'/>
    <Path name='/etc/apt/sources.list.d/multiverse.list'/>
    <Path name='/etc/apt/sources.list.d/umbrella.list'/>
    <Path name='/etc/apt/trusted.gpg.d/umbrella.gpg'/>
-   <Group name='xenial'>
-       <Path name='/etc/apt/trusted.gpg'/>
-       <Group name='workstation'>
-           <!-- for workstations there are some more trusted package sources -->
-           <Path name='/etc/apt/trusted.gpg.d/ubuntu_extras.gpg'/>
-       </Group>
-   </Group>
    <Service name='apt-daily.timer'/>
    <Service name='apt-daily-upgrade.timer'/>
    <xi:include href="../Local/Bundler/apt-sources.xml"><xi:fallback/></xi:include>

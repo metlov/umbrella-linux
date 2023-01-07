@@ -8,9 +8,7 @@
     <Group name='ups-master'>
         <Package name='nut-server'/>
         <Service name='nut-server'/>
-        <Group name='ubuntu-xenial' negate='true'>
-            <Service name='nut-monitor.service'/>
-        </Group>
+        <Service name='nut-monitor.service'/>
         <!-- KLM: SSL support does not work in current Ubuntu NUT due to -->
         <!-- license issues.                                             -->
 <!--        <Path name='/etc/ssl/private/nut.key'/>

@@ -1,17 +1,17 @@
 {% python
 from genshi.template import TemplateError
-import ipcalc
+import ipaddress
 import random
-random.seed(metadata.hostname)
 import hashlib
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/35_organization.py')
-execfile(repo+'/Python/45_ossec.py')
+random.seed(int(hashlib.sha256(metadata.hostname.encode()).hexdigest(),16),version=1)
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/35_organization.py').read())
+exec(open(repo+'/Python/45_ossec.py').read())
 netset=set()
-netset |= set(intnets_str.values())
-netset |= set(netclasses.iterkeys())
+netset |= set(intnets.values())
+netset |= set(netclasses.keys())
 %}\
 <ossec_config>
   <global>
@@ -89,7 +89,7 @@ netset |= set(netclasses.iterkeys())
 
     <!-- Randomized Scheduling -->
     <scan_on_start>no</scan_on_start>
-    <scan_time>${random.randrange(1,6)}:${"%02d" % random.randrange(0,59)}am</scan_time>
+    <scan_time>${int(1+random.random()*6)}:${"%02d" % int(random.random()*59)}am</scan_time>
     <frequency>86400</frequency>
 
     <!-- Directories to check  (perform all possible verifications) -->
@@ -111,8 +111,8 @@ netset |= set(netclasses.iterkeys())
 
   <global>
     <white_list>127.0.0.1</white_list>
-{% for net in netset %}\
-    <white_list>${net}</white_list>
+{% for net in sorted(netset,key= lambda x: x.with_prefixlen) %}\
+    <white_list>${net.with_prefixlen}</white_list>
 {% end %}\
   </global>
 

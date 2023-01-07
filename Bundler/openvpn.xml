@@ -29,14 +29,8 @@
         <Path name='/etc/default/openvpn'/>
     </Group>
     <Group name='openvpn-server'>
-        <Group name='ubuntu-xenial'>
-            <Path name='/etc/openvpn/server.conf' altsrc='/etc/openvpn/server/umbrella.conf'/>
-        </Group>
-        <Group name='ubuntu-xenial' negate='true'>
-            <Path name='/etc/openvpn/server/umbrella.conf'/>
-            <Path name='/etc/openvpn/server.conf'/>
-            <Service name='openvpn-server@umbrella'/>
-        </Group>
+        <Path name='/etc/openvpn/server/umbrella.conf'/>
+        <Service name='openvpn-server@umbrella'/>
         <Path name='/etc/systemd/system/openvpn-server@.service.d/override.conf'/>
         <Path name='/etc/sysctl.d/90-router.conf'/>
         <Action name='generateDHparams'/>

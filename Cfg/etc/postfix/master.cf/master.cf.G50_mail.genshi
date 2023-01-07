@@ -1,7 +1,7 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 %}\
 #
 # Postfix master process configuration file.  For details on the format
@@ -15,7 +15,9 @@ execfile(repo+'/Python/10_funchosts.py')
 # The port 25 delivery only accepts mail destined to sysadmins. Used
 # by daemons.
 smtp      inet  n       -       n       -       -       smtpd
+{% if 'ubuntu-bionic' in metadata.groups %}\
          -o content_filter=dksign:[127.0.0.1]:10027
+{% end %}\
          -o smtpd_client_restrictions=$${system_smtpd_client_restrictions}
          -o smtpd_recipient_restrictions=$${system_smtpd_recipient_restrictions}
          -o smtpd_relay_restrictions=$${system_smtpd_relay_restrictions}
@@ -28,7 +30,9 @@ smtp      inet  n       -       n       -       -       smtpd
 # The port 465 is used for encrypted authenticated mail submission by users.
 # Ether submission or smtps can be used by users.
 smtps	  inet  n       -       n       -       -       smtpd
+{% if 'ubuntu-bionic' in metadata.groups %}\
 	-o content_filter=dksign:[127.0.0.1]:10027
+{% end %}\
 	-o smtpd_tls_wrappermode=yes -o smtpd_sasl_auth_enable=yes
 	-o smtpd_sender_restrictions=$${user_smtpd_sender_restrictions}
 
@@ -36,7 +40,9 @@ smtps	  inet  n       -       n       -       -       smtpd
 # Ether submission or smtps can be used by users.
 submission   inet    n       -       n       -       -       smtpd
 	-o smtpd_etrn_restrictions=reject
+{% if 'ubuntu-bionic' in metadata.groups %}\
 	-o content_filter=dksign:[127.0.0.1]:10027
+{% end %}\
 	-o smtpd_enforce_tls=yes -o smtpd_sasl_auth_enable=yes
 	-o smtpd_sender_restrictions=$${user_smtpd_sender_restrictions}
 

@@ -59,8 +59,8 @@ if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
         exit 1
     fi
 
-    LDAP_CLASS_WORKSTATION='(&(objectClass=gotoWorkstation)(gotoMode=active))'
-    LDAP_CLASS="(|${LDAP_CLASS_WORKSTATION}(objectClass=goServer))"
+    LDAP_CLASS_WORKSTATION='(objectClass=fdWorkstation)'
+    LDAP_CLASS="(|${LDAP_CLASS_WORKSTATION}(objectClass=fdServer))"
     HOSTS=`${PLDAPSEARCH} -x "$LDAP_CLASS" cn | ${PGREP} cn: | ${PSED} -e 's/cn: //g'`
     # append domain name if necessary
     for HOST in ${HOSTS} ; do

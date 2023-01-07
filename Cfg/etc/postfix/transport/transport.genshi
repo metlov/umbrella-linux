@@ -1,19 +1,20 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 
 # check if this host has some robots defined
 local_robots=[]
 if ip_addr in robot_servers:
     # this host serves robots
     local_robot_number=robot_servers.index(ip_addr)
-    for name, num in robot_incoming_addresses.iteritems():
+    for name, num in robot_incoming_addresses.items():
         if num==local_robot_number:
             local_robots.append(name)
+local_robots=sorted(local_robots)
 
 # Route all external mail via outbound relay if specified and if different
 # from this host. This mainly for the case of both outbound relay specified
@@ -22,7 +23,7 @@ if ip_addr in robot_servers:
 # bounce messages.
 outbound_relay = metadata.Properties['umbrella.xml'].xdata.find('SMTP_outbound_relay')
 if outbound_relay is not None:
-    outbound_relay=ipcalc.IP(outbound_relay.text)
+    outbound_relay=ipaddress.ip_address(outbound_relay.text)
     if ip_addr==outbound_relay:
         outbound_relay=None
 
@@ -35,8 +36,8 @@ local_transport=os.path.isfile(repo+'/Local/Cfg/etc/postfix/transport/transport.
 {% if 'DMZsmtp' in metadata.groups %}\
 {% if len(robot_incoming_addresses)>0 %}\
 # relay to robots directly in DMZ not touching the internal mail server in PUB
-{%   for domain in domain_names %}\
-{%     for name, num in robot_incoming_addresses.iteritems() %}\
+{%   for name, num in sorted(robot_incoming_addresses.items(),key=lambda x: x[0]) %}\
+{%     for domain in domain_names %}\
 ${name}@${domain} smtp:[${str(robot_servers[num])}]
 {%     end %}\
 {%   end %}\
@@ -52,8 +53,8 @@ ${name} smtp:[${str(funcifs['mail'])}]:10025
 {% end if 'DMZsmtp' in metadata.groups %}\
 {% if 'mail' in metadata.groups %}\
 # relay mail to robots defined in firewall.xml
-{%   for domain in domain_names %}\
-{%     for robot_name,num in robot_incoming_addresses.iteritems() %}\
+{%   for robot_name,num in sorted(robot_incoming_addresses.items(),key=lambda x: x[0]) %}\
+{%     for domain in domain_names %}\
 ${robot_name}@${domain} smtp:[${str(robot_servers[num])}]
 {%     end %}\
 {%   end %}\
@@ -61,8 +62,8 @@ ${robot_name}@${domain} smtp:[${str(robot_servers[num])}]
 {% if not ('DMZsmtp' in metadata.groups or 'mail' in metadata.groups) %}\
 {% if len(local_robots)>0 %}\
 # local delivery (via aliases) for local robots
-{%   for domain in domain_names %}\
-{%     for robo in local_robots %}\
+{%   for robo in local_robots %}\
+{%     for domain in domain_names %}\
 ${robo}@${domain} local:
 {%     end %}\
 {%   end %}\

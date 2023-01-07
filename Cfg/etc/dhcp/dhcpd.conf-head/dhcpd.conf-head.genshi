@@ -1,9 +1,9 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 %}\
 default-lease-time 21600;
 max-lease-time 21600;
@@ -11,7 +11,17 @@ log-facility local0;
 authoritative;
 ddns-update-style none;
 {% if 'ltsp' in funcifs %}\
+{%     if 'ubuntu-bionic' in metadata.groups %}\
 filename "/pxelinux.0";
+{%     end %}\
+{%     if 'ubuntu-bionic' not in metadata.groups %}\
+option arch code 93 = unsigned integer 16;
+if option arch = 00:07 {
+    filename "boot/bootx64.efi";
+} else {
+    filename "boot/pxelinux.0";
+}
+{%     end %}\
 next-server ${funcifs['ltsp']};
 {% end %}\
 use-host-decl-names on;
@@ -19,11 +29,11 @@ allow booting;
 allow bootp;
 
 # Public network
-subnet ${networks['pubif'].network()} netmask ${networks['pubif'].netmask()} {
+subnet ${networks['pubif'].network_address} netmask ${str(networks['pubif'].netmask)} {
     option routers ${routerifs['pubif']};
     option domain-name "${domain_name}";
-    option subnet-mask ${networks['pubif'].netmask()};
-    option broadcast-address ${networks['pubif'].broadcast()};
+    option subnet-mask ${str(networks['pubif'].netmask)};
+    option broadcast-address ${networks['pubif'].broadcast_address};
     option domain-name-servers ${routerifs['pubif']};
 {% if pub_dhcp is not None %}\
     range ${pub_dhcp[0]} ${pub_dhcp[1]};
@@ -31,23 +41,23 @@ subnet ${networks['pubif'].network()} netmask ${networks['pubif'].netmask()} {
 }
 
 # Secure network
-subnet ${networks['secif'].network()} netmask ${networks['secif'].netmask()} {
+subnet ${networks['secif'].network_address} netmask ${str(networks['secif'].netmask)} {
     option routers ${routerifs['secif']};
     option domain-name "${domain_name}";
-    option subnet-mask ${networks['secif'].netmask()};
-    option broadcast-address ${networks['secif'].broadcast()};
+    option subnet-mask ${str(networks['secif'].netmask)};
+    option broadcast-address ${networks['secif'].broadcast_address};
     option domain-name-servers ${routerifs['secif']};
 }
 
 # DMZ
-subnet ${networks['DMZif'].network()} netmask ${networks['DMZif'].netmask()} {
+subnet ${networks['DMZif'].network_address} netmask ${str(networks['DMZif'].netmask)} {
     option routers ${routerifs['DMZif']};
     option domain-name "${domain_name}";
-    option subnet-mask ${networks['DMZif'].netmask()};
-    option broadcast-address ${networks['DMZif'].broadcast()};
+    option subnet-mask ${str(networks['DMZif'].netmask)};
+    option broadcast-address ${networks['DMZif'].broadcast_address};
     option domain-name-servers ${routerifs['DMZif']};
 }
 
-{% for host in funchosts %}\
+{% for host in sorted(funchosts) %}\
 host ${funchosts[host]} {hardware ethernet ${funcmacs[host]};fixed-address ${funcifs[host]};}
 {% end %}\

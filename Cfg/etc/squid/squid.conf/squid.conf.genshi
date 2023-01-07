@@ -1,39 +1,20 @@
 {% python
-import itertools
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/35_organization.py')
-netset=set()
-netset |= set(intnets_str.values())
-netset |= set(netclasses.iterkeys())
-localnets=' '.join(netset)
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/35_organization.py').read())
 
 # public networks are the internal networks except DMZ and SEC
 pubnets = intnets.copy()
-pubnets.pop('DMZif', None)
-pubnets.pop('secif', None)
+pubnets.pop('DMZif',None)
+pubnets.pop('secif',None)
 
-# gather all the network objects for public networks
-netobjs=set()
-netobjs |= set(pubnets.values())
-netobjs |= set(netclasses_obj.iterkeys())
-# Now we are going to remove the networks, which are fully contained
-# in other networks of this set. For this we compare the networks in pairs
-netobjs_contained=set()
-for a, b in itertools.combinations(netobjs, 2):
-    if a.host_first() in b and a.host_last() in b:
-        netobjs_contained.add(a)
-    if b.host_first() in a and b.host_last() in a:
-        netobjs_contained.add(b)
-localnetobjs = netobjs.difference(netobjs_contained)
+# and all the organization networks
+nets = pubnets.values()
+nets |= netclasses.keys()
 
-# convert localnets to ACL string
-localnetstrset=set()
-for lnet in localnetobjs:
-    localnetstrset.add(str(lnet.network())+'/'+str(lnet.mask))
-localnets=' '.join(localnetstrset)
+localnets = cleanup_fully_contained(nets)
 %}\
 # See squid.conf.orig for description of options
 
@@ -50,7 +31,7 @@ cache_mem 350 MB
 dns_v4_first on
 
 # access control
-acl localnet src ${localnets}
+acl localnet src ${' '.join([n.with_prefixlen for n in sorted(localnets,key = lambda x: str(x))])}
 acl CONNECT_ports port 443      # SSL
 acl CONNECT_ports port 80       # disqus
 acl Safe_ports port 80          # http

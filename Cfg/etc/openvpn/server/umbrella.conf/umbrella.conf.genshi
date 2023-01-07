@@ -1,8 +1,8 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
 %}\
 # incoming connections
 port 1194
@@ -20,10 +20,10 @@ crl-verify /etc/ssl/crl.pem
 
 # VPN clients network
 topology subnet
-server ${networks['vpnif'].network()} ${networks['vpnif'].netmask()}  # vpn network
+server ${networks['vpnif'].network_address} ${str(networks['vpnif'].netmask)}  # vpn network
 ifconfig-pool-persist /var/lib/openvpn/ipp.txt
-push "route ${networks['DMZif'].network()} ${networks['DMZif'].netmask()}"  # DMZ network
-push "route ${networks['pubif'].network()} ${networks['pubif'].netmask()}"  # pub network
+push "route ${networks['DMZif'].network_address} ${str(networks['DMZif'].netmask)}"  # DMZ network
+push "route ${networks['pubif'].network_address} ${str(networks['pubif'].netmask)}"  # pub network
 keepalive 10 120
 
 # Daemon options

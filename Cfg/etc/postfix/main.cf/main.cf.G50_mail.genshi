@@ -1,10 +1,10 @@
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 %}\
 # Configuration for the main Umbrella Linux mail server.
 compatibility_level = 2
@@ -59,19 +59,6 @@ masquerade_exceptions = root
 # Addresses rewriting when mail is about to leave the system
 # smtp_generic_maps = texthash:/etc/postfix/generic
 
-{% if 'ubuntu-xenial' in metadata.groups %}\
-# allow proxying of LDAP maps
-proxy_read_maps = $$default_proxy_read_maps,
-      proxy:ldap:/etc/postfix/alias_map.cf,
-      proxy:ldap:/etc/postfix/alias_map_dupforw.cf,
-      proxy:ldap:/etc/postfix/alias_map_forward.cf,
-      proxy:ldap:/etc/postfix/alias_map_distlist.cf,
-      proxy:ldap:/etc/postfix/map_uid_mail.cf,
-      proxy:ldap:/etc/postfix/alias_map_distlist_ext.cf,
-      proxy:ldap:/etc/postfix/local_recipients.cf
-
-{% end %}\
-{% if not 'ubuntu-xenial' in metadata.groups %}\
 proxy_read_maps = $$local_recipient_maps, $$mydestination, $$virtual_alias_maps,
       $$virtual_alias_domains, $$virtual_mailbox_maps, $$virtual_mailbox_domains,
       $$relay_recipient_maps, $$relay_domains, $$canonical_maps,
@@ -99,7 +86,6 @@ proxy_read_maps = $$local_recipient_maps, $$mydestination, $$virtual_alias_maps,
       proxy:ldap:/etc/postfix/alias_map_distlist_ext.cf,
       proxy:ldap:/etc/postfix/local_recipients.cf
 
-{% end %}\
 transport_maps = texthash:/etc/postfix/transport
 virtual_alias_maps = texthash:/etc/postfix/alias_system,
       proxy:ldap:/etc/postfix/alias_map.cf,
@@ -164,11 +150,16 @@ user_smtpd_sender_restrictions = reject_authenticated_sender_login_mismatch,
 acceptor_smtpd_client_restrictions = check_client_access texthash:/etc/postfix/DMZ_relay,
     reject
 
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+from_adm_hosts = check_client_access inline:{${funcifs['config']}=OK}, reject
+{% end %}\
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
 # These are map targets in for handling outgoing messages from robots
 # (delivery to robots is handled via the transport map).
 smtpd_restriction_classes = from_adm_hosts, ${', '.join(("from_robot_%03d" % (i,)) for i in range(len(robot_servers)) )}
+{% if 'ubuntu-bionic' in metadata.groups %}\
 from_adm_hosts = check_client_access inline:{${funcifs['config']}=OK}, reject
+{% end %}\
 {% for i in range(len(robot_servers)) %}\
 ${"from_robot_%03d" % (i,)} = check_client_access inline:{${str(robot_servers[i])}=OK}, reject
 {% end %}\
@@ -177,18 +168,31 @@ ${"from_robot_%03d" % (i,)} = check_client_access inline:{${str(robot_servers[i]
 # These are the client and sender restrictions for local unauthenticated
 # mail delivery. This way of sending mail is used by daemons and robots.
 # The mail is going to be signed by DKIM.
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+system_smtpd_sender_restrictions =
+    check_sender_access inline:{${domain_name},.${domain_name}},
+    reject
+{% end %}\
 system_smtpd_recipient_restrictions =  permit_mynetworks,
     check_recipient_access texthash:/etc/postfix/admin_recipients,
     check_sender_access inline:{itadmins@${domain_name}=from_adm_hosts},
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
-    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_outgoing_addresses.iteritems() for d in domain_names)}},
+    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in sorted(robot_outgoing_addresses.items(),key=lambda x: x[0]) for d in domain_names)}},
 {% end %}\
     reject
 system_smtpd_client_restrictions = check_client_access cidr:/etc/postfix/local_clients,
     reject
 system_smtpd_relay_restrictions =  permit_mynetworks,
 {% if mail_in_DMZ and len(robot_servers)>0 %}\
-    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in robot_outgoing_addresses.iteritems() for d in domain_names)}},
+    check_sender_access inline:{${', '.join(('%s@%s=from_robot_%03d' % (n,d,i)) for n,i in sorted(robot_outgoing_addresses.items(),key=lambda x: x[0]) for d in domain_names)}},
 {% end %}\
     permit_sasl_authenticated,
     defer_unauth_destination
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+
+# Milter configuration
+milter_default_action = accept
+milter_protocol = 6
+smtpd_milters = local:opendkim/opendkim.sock
+non_smtpd_milters = $$smtpd_milters
+{% end %}\

@@ -1,4 +1,4 @@
-Title: Что такое Umbrella Linux ?
+Title: Что это такое ?
 Date: 2018-10-05 18:39
 Category: docs
 Slug: about

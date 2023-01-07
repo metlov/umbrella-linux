@@ -4,20 +4,37 @@
     <!-- Local/Bundler/cli.xml , which is included here. -->
     <Package name='aspell-en'/>
     <Package name='aspell-ru'/>
-    <Package name='at'/>
+    <Group name='ubuntu-bionic'>
+        <Package name='at'/>
+        <Package name='enchant'/>
+        <Package name='exfat-fuse'/>
+        <Package name='exfat-utils'/>
+    </Group>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='enchant-2'/>
+        <Package name='exfatprogs'/>
+        <Package name='fuse3'/>
+        <Package name='gnupg'/>
+        <Package name='git'/>
+        <Package name='pinentry-curses'/>
+    </Group>
     <Package name='dialog'/>
     <Package name='dnsutils'/>
     <Package name='dosfstools'/>
-    <Package name='enchant'/>
     <Package name='info'/>
     <Package name='hunspell-en-us'/>
     <Package name='hunspell-ru'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <Package name='htop'/>
+    </Group>
     <Package name='lm-sensors'/>
     <Service name='lm-sensors'/>
     <Package name='libnss3-tools'/>
     <Package name='manpages'/>
-    <Package name='exfat-fuse'/>
-    <Package name='exfat-utils'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <!-- apparmor fix for man with homes in NFS -->
+        <Path name='/etc/apparmor.d/local/usr.bin.man'/>
+    </Group>
     <Group name='ntfs-3g'>
         <Package name='ntfs-3g'/>
     </Group>
@@ -26,9 +43,7 @@
     </Group>
     <Package name='rar'/>
     <Package name='schroot'/>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Service name='schroot'/>
-    </Group>
+    <Service name='schroot'/>
     <Package name='debootstrap'/>
 
     <Package name='fortune-mod'/>

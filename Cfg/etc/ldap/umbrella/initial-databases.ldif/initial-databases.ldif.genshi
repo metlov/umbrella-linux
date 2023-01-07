@@ -2,19 +2,33 @@
 import socket
 from passlib.hash import ldap_salted_sha1 as lsm
 import random
+import hashlib
 import string
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+
+def choiceP2(seq):  # python2 compatible version of random.choice
+    return seq[int(random.random() * len(seq))]
+
 # generate salt
-random.seed(metadata.hostname+metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text)
-saltstr=''.join(random.choice(string.ascii_letters+string.digits) for x in range(16))
-ldap_config_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_config_pass').text, salt=saltstr)
-ldap_admin_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_pass').text, salt=saltstr)
+seed=metadata.hostname+metadata.Properties['umbrella_keys.xml'].xdata.find('DKIMseckey').text
+random.seed(int(hashlib.sha256(seed.encode()).hexdigest(),16),version=1)
+saltstr=''.join(choiceP2(string.ascii_letters+string.digits) for x in range(16))
+saltstr=saltstr.encode('utf-8')
+ldap_config_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_config_pass').text.encode('utf-8'), salt=saltstr)
+ldap_admin_pwd_hash=lsm.encrypt(metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_pass').text.encode('utf-8'), salt=saltstr)
 %}\
+{% if 'ubuntu-bionic' in metadata.groups %}\
 dn: olcBackend={0}hdb,cn=config
 objectClass: olcBackendConfig
 olcBackend: {0}hdb
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+dn: olcBackend={0}mdb,cn=config
+objectClass: olcBackendConfig
+olcBackend: {0}mdb
+{% end %}\
 
 dn: olcDatabase={-1}frontend,cn=config
 objectClass: olcDatabaseConfig
@@ -46,10 +60,18 @@ olcRootPW: ${ldap_config_pwd_hash}
 olcSyncUseSubentry: FALSE
 olcMonitoring: FALSE
 
+{% if 'ubuntu-bionic' in metadata.groups %}\
 dn: olcDatabase={1}hdb,cn=config
 objectClass: olcDatabaseConfig
 objectClass: olcHdbConfig
 olcDatabase: {1}hdb
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+dn: olcDatabase={1}mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: {1}mdb
+{% end %}\
 olcSuffix: ${ldap_root}
 olcAddContentAcl: FALSE
 olcLastMod: TRUE
@@ -60,15 +82,21 @@ olcRootPW: ${ldap_admin_pwd_hash}
 olcSyncUseSubentry: FALSE
 olcMonitoring: FALSE
 olcDbDirectory: /var/lib/ldap
+{% if 'ubuntu-bionic' in metadata.groups %}\
 olcDbCacheSize: 1000
+{% end %}\
 olcDbCheckpoint: 512 30
+{% if 'ubuntu-bionic' in metadata.groups %}\
 olcDbConfig: {0}set_cachesize 0 2097152 0
 olcDbConfig: {1}set_lk_max_objects 1500
 olcDbConfig: {2}set_lk_max_locks 1500
 olcDbConfig: {3}set_lk_max_lockers 1500
+{% end %}\
 olcDbNoSync: FALSE
+{% if 'ubuntu-bionic' in metadata.groups %}\
 olcDbDirtyRead: FALSE
 olcDbIDLcacheSize: 0
+{% end %}\
 olcAccess: {0}to dn.base="" by * read
 olcAccess: {1}to * by dn="cn=admin,${ldap_root}" write by * read
 olcDbIndex: default sub
@@ -80,7 +108,9 @@ olcDbIndex: cn,sn,givenName,ou pres,eq,sub
 olcDbIndex: objectClass pres,eq
 olcDbIndex: uidNumber,gidNumber,memberuid eq
 olcDbIndex: roleOccupant eq
+{% if 'ubuntu-bionic' in metadata.groups %}\
 olcDbIndex: gosaObject,gosaUser pres,eq
+{% end %}\
 olcDbIndex: sudoUser eq,sub
 olcDbIndex: gosaMailDeliveryMode sub
 olcDbIndex: ipHostNumber eq
@@ -88,23 +118,17 @@ olcDbIndex: uniqueMember eq
 olcDbIndex: entryUUID eq
 olcDbIndex: entryCSN eq
 olcDbIndex: displayName pres,eq,sub
-{% if 'ubuntu-xenial' in metadata.groups %}\
-olcDbIndex: zoneName eq,sub
-olcDbIndex: dhcpHWAddress eq
-olcDbIndex: dhcpClassData eq
-olcDbIndex: relativeDomainName eq
-{% end %}\
-{% if 'ubuntu-xenial' not in metadata.groups %}\
 olcDbIndex: sudoHost eq,sub
 olcDbIndex: modifyTimestamp eq
 olcDbIndex: ipServicePort eq
 olcDbIndex: ipServiceProtocol eq
-{% end %}\
 olcDbMode: 0600
 olcDbSearchStack: 16
+{% if 'ubuntu-bionic' in metadata.groups %}\
 olcDbShmKey: 0
 olcDbCacheFree: 1
 olcDbDNcacheSize: 0
+{% end %}\
 {% if 'proxy' in metadata.groups %}\
 olcUpdateRef: ldaps://${funchosts['config']}
 olcSyncrepl: {0}rid=100 provider=ldaps://${funchosts['config']} type=refreshOnly interval=00:00:00:60 retry="60 10 300 +" timelimit=10 searchbase="${ldap_root}" binddn="cn=syncrepl,ou=people,${ldap_root}" bindmethod=simple credentials=${metadata.Properties['umbrella_keys.xml'].xdata.find('LDAP_syncrepl_pass').text}
@@ -115,7 +139,12 @@ objectClass: olcOverlayConfig
 objectclass: olcSyncProvConfig
 olcOverlay: {0}syncprov
 
+{% if 'ubuntu-bionic' in metadata.groups %}\
 dn: olcOverlay={0}syncprov,olcDatabase={1}hdb,cn=config
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+dn: olcOverlay={0}syncprov,olcDatabase={1}mdb,cn=config
+{% end %}\
 objectClass: olcOverlayConfig
 objectclass: olcSyncProvConfig
 objectClass: olcConfig

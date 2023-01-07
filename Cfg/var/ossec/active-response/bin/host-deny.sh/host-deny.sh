@@ -19,6 +19,9 @@ case "$BCFG2_GROUPS" in
     *DMZsmtp*)
     exec /var/ossec/active-response/bin/firewall-drop.sh "$@"
     ;;
+    *DMZwww*)
+    exec /var/ossec/active-response/bin/firewall-drop.sh "$@"
+    ;;
     *\ mail\ *)
     exec /var/ossec/active-response/bin/firewall-drop.sh "$@"
     ;;

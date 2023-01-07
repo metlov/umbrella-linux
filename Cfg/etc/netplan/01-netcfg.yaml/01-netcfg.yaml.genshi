@@ -1,11 +1,11 @@
 {% python
 import socket
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/25_firewall.py')
-execfile(repo+'/Python/30_networking.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/25_firewall.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
 if (entry is not None) and \
      (entry.find('function').text in ['router','vmhost','backdoor']):
   type='multiif'
@@ -30,12 +30,12 @@ else:
     if organization_host:
       # a workstation in a subnet, defined in the organization.xml file
       interface=None
-      subnet = ipcalc.Network(ws_org_network)
+      subnet = ipaddress.ip_network(ws_org_network)
     else:
       # a workstation in one of the standard subnets (pub, sec, etc)
       # find the subnet
       subnet=None
-      for iface, net in networks.iteritems():
+      for iface, net in networks.items():
         if ip_addr in net:
           subnet=net
           interface=iface
@@ -58,9 +58,11 @@ network:
     ${netdev}:
       dhcp4: no
       addresses:
-        - ${ip_addr}/${subnet.mask}
+        - ${ip_addr}/${subnet.prefixlen}
 {%     if organization_host %}\
+{%         if 'ubuntu-bionic' in metadata.groups %}\
       gateway4: ${ws_org_gateway}
+{%         end %}\
       nameservers:
         search:
           - ${domain_name}
@@ -73,7 +75,9 @@ network:
 {%         end %}\
 {%     end %}\
 {%     if not organization_host %}\
+{%         if 'ubuntu-bionic' in metadata.groups %}\
       gateway4: ${routerifs[interface]}
+{%         end %}\
       nameservers:
         search:
           - ${domain_name}
@@ -90,7 +94,7 @@ for server in metadata.Properties['umbrella.xml'].xdata.findall('server'):
   if server.find('function').text=='DMZsmtp':
     t = server.find('DMZif').find('ip')
     if (t is not None) and t.text.strip():
-      dmzip=ipcalc.IP(t.text.strip())
+      dmzip=ipaddress.ip_address(t.text.strip())
 %}\
 {%                 if dmzip is not None %}\
           - ${dmzip}
@@ -109,10 +113,22 @@ if DNScache is None:
 {%                  end %}\
 {%              end %}\
 {%         end %}\
-{% if interface and (interface in static_routes) %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
       routes:
+          - to: default
+{%     if organization_host %}\
+            via: ${ws_org_gateway}
+{%     end %}\
+{%     if not organization_host %}\
+            via: ${routerifs[interface]}
+{%     end %}\
+{% end %}\
+{% if interface and (interface in static_routes) %}\
+{% if 'ubuntu-bionic' in metadata.groups %}\
+      routes:
+{% end %}\
 {%   for static_route in static_routes[interface]%}\
-        - to: ${str(static_route[0])}
+        - to: ${static_route[0].with_prefixlen}
           via: ${str(static_route[1])}
 {%   end %}\
 {% end %}\
@@ -151,18 +167,19 @@ for interfaceType in iftypes:
           if interface.tag != 'extif' and interface.tag != 'intif':
             nameserver=gateway
           else:
-            if 'backdoor' in metadata.groups:
-              if interface.tag != 'extif' and interface.tag != 'intif':
-                nameserver=str(routerifs['pubif'])
-            else:
+            if 'backdoor' not in metadata.groups:
               nameserver='127.0.0.1'
+        else:
+          if 'backdoor' in metadata.groups:
+            if interface.tag != 'extif' and interface.tag != 'intif':
+              nameserver=str(routerifs['pubif'])
       else:
         ip=''
     bridged=interface.find('bridged')
     bridgeddev=None
     if bridged is not None:
       bridgeddev=bridged.text
-      if bridgeddev <> 'none':
+      if bridgeddev != 'none':
         hwmac=None
         setmac=None
         # this is the real device, which is connected to a bridge
@@ -177,10 +194,12 @@ for interfaceType in iftypes:
             setmac=interface.find('mac')
             if setmac is not None:
               setmac=setmac.text
-              ethers.update([(bridgeddev+"MAC", None, None, None, None,
-                              None, hwmac, setmac, None)])
+              if 'ubuntu-bionic' in metadata.groups:
+                  ethers.update([(bridgeddev+"MAC", None, None, None, None,
+                                None, hwmac, setmac, None)])
+                  setmac=None
         ethers.update([(bridgeddev, None, None, None, None, None, None,
-                        None, None)])
+                        setmac, None)])
       else:
         bridgeddev=''
     routes=None
@@ -201,8 +220,6 @@ for interfaceType in iftypes:
       bridges.add(iftuple)
     else:
       ethers.add(iftuple)
-print bridges
-print ethers
 %}\
 {% def RENDER_INTERFACE_TUPLE(tuple) %}\
     ${tuple[0]}:
@@ -233,8 +250,8 @@ print ethers
 {%     end %}\
 {%     if tuple[1] is not None and tuple[1] %}\
       addresses:
-        - ${tuple[1]}/${networks[tuple[2]].mask}
-{%         if tuple[3] %}\
+        - ${tuple[1]}/${networks[tuple[2]].prefixlen}
+{%         if 'ubuntu-bionic' in metadata.groups and tuple[3] %}\
       gateway4: ${tuple[3]}
 {%         end %}\
 {%         if tuple[4] %}\
@@ -244,11 +261,17 @@ print ethers
         addresses:
           - ${tuple[4]}
 {%         end %}\
-{%         if tuple[8] %}\
+{%         if tuple[8] or ('ubuntu-bionic' not in metadata.groups and tuple[3]) %}\
       routes:
+{%         end %}\
+{%         if 'ubuntu-bionic' not in metadata.groups and tuple[3] %}\
+        - to: default
+          via: ${tuple[3]}
+{%         end %}\
+{%         if tuple[8] %}\
 {%             for route in tuple[8] %}\
-        - to: ${str(route[0])}
-          via: ${str(route[1])}
+        - to: ${route[0].with_prefixlen}
+          via: ${route[1]}
 {%             end %}\
 {%         end %}\
 {%     end %}\

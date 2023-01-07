@@ -1,8 +1,13 @@
 <Rules priority="0">
-<Group name='config'>
-   <Path type='directory' name="/etc/ssl/private" mode='711' owner='root' group='ssl-cert'/>
+<Group name='ubuntu-bionic'>
+   <Group name='config'>
+      <Path type='directory' name="/etc/ssl/private" mode='711' owner='root' group='ssl-cert'/>
+   </Group>
+   <Group name='config' negate='true'>
+      <Path type='directory' name="/etc/ssl/private" mode='710' owner='root' group='ssl-cert'/>
+   </Group>
 </Group>
-<Group name='config' negate='true'>
+<Group name='ubuntu-bionic' negate='true'>
    <Path type='directory' name="/etc/ssl/private" mode='710' owner='root' group='ssl-cert'/>
 </Group>
 <Group name='config'>
@@ -22,6 +27,7 @@
 <Path type='symlink' name='/etc/apache2/mods-enabled/rewrite.load' to='../mods-available/rewrite.load'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/proxy.load' to='../mods-available/proxy.load'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/proxy_wstunnel.load' to='../mods-available/proxy_wstunnel.load'/>
+<Path type='symlink' name='/etc/apache2/mods-enabled/cgi.load' to='../mods-available/cgi.load'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/cgid.conf' to='../mods-available/cgid.conf'/>
 <Path type='symlink' name='/etc/apache2/mods-enabled/cgid.load' to='../mods-available/cgid.load'/>
 <Path type='symlink' name='/etc/apache2/sites-enabled/packages.conf' to='../sites-available/packages'/>
@@ -32,21 +38,16 @@
 <Path type='symlink' name='/etc/apache2/sites-enabled/invenio.conf' to='../sites-available/invenio.conf'/>
 <Path type='symlink' name='/etc/apache2/sites-enabled/invenio-ssl.conf' to='../sites-available/invenio-ssl.conf'/>
 <Path type='symlink' name='/etc/apache2/conf-enabled/umbrella-logo.conf' to='../conf-available/umbrella-logo.conf'/>
-<Path type='symlink' name='/etc/apache2/conf-enabled/squirrelmail.conf' to='../conf-available/squirrelmail.conf'/>
-<Path type='symlink' name='/etc/apache2/conf-available/squirrelmail.conf' to='../../squirrelmail/apache.conf'/>
 <Path type='symlink' name='/etc/apache2/conf-available/mailman.conf' to='/etc/mailman/apache.conf'/>
 <Path type='symlink' name='/etc/apache2/conf-enabled/mailman.conf' to='../conf-available/mailman.conf'/>
 <Path type='symlink' name='/usr/bin/pine' to='/usr/bin/alpine'/>
 <Path type='symlink' name='/usr/share/man/man1/pine.1.gz' to='alpine.1.gz'/>
-<Path type='symlink' name='/etc/sudo-ldap.conf' to='ldap.conf'/>
 <Path type='directory' name="/scratch" mode='1777' owner='root' group='root'/>
 <Path type='nonexistent' name='/etc/xdg/autostart/update-notifier.desktop'/>
 <Path type='nonexistent' name='/usr/share/applications/sylpheed.desktop'/>
 <Path type='symlink' name='/etc/xdg/autostart/pidgin.desktop' to='/usr/share/applications/pidgin.desktop'/>
 <Path type='symlink' name='/etc/cups/ssl/server.crt' to='../../ssl/cups.pem'/>
 <Path type='symlink' name='/etc/cups/ssl/server.key' to='../../ssl/private/cups.key'/>
-<Path type='directory' name="/var/lib/ntp" mode='755' owner='ntp' group='ntp'/>
-<Path type='directory' name="/var/lib/lightdm" mode='755' owner='lightdm' group='lightdm'/>
 <Path type='directory' name="/var/cache/pyzor" mode='0755' owner='mail' group='mail'/>
 <Path type='directory' name="/var/ossec/logs/archives" mode='750' owner='ossec' group='ossec'/>
 <Path type='directory' name="/etc/bind" mode='2775' owner='root' group='bind'/>
@@ -59,8 +60,19 @@
 </Group>
 <Path type='directory' name="/var/maildirs" mode='0700' owner='vmail' group='vmail'/>
 
+<Group name='xmpp-server'>
+    <Path type='directory' name='/etc/prosody/conf.d' owner='root' group='root' mode='0755' prune='true'/>
+    <Path type='symlink' name='/etc/prosody/conf.d/local-umbrella-xmpp.cfg.lua' to='../conf.avail/local-umbrella-xmpp.cfg.lua'/>
+</Group>
+
 <!-- guarantee proper user/group of certain files (in case uid/gid changes) -->
-<Path type='permissions' name='/usr/bin/ssh-agent' mode='2755' owner='root' group='ssh'/>
+<Group name='ubuntu-bionic'>
+    <Path type='directory' name="/var/lib/lightdm" mode='755' owner='lightdm' group='lightdm'/>
+    <Path type='permissions' name='/usr/bin/ssh-agent' mode='2755' owner='root' group='ssh'/>
+</Group>
+<Group name='ubuntu-bionic' negate='true'>
+    <Path type='permissions' name='/usr/bin/ssh-agent' mode='2755' owner='root' group='_ssh'/>
+</Group>
 <Path type='permissions' name='/usr/lib/dbus-1.0/dbus-daemon-launch-helper' mode='4754' owner='root' group='messagebus'/>
 
 <Path type='nonexistent' name='/etc/apt/apt.conf'/>
@@ -72,32 +84,41 @@
 <!-- auto-pruned zone file directory -->
 <Path type='directory' name='/etc/bind/zones' owner='root' group='root' mode='0755' prune='true'/>
 
+<Group name='ubuntu-bionic' negate='true'>
+    <!-- for opendkim -->
+    <Path type='directory' name='/var/spool/postfix/opendkim' owner='opendkim' group='postfix' mode='0755'/>
+
+    <!-- for network booting -->
+    <Path type='directory' name='/var/lib/tftpboot/boot/pxelinux.cfg' owner='root' group='root' mode='0755'/>
+    <Path type='symlink' name='/var/lib/tftpboot/boot/pxelinux.cfg/default' to='../bios-default.cfg'/>
+
+    <Path type='symlink' name='/usr/share/sddm/themes/lubuntu/wall.png' to='../../../../../var/lib/umbrella-logo/1440x900-cc.png'/>
+</Group>
+
 <!-- for MRTG -->
-<Path type='directory' name="/var/www/mrtg" mode='755' owner='root' group='root'/>
+
 <Path type='symlink' name='/etc/apache2/conf-enabled/mrtg.conf' to='../conf-available/mrtg.conf'/>
-<Action name='update-mrtg-index' timing='post' when='modified' shell='true' command="indexmaker /etc/mrtg.cfg &gt; /var/www/mrtg/index.html" status='ignore'/>
-
-<!-- upgrade scripts -->
-<Group name='ubuntu-xenial' negate='true'>
-    <Path type='nonexistent' name='/usr/local/bin/umbrella-upgrade-U1604-U1804-pre'/>
-    <Path type='nonexistent' name='/usr/local/bin/umbrella-upgrade-U1604-U1804-post'/>
+<Group name='ubuntu-bionic'>
+    <Path type='directory' name="/var/www/mrtg" mode='755' owner='root' group='root'/>
+    <Action name='update-mrtg-index' timing='post' when='modified' shell='true' command="indexmaker /etc/mrtg.cfg &gt; /var/www/mrtg/index.html" status='ignore'/>
+</Group>
+<Group name='ubuntu-bionic' negate='true'>
+    <Path type='directory' name="/var/www/html/mrtg" mode='750' owner='mrtg' group='www-data'/>
+    <Action name='update-mrtg-index' timing='post' when='modified' shell='true' command="indexmaker /etc/mrtg/mrtg.cfg &gt; /var/www/html/mrtg/index.html" status='ignore'/>
 </Group>
 
-<!-- krenew clean up after Xenial -->
-<Group name='ubuntu-xenial' negate='true'>
-    <Path type='nonexistent' name='/etc/profile.d/krenew.sh'/>
-    <Path type='nonexistent' name='/etc/profile.d/krenew.csh'/>
-    <Path type='nonexistent' name='/etc/bash.bash_logout'/>
-    <Path type='nonexistent' name="/etc/X11/Xsession.d/90krenew"/>
-</Group>
 
-<!-- other Xenial leftovers -->
-<Group name='ubuntu-xenial' negate='true'>
-    <Path type='nonexistent' name='/etc/cron.hourly/nssupdate'/>
-    <Path type='nonexistent' name='/etc/ldap.conf'/>
-    <Path type='nonexistent' name='/etc/systemd/system/rpc-gssd.service.d/override.conf'/>
-    <Path type='nonexistent' name='/etc/systemd/system/rpc-gssd.service.d'/>
-    <Path type='nonexistent' name='/etc/default/snmpd'/>
-</Group>
+<Path type='symlink' name='/usr/bin/mail' to='s-nail'/>
+<Path type='symlink' name='/usr/bin/mailx' to='s-nail'/>
 
+<Path type='symlink' name='/etc/alternatives/editor' to='/usr/bin/mcedit'/>
+
+<!-- for Nagios -->
+<Path type='directory' name='/etc/nagios4/objects' mode='755' owner='root' group='root' prune='true'/>
+
+<Group name='ubuntu-bionic' negate='true'>
+    <Group name='ltsp'>
+        <Path type='directory' name='/opt/x2gothinclient/chroot/var/lib/alsa' owner='root' group='root' mode='0755'/>
+    </Group>
+</Group>
 </Rules>

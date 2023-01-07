@@ -1,21 +1,17 @@
 <Bundle>
 <Group name='ubuntu'>
     <Path name='/etc/hosts'/>
-    <Group name='ubuntu-xenial'>
-        <Path name='/etc/resolvconf/resolv.conf.d/original'/>
-        <Service name='resolvconf'/>
-        <Group name='roaming' negate='true'>
-            <Path name='/etc/network/interfaces' altsrc='/etc/network/interfaces-src'/>
+    <Group name='roaming' negate='true'>
+        <Group name='ubuntu-bionic' negate='true'>
+            <Group name='gui'>
+                <Package name='network-manager'/>
+            </Group>
         </Group>
-       <Service name='networking'/>
-    </Group>
-    <Group name='ubuntu-xenial' negate='true'>
-        <Group name='roaming' negate='true'>
-            <Path name='/etc/netplan/01-netcfg.yaml'/>
-            <Path name='/etc/netplan'/>
-            <Action name='apply-netplan'/>
-            <Path name='/etc/network/interfaces'/>  <!-- this removes /etc/network/interfaces -->
-            <Group name='networking-networkd'>
+        <Path name='/etc/netplan/01-netcfg.yaml'/>
+        <Path name='/etc/netplan'/>
+        <Action name='apply-netplan'/>
+        <Group name='networking-networkd'>
+            <Group name='ubuntu-bionic'>
                 <!-- make network dispatcher process 'carrier' and 'degraded' states -->
                 <Action name='fix_networkd_dispatcher'/>
                 <!-- set transmit queue for all interfaces is as many states -->
@@ -31,14 +27,14 @@
                 <Path name='/etc/networkd-dispatcher/no-carrier.d'/>
                 <Path name='/etc/networkd-dispatcher/off.d'/>
                 <Path name='/etc/networkd-dispatcher/routable.d'/>
-                <!-- disable network waitonline -->
-                <Path name='/etc/systemd/system/systemd-networkd-wait-online.service'/>
             </Group>
+            <!-- disable network waitonline -->
+            <Path name='/etc/systemd/system/systemd-networkd-wait-online.service'/>
         </Group>
-        <Service name='systemd-networkd'/>
-        <Service name='systemd-networkd.socket'/>
-        <Service name='systemd-resolved'/>
-        <Service name='systemd-networkd-wait-online'/>
     </Group>
+    <Service name='systemd-networkd'/>
+    <Service name='systemd-networkd.socket'/>
+    <Service name='systemd-resolved'/>
+    <Service name='systemd-networkd-wait-online'/>
 </Group>
 </Bundle>

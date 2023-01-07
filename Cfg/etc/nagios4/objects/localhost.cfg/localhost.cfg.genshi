@@ -1,0 +1,10 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+nagios_pass=metadata.Properties['umbrella_keys.xml'].xdata.find('snmp_nagios_pass').text
+%}\
+# 'check_snmp_process_v3' command definition
+define command {
+        command_name check_snmp_process_v3
+        command_line /usr/lib/nagios/plugins/check_snmp_process.pl -H $$HOSTADDRESS$$ -L sha,aes -l nagios -x ${nagios_pass} -X ${nagios_pass} -n ossec-execd -r -n $$ARG1$$ -w $$ARG2$$ -c $$ARG3$$ $$ARG4$$
+}

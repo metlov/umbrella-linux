@@ -6,12 +6,20 @@
 from genshi.template import TemplateError
 import os
 import datetime
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/21_revzones.py')
-execfile(repo+'/Python/30_networking.py')
-execfile(repo+'/Python/32_zone_timestamp.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/21_revzones.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+exec(open(repo+'/Python/32_zone_timestamp.py').read())
+
+# compatibility code for ipaddress version < 3.7.
+# TODO: remove, once ubuntu-bionic support is removed
+if hasattr(ipaddress.IPv4Network,"subnet_of"):
+    is_subnet_of = lambda a, b: a.subnet_of(b)
+else:
+    is_subnet_of = lambda a, b: (b.network_address <= a.network_address and
+                                 b.broadcast_address >= a.broadcast_address)
 
 zonefilename=name.split('/')[-1]
 
@@ -68,17 +76,17 @@ $$TTL 500
                                           )
 ${"".ljust(c1width)}    NS ${funchosts['router']}.
 {% if params.startswith('link_') %}\
-{%   for N in networks.values() %}\
-{%     if N in NET and N.size()<NET.size() %}\
+{%   for N in sorted(networks.values(),key=lambda x: x.with_prefixlen) %}\
+{%     if is_subnet_of(N,NET) and N != NET %}\
 ${classlessShortName(N,NET).ljust(c1width)}    NS ${funchosts['router']}.
-{%       for IP in N %}\
+{%       for IP in list(N)[1:-1] %}\
 ${hostRevIP(IP,NETC).ljust(c1width)}    CNAME ${hostRevIP(IP,N)}.${classlessShortName(N,NET)}
 {%       end %}\
 {%     end %}\
 {%   end %}\
 {% end if params.startswith('link_') %}\
 {% if not params.startswith('link_') %}\
-{%   for host in funchosts %}\
+{%   for host in sorted(funchosts) %}\
 {%     if funcifs[host] in NET %}\
 ${hostRevIP(funcifs[host],NET).ljust(c1width)}    IN PTR ${funchosts[host]}.
 {%     end %}\

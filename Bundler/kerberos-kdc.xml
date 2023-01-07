@@ -2,28 +2,29 @@
 <?python
 from genshi.template import TemplateError
 import socket
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
 ?>
 <Group name='ubuntu'>
     <Package name='krb5-kdc'/>
     <Package name='libverto-libevent1'/>
     <Path name='/etc/krb5.conf'/>
     <Group name='kerberos-slavekdc'>
-        <Group name='ubuntu-xenial'>
-            <Package name='xinetd'/>
-            <Service name='xinetd'/>
-            <Path name='/etc/xinetd.d/krb5_prop'/>
-        </Group>
-        <Group name='ubuntu-xenial' negate='true'>
-            <Package name='krb5-kpropd'/>
-            <Service name='krb5-kpropd'/>
-        </Group>
+        <Package name='krb5-kpropd'/>
+        <Service name='krb5-kpropd'/>
         <Path name='/etc/krb5kdc/kpropd.acl'/>
     </Group>
     <Group name='kerberos-masterkdc'>
         <Package name='krb5-admin-server'/>
         <Service name='krb5-admin-server'/>
+        <Group name='ubuntu-bionic' negate='true'>
+            <!-- for password quality check -->
+            <Package name='krb5-strength'/>
+            <Package name='cracklib-runtime'/>
+            <Action name='update-cracklib'/>
+            <BoundPOSIXUser name="_history" home="/var/lib/heimdal-history" shell="/usr/sbin/nologin" gecos="" uid="684" group="_history"/>
+            <BoundPOSIXGroup name="_history" gid="684"/>
+        </Group>
         <py:if test="'proxy' in funchosts">
             <Path name='/etc/cron.hourly/krb5dump'/>
         </py:if>

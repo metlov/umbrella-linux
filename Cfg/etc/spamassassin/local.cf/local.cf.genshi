@@ -1,13 +1,13 @@
 {% if 'mail' in metadata.groups %}\
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
-execfile(repo+'/Python/10_funchosts.py')
-execfile(repo+'/Python/20_networks.py')
-execfile(repo+'/Python/30_networking.py')
-domain_names_escaped=set()
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+domain_names_escaped=[]
 for domain in domain_names:
-  domain_names_escaped.add(domain.replace('.','\.'))
+  domain_names_escaped.append(domain.replace('.','\.'))
 %}\
 # This is the right place to customize your installation of SpamAssassin.
 #

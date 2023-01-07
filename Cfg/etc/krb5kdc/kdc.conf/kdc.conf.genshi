@@ -1,7 +1,6 @@
-{% if 'mail' in metadata.groups %}\
 {% python
 from genshi.template import TemplateError
-execfile(repo+'/Python/00_baseparams.py')
+exec(open(repo+'/Python/00_baseparams.py').read())
 %}\
 [kdcdefaults]
     kdc_ports = 750,88
@@ -19,3 +18,9 @@ execfile(repo+'/Python/00_baseparams.py')
         supported_enctypes = aes256-cts:normal arcfour-hmac:normal des3-hmac-sha1:normal des-cbc-crc:normal des:normal des:v4 des:norealm des:onlyrealm des:afs3
         default_principal_flags = +preauth
     }
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+[plugins]
+    pwqual = {
+        module = strength:/usr/lib/x86_64-linux-gnu/krb5/plugins/pwqual/strength.so
+    }
+{% end %}\

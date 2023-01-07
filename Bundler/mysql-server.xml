@@ -4,9 +4,6 @@
     <BoundPOSIXGroup name="mysql" gid="606"/>
     <Package name='mysql-server'/>
     <Path name='/etc/mysql/conf.d/charset.cnf'/>
-    <Group name='ubuntu-xenial'>
-        <Path name='/etc/apparmor.d/local/usr.sbin.mysqld'/>
-    </Group>
     <Group name='database-server'>
         <Path name='/etc/mysql/mysql.conf.d/mysqld_bindaddress.cnf'/>
         <Path name='/etc/mysql/mysql.conf.d/mysqld_ssl.cnf'/>

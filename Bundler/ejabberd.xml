@@ -1,31 +1,67 @@
 <Bundle>
 <Group name='ubuntu'>
-    <Package name='ejabberd-gssapi'/>
-    <Package name='erlang-esasl'/>
-    <BoundPOSIXUser name="ejabberd" home="/var/lib/ejabberd" shell="/bin/sh" gecos="" uid="621" group="ejabberd"/>
-    <BoundPOSIXUser name="epmd" home="/var/run/epmd" shell="/bin/false" gecos="" uid="630" group="epmd"/>
-    <BoundPOSIXGroup name="ejabberd" gid="621"/>
-    <BoundPOSIXGroup name="epmd" gid="630"/>
-    <Path name='/etc/default/ejabberd-gssapi' altsrc='/etc/default/ejabberd'/>
-    <Path name='/etc/ejabberd/ejabberd.yml'/>
-    <Path name='/etc/apparmor.d/local/usr.sbin.ejabberdctl'/>
-    <Group name='ubuntu-xenial'>
-        <!-- gsasl_drv wants to be mmaped now, its apparmor profile will -->
-        <!-- be fixed in the next version of ejabberd package, which will-->
-        <!-- make the next hotfix unnecessary (as it is on bionic).      -->
-        <Path name='/etc/apparmor.d/usr.sbin.ejabberdctl'/>
+    <Group name='ubuntu-bionic'>
+        <!-- on bionic we install ejabberd -->
+        <Package name='ejabberd-gssapi'/>
+        <Package name='erlang-esasl'/>
+        <BoundPOSIXUser name="ejabberd" home="/var/lib/ejabberd" shell="/bin/sh" gecos="" uid="621" group="ejabberd"/>
+        <BoundPOSIXUser name="epmd" home="/var/run/epmd" shell="/bin/false" gecos="" uid="630" group="epmd"/>
+        <BoundPOSIXGroup name="ejabberd" gid="621"/>
+        <BoundPOSIXGroup name="epmd" gid="630"/>
+        <Path name='/etc/default/ejabberd-gssapi' altsrc='/etc/default/ejabberd'/>
+        <Path name='/etc/ejabberd/ejabberd.yml'/>
+        <Path name='/etc/apparmor.d/local/usr.sbin.ejabberdctl'/>
+        <Package name='fonts-dejavu-core'/>
+        <Service name='ejabberd-gssapi'/>
+        <Path name='/etc/ssl/ejabberd.pem'/>
+        <Path name='/etc/ssl/private/ejabberd.key'/>
+        <Path name='/etc/ejabberd/ejabberd.pem'/>
+        <Group name='ubuntu-bionic'>
+            <Package name='libodbc1'/>
+        </Group>
+        <!-- This restarts ejabberd every night to prevent a memory leak. -->
+        <!--    <Path name='/etc/cron.d/ejabberd'/> -->
+        <Path name='/etc/ejabberd/xmpp.keytab'/> 
+        <Package name='lksctp-tools'/>
+        <Package name='erlang-base'/>
     </Group>
-    <Package name='fonts-dejavu-core'/>
-    <Service name='ejabberd-gssapi'/>
-    <Path name='/etc/ssl/ejabberd.pem'/>
-    <Path name='/etc/ssl/private/ejabberd.key'/>
-    <Path name='/etc/ejabberd/ejabberd.pem'/>
-    <Package name='libodbc1'/>
-    <!-- This restarts ejabberd every night to prevent a memory leak. -->
-    <!-- Hopefully, not needed on Xenial -->
-    <!--    <Path name='/etc/cron.d/ejabberd'/> -->
-    <Path name='/etc/ejabberd/xmpp.keytab'/> 
-    <Package name='lksctp-tools'/>
-    <Package name='erlang-base'/>
+    <Group name='ubuntu-bionic' negate='true'>
+        <!-- by default now we install prosody. -->
+        <!-- TODO: the bundle should be renamed to xmpp-server -->
+        <!-- once the ubuntu-bionic support is removed.        -->
+        <BoundPOSIXUser name="prosody" home="/var/lib/prosody" shell="/usr/sbin/nologin" gecos="Prosody XMPP Server" uid="621" group="prosody">
+            <MemberOf>ssl-cert</MemberOf>
+            <MemberOf>sasl</MemberOf>
+        </BoundPOSIXUser>
+        <BoundPOSIXGroup name="prosody" gid="621"/>
+        <Package name='prosody'/>
+        <Package name='prosody-modules'/>
+        <Package name='lua-dbi-sqlite3'/>
+        <Package name='lua-sql-sqlite3'/>
+
+        <!-- configure and install environment variables file for the prosody service -->
+        <Path name='/etc/systemd/system/prosody.service.d/override.conf'/>
+        <Service name='prosody'/>
+
+        <!-- install cert and key for TLS -->
+        <Path name='/etc/ssl/prosody.pem'/>
+        <Path name='/etc/ssl/private'/>
+        <Path name='/etc/ssl/private/prosody.key'/>
+
+        <!-- for SASL (GSSAPI and other) authentication -->
+        <Package name='lua-cyrussasl'/>
+        <Path name='/etc/default/prosody'/>
+        <Path name='/etc/prosody/sasl2/prosody.conf'/>
+        <Path name='/etc/prosody/xmpp.keytab'/>
+        <Service name='saslauthd'/>
+
+        <!-- prosody configuration -->
+        <Path name='/etc/prosody/conf.d'/>
+        <Path name='/etc/prosody/conf.avail/local-umbrella-xmpp.cfg.lua'/>
+        <Path name='/etc/prosody/conf.d/local-umbrella-xmpp.cfg.lua'/>
+
+        <!-- regenerate shared groups hourly -->
+        <Path name='/etc/cron.hourly/umbrella-gen-prosody_groups'/>
+    </Group>
 </Group>
 </Bundle>

@@ -1,0 +1,68 @@
+{% python
+from genshi.template import TemplateError
+exec(open(repo+'/Python/00_baseparams.py').read())
+exec(open(repo+'/Python/10_funchosts.py').read())
+exec(open(repo+'/Python/20_networks.py').read())
+exec(open(repo+'/Python/30_networking.py').read())
+%}\
+DEFAULT vesamenu.c32
+PROMPT 0
+MENU BACKGROUND 640x480-nw.png
+MENU TITLE ${long_name}
+
+{% if 'ubuntu-bionic' in metadata.groups %}\
+include local-boot.cfg
+include x2go-tce.cfg
+MENU SEPARATOR
+include memtest.cfg
+MENU SEPARATOR
+include netinstall.cfg
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+include bios-local-boot.cfg
+include bios-x2go-tce.cfg
+MENU SEPARATOR
+include bios-memtest.cfg
+MENU SEPARATOR
+include bios-netinstall.cfg
+{% end %}\
+
+# menu settings
+MENU VSHIFT 3
+MENU HSHIFT 18
+MENU WIDTH 68
+MENU MARGIN 10
+MENU ROWS 14
+MENU TABMSGROW 17
+MENU CMDLINEROW 23
+MENU ENDROW 12
+MENU TIMEOUTROW 20
+
+MENU COLOR border 0 #ffffffff #ee000000 std
+MENU COLOR title 0 #ffffff00 #ee000000 std
+MENU COLOR sel 0 #ffffffff #85000000 std
+MENU COLOR unsel 0 #ffffffff #ee000000 std
+MENU COLOR help 0 #ff000000 #99ffffff rev
+MENU COLOR cmdmark 0 #ffe00000 #99ffffff rev
+MENU COLOR cmdline 0 #ff000000 #99ffffff rev
+MENU COLOR timeout_msg 0 #ffe00000 #99ffffff none
+MENU COLOR timeout 0 #ffe00000 #99ffffff none
+MENU COLOR msg07 0 #ffffffff #ee000000 std
+MENU COLOR tabmsg 0  #e000e000 #ee000000 std
+MENU COLOR disabled 0 #ffffffff #ee000000 std
+MENU COLOR pwdheader 0 #ff000000 #99ffffff rev
+MENU COLOR pwdborder 0 #ff000000 #99ffffff rev
+MENU COLOR pwdentry 0 #ff000000 #99ffffff rev
+MENU COLOR hotkey 0 #ff00ff00 #ee000000 std
+MENU COLOR hotsel 0 #ffffffff #85000000 std
+
+# possible boot profiles for ONTIMEOUT: 
+# localboot, x2go-tce-686, x2go-tce-486
+# (... or any other profile you defined in your customized menu)
+{% if 'ubuntu-bionic' in metadata.groups %}\
+ONTIMEOUT x2go-tce-486
+{% end %}\
+{% if 'ubuntu-bionic' not in metadata.groups %}\
+ONTIMEOUT x2go-tce
+{% end %}\
+TIMEOUT 100

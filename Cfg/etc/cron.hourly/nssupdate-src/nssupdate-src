@@ -1,3 +1,0 @@
-#!/bin/sh
-/usr/sbin/nss_updatedb ldap | /bin/grep -v done.
-true
